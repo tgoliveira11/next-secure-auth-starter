@@ -1,0 +1,6 @@
+openapi: 3.1.0
+info:
+  title: Next Secure Auth Starter API
+  version: 0.1.0
+  description: Account and authentication API for the next-secure-auth-starter template.
+paths: {}

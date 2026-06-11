@@ -1,0 +1,159 @@
+/** @vitest-environment happy-dom */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  buildPasskeyLoginOptionsPayload,
+  signInWithPasskey,
+  PASSKEY_LOGIN_OUTCOME_KEY,
+  getPasskeyLoginUnsupportedMessage,
+} from "@/features/passkey/sign-in-with-passkey";
+import { USER_ID } from "@/test/helpers/fixtures";
+
+const mocks = vi.hoisted(() => ({
+  options: vi.fn(),
+  verify: vi.fn(),
+  signIn: vi.fn(),
+  startAuthentication: vi.fn(),
+  getPasskeyLoginHint: vi.fn(),
+  setPasskeyLoginHint: vi.fn(),
+}));
+
+vi.mock("@/lib/api-client/passkey-login", () => ({
+  passkeyLoginApi: {
+    options: mocks.options,
+    verify: mocks.verify,
+  },
+}));
+
+vi.mock("next-auth/react", () => ({
+  signIn: mocks.signIn,
+}));
+
+vi.mock("@simplewebauthn/browser", () => ({
+  startAuthentication: mocks.startAuthentication,
+}));
+
+vi.mock("@/lib/passkey/prepare-webauthn-options", () => ({
+  prepareAuthenticationOptions: (options: unknown) => options,
+}));
+
+vi.mock("@/lib/passkey/login-hint", () => ({
+  getPasskeyLoginHint: mocks.getPasskeyLoginHint,
+  setPasskeyLoginHint: mocks.setPasskeyLoginHint,
+}));
+
+describe("buildPasskeyLoginOptionsPayload", () => {
+  it("prefers email over saved hint", () => {
+    expect(
+      buildPasskeyLoginOptionsPayload("user@example.com", {
+        userId: USER_ID,
+        credentialId: "cred-id",
+      })
+    ).toEqual({ email: "user@example.com" });
+  });
+
+  it("uses credentialId with userId when both are saved", () => {
+    expect(
+      buildPasskeyLoginOptionsPayload(undefined, { userId: USER_ID, credentialId: "cred-id" })
+    ).toEqual({ credentialId: "cred-id", userId: USER_ID });
+  });
+
+  it("uses saved userId when credentialId is missing", () => {
+    expect(buildPasskeyLoginOptionsPayload(undefined, { userId: USER_ID })).toEqual({
+      userId: USER_ID,
+    });
+  });
+
+  it("returns undefined when no email or hint exists", () => {
+    expect(buildPasskeyLoginOptionsPayload(undefined, null)).toBeUndefined();
+  });
+});
+
+describe("signInWithPasskey", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+    mocks.getPasskeyLoginHint.mockReturnValue({ userId: USER_ID, credentialId: "cred-id" });
+    mocks.options.mockResolvedValue({ options: { challenge: "c" } });
+    mocks.startAuthentication.mockResolvedValue({
+      id: "cred",
+      clientExtensionResults: {},
+    });
+    mocks.verify.mockResolvedValue({
+      loginToken: "token",
+      userId: USER_ID,
+      credentialId: "cred-id",
+    });
+    mocks.signIn.mockResolvedValue({ error: null });
+    vi.stubGlobal(
+      "PublicKeyCredential",
+      Object.assign(function PublicKeyCredential() {}, {
+        isUserVerifyingPlatformAuthenticatorAvailable: vi.fn(),
+      })
+    );
+  });
+
+  it("returns unsupported when passkeys are unavailable", async () => {
+    // @ts-expect-error test-specific override
+    globalThis.PublicKeyCredential = undefined;
+    const result = await signInWithPasskey();
+    expect(result.outcome).toBe("unsupported");
+  });
+
+  it("signs in and routes to dashboard", async () => {
+    const result = await signInWithPasskey();
+    expect(mocks.options).toHaveBeenCalledWith({
+      credentialId: "cred-id",
+      userId: USER_ID,
+    });
+    expect(mocks.setPasskeyLoginHint).toHaveBeenCalledWith({
+      userId: USER_ID,
+      credentialId: "cred-id",
+    });
+    expect(result.outcome).toBe("signed-in");
+    expect(result.redirectTo).toBe("/dashboard");
+    expect(sessionStorage.getItem(PASSKEY_LOGIN_OUTCOME_KEY)).toBe("signed-in");
+  });
+
+  it("handles user cancellation during WebAuthn", async () => {
+    mocks.startAuthentication.mockRejectedValue(
+      Object.assign(new Error("cancelled"), { name: "NotAllowedError" })
+    );
+    const result = await signInWithPasskey();
+    expect(result.outcome).toBe("cancelled");
+  });
+
+  it("handles user cancellation while fetching options", async () => {
+    mocks.options.mockRejectedValue(
+      Object.assign(new Error("cancelled"), { name: "NotAllowedError" })
+    );
+    const result = await signInWithPasskey();
+    expect(result.outcome).toBe("cancelled");
+  });
+
+  it("rethrows unexpected option fetch failures", async () => {
+    mocks.options.mockRejectedValue(new Error("network down"));
+    await expect(signInWithPasskey()).rejects.toThrow("network down");
+  });
+
+  it("throws when session sign-in fails after passkey verify", async () => {
+    mocks.signIn.mockResolvedValue({ error: "CredentialsSignin" });
+    await expect(signInWithPasskey()).rejects.toThrow(
+      "Passkey sign-in could not complete your session."
+    );
+  });
+
+  it("rethrows unexpected WebAuthn failures", async () => {
+    mocks.startAuthentication.mockRejectedValue(new Error("hardware error"));
+    await expect(signInWithPasskey()).rejects.toThrow("hardware error");
+  });
+
+  it("exposes unsupported browser copy", () => {
+    expect(getPasskeyLoginUnsupportedMessage()).toContain("does not support passkey sign-in");
+  });
+
+  it("passes email to options when provided", async () => {
+    mocks.getPasskeyLoginHint.mockReturnValue({ userId: USER_ID, credentialId: "cred-id" });
+    await signInWithPasskey({ email: "user@example.com" });
+    expect(mocks.options).toHaveBeenCalledWith({ email: "user@example.com" });
+  });
+});

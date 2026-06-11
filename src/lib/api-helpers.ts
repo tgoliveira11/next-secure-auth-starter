@@ -1,0 +1,47 @@
+import { NextResponse } from "next/server";
+import { UnauthorizedError } from "@/lib/auth/session";
+import { safeLogger } from "@/lib/logger";
+import { TwoFactorEncryptionKeyError } from "@/server/policies/two-factor-secret-crypto";
+
+export function apiError(error: unknown, endpoint: string) {
+  if (error instanceof UnauthorizedError) {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+  if (error instanceof TwoFactorEncryptionKeyError) {
+    return NextResponse.json({ error: error.message }, { status: 503 });
+  }
+  if (error && typeof error === "object" && "name" in error) {
+    const named = error as { name: string; message: string };
+    if (named.name === "NotFoundError") {
+      return NextResponse.json({ error: named.message }, { status: 404 });
+    }
+    if (named.name === "ConflictError") {
+      return NextResponse.json({ error: named.message }, { status: 409 });
+    }
+    if (named.name === "RateLimitError") {
+      return NextResponse.json({ error: named.message }, { status: 429 });
+    }
+    if (named.name === "ChallengeError") {
+      return NextResponse.json({ error: named.message }, { status: 400 });
+    }
+    if (named.name === "ValidationError") {
+      return NextResponse.json({ error: named.message }, { status: 400 });
+    }
+    if (named.name === "ReauthenticationRequiredError") {
+      return NextResponse.json({ error: named.message }, { status: 401 });
+    }
+    if (named.name === "EmailVerificationRequiredError") {
+      return NextResponse.json({ error: named.message }, { status: 403 });
+    }
+  }
+  safeLogger.error("API error", { endpoint, error: error instanceof Error ? error.message : "unknown" });
+  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+}
+
+export async function parseJsonBody(request: Request): Promise<Record<string, unknown>> {
+  try {
+    return (await request.json()) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
