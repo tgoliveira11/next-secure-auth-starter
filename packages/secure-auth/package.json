@@ -60,11 +60,13 @@
     "./client/password-policy": {
       "types": "./dist/client/password-policy.d.ts",
       "import": "./dist/client/password-policy.js"
-    }
+    },
+    "./styles.css": "./styles.css"
   },
   "files": [
     "dist",
     "migrations",
+    "styles.css",
     "README.md"
   ],
   "publishConfig": {

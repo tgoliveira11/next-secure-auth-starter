@@ -1,0 +1,4 @@
+/* Tailwind v4 source registration for @tgoliveira/secure-auth UI primitives.
+   Import this file from the consuming app's globals.css (after @import "tailwindcss"). */
+@source "./src/modules/ui";
+@source "./dist/modules/ui";

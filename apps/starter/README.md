@@ -71,6 +71,7 @@ npm run typecheck -w @secure-auth/starter
 | `Invalid hook call` / `useState` is null on `/` | Ensure `next-auth` is in `transpilePackages` but **not** in `serverExternalPackages` (see `next.config.ts`); then `rm -rf apps/starter/.next` and restart |
 | `EADDRINUSE` on port 3001 | Stop the other process: `lsof -ti :3001 \| xargs kill` or run `next dev -p 3002` |
 | Build fails with `useState` during prerender | Rebuild the package (`npm run build -w @tgoliveira/secure-auth`); root layout uses `dynamic = "force-dynamic"` for session-aware pages |
+| UI looks unstyled / cards clip text / buttons lack color | Tailwind v4 must scan package UI sources — ensure `globals.css` imports `@tgoliveira/secure-auth/styles.css`; then `rm -rf apps/starter/.next` and restart dev |
 
 ## Validation (hardening phase)
 

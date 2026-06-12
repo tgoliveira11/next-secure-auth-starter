@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { signOutAccount } from "@/lib/sign-out-account";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@tgoliveira/secure-auth/react";
 import { AppMark } from "@tgoliveira/secure-auth/react";
 import { APP_NAME } from "@/lib/brand";
@@ -18,11 +18,20 @@ const navLinks = [
 ] as const;
 
 export function Nav() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Session is unavailable during SSR; defer auth-specific UI until after mount.
+  const showAuthenticatedNav =
+    mounted && status === "authenticated" && session != null;
 
   function closeMenu() {
     setMenuOpen(false);
@@ -41,7 +50,7 @@ export function Nav() {
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
         <Link
-          href={session ? "/dashboard" : "/"}
+          href={showAuthenticatedNav ? "/dashboard" : "/"}
           className="flex items-center gap-2 text-lg font-semibold text-[var(--primary)]"
         >
           <AppMark size={28} />
@@ -49,7 +58,7 @@ export function Nav() {
           <span className="sm:hidden">Secure Auth</span>
         </Link>
 
-        {session ? (
+        {showAuthenticatedNav ? (
           <>
             <div className="hidden items-center gap-1 md:flex">
               {navLinks.map((link) => (
@@ -99,7 +108,7 @@ export function Nav() {
         )}
       </div>
 
-      {session && menuOpen && (
+      {showAuthenticatedNav && menuOpen && (
         <nav
           id={menuId}
           aria-label="Main navigation"

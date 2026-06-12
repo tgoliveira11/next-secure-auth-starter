@@ -19,6 +19,7 @@ This is **not** a generic auth framework. It encodes specific flows: credentials
 | `@tgoliveira/secure-auth/server` | Server helpers (`createRouteHandlers`, `createAuthServices`) |
 | `@tgoliveira/secure-auth/drizzle/schema` | Auth Drizzle schema (single source of truth) |
 | `@tgoliveira/secure-auth/email` | Email provider types |
+| `@tgoliveira/secure-auth/styles.css` | Tailwind v4 `@source` registration for package UI classes (import from app `globals.css`) |
 
 The root export also exposes `safeLogger` for app-owned adapters (e.g. SMTP delivery in the starter).
 
@@ -73,6 +74,17 @@ export async function POST(request: Request) {
 ```
 
 All auth/account API route handlers are available on `secureAuth.routes.*` (Phase 7). The starter app wraps them in thin `app/api/**/route.ts` files.
+
+## Tailwind CSS (v4)
+
+UI primitives use Tailwind utility classes. Tailwind v4 only auto-scans the consuming app — register package sources in the app stylesheet:
+
+```css
+@import "tailwindcss";
+@import "@tgoliveira/secure-auth/styles.css";
+```
+
+Copy the CSS variables from `apps/starter/src/app/globals.css` (`:root { --primary, --card, … }`) or define your own theme tokens. The package components reference those variables.
 
 ## EmailProvider contract
 
