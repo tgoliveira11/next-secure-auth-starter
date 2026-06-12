@@ -1,5 +1,5 @@
 /** @vitest-environment happy-dom */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LoginPage from "@/app/(auth)/login/page";
 import { CredentialsLoginForm } from "@/components/auth/credentials-login-form";
@@ -27,11 +27,7 @@ vi.mock("next-auth/react", () => ({
   useSession: () => ({ data: null, status: "unauthenticated" }),
 }));
 
-vi.mock("@/features/passkey/sign-in-with-passkey", () => ({
-  signInWithPasskey: mocks.signInWithPasskey,
-  isPasskeyLoginSupported: mocks.isPasskeyLoginSupported,
-  getPasskeyLoginUnsupportedMessage: () => "This browser does not support passkey sign-in.",
-}));
+import * as PasskeySignIn from "@tgoliveira/secure-auth/react/client";
 
 vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
@@ -68,13 +64,19 @@ describe("login page passkey sign-in", () => {
     vi.clearAllMocks();
     mocks.isPasskeyLoginSupported.mockReturnValue(true);
     mocks.getPasskeyLoginHint.mockReturnValue(null);
+    vi.spyOn(PasskeySignIn, "signInWithPasskey").mockImplementation(mocks.signInWithPasskey);
+    vi.spyOn(PasskeySignIn, "isPasskeyLoginSupported").mockImplementation(mocks.isPasskeyLoginSupported);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("shows passkey sign-in option", async () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     expect(await screen.findByRole("button", { name: "Sign in with passkey" })).toBeTruthy();
@@ -92,7 +94,7 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
@@ -105,7 +107,7 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
@@ -127,12 +129,15 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
     await waitFor(() => {
-      expect(mocks.signInWithPasskey).toHaveBeenCalledWith(undefined);
+      expect(mocks.signInWithPasskey).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ appSlug: "test-app" })
+      );
       expect(mocks.push).toHaveBeenCalledWith("/dashboard");
     });
   });
@@ -145,7 +150,7 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     fireEvent.change(screen.getByLabelText("Email"), {
@@ -153,7 +158,10 @@ describe("login page passkey sign-in", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
     await waitFor(() => {
-      expect(mocks.signInWithPasskey).toHaveBeenCalledWith({ email: "user@example.com" });
+      expect(mocks.signInWithPasskey).toHaveBeenCalledWith(
+        { email: "user@example.com" },
+        expect.objectContaining({ appSlug: "test-app" })
+      );
     });
   });
 
@@ -165,14 +173,17 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
     emailInput.value = "user@example.com";
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
     await waitFor(() => {
-      expect(mocks.signInWithPasskey).toHaveBeenCalledWith({ email: "user@example.com" });
+      expect(mocks.signInWithPasskey).toHaveBeenCalledWith(
+        { email: "user@example.com" },
+        expect.objectContaining({ appSlug: "test-app" })
+      );
     });
   });
 
@@ -188,7 +199,7 @@ describe("login page passkey sign-in", () => {
     render(
       <>
         <CredentialsLoginForm />
-        <LoginPasskeySection />
+        <LoginPasskeySection appSlug="test-app" />
       </>
     );
     fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));

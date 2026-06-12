@@ -13,17 +13,19 @@ const mocks = vi.hoisted(() => ({
   push: vi.fn(),
 }));
 
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  accountSessionsApi: {
-    list: mocks.list,
-    ping: mocks.ping,
-    revoke: mocks.revoke,
-    revokeOthers: mocks.revokeOthers,
-    revokeAll: mocks.revokeAll,
-  },
-  formatAuthMethod: (method: string) => (method === "passkey" ? "Passkey" : method),
-  formatSessionDateTime: (value: string) => value,
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    accountSessionsApi: {
+      list: mocks.list,
+      ping: mocks.ping,
+      revoke: mocks.revoke,
+      revokeOthers: mocks.revokeOthers,
+      revokeAll: mocks.revokeAll,
+    },
+  };
+});
 
 vi.mock("@/lib/sign-out-account", () => ({
   signOutAccount: mocks.signOutAccount,
@@ -60,6 +62,8 @@ const sessions = [
   },
 ];
 
+const onSignOut = vi.fn().mockResolvedValue(undefined);
+
 describe("ActiveSessionsSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -68,10 +72,11 @@ describe("ActiveSessionsSettings", () => {
     mocks.revoke.mockResolvedValue({ revoked: true, signOut: false });
     mocks.revokeOthers.mockResolvedValue({ revokedCount: 1 });
     mocks.signOutAccount.mockResolvedValue(undefined);
+    onSignOut.mockResolvedValue(undefined);
   });
 
   it("shows current session badge and metadata", async () => {
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => {
       expect(screen.getByText("This session")).toBeTruthy();
     });
@@ -81,14 +86,14 @@ describe("ActiveSessionsSettings", () => {
   });
 
   it("shows revoke confirmation for another session", async () => {
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => expect(screen.getByText("Safari on iOS")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(screen.getByText("Sign out this session?")).toBeTruthy();
   });
 
   it("revokes another session and shows success", async () => {
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => expect(screen.getByText("Safari on iOS")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     fireEvent.click(screen.getByRole("button", { name: "Sign out session" }));
@@ -100,14 +105,14 @@ describe("ActiveSessionsSettings", () => {
 
   it("shows empty state when no sessions are returned", async () => {
     mocks.list.mockResolvedValue({ sessions: [] });
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => {
       expect(screen.getByText("No active sessions were found.")).toBeTruthy();
     });
   });
 
   it("revokes all other sessions and shows success", async () => {
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => expect(screen.getByText("Sign out of all other sessions")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: "Sign out of all other sessions" }));
     fireEvent.click(screen.getByRole("button", { name: "Sign out others" }));
@@ -117,7 +122,7 @@ describe("ActiveSessionsSettings", () => {
   });
 
   it("shows revoke all others confirmation", async () => {
-    render(<ActiveSessionsSettings />);
+    render(<ActiveSessionsSettings onSignOut={onSignOut} />);
     await waitFor(() => expect(screen.getByText("Sign out of all other sessions")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: "Sign out of all other sessions" }));
     expect(screen.getByText("Sign out of all other sessions?")).toBeTruthy();

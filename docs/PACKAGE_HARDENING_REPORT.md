@@ -239,3 +239,31 @@ Additional changes to prepare for a brand-new consumer without open design quest
 | [minimal-consumer-example.md](./minimal-consumer-example.md) | Smallest working example |
 | [consumer-validation-checklist.md](./consumer-validation-checklist.md) | Sign-off checklist |
 | [package-api.md](./package-api.md) | Supported / unsupported entry points |
+
+---
+
+## Ready-to-use page components (2026-06-11)
+
+### Audit (before)
+
+| Area | State |
+| --- | --- |
+| `@tgoliveira/secure-auth/react` | UI primitives only (Button, Card, PageHeader, …) |
+| `@tgoliveira/secure-auth/react/client` | ConfirmDialog, usePasswordManagerFormSubmit |
+| Auth/account screens | Implemented in `apps/starter` only |
+
+### Implementation
+
+| Area | State |
+| --- | --- |
+| `modules/ui/pages/*` | 13 ready-to-use page components exported from `@tgoliveira/secure-auth/react` |
+| `modules/ui/features/*` | Auth/settings feature blocks for optional composition |
+| `modules/ui/layouts/*` | `PageShell`, `AuthPageShell` (no app Nav) |
+| `apps/starter` | Thin `page.tsx` re-exports; Nav/providers remain app-owned |
+| Tests | Package export/render/boundary tests; starter uses package pages |
+
+### Consumer impact
+
+A new consumer (`apps/consumer-demo`) can wire routes + env + `createSecureAuth(config)` and use thin page wrappers without recreating auth UI.
+
+See [package-api.md](./package-api.md) — **Ready-to-use pages** section.

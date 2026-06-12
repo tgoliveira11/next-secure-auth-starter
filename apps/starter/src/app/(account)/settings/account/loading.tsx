@@ -5,7 +5,7 @@ import { LoadingState } from "@tgoliveira/secure-auth/react";
 
 export default function AccountSettingsLoading() {
   return (
-    <PageLayout width="medium">
+    <PageLayout width="medium" hideNav>
       <LoadingState label="Loading account settings" />
     </PageLayout>
   );

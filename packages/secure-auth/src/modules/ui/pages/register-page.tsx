@@ -4,22 +4,25 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PageLayout } from "@/components/layout/page-layout";
-import { Button } from "@tgoliveira/secure-auth/react";
-import { Input } from "@tgoliveira/secure-auth/react";
-import { Card } from "@tgoliveira/secure-auth/react";
-import { FormField } from "@tgoliveira/secure-auth/react";
-import { PageHeader } from "@tgoliveira/secure-auth/react";
-import { SocialSignIn } from "@/components/auth/social-sign-in";
-import { getErrorMessage } from "@tgoliveira/secure-auth/client";
-import { PasswordStrengthField } from "@/components/auth/password-strength-field";
-import { authLoginApi } from "@tgoliveira/secure-auth/client";
-import { ApiError } from "@tgoliveira/secure-auth/client";
+import { PageShell } from "../layouts/page-shell.js";
+import { Button } from "../primitives/button.js";
+import { Input } from "../primitives/input.js";
+import { Card } from "../primitives/card.js";
+import { FormField } from "../primitives/form-field.js";
+import { PageHeader } from "../primitives/page-header.js";
+import { SocialSignIn } from "../features/auth/social-sign-in.js";
+import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
+import {
+  ApiError,
+  authLoginApi,
+  getErrorMessage,
+} from "@tgoliveira/secure-auth/client";
 import {
   getPasswordPolicyHint,
   type PasswordPolicyConfig,
   validatePasswordForSubmission,
 } from "@tgoliveira/secure-auth/client/password-policy";
+import { resolveAuthPaths, type RegisterPageProps } from "./types.js";
 
 type RegisterResponse = {
   id: string;
@@ -28,7 +31,22 @@ type RegisterResponse = {
   requireEmailVerificationBeforeSignIn: boolean;
 };
 
-export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolicyConfig }) {
+export function RegisterPage({
+  title = "Create your account",
+  description = "Set up secure email/password sign-in for your account.",
+  brand,
+  header,
+  footer,
+  className,
+  width = "narrow",
+  paths,
+  passwordPolicy,
+  submitLabel = "Create account with email",
+  loginLinkLabel = "Sign in",
+  afterLoginPath,
+}: RegisterPageProps) {
+  const resolved = resolveAuthPaths(paths);
+  const destination = afterLoginPath ?? resolved.afterLogin;
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +58,7 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
     setLoading(true);
     setError("");
 
-    if (passwordPolicy.enforcement === "enforce") {
+    if (passwordPolicy?.enforcement === "enforce") {
       const policyResult = validatePasswordForSubmission(password, passwordPolicy);
       if (!policyResult.valid) {
         setError(
@@ -67,7 +85,9 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
 
     if (body.requireEmailVerificationBeforeSignIn) {
       setLoading(false);
-      router.push(`/check-email?email=${encodeURIComponent(email)}&required=1`);
+      router.push(
+        `${resolved.checkEmail}?email=${encodeURIComponent(email)}&required=1`
+      );
       return;
     }
 
@@ -90,7 +110,7 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
         return;
       }
 
-      router.push("/dashboard");
+      router.push(destination);
     } catch (signInError) {
       if (signInError instanceof ApiError) {
         setError(signInError.message);
@@ -102,11 +122,10 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
   }
 
   return (
-    <PageLayout width="narrow">
-      <PageHeader
-        title="Create your account"
-        description="Set up secure email/password sign-in for your account."
-      />
+    <PageShell width={width} className={className}>
+      {brand}
+      {header}
+      <PageHeader title={title} description={description} />
 
       <Card className="space-y-6">
         <form onSubmit={handleRegister} className="space-y-4">
@@ -127,7 +146,7 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
             onChange={setPassword}
             autoComplete="new-password"
             policyConfig={passwordPolicy}
-            hint={getPasswordPolicyHint(passwordPolicy)}
+            hint={passwordPolicy ? getPasswordPolicyHint(passwordPolicy) : undefined}
           />
           {error && (
             <p className="text-sm text-[var(--danger)]" role="alert">
@@ -135,11 +154,11 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
             </p>
           )}
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating account…" : "Create account with email"}
+            {loading ? "Creating account…" : submitLabel}
           </Button>
         </form>
 
-        <SocialSignIn dividerLabel="or sign up with" />
+        <SocialSignIn dividerLabel="or sign up with" afterLoginPath={destination} />
 
         <p className="text-center text-xs text-[var(--muted)]">
           Google, Apple, and Microsoft create your account automatically on first sign-in — the same
@@ -147,12 +166,14 @@ export function RegisterForm({ passwordPolicy }: { passwordPolicy: PasswordPolic
         </p>
       </Card>
 
-      <p className="mt-6 text-center text-sm text-[var(--muted)]">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-[var(--primary)] hover:underline">
-          Sign in
-        </Link>
-      </p>
-    </PageLayout>
+      {footer ?? (
+        <p className="mt-6 text-center text-sm text-[var(--muted)]">
+          Already have an account?{" "}
+          <Link href={resolved.login} className="font-medium text-[var(--primary)] hover:underline">
+            {loginLinkLabel}
+          </Link>
+        </p>
+      )}
+    </PageShell>
   );
 }

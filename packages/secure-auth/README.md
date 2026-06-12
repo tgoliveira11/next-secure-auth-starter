@@ -44,8 +44,8 @@ See [publishing-private-package.md](../../docs/publishing-private-package.md) fo
 | --- | --- |
 | `@tgoliveira/secure-auth/next` | **`createSecureAuth(config)`** — composition root |
 | `@tgoliveira/secure-auth` | Types, `SECURE_AUTH_PACKAGE_VERSION`, `authSchema`, `safeLogger` |
-| `@tgoliveira/secure-auth/react` | UI primitives |
-| `@tgoliveira/secure-auth/react/client` | Client-only UI |
+| `@tgoliveira/secure-auth/react` | UI primitives **and ready-to-use pages** |
+| `@tgoliveira/secure-auth/react/client` | Client-only UI, passkey sign-in, default sign-out |
 | `@tgoliveira/secure-auth/client` | Browser API client, passkey helpers |
 | `@tgoliveira/secure-auth/client/password-policy` | Password policy helpers |
 | `@tgoliveira/secure-auth/drizzle/schema` | Auth Drizzle schema |

@@ -64,11 +64,65 @@ This is the **primary integration entry point**.
 
 | | |
 | --- | --- |
-| **Purpose** | Default UI primitives (Button, Card, Input, FormField, …) |
-| **Audience** | App pages and settings components |
-| **Example** | `import { Button, Card } from "@tgoliveira/secure-auth/react"` |
+| **Purpose** | UI primitives **and ready-to-use auth/account/security page components** |
+| **Audience** | Thin Next.js `page.tsx` wrappers in consumer apps |
+| **Example** | `import { LoginPage, RegisterPage } from "@tgoliveira/secure-auth/react"` |
 
-Server-safe components. No `"use client"` required for these exports.
+Server-safe primitives (Button, Card, Input, …) do not require `"use client"`. **Page components are client components** — import them from route files directly; Next.js handles the boundary.
+
+#### Ready-to-use pages
+
+| Export | Route (defaults) | Notes |
+| --- | --- | --- |
+| `LoginPage` | `/login` | Email/password, passkey, OAuth |
+| `RegisterPage` | `/register` | Optional `passwordPolicy` prop |
+| `ForgotPasswordPage` | `/forgot-password` | |
+| `ResetPasswordPage` | `/reset-password` | Reads `?token=` |
+| `CheckEmailPage` | `/check-email` | Reads `?email=` / `?required=` |
+| `VerifyEmailPage` | `/verify-email` | Reads `?token=` |
+| `LoginTwoFactorPage` | `/login/2fa` | Reads `?mode=` / `?error=` |
+| `LoginCompletePage` | `/login/complete` | OAuth/login-token completion |
+| `AccountSettingsPage` | `/settings/account` | Requires session; optional `onSignOut` |
+| `SecuritySettingsPage` | `/settings/security` | Requires `appSlug` for passkey/2FA |
+| `SessionsSettingsPage` | `/settings/sessions` | Optional `onSignOut` |
+| `AccountDeletedPage` | `/account-deleted` | Post-deletion confirmation |
+| `DashboardPlaceholderPage` | `/dashboard` | **Optional** demo/starter only |
+
+Shared customization props (all pages): `title`, `description`, `subtitle`, `brand`, `footer`, `header`, `className`, `width`, `paths`, `appName`.
+
+Path overrides via `paths` or per-page props such as `afterLoginPath`, `loginPath`, `registerPath`.
+
+Helpers: `DEFAULT_AUTH_PATHS`, `resolveAuthPaths()`.
+
+Feature building blocks (optional composition): `CredentialsLoginForm`, `SocialSignIn`, `PasskeySettings`, `TwoFactorSettings`, … — same export entry.
+
+**Example — thin page wrapper:**
+
+```tsx
+// app/(auth)/login/page.tsx
+import { LoginPage } from "@tgoliveira/secure-auth/react";
+
+export default function Page() {
+  return <LoginPage appSlug="my-app" afterLoginPath="/dashboard" />;
+}
+```
+
+```tsx
+// app/(auth)/register/page.tsx
+import { RegisterPage } from "@tgoliveira/secure-auth/react";
+import { getPasswordPolicyConfig } from "@tgoliveira/secure-auth/client/password-policy";
+
+export default function Page() {
+  return (
+    <RegisterPage
+      appSlug="my-app"
+      passwordPolicy={getPasswordPolicyConfig(/* from createSecureAuth config */)}
+    />
+  );
+}
+```
+
+**App-owned (not exported as pages):** marketing landing, app shell navigation, providers wrapper, dev auth trace panel.
 
 ---
 
@@ -76,9 +130,9 @@ Server-safe components. No `"use client"` required for these exports.
 
 | | |
 | --- | --- |
-| **Purpose** | Client-only UI (`ConfirmDialog`, hooks) |
+| **Purpose** | Client-only UI (`ConfirmDialog`, hooks, passkey sign-in helper, default sign-out) |
 | **Audience** | Client components (`"use client"`) |
-| **Example** | `import { ConfirmDialog } from "@tgoliveira/secure-auth/react/client"` |
+| **Example** | `import { ConfirmDialog, defaultSignOutAccount, signInWithPasskey } from "@tgoliveira/secure-auth/react/client"` |
 
 ---
 

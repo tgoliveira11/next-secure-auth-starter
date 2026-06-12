@@ -148,6 +148,32 @@ npm run db:migrate   # script: "drizzle-kit migrate"
 
 ---
 
+## Example pages (thin wrappers)
+
+`src/app/(auth)/login/page.tsx`:
+
+```tsx
+import { LoginPage } from "@tgoliveira/secure-auth/react";
+
+export default function Page() {
+  return <LoginPage appSlug="my-app" />;
+}
+```
+
+`src/app/(auth)/register/page.tsx`:
+
+```tsx
+import { RegisterPage } from "@tgoliveira/secure-auth/react";
+
+export default function Page() {
+  return <RegisterPage appSlug="my-app" />;
+}
+```
+
+Account/security routes: `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage` — see [package-api.md](./package-api.md).
+
+---
+
 ## Verify
 
 ```bash

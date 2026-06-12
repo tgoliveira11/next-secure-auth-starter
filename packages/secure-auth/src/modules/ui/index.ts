@@ -1,4 +1,4 @@
-/** Phase 2 public API — domain-neutral UI primitives only. */
+/** Phase 2 public API — domain-neutral UI primitives and ready-to-use pages. */
 
 export * from "./primitives/alert";
 export * from "./primitives/app-mark";
@@ -14,3 +14,8 @@ export * from "./primitives/loading-state";
 export * from "./primitives/page-header";
 export * from "./primitives/success-state";
 export * from "./primitives/textarea";
+
+export * from "./layouts/page-shell";
+export * from "./layouts/auth-page-shell";
+export * from "./features/index";
+export * from "./pages/index";

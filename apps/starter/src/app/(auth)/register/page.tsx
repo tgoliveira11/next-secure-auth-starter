@@ -1,6 +1,7 @@
+import { RegisterPage } from "@tgoliveira/secure-auth/react";
 import { getPasswordPolicyConfig } from "@tgoliveira/secure-auth/client/password-policy";
-import { RegisterForm } from "./register-form";
+import { APP_SLUG } from "@/lib/brand";
 
-export default function RegisterPage() {
-  return <RegisterForm passwordPolicy={getPasswordPolicyConfig()} />;
+export default function Page() {
+  return <RegisterPage passwordPolicy={getPasswordPolicyConfig()} appSlug={APP_SLUG} />;
 }

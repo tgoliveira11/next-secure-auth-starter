@@ -79,6 +79,8 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 - [ ] `@import "@tgoliveira/secure-auth/styles.css"` in app global CSS
 - [ ] Theme CSS variables defined (`:root { --primary, --card, ... }`)
 - [ ] Package UI components render with expected styling
+- [ ] Auth/account routes use package page components (`LoginPage`, `RegisterPage`, …) as thin wrappers
+- [ ] Pages customized via props (`appSlug`, `paths`, `onSignOut`) where needed
 
 ---
 

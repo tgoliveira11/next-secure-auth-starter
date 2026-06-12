@@ -3,19 +3,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import VerifyEmailPage from "@/app/(auth)/verify-email/page";
 
-vi.mock("@/components/layout/page-layout", () => ({
-  PageLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("token=abc"),
 }));
 
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  accountAuthApi: {
-    confirmVerification: vi.fn(async () => ({ verified: true, email: "user@example.com" })),
-  },
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    accountAuthApi: {
+      ...actual.accountAuthApi,
+      confirmVerification: vi.fn(async () => ({ verified: true, email: "user@example.com" })),
+    },
+  };
+});
 
 describe("verify email page", () => {
   beforeEach(() => vi.clearAllMocks());

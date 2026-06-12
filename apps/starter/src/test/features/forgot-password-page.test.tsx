@@ -3,17 +3,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ForgotPasswordPage from "@/app/(auth)/forgot-password/page";
 
-vi.mock("@/components/layout/page-layout", () => ({
-  PageLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  accountAuthApi: {
-    forgotPassword: vi.fn(async () => ({
-      message: "If an account exists for this email, we'll send password reset instructions.",
-    })),
-  },
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    accountAuthApi: {
+      ...actual.accountAuthApi,
+      forgotPassword: vi.fn(async () => ({
+        message: "If an account exists for this email, we'll send password reset instructions.",
+      })),
+    },
+  };
+});
 
 describe("forgot password page", () => {
   beforeEach(() => vi.clearAllMocks());

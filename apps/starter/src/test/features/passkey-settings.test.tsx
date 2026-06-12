@@ -9,14 +9,18 @@ const mocks = vi.hoisted(() => ({
   remove: vi.fn(),
 }));
 
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  passkeyAccountApi: {
-    list: mocks.list,
-    registerOptions: vi.fn(),
-    registerVerify: vi.fn(),
-    remove: mocks.remove,
-  },
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    passkeyAccountApi: {
+      list: mocks.list,
+      registerOptions: vi.fn(),
+      registerVerify: vi.fn(),
+      remove: mocks.remove,
+    },
+  };
+});
 
 describe("PasskeySettings", () => {
   beforeEach(() => {
@@ -42,7 +46,7 @@ describe("PasskeySettings", () => {
   });
 
   it("lists passkeys with account details", async () => {
-    render(<PasskeySettings userId={USER_ID} />);
+    render(<PasskeySettings userId={USER_ID} appSlug="test-app" />);
     await waitFor(() => {
       expect(screen.getByText("Laptop")).toBeTruthy();
       expect(screen.getByText("Phone")).toBeTruthy();
@@ -50,7 +54,7 @@ describe("PasskeySettings", () => {
   });
 
   it("shows passkey section title", async () => {
-    render(<PasskeySettings userId={USER_ID} />);
+    render(<PasskeySettings userId={USER_ID} appSlug="test-app" />);
     await waitFor(() => {
       expect(screen.getByText("Passkeys")).toBeTruthy();
     });

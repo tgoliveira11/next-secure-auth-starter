@@ -13,7 +13,7 @@ export function RouteError({
   message = "Something went wrong loading this page. Your account data was not changed.",
 }: RouteErrorProps) {
   return (
-    <PageLayout>
+    <PageLayout hideNav>
       <ErrorState message={message} onRetry={reset} />
     </PageLayout>
   );

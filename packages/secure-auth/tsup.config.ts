@@ -54,6 +54,13 @@ export default defineConfig([
     outDir: "dist",
     clean: true,
     banner: { js: '"use client";' },
+    external: [
+      "react",
+      "react-dom",
+      "next-auth",
+      "@simplewebauthn/browser",
+      "@tgoliveira/secure-auth/client",
+    ],
   },
   {
     format: ["esm"] as const,
@@ -64,7 +71,7 @@ export default defineConfig([
     esbuildOptions(options: { sourcesContent?: boolean }) {
       options.sourcesContent = false;
     },
-    external: ["react", "react-dom"],
+    external: ["react", "react-dom", "next", "next-auth", "@simplewebauthn/browser", "@tgoliveira/secure-auth/client", "@tgoliveira/secure-auth/client/password-policy", "@tgoliveira/secure-auth/react/client"],
     entry: {
       "react/index": "src/react/index.ts",
       ...uiEntries,

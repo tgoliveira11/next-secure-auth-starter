@@ -9,14 +9,18 @@ const mocks = vi.hoisted(() => ({
   verifySetup: vi.fn(),
 }));
 
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  twoFactorApi: {
-    status: mocks.status,
-    startSetup: mocks.startSetup,
-    verifySetup: mocks.verifySetup,
-    disable: vi.fn(),
-  },
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    twoFactorApi: {
+      status: mocks.status,
+      startSetup: mocks.startSetup,
+      verifySetup: mocks.verifySetup,
+      disable: vi.fn(),
+    },
+  };
+});
 
 describe("two-factor settings UI", () => {
   beforeEach(() => {
@@ -25,7 +29,7 @@ describe("two-factor settings UI", () => {
   });
 
   it("shows off status and setup action", async () => {
-    render(<TwoFactorSettings />);
+    render(<TwoFactorSettings appSlug="test-app" />);
     await waitFor(() => {
       expect(screen.getByText("Off")).toBeTruthy();
     });
@@ -41,7 +45,7 @@ describe("two-factor settings UI", () => {
       accountLabel: "user@example.com",
     });
 
-    render(<TwoFactorSettings />);
+    render(<TwoFactorSettings appSlug="test-app" />);
     await waitFor(() => screen.getByRole("button", { name: /set up two-factor authentication/i }));
     fireEvent.click(screen.getByRole("button", { name: /set up two-factor authentication/i }));
 

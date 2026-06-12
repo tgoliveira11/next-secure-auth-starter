@@ -386,6 +386,23 @@ Define theme CSS variables (copy from `apps/starter/src/app/globals.css` or defi
 
 Import UI from `@tgoliveira/secure-auth/react`.
 
+### Ready-to-use pages
+
+Prefer thin route wrappers instead of rebuilding auth screens:
+
+```tsx
+// app/(auth)/login/page.tsx
+import { LoginPage } from "@tgoliveira/secure-auth/react";
+
+export default function Page() {
+  return <LoginPage appSlug="my-app" />;
+}
+```
+
+Available pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage`.
+
+Customize via props (`title`, `paths`, `afterLoginPath`, `onSignOut`, `appSlug`, …). See [package-api.md](./package-api.md).
+
 ---
 
 ## 13. Start the application

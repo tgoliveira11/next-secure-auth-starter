@@ -7,11 +7,15 @@ const mocks = vi.hoisted(() => ({
   signOut: vi.fn(),
 }));
 
-vi.mock("@tgoliveira/secure-auth/client", () => ({
-  accountSessionsApi: {
-    revokeCurrent: mocks.revokeCurrent,
-  },
-}));
+vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
+  return {
+    ...actual,
+    accountSessionsApi: {
+      revokeCurrent: mocks.revokeCurrent,
+    },
+  };
+});
 
 vi.mock("next-auth/react", () => ({
   signOut: mocks.signOut,

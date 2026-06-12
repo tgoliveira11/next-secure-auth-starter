@@ -4,6 +4,20 @@ All notable changes to this monorepo are documented here.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **Ready-to-use page components** — `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage` exported from `@tgoliveira/secure-auth/react`.
+- **UI feature blocks** — auth/settings feature components (forms, passkey/2FA settings) for optional composition from the same export.
+- **Client helpers** — `defaultSignOutAccount`, `signInWithPasskey`, `buildPasskeyLoginOptionsPayload` on `@tgoliveira/secure-auth/react/client`.
+- **Package tests** — page export, render smoke, and client/server boundary tests.
+
+### Changed
+
+- **`apps/starter`** — auth/account/security routes are thin wrappers around package pages.
+- **`@tgoliveira/secure-auth/react`** — documents ready-to-use pages, customization props, and path helpers (`DEFAULT_AUTH_PATHS`, `resolveAuthPaths`).
+
 ## [0.1.1-internal] - 2026-06-11
 
 ### Added
