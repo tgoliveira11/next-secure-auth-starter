@@ -1,5 +1,6 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
-import { requireTwoFactorEncryptionKey } from "@/core/app-brand.js";
+import { requireTwoFactorEncryptionKey } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export const TWO_FACTOR_SECRET_PAYLOAD_VERSION = "tf-v1";
 
@@ -19,17 +20,20 @@ export class TwoFactorEncryptionKeyError extends Error {
   }
 }
 
-function getEncryptionKey(): Buffer {
+function getEncryptionKey(config: SecureAuthConfig): Buffer {
   try {
-    return createHash("sha256").update(requireTwoFactorEncryptionKey()).digest();
+    return createHash("sha256").update(requireTwoFactorEncryptionKey(config)).digest();
   } catch {
     throw new TwoFactorEncryptionKeyError();
   }
 }
 
-export function encryptTwoFactorSecret(plaintext: string): EncryptedTwoFactorSecret {
+export function encryptTwoFactorSecret(
+  config: SecureAuthConfig,
+  plaintext: string
+): EncryptedTwoFactorSecret {
   const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
+  const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(config), iv);
   const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
 
@@ -41,14 +45,17 @@ export function encryptTwoFactorSecret(plaintext: string): EncryptedTwoFactorSec
   };
 }
 
-export function decryptTwoFactorSecret(payload: EncryptedTwoFactorSecret): string {
+export function decryptTwoFactorSecret(
+  config: SecureAuthConfig,
+  payload: EncryptedTwoFactorSecret
+): string {
   if (payload.version !== TWO_FACTOR_SECRET_PAYLOAD_VERSION) {
     throw new Error("Unsupported two-factor secret payload version");
   }
 
   const decipher = createDecipheriv(
     "aes-256-gcm",
-    getEncryptionKey(),
+    getEncryptionKey(config),
     Buffer.from(payload.iv, "base64url")
   );
   decipher.setAuthTag(Buffer.from(payload.tag, "base64url"));

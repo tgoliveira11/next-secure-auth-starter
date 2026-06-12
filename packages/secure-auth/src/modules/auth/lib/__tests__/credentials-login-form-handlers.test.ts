@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { handleCredentialsLoginFormPost } from "@/modules/auth/lib/credentials-login-start-handler";
 import { handleCredentialsTwoFactorFormPost } from "@/modules/auth/lib/credentials-two-factor-form-handler";
-import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
+import { getTestServices } from "@/test/helpers/mock-services";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   startCredentialsLogin: vi.fn(),
@@ -15,17 +16,17 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
-  return {
-    ...actual,
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
     authLoginService: {
-      ...actual.authLoginService,
+      ...base.authLoginService,
       startCredentialsLogin: mocks.startCredentialsLogin,
       verifyTwoFactorLogin: mocks.verifyTwoFactorLogin,
     },
-  };
-});
+  }));
+}
 
 function formRequest(url: string, fields: Record<string, string>) {
   return new Request(url, {
@@ -36,13 +37,15 @@ function formRequest(url: string, fields: Record<string, string>) {
 }
 
 describe("credentials login form handlers", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    services = await buildServices();
   });
 
   it("redirects invalid payloads from the login handler", async () => {
     const response = await handleCredentialsLoginFormPost(
-      formRequest("http://localhost/login", { email: "bad", password: "x" })
+      formRequest("http://localhost/login", { email: "bad", password: "x" }),
+      services
     );
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toContain("invalid_request");
@@ -57,7 +60,8 @@ describe("credentials login form handlers", () => {
           email: "user@example.com",
           password: "password123",
         }),
-      })
+      }),
+      services
     );
     expect(response.headers.get("location")).toContain("invalid_request");
   });
@@ -71,7 +75,8 @@ describe("credentials login form handlers", () => {
       formRequest("http://localhost/login", {
         email: "user@example.com",
         password: "password123",
-      })
+      }),
+      services
     );
     expect(response.headers.get("location")).toContain("/login/complete");
   });
@@ -83,7 +88,8 @@ describe("credentials login form handlers", () => {
       formRequest("http://localhost/login", {
         email: "user@example.com",
         password: "wrongpass",
-      })
+      }),
+      services
     );
     expect(response.headers.get("location")).toContain("invalid_credentials");
   });
@@ -94,7 +100,8 @@ describe("credentials login form handlers", () => {
       formRequest("http://localhost/login", {
         email: "user@example.com",
         password: "password123",
-      })
+      }),
+      services
     );
     expect(response.headers.get("location")).toContain("unavailable");
   });
@@ -102,14 +109,16 @@ describe("credentials login form handlers", () => {
   it("redirects expired 2FA challenges from the verify handler", async () => {
     mocks.cookiesGet.mockReturnValue(undefined);
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { code: "123456" })
+      formRequest("http://localhost/login/2fa", { code: "123456" }),
+      services
     );
     expect(response.headers.get("location")).toContain("expired_challenge");
   });
 
   it("redirects invalid 2FA payloads from the verify handler", async () => {
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { code: "12" })
+      formRequest("http://localhost/login/2fa", { code: "12" }),
+      services
     );
     expect(response.headers.get("location")).toContain("invalid_request");
   });
@@ -117,13 +126,14 @@ describe("credentials login form handlers", () => {
   it("redirects consumed 2FA challenges from the verify handler", async () => {
     const { InvalidTwoFactorChallengeError } = await import("@/modules/auth/services/auth-login-service");
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     mocks.verifyTwoFactorLogin.mockRejectedValue(new InvalidTwoFactorChallengeError());
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { code: "123456" })
+      formRequest("http://localhost/login/2fa", { code: "123456" }),
+      services
     );
     expect(response.headers.get("location")).toContain("expired_challenge");
   });
@@ -131,39 +141,42 @@ describe("credentials login form handlers", () => {
   it("redirects invalid 2FA codes from the verify handler", async () => {
     const { InvalidTwoFactorCodeError } = await import("@/modules/auth/services/auth-login-service");
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     mocks.verifyTwoFactorLogin.mockRejectedValue(new InvalidTwoFactorCodeError());
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { code: "123456" })
+      formRequest("http://localhost/login/2fa", { code: "123456" }),
+      services
     );
     expect(response.headers.get("location")).toContain("invalid_code");
   });
 
   it("redirects unavailable 2FA failures from the verify handler", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     mocks.verifyTwoFactorLogin.mockRejectedValue(new Error("db down"));
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { code: "123456" })
+      formRequest("http://localhost/login/2fa", { code: "123456" }),
+      services
     );
     expect(response.headers.get("location")).toContain("unavailable");
   });
 
   it("accepts backup codes during 2FA verification", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     mocks.verifyTwoFactorLogin.mockResolvedValue({ loginToken: "login-token-1234567890" });
     const response = await handleCredentialsTwoFactorFormPost(
-      formRequest("http://localhost/login/2fa", { backupCode: "AAAA-BBBB-CCCC" })
+      formRequest("http://localhost/login/2fa", { backupCode: "AAAA-BBBB-CCCC" }),
+      services
     );
     expect(response.headers.get("location")).toContain("/login/complete");
   });

@@ -1,4 +1,5 @@
-import { resolveAccountPolicyConfig } from "@/core/config-resolvers.js";
+import { resolveAccountPolicyConfig } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export type AccountPolicyConfig = {
   sendVerificationOnRegister: boolean;
@@ -10,15 +11,8 @@ export const DEFAULT_ACCOUNT_POLICY: AccountPolicyConfig = {
   requireEmailVerificationBeforeSignIn: false,
 };
 
-export function getAccountPolicyConfig(
-  override?: AccountPolicyConfig
-): AccountPolicyConfig {
-  if (override) return override;
-  try {
-    return resolveAccountPolicyConfig();
-  } catch {
-    return DEFAULT_ACCOUNT_POLICY;
-  }
+export function getAccountPolicyConfig(config: SecureAuthConfig): AccountPolicyConfig {
+  return resolveAccountPolicyConfig(config);
 }
 
 export function isCredentialsAccount(user: {
@@ -34,9 +28,9 @@ export function credentialsSignInRequiresEmailVerification(
     passwordHash: string | null;
     emailVerifiedAt: Date | null;
   },
-  policyOverride?: AccountPolicyConfig
+  config: SecureAuthConfig
 ): boolean {
-  const policy = getAccountPolicyConfig(policyOverride);
+  const policy = getAccountPolicyConfig(config);
   if (!policy.requireEmailVerificationBeforeSignIn) return false;
   if (!isCredentialsAccount(user)) return false;
   return !user.emailVerifiedAt;
@@ -48,9 +42,9 @@ export function assertCredentialsEmailVerifiedForSignIn(
     passwordHash: string | null;
     emailVerifiedAt: Date | null;
   },
-  policyOverride?: AccountPolicyConfig
+  config: SecureAuthConfig
 ): void {
-  if (credentialsSignInRequiresEmailVerification(user, policyOverride)) {
+  if (credentialsSignInRequiresEmailVerification(user, config)) {
     throw new EmailVerificationRequiredError();
   }
 }

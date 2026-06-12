@@ -1,13 +1,14 @@
 import { generateSecret, generateURI, verify } from "otplib";
 import { getTwoFactorIssuer } from "@/modules/two-factor/lib/constants";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export function generateTotpSecret(): string {
   return generateSecret();
 }
 
-export function buildOtpAuthUri(email: string, secret: string): string {
+export function buildOtpAuthUri(config: SecureAuthConfig, email: string, secret: string): string {
   return generateURI({
-    issuer: getTwoFactorIssuer(),
+    issuer: getTwoFactorIssuer(config),
     label: email,
     secret,
   });

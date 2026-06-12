@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { PasswordPolicyConfig } from "@tgoliveira/secure-auth/client/password-policy";
+import type { PasswordPolicyConfig } from "../../security/password-policy/index.js";
 
 export type PageWidth = "narrow" | "medium" | "wide";
 

@@ -7,7 +7,7 @@ import {
   AuthPasswordTransportError,
 } from "@/modules/security/policies/auth-password-input";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { accountAuthService } from "@/modules/account/services/account-auth-service";
+import type { SecureAuthServices } from "@/core/types";
 
 const validateSchema = z.object({
   action: z.literal("validate"),
@@ -22,7 +22,7 @@ const resetSchema = z.object({
 
 const bodySchema = z.discriminatedUnion("action", [validateSchema, resetSchema]);
 
-export async function POST(request: Request) {
+async function resetPasswordPost(request: Request, services: SecureAuthServices) {
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
     assertPasswordNotInUrl(request.url);
@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     }
 
     if (parsed.data.action === "validate") {
-      const result = await accountAuthService.validatePasswordResetToken(parsed.data.token);
+      const result = await services.accountAuthService.validatePasswordResetToken(parsed.data.token);
       return NextResponse.json(result);
     }
 
-    const result = await accountAuthService.resetPassword(
+    const result = await services.accountAuthService.resetPassword(
       parsed.data.token,
       parsed.data.newPassword,
       getClientIp(request)
@@ -50,4 +50,8 @@ export async function POST(request: Request) {
     }
     return apiError(error, "POST /api/auth/reset-password");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => resetPasswordPost(request, services);
 }

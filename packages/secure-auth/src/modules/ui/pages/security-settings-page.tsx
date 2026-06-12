@@ -8,20 +8,29 @@ import { PageHeader } from "../primitives/page-header.js";
 import { LoadingState } from "../primitives/loading-state.js";
 import { PasskeySettings } from "../features/settings/passkey-settings.js";
 import { TwoFactorSettings } from "../features/settings/two-factor-settings.js";
-import { resolveAuthPaths, type SecuritySettingsPageProps } from "./types.js";
+import { type SecuritySettingsPageProps } from "./types.js";
+import { usePageTitle, useUiAppSlug, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function SecuritySettingsPage({
-  title = "Security",
-  description = "Manage passkeys and optional two-factor authentication for your account.",
   brand,
   header,
   className,
   width = "medium",
   paths,
-  appSlug = "app",
+  appSlug: appSlugProp,
   userId: userIdProp,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: SecuritySettingsPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const appSlug = useUiAppSlug(appSlugProp);
+  const title = usePageTitle({ title: titleProp, subtitle }, "securitySettingsTitle", "Security");
+  const description = useUiMessage(
+    descriptionProp,
+    "securitySettingsDescription",
+    "Manage passkeys and optional two-factor authentication for your account."
+  );
   const { data: session, status } = useSession();
   const router = useRouter();
   const userId = userIdProp ?? session?.user?.id;

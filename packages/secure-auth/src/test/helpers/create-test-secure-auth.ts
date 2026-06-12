@@ -31,7 +31,7 @@ const baseTestConfig = {
   },
 } satisfies Omit<SecureAuthConfig, "db">;
 
-/** Base config object for `initSecureAuthRuntime` in individual tests. */
+/** Base config object for `createTestSecureAuth` in individual tests. */
 export function buildTestSecureAuthConfig(
   overrides: Partial<SecureAuthConfig> = {}
 ): SecureAuthConfig {

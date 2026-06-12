@@ -1,5 +1,6 @@
-import { initSecureAuthRuntime } from "../core/secure-auth-runtime.js";
 import type { SecureAuthConfig } from "../core/types.js";
+import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
+import { createAuthServices } from "../core/create-auth-services.js";
 import { createRoutes } from "../server/routes/create-routes.js";
 
 export type SecureAuth = ReturnType<typeof createSecureAuth>;
@@ -9,23 +10,28 @@ export type SecureAuth = ReturnType<typeof createSecureAuth>;
  * Heavy service modules load lazily on first route invocation to keep Next.js builds lean.
  */
 export function createSecureAuth(config: SecureAuthConfig) {
-  initSecureAuthRuntime(config);
+  const uiConfig = buildPublicUIConfig(config);
 
-  let servicesPromise: Promise<import("../core/types.js").SecureAuthServices> | undefined;
+  let services: ReturnType<typeof createAuthServices> | undefined;
 
   const getServices = () => {
-    if (!servicesPromise) {
-      servicesPromise = import("../core/create-auth-services.js").then(({ createAuthServices }) =>
-        createAuthServices(config)
-      );
+    if (!services) {
+      services = createAuthServices(config);
     }
-    return servicesPromise;
+    return Promise.resolve(services);
   };
 
   const routes = createRoutes(getServices);
 
   return {
     config,
+    uiConfig,
+    get ui() {
+      return uiConfig;
+    },
+    getPublicUIConfig(): SecureAuthUIPublicConfig {
+      return uiConfig;
+    },
     get services() {
       throw new Error(
         "@tgoliveira/secure-auth: use await secureAuth.getServices() — services load asynchronously."

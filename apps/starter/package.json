@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/starter",
-  "version": "0.1.1-internal",
+  "version": "0.1.2-internal",
   "private": true,
   "description": "Integration harness for @tgoliveira/secure-auth",
   "scripts": {
@@ -22,7 +22,7 @@
     "postinstall": "node scripts/copy-swagger-ui.mjs"
   },
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.1-internal",
+    "@tgoliveira/secure-auth": "0.1.2-internal",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.1",
     "bcryptjs": "^3.0.2",

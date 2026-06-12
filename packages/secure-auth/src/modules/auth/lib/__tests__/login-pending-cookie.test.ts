@@ -1,5 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { initSecureAuthRuntime } from "@/core/secure-auth-runtime";
+import { describe, it, expect, vi } from "vitest";
 import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
 import {
   clearLoginPendingTokenCookie,
@@ -8,15 +7,12 @@ import {
 import { buildLoginPendingTokenCookieName } from "@/modules/auth/lib/auth-cookie-names";
 
 describe("login pending cookie helpers", () => {
-  beforeEach(() => {
-    initSecureAuthRuntime(buildTestSecureAuthConfig());
-  });
-
   it("clears the pending login cookie", () => {
+    const config = buildTestSecureAuthConfig();
     const set = vi.fn();
-    clearLoginPendingTokenCookie({ cookies: { set } });
+    clearLoginPendingTokenCookie(config, { cookies: { set } });
     expect(set).toHaveBeenCalledWith(buildLoginPendingTokenCookieName("test-app"), "", {
-      ...getLoginPendingTokenCookieOptions(),
+      ...getLoginPendingTokenCookieOptions(config),
       maxAge: 0,
     });
   });

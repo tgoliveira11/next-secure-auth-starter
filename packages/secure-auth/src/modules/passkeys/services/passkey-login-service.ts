@@ -3,29 +3,30 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
-import { passkeyRepository } from "@/modules/passkeys/repositories/passkey-repository";
-import { auditRepository } from "@/modules/audit/repositories/audit-repository";
-import { userRepository } from "@/modules/account/repositories/user-repository";
-import { enforceRateLimit } from "@/modules/rate-limit/index";
-import {
-  getWebAuthnOrigins,
-  getWebAuthnRpId,
-  toPasskeyVerificationErrorMessage,
-} from "@/modules/passkeys/lib/webauthn-config";
-import { authLoginService } from "@/modules/auth/services/auth-login-service";
-import { authService } from "@/modules/auth/services/auth-service";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
-import { ValidationError } from "@/modules/account/services/account-service";
+import { ValidationError } from "@/modules/account/lib/account-errors";
+import type { SecureAuthContext } from "@/core/create-secure-auth-context";
+import type { SecureAuthRepositories } from "@/core/create-repositories";
+import type { RateLimitApi } from "@/modules/rate-limit/index";
+import type { AuthLoginService } from "@/modules/auth/services/auth-login-service";
+import type { AuthService } from "@/modules/auth/services/auth-service";
 
-const rpID = getWebAuthnRpId();
-const origins = getWebAuthnOrigins();
+type PasskeyLoginServiceDeps = {
+  config: SecureAuthContext["config"];
+  ctx: SecureAuthContext;
+  repos: SecureAuthRepositories;
+  rateLimit: RateLimitApi;
+  authLoginService: AuthLoginService;
+  authService: AuthService;
+};
 
 async function resolveLoginCredentialAllowList(
+  repos: SecureAuthRepositories,
   userId: string,
   preferredCredentialId?: string
 ): Promise<{ id: string; transports?: AuthenticatorTransport[] }[] | undefined> {
-  const creds = await passkeyRepository.findByUserId(userId);
+  const creds = await repos.passkeyRepository.findByUserId(userId);
   const signInCreds = creds.filter((c) => c.signInEnabled);
   if (signInCreds.length === 0) return undefined;
 
@@ -47,16 +48,19 @@ async function resolveLoginCredentialAllowList(
   }));
 }
 
-async function resolveLoginContext(input?: {
-  email?: string;
-  userId?: string;
-  credentialId?: string;
-}): Promise<{
+async function resolveLoginContext(
+  repos: SecureAuthRepositories,
+  input?: {
+    email?: string;
+    userId?: string;
+    credentialId?: string;
+  }
+): Promise<{
   userId?: string;
   allowCredentials?: { id: string; transports?: AuthenticatorTransport[] }[];
 }> {
   if (input?.credentialId) {
-    const credential = await passkeyRepository.findByCredentialId(input.credentialId);
+    const credential = await repos.passkeyRepository.findByCredentialId(input.credentialId);
     if (credential?.signInEnabled) {
       return {
         userId: credential.userId,
@@ -71,21 +75,21 @@ async function resolveLoginContext(input?: {
   }
 
   if (input?.userId) {
-    const user = await userRepository.findById(input.userId);
+    const user = await repos.userRepository.findById(input.userId);
     if (user) {
       return {
         userId: user.id,
-        allowCredentials: await resolveLoginCredentialAllowList(user.id, input.credentialId),
+        allowCredentials: await resolveLoginCredentialAllowList(repos, user.id, input.credentialId),
       };
     }
   }
 
   if (input?.email) {
-    const user = await userRepository.findByEmail(input.email);
+    const user = await repos.userRepository.findByEmail(input.email);
     if (user) {
       return {
         userId: user.id,
-        allowCredentials: await resolveLoginCredentialAllowList(user.id, input.credentialId),
+        allowCredentials: await resolveLoginCredentialAllowList(repos, user.id, input.credentialId),
       };
     }
   }
@@ -93,131 +97,139 @@ async function resolveLoginContext(input?: {
   return {};
 }
 
-export const passkeyLoginService = {
-  async getLoginOptions(input?: {
-    email?: string;
-    userId?: string;
-    credentialId?: string;
-    ip?: string;
-  }) {
-    await enforceRateLimit({
-      operation: "passkey.login",
-      ip: input?.ip,
-      endpoint: "/api/auth/passkey/login/options",
-      keyMode: "ip",
-    });
+export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
+  const { config, ctx, repos, rateLimit, authLoginService, authService } = deps;
+  const rpID = ctx.getWebAuthnRpId();
+  const origins = ctx.getWebAuthnOrigins();
 
-    if (input?.email) {
-      const user = await userRepository.findByEmail(input.email);
-      if (!user) {
-        throw new NotFoundError("No account found for this email.");
+  return {
+    async getLoginOptions(input?: {
+      email?: string;
+      userId?: string;
+      credentialId?: string;
+      ip?: string;
+    }) {
+      await rateLimit.enforceRateLimit({
+        operation: "passkey.login",
+        ip: input?.ip,
+        endpoint: "/api/auth/passkey/login/options",
+        keyMode: "ip",
+      });
+
+      if (input?.email) {
+        const user = await repos.userRepository.findByEmail(input.email);
+        if (!user) {
+          throw new NotFoundError("No account found for this email.");
+        }
+
+        const creds = await repos.passkeyRepository.findByUserId(user.id);
+        const hasSignInPasskey = creds.some((c) => c.signInEnabled);
+        if (!hasSignInPasskey) {
+          throw new ValidationError(
+            "This account does not have a passkey yet. Sign in with your password or social account, then add one in Security settings."
+          );
+        }
       }
 
-      const creds = await passkeyRepository.findByUserId(user.id);
-      const hasSignInPasskey = creds.some((c) => c.signInEnabled);
-      if (!hasSignInPasskey) {
-        throw new ValidationError(
-          "This account does not have a passkey yet. Sign in with your password or social account, then add one in Security settings."
-        );
-      }
-    }
+      const { userId, allowCredentials } = await resolveLoginContext(repos, input);
 
-    const { userId, allowCredentials } = await resolveLoginContext(input);
+      const options = await generateAuthenticationOptions({
+        rpID,
+        allowCredentials,
+        userVerification: "required",
+      });
 
-    const options = await generateAuthenticationOptions({
-      rpID,
-      allowCredentials,
-      userVerification: "required",
-    });
+      await repos.passkeyRepository.storeChallenge({
+        userId,
+        challenge: options.challenge,
+        type: "login",
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      });
 
-    await passkeyRepository.storeChallenge({
-      userId,
-      challenge: options.challenge,
-      type: "login",
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    });
+      return { options };
+    },
 
-    return { options };
-  },
-
-  async verifyLogin(response: AuthenticationResponseJSON, ip?: string) {
-    const clientData = JSON.parse(
-      Buffer.from(response.response.clientDataJSON, "base64url").toString()
-    );
-
-    let challengeRecord;
-    try {
-      challengeRecord = await passkeyRepository.consumeValidChallenge(
-        clientData.challenge,
-        "login"
+    async verifyLogin(response: AuthenticationResponseJSON, ip?: string) {
+      const clientData = JSON.parse(
+        Buffer.from(response.response.clientDataJSON, "base64url").toString()
       );
-    } catch {
-      throw new ChallengeError("Invalid or expired challenge");
-    }
 
-    const credential = await passkeyRepository.findByCredentialId(response.id);
-    if (!credential || !credential.signInEnabled) {
-      await auditRepository.record("passkey_login_failed", challengeRecord.userId ?? undefined, {
-        reason: "unknown_or_sign_in_disabled",
+      let challengeRecord;
+      try {
+        challengeRecord = await repos.passkeyRepository.consumeValidChallenge(
+          clientData.challenge,
+          "login"
+        );
+      } catch {
+        throw new ChallengeError("Invalid or expired challenge");
+      }
+
+      const credential = await repos.passkeyRepository.findByCredentialId(response.id);
+      if (!credential || !credential.signInEnabled) {
+        await repos.auditRepository.record("passkey_login_failed", challengeRecord.userId ?? undefined, {
+          reason: "unknown_or_sign_in_disabled",
+        });
+        throw new NotFoundError("This passkey is not registered for sign-in.");
+      }
+
+      await rateLimit.enforceRateLimit({
+        operation: "passkey.login",
+        userId: credential.userId,
+        ip,
+        endpoint: "/api/auth/passkey/login/verify",
       });
-      throw new NotFoundError("This passkey is not registered for sign-in.");
-    }
 
-    await enforceRateLimit({
-      operation: "passkey.login",
-      userId: credential.userId,
-      ip,
-      endpoint: "/api/auth/passkey/login/verify",
-    });
+      let verification;
+      try {
+        verification = await verifyAuthenticationResponse({
+          response,
+          expectedChallenge: challengeRecord.challenge,
+          expectedOrigin: origins,
+          expectedRPID: rpID,
+          credential: {
+            id: credential.credentialId,
+            publicKey: new Uint8Array(Buffer.from(credential.publicKey, "base64url")),
+            counter: Number.parseInt(credential.counter, 10) || 0,
+            transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
+          },
+        });
+      } catch (error) {
+        await repos.auditRepository.record("passkey_login_failed", credential.userId, {
+          reason: "verification_failed",
+        });
+        throw new ChallengeError(ctx.toPasskeyVerificationErrorMessage(error));
+      }
 
-    let verification;
-    try {
-      verification = await verifyAuthenticationResponse({
-        response,
-        expectedChallenge: challengeRecord.challenge,
-        expectedOrigin: origins,
-        expectedRPID: rpID,
-        credential: {
-          id: credential.credentialId,
-          publicKey: new Uint8Array(Buffer.from(credential.publicKey, "base64url")),
-          counter: Number.parseInt(credential.counter, 10) || 0,
-          transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
-        },
-      });
-    } catch (error) {
-      await auditRepository.record("passkey_login_failed", credential.userId, {
-        reason: "verification_failed",
-      });
-      throw new ChallengeError(toPasskeyVerificationErrorMessage(error));
-    }
+      if (!verification.verified) {
+        await repos.auditRepository.record("passkey_login_failed", credential.userId, {
+          reason: "not_verified",
+        });
+        throw new ChallengeError("Passkey sign-in failed. Try again.");
+      }
 
-    if (!verification.verified) {
-      await auditRepository.record("passkey_login_failed", credential.userId, {
-        reason: "not_verified",
-      });
-      throw new ChallengeError("Passkey sign-in failed. Try again.");
-    }
+      await repos.passkeyRepository.updateCounter(
+        credential.credentialId,
+        String(verification.authenticationInfo.newCounter)
+      );
+      await repos.passkeyRepository.updateLastUsedAt(credential.credentialId);
 
-    await passkeyRepository.updateCounter(
-      credential.credentialId,
-      String(verification.authenticationInfo.newCounter)
-    );
-    await passkeyRepository.updateLastUsedAt(credential.credentialId);
+      const user = await repos.userRepository.findById(credential.userId);
+      if (!user) {
+        throw new NotFoundError("This passkey is not registered for sign-in.");
+      }
+      assertCredentialsEmailVerifiedForSignIn(user, config);
 
-    const user = await userRepository.findById(credential.userId);
-    if (!user) {
-      throw new NotFoundError("This passkey is not registered for sign-in.");
-    }
-    assertCredentialsEmailVerifiedForSignIn(user);
+      const loginToken = await authLoginService.issueLoginToken(credential.userId, "passkey");
+      await authService.recordLoginSuccess(credential.userId, "passkey");
+      await repos.auditRepository.record("passkey_login_success", credential.userId);
 
-    const loginToken = await authLoginService.issueLoginToken(credential.userId, "passkey");
-    await authService.recordLoginSuccess(credential.userId, "passkey");
-    await auditRepository.record("passkey_login_success", credential.userId);
+      return {
+        loginToken,
+        userId: credential.userId,
+        credentialId: credential.credentialId,
+      };
+    },
+  };
+}
 
-    return {
-      loginToken,
-      userId: credential.userId,
-      credentialId: credential.credentialId,
-    };
-  },
-};
+export type PasskeyLoginService = ReturnType<typeof createPasskeyLoginService>;

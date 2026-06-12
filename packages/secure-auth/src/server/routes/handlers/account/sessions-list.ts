@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
 import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
-import { accountSessionService } from "@/modules/sessions/services/account-session-service";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function GET() {
+async function sessionsListGet(services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser();
-    const result = await accountSessionService.listSessions(
+    const user = await requireFullyAuthenticatedUser(services);
+    const result = await services.accountSessionService.listSessions(
       user.id,
       user.accountSessionId
     );
@@ -14,4 +14,8 @@ export async function GET() {
   } catch (error) {
     return apiError(error, "GET /api/account/sessions");
   }
+}
+
+export function createGetHandler(services: SecureAuthServices) {
+  return () => sessionsListGet(services);
 }

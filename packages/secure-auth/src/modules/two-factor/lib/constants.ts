@@ -1,7 +1,8 @@
-import { getAppName } from "@/core/app-brand";
+import { getAppName } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
-export function getTwoFactorIssuer(): string {
-  return getAppName();
+export function getTwoFactorIssuer(config: SecureAuthConfig): string {
+  return getAppName(config);
 }
 
 export const TWO_FACTOR_BACKUP_CODE_COUNT = 10;

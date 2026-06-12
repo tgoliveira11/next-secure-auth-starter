@@ -9,12 +9,14 @@ import { PageHeader } from "../primitives/page-header.js";
 import { Alert } from "../primitives/alert.js";
 import { Button } from "../primitives/button.js";
 import { getCheckEmailMessage, accountAuthApi } from "@tgoliveira/secure-auth/client";
-import { resolveAuthPaths, type CheckEmailPageProps } from "./types.js";
+import { type CheckEmailPageProps } from "./types.js";
+import { usePageTitle, useUiPaths } from "./use-page-ui.js";
 
 function CheckEmailContent({
   email: emailProp,
   verificationRequired: verificationRequiredProp,
-  title = "Check your email",
+  title: titleProp,
+  subtitle,
   paths,
   className,
   width = "narrow",
@@ -22,7 +24,8 @@ function CheckEmailContent({
   header,
 }: CheckEmailPageProps) {
   const searchParams = useSearchParams();
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const title = usePageTitle({ title: titleProp, subtitle }, "checkEmailTitle", "Check your email");
   const email = emailProp ?? searchParams.get("email") ?? "";
   const verificationRequired =
     verificationRequiredProp ?? searchParams.get("required") === "1";

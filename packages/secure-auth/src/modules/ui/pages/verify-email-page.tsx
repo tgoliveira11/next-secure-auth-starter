@@ -10,7 +10,8 @@ import { Alert } from "../primitives/alert.js";
 import { LoadingState } from "../primitives/loading-state.js";
 import { Button } from "../primitives/button.js";
 import { accountAuthApi } from "@tgoliveira/secure-auth/client";
-import { resolveAuthPaths, type VerifyEmailPageProps } from "./types.js";
+import { type VerifyEmailPageProps } from "./types.js";
+import { useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 type VerifyState = "loading" | "success" | "invalid";
 
@@ -21,12 +22,24 @@ function VerifyEmailContent({
   width = "narrow",
   brand,
   header,
+  title: titleProp,
+  description: descriptionProp,
 }: VerifyEmailPageProps) {
   const searchParams = useSearchParams();
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
   const token = tokenProp ?? searchParams.get("token") ?? "";
   const [state, setState] = useState<VerifyState>("loading");
   const [email, setEmail] = useState<string | null>(null);
+  const successTitle = useUiMessage(
+    titleProp,
+    "verifyEmailTitleSuccess",
+    "Your email has been verified"
+  );
+  const invalidTitle = useUiMessage(
+    undefined,
+    "verifyEmailTitleInvalid",
+    "Verification link expired"
+  );
 
   useEffect(() => {
     if (!token) {
@@ -59,18 +72,18 @@ function VerifyEmailContent({
     );
   }
 
+  const title = state === "success" ? successTitle : invalidTitle;
+  const description =
+    descriptionProp ??
+    (state === "success"
+      ? "You can now sign in and use your account."
+      : "This verification link is invalid or expired. You can request a new one.");
+
   return (
     <PageShell width={width} className={className}>
       {brand}
       {header}
-      <PageHeader
-        title={state === "success" ? "Your email has been verified" : "Verification link expired"}
-        description={
-          state === "success"
-            ? "You can now sign in and use your account."
-            : "This verification link is invalid or expired. You can request a new one."
-        }
-      />
+      <PageHeader title={title} description={description} />
       <Card className="space-y-4">
         {state === "success" && email && <Alert variant="success">Verified {email}</Alert>}
         <Link href={resolved.login} className="block">

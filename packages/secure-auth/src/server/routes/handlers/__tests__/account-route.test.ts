@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { accountDelete as DELETE, accountGet as GET } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
 import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/modules/account/lib/account-deletion";
+import type { SecureAuthServices } from "@/core/types";
+
+const mocks = vi.hoisted(() => ({
+  getDeletionRequirements: vi.fn(),
+  deleteAccount: vi.fn(),
+}));
 
 vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
@@ -15,38 +22,44 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/account/services/account-service", () => ({
-  accountService: {
-    getDeletionRequirements: vi.fn(async () => ({
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    accountService: {
+      ...base.accountService,
+      getDeletionRequirements: mocks.getDeletionRequirements,
+      deleteAccount: mocks.deleteAccount,
+    },
+  }));
+}
+
+describe("/api/account", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mocks.getDeletionRequirements.mockResolvedValue({
       requiresPassword: true,
       authProvider: "credentials",
       confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
-    })),
-    deleteAccount: vi.fn(async () => ({ success: true })),
-  },
-}));
-
-describe("/api/account", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+    });
+    mocks.deleteAccount.mockResolvedValue({ success: true });
+    services = await buildServices();
   });
 
   it("returns deletion requirements", async () => {
-    const res = await GET();
+    const res = await GET(services);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.confirmationPhrase).toBe(ACCOUNT_DELETION_CONFIRMATION_PHRASE);
   });
 
   it("maps unexpected GET failures", async () => {
-    const { accountService } = await import("@/modules/account/services/account-service");
-    vi.mocked(accountService.getDeletionRequirements).mockRejectedValueOnce(new Error("db down"));
-    const res = await GET();
+    mocks.getDeletionRequirements.mockRejectedValueOnce(new Error("db down"));
+    const res = await GET(services);
     expect(res.status).toBe(500);
   });
 
   it("deletes the authenticated account with confirmation payload", async () => {
-    const { accountService } = await import("@/modules/account/services/account-service");
     const res = await DELETE(
       new Request("http://localhost/api/account", {
         method: "DELETE",
@@ -58,10 +71,11 @@ describe("/api/account", () => {
           confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
           password: "secret",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
-    expect(accountService.deleteAccount).toHaveBeenCalledWith(
+    expect(mocks.deleteAccount).toHaveBeenCalledWith(
       USER_ID,
       {
         confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
@@ -77,7 +91,8 @@ describe("/api/account", () => {
         method: "DELETE",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ password: "secret" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -88,7 +103,8 @@ describe("/api/account", () => {
         method: "DELETE",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });

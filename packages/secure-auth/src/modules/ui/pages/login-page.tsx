@@ -6,25 +6,35 @@ import { Card } from "../primitives/card.js";
 import { PageHeader } from "../primitives/page-header.js";
 import { CredentialsLoginForm } from "../features/auth/credentials-login-form.js";
 import { LoginPasskeySection } from "../features/auth/login-passkey-section.js";
-import { resolveAuthPaths, type LoginPageProps } from "./types.js";
+import { type LoginPageProps } from "./types.js";
+import { usePageTitle, useUiAppSlug, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function LoginPage({
-  title = "Welcome back",
-  description = "Sign in to your account.",
   brand,
   header,
   footer,
   className,
   width = "narrow",
   paths,
-  appSlug = "app",
-  registerLinkLabel = "Create one",
+  appSlug: appSlugProp,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
+  registerLinkLabel: registerLinkLabelProp,
   forgotPasswordLinkLabel,
   submitLabel,
   afterLoginPath,
 }: LoginPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
+  const title = usePageTitle({ title: titleProp, subtitle }, "loginTitle", "Welcome back");
+  const description = useUiMessage(
+    descriptionProp,
+    "loginDescription",
+    "Sign in to your account."
+  );
+  const appSlug = useUiAppSlug(appSlugProp);
+  const registerLinkLabel = useUiMessage(registerLinkLabelProp, "registerLinkLabel", "Create one");
 
   return (
     <AuthPageShell width={width} className={className}>

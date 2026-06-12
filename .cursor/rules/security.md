@@ -41,7 +41,7 @@ Apply to: login, registration, TOTP verify, password reset, verification resend,
 
 ## Logging
 
-Use the `security` module logger with redaction. No reset/verification links in production logs.
+Use the package `safeLogger` with redaction. No reset/verification links in production logs.
 
 ## Audit
 
@@ -56,4 +56,4 @@ TODO_SECURITY_REVIEW_REQUIRED:
 This behavior affects account security and requires human review.
 ```
 
-Update [SECURITY.md](../../SECURITY.md) when security behavior changes.
+Update [docs/security.md](../../docs/security.md) when security behavior changes.

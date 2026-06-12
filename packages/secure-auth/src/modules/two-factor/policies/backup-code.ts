@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
-import { requireTwoFactorEncryptionKey } from "@/core/app-brand.js";
+import { requireTwoFactorEncryptionKey } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 import { TwoFactorEncryptionKeyError } from "./two-factor-secret-crypto.js";
 
 const BACKUP_CODE_GROUPS = 3;
@@ -13,10 +14,10 @@ export function normalizeBackupCode(code: string): string {
   return code.replace(/\s+/g, "").replace(/-/g, "").toUpperCase();
 }
 
-export function hashBackupCode(code: string): string {
+export function hashBackupCode(config: SecureAuthConfig, code: string): string {
   let pepper: string;
   try {
-    pepper = requireTwoFactorEncryptionKey();
+    pepper = requireTwoFactorEncryptionKey(config);
   } catch {
     throw new TwoFactorEncryptionKeyError();
   }

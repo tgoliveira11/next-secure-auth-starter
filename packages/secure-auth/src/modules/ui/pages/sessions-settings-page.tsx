@@ -9,19 +9,31 @@ import { Card, CardDescription, CardHeader, CardTitle } from "../primitives/card
 import { LoadingState } from "../primitives/loading-state.js";
 import { ActiveSessionsSettings } from "../features/settings/active-sessions-settings.js";
 import { defaultSignOutAccount } from "@tgoliveira/secure-auth/react/client";
-import { resolveAuthPaths, type SessionsSettingsPageProps } from "./types.js";
+import { type SessionsSettingsPageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function SessionsSettingsPage({
-  title = "Active sessions",
-  description = "Review browsers and devices signed in to your account.",
   brand,
   header,
   className,
   width = "medium",
   paths,
   onSignOut = defaultSignOutAccount,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: SessionsSettingsPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "sessionsSettingsTitle",
+    "Active sessions"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "sessionsSettingsDescription",
+    "Review browsers and devices signed in to your account."
+  );
   const { status } = useSession();
   const router = useRouter();
 

@@ -19,10 +19,15 @@ import {
 } from "@tgoliveira/secure-auth/client";
 import {
   getPasswordPolicyHint,
-  type PasswordPolicyConfig,
   validatePasswordForSubmission,
 } from "@tgoliveira/secure-auth/client/password-policy";
-import { resolveAuthPaths, type RegisterPageProps } from "./types.js";
+import { type RegisterPageProps } from "./types.js";
+import {
+  usePageTitle,
+  useUiMessage,
+  useUiPasswordPolicy,
+  useUiPaths,
+} from "./use-page-ui.js";
 
 type RegisterResponse = {
   id: string;
@@ -32,21 +37,34 @@ type RegisterResponse = {
 };
 
 export function RegisterPage({
-  title = "Create your account",
-  description = "Set up secure email/password sign-in for your account.",
   brand,
   header,
   footer,
   className,
   width = "narrow",
   paths,
-  passwordPolicy,
+  passwordPolicy: passwordPolicyProp,
   submitLabel = "Create account with email",
-  loginLinkLabel = "Sign in",
+  loginLinkLabel: loginLinkLabelProp,
   afterLoginPath,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: RegisterPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
+  const passwordPolicy = useUiPasswordPolicy(passwordPolicyProp);
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "registerTitle",
+    "Create your account"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "registerDescription",
+    "Set up secure email/password sign-in for your account."
+  );
+  const loginLinkLabel = useUiMessage(loginLinkLabelProp, "loginLinkLabel", "Sign in");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

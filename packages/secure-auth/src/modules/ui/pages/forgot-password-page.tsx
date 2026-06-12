@@ -10,11 +10,10 @@ import { Button } from "../primitives/button.js";
 import { Input } from "../primitives/input.js";
 import { FormField } from "../primitives/form-field.js";
 import { GENERIC_FORGOT_PASSWORD_MESSAGE, accountAuthApi } from "@tgoliveira/secure-auth/client";
-import { resolveAuthPaths, type ForgotPasswordPageProps } from "./types.js";
+import { type ForgotPasswordPageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function ForgotPasswordPage({
-  title = "Forgot your password?",
-  description = "Enter your email and we'll send reset instructions if an account exists.",
   brand,
   header,
   footer,
@@ -22,9 +21,23 @@ export function ForgotPasswordPage({
   width = "narrow",
   paths,
   submitLabel = "Send reset instructions",
-  successMessage = GENERIC_FORGOT_PASSWORD_MESSAGE,
+  successMessage: successMessageProp,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: ForgotPasswordPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "forgotPasswordTitle",
+    "Forgot your password?"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "forgotPasswordDescription",
+    "Enter your email and we'll send reset instructions if an account exists."
+  );
+  const successMessage = successMessageProp ?? GENERIC_FORGOT_PASSWORD_MESSAGE;
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);

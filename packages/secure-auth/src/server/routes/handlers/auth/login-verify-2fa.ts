@@ -4,16 +4,14 @@ import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorLoginVerifySchema } from "@/lib/validation/two-factor";
 import {
-  authLoginService,
   InvalidTwoFactorChallengeError,
   InvalidTwoFactorCodeError,
 } from "@/modules/auth/services/auth-login-service";
-import {
-  clearLoginChallengeCookie,
-  getTwoFactorLoginChallengeCookieName,
-} from "@/modules/two-factor/lib/login-challenge-cookie";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
+async function loginVerify2faPost(request: Request, services: SecureAuthServices) {
+  const { ctx, authLoginService } = services;
+
   try {
     const body = await parseJsonBody(request);
     const parsed = twoFactorLoginVerifySchema.safeParse(body);
@@ -23,7 +21,7 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const challengeToken =
-      parsed.data.challengeToken ?? cookieStore.get(getTwoFactorLoginChallengeCookieName())?.value;
+      parsed.data.challengeToken ?? cookieStore.get(ctx.getTwoFactorLoginChallengeCookieName())?.value;
     if (!challengeToken) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
@@ -34,12 +32,12 @@ export async function POST(request: Request) {
       getClientIp(request)
     );
     const response = NextResponse.json(result);
-    clearLoginChallengeCookie(response);
+    ctx.clearLoginChallengeCookie(response);
     return response;
   } catch (error) {
     if (error instanceof InvalidTwoFactorChallengeError) {
       const response = NextResponse.json({ error: error.message }, { status: 401 });
-      clearLoginChallengeCookie(response);
+      ctx.clearLoginChallengeCookie(response);
       return response;
     }
     if (error instanceof InvalidTwoFactorCodeError) {
@@ -47,4 +45,8 @@ export async function POST(request: Request) {
     }
     return apiError(error, "POST /api/auth/login/verify-2fa");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => loginVerify2faPost(request, services);
 }

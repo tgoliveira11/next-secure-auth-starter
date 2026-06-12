@@ -4,15 +4,19 @@ This file defines instructions for AI coding agents working on `next-secure-auth
 
 ## Core mission
 
-Build and maintain a secure Next.js account/authentication starter.
+Build and maintain **`@tgoliveira/secure-auth`** — a secure Next.js account/authentication package — with **`apps/starter`** as the reference integration app.
 
-This is a starter/template, not a product-specific application.
+This is a reusable auth starter/template, not a product-specific application.
 
 ## Repository phase
 
-Current phase: **Phase 0 — Documentation and project context**
+Current phase: **Package-first architecture**
 
-Do not implement application code unless explicitly instructed. When implementation begins, follow [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md).
+- **`packages/secure-auth`** is the product; changes here affect all consumers.
+- **`apps/starter`** demonstrates integration only — keep it thin.
+- **`createSecureAuth(config)`** is the sole composition root.
+- **`SecureAuthUIProvider` + `secureAuth.uiConfig`** drive page defaults.
+- No global runtime state — config and `db` are injected through factories.
 
 ## Non-negotiable rules
 
@@ -26,7 +30,8 @@ Do not:
 - lower test coverage thresholds;
 - bypass module boundaries;
 - import database clients into client components;
-- use Server Actions for sensitive account operations unless explicitly reviewed.
+- use Server Actions for sensitive account operations unless explicitly reviewed;
+- expose internal package APIs (`createAuthServices`, `createRoutes`, deep `src/**` imports).
 
 ## Coverage requirement
 
@@ -45,13 +50,17 @@ Do not lower thresholds.
 
 Docs are part of the product.
 
-Whenever architecture, security behavior, environment variables, providers, routes, or testing strategy changes, update relevant docs **in the same change**.
+Whenever architecture, security behavior, environment variables, providers, routes, UI config, or testing strategy changes, update relevant docs **in the same change**.
 
 At minimum review:
 
 - README.md
-- ARCHITECTURE.md
-- SECURITY.md
+- docs/architecture.md
+- docs/security.md
+- docs/package-api.md
+- docs/consumer-quick-start.md
+- packages/secure-auth/README.md
+- apps/starter/README.md
 - docs/*
 - .cursor/rules/*
 
@@ -59,11 +68,11 @@ See [.cursor/rules/documentation.md](.cursor/rules/documentation.md) for the ful
 
 ## Module boundaries
 
-Follow [docs/MODULE_BOUNDARIES.md](docs/MODULE_BOUNDARIES.md).
+Follow [docs/architecture.md](docs/architecture.md#module-boundaries).
 
-- Business logic lives in `src/modules/*`, not in route files.
+- Business logic lives in `packages/secure-auth/src/modules/*`, not in consumer route files.
 - Server-only code must not be imported by client components.
-- UI primitives must not import domain/server modules.
+- UI primitives and pages must not import domain/server modules directly.
 
 ## Security behavior
 
@@ -87,10 +96,10 @@ This behavior affects account security and requires human review.
 | File | When to read |
 | --- | --- |
 | [README.md](README.md) | Project overview and doc index |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Before adding modules or routes |
-| [SECURITY.md](SECURITY.md) | Before any auth/security change |
-| [docs/PRODUCT_PURPOSE.md](docs/PRODUCT_PURPOSE.md) | Scope and non-goals |
-| [docs/MODULE_BOUNDARIES.md](docs/MODULE_BOUNDARIES.md) | Before cross-module imports |
-| [docs/USAGE_GUIDE.md](docs/USAGE_GUIDE.md) | Environment and deployment |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Before writing tests |
-| [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) | Implementation order |
+| [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, UI provider, boundaries |
+| [docs/security.md](docs/security.md) | Before any auth/security change |
+| [docs/package-api.md](docs/package-api.md) | Public exports and route map |
+| [docs/consumer-quick-start.md](docs/consumer-quick-start.md) | Consumer integration |
+| [docs/customization.md](docs/customization.md) | UI and config customization |
+| [docs/migrations.md](docs/migrations.md) | Database migrations and upgrades |
+| [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package-specific overview |

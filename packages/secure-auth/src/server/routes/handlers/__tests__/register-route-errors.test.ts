@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { registerPost as POST } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
+import type { SecureAuthServices } from "@/core/types";
 
-vi.mock("@/modules/account/repositories/user-repository", () => ({
-  userRepository: {
-    findByEmail: vi.fn(),
-    create: vi.fn(),
-  },
+const mocks = vi.hoisted(() => ({
+  findByEmail: vi.fn(),
+  create: vi.fn(),
 }));
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
@@ -14,20 +14,36 @@ vi.mock("@/modules/security/policies/password-hashing", () => ({
   ),
 }));
 
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    repos: {
+      ...base.repos,
+      userRepository: {
+        ...base.repos.userRepository,
+        findByEmail: mocks.findByEmail,
+        create: mocks.create,
+      },
+    },
+  }));
+}
+
 describe("register route error mapping", () => {
   beforeEach(async () => {
-    const { userRepository } = await import("@/modules/account/repositories/user-repository");
-    vi.mocked(userRepository.findByEmail).mockResolvedValue(null as never);
+    vi.clearAllMocks();
+    mocks.findByEmail.mockResolvedValue(null);
+    services = await buildServices();
   });
 
   it("maps database connection errors", async () => {
-    const { userRepository } = await import("@/modules/account/repositories/user-repository");
-    vi.mocked(userRepository.create).mockRejectedValue(new Error("ECONNREFUSED"));
+    mocks.create.mockRejectedValue(new Error("ECONNREFUSED"));
     const res = await POST(
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
@@ -36,13 +52,13 @@ describe("register route error mapping", () => {
   });
 
   it("maps missing DATABASE_URL configuration", async () => {
-    const { userRepository } = await import("@/modules/account/repositories/user-repository");
-    vi.mocked(userRepository.create).mockRejectedValue(new Error("DATABASE_URL is not set"));
+    mocks.create.mockRejectedValue(new Error("DATABASE_URL is not set"));
     const res = await POST(
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
@@ -51,15 +67,13 @@ describe("register route error mapping", () => {
   });
 
   it("maps missing schema errors", async () => {
-    const { userRepository } = await import("@/modules/account/repositories/user-repository");
-    vi.mocked(userRepository.create).mockRejectedValue(
-      new Error('relation "users" does not exist')
-    );
+    mocks.create.mockRejectedValue(new Error('relation "users" does not exist'));
     const res = await POST(
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
@@ -72,7 +86,8 @@ describe("register route error mapping", () => {
       new Request("http://localhost/api/auth/register?password=secret", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -83,14 +98,16 @@ describe("register route error mapping", () => {
         new Request("http://localhost", {
           method: "POST",
           body: JSON.stringify({ email: `user${i}@example.com`, password: "password123" }),
-        })
+        }),
+        services
       );
     }
     const res = await POST(
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "blocked@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(429);
   });

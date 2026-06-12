@@ -2,6 +2,19 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ReactNode } from "react";
 import type { AuthSchema } from "../drizzle/schema.js";
 import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
+import type { SecureAuthContext } from "./create-secure-auth-context.js";
+import type { SecureAuthRepositories } from "./create-repositories.js";
+import type { RateLimitApi } from "../modules/rate-limit/index.js";
+import type { RunInTransaction } from "../lib/db/transaction.js";
+import type { NextAuthOptions } from "next-auth";
+import type { createAuthService } from "../modules/auth/services/auth-service.js";
+import type { createAuthLoginService } from "../modules/auth/services/auth-login-service.js";
+import type { createAccountAuthService } from "../modules/account/services/account-auth-service.js";
+import type { createAccountService } from "../modules/account/services/account-service.js";
+import type { createAccountSessionService } from "../modules/sessions/services/account-session-service.js";
+import type { createTwoFactorService } from "../modules/two-factor/services/two-factor-service.js";
+import type { createPasskeyLoginService } from "../modules/passkeys/services/passkey-login-service.js";
+import type { createPasskeyAccountService } from "../modules/passkeys/services/passkey-account-service.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -86,10 +99,22 @@ export type SecureAuthConfig = {
       logo?: ReactNode;
     };
     paths?: {
+      home?: string;
       login?: string;
       register?: string;
+      forgotPassword?: string;
+      resetPassword?: string;
+      checkEmail?: string;
+      verifyEmail?: string;
+      loginTwoFactor?: string;
+      loginComplete?: string;
+      accountDeleted?: string;
       account?: string;
+      accountSettings?: string;
       security?: string;
+      securitySettings?: string;
+      sessions?: string;
+      sessionsSettings?: string;
     };
     messages?: Record<string, string>;
     cssVariables?: Record<string, string>;
@@ -99,12 +124,17 @@ export type SecureAuthConfig = {
 export type SecureAuthServices = {
   readonly config: SecureAuthConfig;
   readonly db: SecureAuthDb;
-  readonly authLoginService: typeof import("../modules/auth/services/auth-login-service.js").authLoginService;
-  readonly authService: typeof import("../modules/auth/services/auth-service.js").authService;
-  readonly accountAuthService: typeof import("../modules/account/services/account-auth-service.js").accountAuthService;
-  readonly accountService: typeof import("../modules/account/services/account-service.js").accountService;
-  readonly accountSessionService: typeof import("../modules/sessions/services/account-session-service.js").accountSessionService;
-  readonly twoFactorService: typeof import("../modules/two-factor/services/two-factor-service.js").twoFactorService;
-  readonly passkeyLoginService: typeof import("../modules/passkeys/services/passkey-login-service.js").passkeyLoginService;
-  readonly passkeyAccountService: typeof import("../modules/passkeys/services/passkey-account-service.js").passkeyAccountService;
+  readonly ctx: SecureAuthContext;
+  readonly repos: SecureAuthRepositories;
+  readonly rateLimit: RateLimitApi;
+  readonly runInTransaction: RunInTransaction;
+  readonly authLoginService: ReturnType<typeof createAuthLoginService>;
+  readonly authService: ReturnType<typeof createAuthService>;
+  readonly accountAuthService: ReturnType<typeof createAccountAuthService>;
+  readonly accountService: ReturnType<typeof createAccountService>;
+  readonly accountSessionService: ReturnType<typeof createAccountSessionService>;
+  readonly twoFactorService: ReturnType<typeof createTwoFactorService>;
+  readonly passkeyLoginService: ReturnType<typeof createPasskeyLoginService>;
+  readonly passkeyAccountService: ReturnType<typeof createPasskeyAccountService>;
+  readonly getAuthOptions: () => NextAuthOptions;
 };

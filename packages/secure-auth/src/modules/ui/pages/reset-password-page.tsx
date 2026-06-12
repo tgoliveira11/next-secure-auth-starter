@@ -12,7 +12,8 @@ import { LoadingState } from "../primitives/loading-state.js";
 import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
 import { assessPassword } from "@tgoliveira/secure-auth/client/password-policy";
-import { resolveAuthPaths, type ResetPasswordPageProps } from "./types.js";
+import { type ResetPasswordPageProps } from "./types.js";
+import { usePageTitle, useUiPaths } from "./use-page-ui.js";
 
 type ResetState = "loading" | "invalid" | "ready" | "success";
 
@@ -22,10 +23,17 @@ function ResetPasswordContent({
   submitLabel = "Update password",
   className,
   width = "narrow",
+  title: titleProp,
+  subtitle,
 }: ResetPasswordPageProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const resetTitle = usePageTitle(
+    { title: titleProp, subtitle },
+    "resetPasswordTitle",
+    "Choose a new password"
+  );
   const token = tokenProp ?? searchParams.get("token") ?? "";
   const [state, setState] = useState<ResetState>("loading");
   const [newPassword, setNewPassword] = useState("");
@@ -119,7 +127,7 @@ function ResetPasswordContent({
 
   return (
     <PageShell width={width} className={className}>
-      <PageHeader title="Choose a new password" description={ACCOUNT_PASSWORD_RESET_NOTE} />
+      <PageHeader title={resetTitle} description={ACCOUNT_PASSWORD_RESET_NOTE} />
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PasswordStrengthField

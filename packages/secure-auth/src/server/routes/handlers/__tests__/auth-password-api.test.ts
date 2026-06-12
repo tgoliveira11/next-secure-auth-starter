@@ -3,19 +3,15 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { readModuleSource } from "@/test/helpers/module-source";
 import { registerPost, accountGet } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   findByEmail: vi.fn(),
   create: vi.fn(),
   requireFullyAuthenticatedUser: vi.fn(),
   getDeletionRequirements: vi.fn(),
-}));
-
-vi.mock("@/modules/account/repositories/user-repository", () => ({
-  userRepository: {
-    findByEmail: mocks.findByEmail,
-    create: mocks.create,
-  },
+  sendVerificationEmailForUser: vi.fn(),
 }));
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
@@ -24,25 +20,38 @@ vi.mock("@/modules/security/policies/password-hashing", () => ({
   ),
 }));
 
-vi.mock("@/modules/account/services/account-auth-service", () => ({
-  accountAuthService: {
-    sendVerificationEmailForUser: vi.fn(async () => ({ alreadyVerified: false })),
-  },
-}));
-
 vi.mock("@/modules/auth/lib/session", () => ({
   requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
 }));
 
-vi.mock("@/modules/account/services/account-service", () => ({
-  accountService: {
-    getDeletionRequirements: mocks.getDeletionRequirements,
-  },
-}));
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    repos: {
+      ...base.repos,
+      userRepository: {
+        ...base.repos.userRepository,
+        findByEmail: mocks.findByEmail,
+        create: mocks.create,
+      },
+    },
+    accountAuthService: {
+      ...base.accountAuthService,
+      sendVerificationEmailForUser: mocks.sendVerificationEmailForUser,
+    },
+    accountService: {
+      ...base.accountService,
+      getDeletionRequirements: mocks.getDeletionRequirements,
+    },
+  }));
+}
 
 describe("auth password API boundaries", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    mocks.sendVerificationEmailForUser.mockResolvedValue({ alreadyVerified: false });
+    services = await buildServices();
   });
 
   it("rejects registration when password is sent in the query string", async () => {
@@ -50,7 +59,8 @@ describe("auth password API boundaries", () => {
       new Request("http://localhost/api/auth/register?password=secret", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
     expect(mocks.create).not.toHaveBeenCalled();
@@ -68,7 +78,8 @@ describe("auth password API boundaries", () => {
       new Request("http://localhost/api/auth/register", {
         method: "POST",
         body: JSON.stringify({ email: "new@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
 
     const body = await res.json();
@@ -95,7 +106,7 @@ describe("auth password API boundaries", () => {
       confirmationPhrase: "DELETE MY ACCOUNT",
     });
 
-    const res = await accountGet();
+    const res = await accountGet(services);
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body).not.toHaveProperty("password");

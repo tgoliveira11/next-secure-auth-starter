@@ -1,15 +1,15 @@
+import { getAppName } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE } from "@/modules/account/lib/account-auth-messages";
-import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
 
-function buildAccountLink(path: string, token: string): string {
-  const { app } = getSecureAuthConfig();
-  const base = app.baseUrl.replace(/\/$/, "");
+function buildAccountLink(config: SecureAuthConfig, path: string, token: string): string {
+  const base = config.app.baseUrl.replace(/\/$/, "");
   return `${base}${path}?token=${encodeURIComponent(token)}`;
 }
 
-export function verificationEmailContent(token: string) {
-  const appName = getSecureAuthConfig().app.name;
-  const link = buildAccountLink("/verify-email", token);
+export function verificationEmailContent(config: SecureAuthConfig, token: string) {
+  const appName = getAppName(config);
+  const link = buildAccountLink(config, "/verify-email", token);
   return {
     subject: `Verify your email — ${appName}`,
     text: [
@@ -27,9 +27,9 @@ export function verificationEmailContent(token: string) {
   };
 }
 
-export function passwordResetEmailContent(token: string) {
-  const appName = getSecureAuthConfig().app.name;
-  const link = buildAccountLink("/reset-password", token);
+export function passwordResetEmailContent(config: SecureAuthConfig, token: string) {
+  const appName = getAppName(config);
+  const link = buildAccountLink(config, "/reset-password", token);
   return {
     subject: `Reset your password — ${appName}`,
     text: [

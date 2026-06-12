@@ -61,17 +61,14 @@ export const DEFAULT_PASSWORD_POLICY: PasswordPolicyConfig = {
   minScore: 2,
 };
 
-import { resolvePasswordPolicyConfig } from "@/core/config-resolvers.js";
+import { resolvePasswordPolicyConfig } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export function getPasswordPolicyConfig(
+  config?: SecureAuthConfig,
   override?: Partial<PasswordPolicyConfig>
 ): PasswordPolicyConfig {
-  let base: PasswordPolicyConfig;
-  try {
-    base = resolvePasswordPolicyConfig();
-  } catch {
-    base = DEFAULT_PASSWORD_POLICY;
-  }
+  const base = config ? resolvePasswordPolicyConfig(config) : DEFAULT_PASSWORD_POLICY;
   if (!override) return base;
   return { ...base, ...override };
 }

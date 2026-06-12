@@ -1,6 +1,7 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { renderWithStarterUi } from "@/test/helpers/render-with-starter-ui";
 import HomePage from "@/app/page";
 import LoginPage from "@/app/(auth)/login/page";
 import RegisterPage from "@/app/(auth)/register/page";
@@ -34,13 +35,14 @@ describe("UI pages and components", () => {
   });
 
   it("renders login page with labeled fields", () => {
-    render(<LoginPage />);
+    renderWithStarterUi(<LoginPage />);
     expect(screen.getByLabelText("Email")).toBeTruthy();
     expect(screen.getByLabelText("Password")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /sign in/i })).toBeTruthy();
   });
 
   it("renders register page with social options", () => {
-    render(<RegisterPage />);
+    renderWithStarterUi(<RegisterPage />);
     expect(screen.getByRole("heading", { name: /create your account/i })).toBeTruthy();
     expect(screen.getByText(/email\/password sign-in/i)).toBeTruthy();
     expect(screen.getByRole("button", { name: /continue with google/i })).toBeTruthy();

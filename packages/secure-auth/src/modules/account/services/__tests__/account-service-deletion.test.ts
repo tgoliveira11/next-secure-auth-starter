@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/modules/account/lib/account-deletion";
+import { createAccountService } from "../account-service";
+import type { DbClient } from "@/lib/db/types";
+import type { RunInTransaction } from "@/lib/db/transaction";
+import { ReauthenticationRequiredError, ValidationError } from "@/modules/account/lib/account-errors";
 
 const mocks = vi.hoisted(() => ({
   findById: vi.fn(),
@@ -8,41 +12,33 @@ const mocks = vi.hoisted(() => ({
   verifyPassword: vi.fn(),
   enforceRateLimit: vi.fn(),
   recordAudit: vi.fn(),
-  runInTransaction: vi.fn(async (fn: (tx: unknown) => Promise<void>) => fn({})),
-}));
-
-vi.mock("@/modules/account/repositories/user-repository", () => ({
-  userRepository: {
-    findById: mocks.findById,
-    deleteById: mocks.deleteById,
-  },
-}));
-
-vi.mock("@/modules/sessions/repositories/account-session-repository", () => ({
-  accountSessionRepository: {
-    findByIdForUser: mocks.findSession,
-  },
+  runInTransaction: vi.fn(async <T>(fn: (tx: DbClient) => Promise<T>) =>
+    fn({} as DbClient)
+  ) as RunInTransaction,
 }));
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
   verifyPassword: mocks.verifyPassword,
 }));
 
-vi.mock("@/modules/rate-limit/index", () => ({
-  enforceRateLimit: mocks.enforceRateLimit,
-  RateLimitError: class RateLimitError extends Error {},
-}));
-
-vi.mock("@/modules/audit/repositories/audit-repository", () => ({
-  auditRepository: { record: mocks.recordAudit },
-}));
-
-vi.mock("@/lib/db/transaction", () => ({
+const accountService = createAccountService({
+  repos: {
+    userRepository: {
+      findById: mocks.findById,
+      deleteById: mocks.deleteById,
+    },
+    accountSessionRepository: {
+      findByIdForUser: mocks.findSession,
+    },
+    auditRepository: {
+      record: mocks.recordAudit,
+    },
+  } as never,
+  rateLimit: {
+    enforceRateLimit: mocks.enforceRateLimit,
+  } as never,
   runInTransaction: mocks.runInTransaction,
-}));
-
-import { accountService } from "../account-service";
-import { ReauthenticationRequiredError, ValidationError } from "@/modules/account/lib/account-errors";
+});
 
 const now = new Date();
 

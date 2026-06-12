@@ -15,8 +15,10 @@ import {
   SecuritySettingsPage,
   SessionsSettingsPage,
   DashboardPlaceholderPage,
+  SecureAuthUIProvider,
   DEFAULT_AUTH_PATHS,
   resolveAuthPaths,
+  type SecureAuthUIPublicConfig,
 } from "@tgoliveira/secure-auth/react";
 
 vi.mock("next-auth/react", () => ({
@@ -76,5 +78,59 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
   it("AccountDeletedPage renders without crashing", () => {
     render(<AccountDeletedPage />);
     expect(screen.getByText(/your account has been deleted/i)).toBeTruthy();
+  });
+
+  it("LoginPage uses SecureAuthUIProvider defaults", () => {
+    const uiConfig: SecureAuthUIPublicConfig = {
+      appSlug: "provider-app",
+      appName: "Provider App",
+      paths: DEFAULT_AUTH_PATHS,
+      messages: { loginTitle: "Provider sign in" },
+      passwordPolicy: {
+        enforcement: "warn",
+        minLength: 12,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: true,
+        minScore: 2,
+      },
+    };
+
+    render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <LoginPage />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.getByRole("heading", { name: /provider sign in/i })).toBeTruthy();
+  });
+
+  it("LoginPage props override SecureAuthUIProvider config", () => {
+    const uiConfig: SecureAuthUIPublicConfig = {
+      appSlug: "provider-app",
+      appName: "Provider App",
+      paths: DEFAULT_AUTH_PATHS,
+      messages: { loginTitle: "Provider sign in" },
+      passwordPolicy: {
+        enforcement: "warn",
+        minLength: 12,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: true,
+        minScore: 2,
+      },
+    };
+
+    render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <LoginPage title="Explicit title" />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.getByRole("heading", { name: /explicit title/i })).toBeTruthy();
   });
 });

@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
+async function twoFactorSetupStartPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser();
-    const setup = await twoFactorService.startSetup(user.id, getClientIp(request));
+    const user = await requireFullyAuthenticatedUser(services);
+    const setup = await services.twoFactorService.startSetup(user.id, getClientIp(request));
     return NextResponse.json({
       qrCodeDataUrl: setup.qrCodeDataUrl,
       manualSetupKey: setup.manualSetupKey,
@@ -17,4 +17,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/account/2fa/setup/start");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => twoFactorSetupStartPost(request, services);
 }

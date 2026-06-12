@@ -1,5 +1,5 @@
-export { passkeyAccountService } from "./services/passkey-account-service";
-export { passkeyLoginService } from "./services/passkey-login-service";
+export { createPasskeyAccountService } from "./services/passkey-account-service";
+export { createPasskeyLoginService } from "./services/passkey-login-service";
 export * from "./lib/credential-label";
 export * from "./lib/login-hint";
 export * from "./lib/messages";

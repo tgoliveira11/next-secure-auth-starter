@@ -2,13 +2,16 @@ import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
-import { accountSessionService } from "@/modules/sessions/services/account-session-service";
-
+import type { SecureAuthServices } from "@/core/types";
 import type { RouteContext } from "../../create-routes.js";
 
-export async function DELETE(request: Request, context?: RouteContext) {
+async function sessionsDelete(
+  request: Request,
+  context: RouteContext | undefined,
+  services: SecureAuthServices
+) {
   try {
-    const user = await requireFullyAuthenticatedUser();
+    const user = await requireFullyAuthenticatedUser(services);
     if (!context) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
@@ -17,7 +20,7 @@ export async function DELETE(request: Request, context?: RouteContext) {
     if (!id) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
-    const result = await accountSessionService.revokeSession(
+    const result = await services.accountSessionService.revokeSession(
       user.id,
       id,
       user.accountSessionId,
@@ -27,4 +30,8 @@ export async function DELETE(request: Request, context?: RouteContext) {
   } catch (error) {
     return apiError(error, "DELETE /api/account/sessions/:id");
   }
+}
+
+export function createDeleteHandler(services: SecureAuthServices) {
+  return (request: Request, context?: RouteContext) => sessionsDelete(request, context, services);
 }

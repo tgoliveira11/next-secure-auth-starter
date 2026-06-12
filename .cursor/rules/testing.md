@@ -1,6 +1,6 @@
 # Cursor Rule — Testing
 
-Apply these rules for all code changes in `next-secure-auth-starter`.
+Apply these rules for all code changes in this monorepo.
 
 ## Coverage thresholds (non-negotiable)
 
@@ -32,10 +32,11 @@ Every PR that touches behavior must include tests for:
 - account deletion
 - logging redaction (no tokens/passwords in output)
 - module boundary violations (static tests)
+- `SecureAuthUIProvider` / `useSecureAuthUi` page defaults
 
 ## Test types
 
-- Unit tests for pure logic (security, policies, sanitization)
+- Unit tests for pure logic (security, policies, sanitization, ui-config)
 - Service tests with mocked dependencies
 - Route handler tests for HTTP contracts
 - Component tests with Testing Library for account UI
@@ -49,6 +50,4 @@ Every PR that touches behavior must include tests for:
 
 ## Documentation
 
-When testing strategy or tooling changes, update docs/TESTING_STRATEGY.md and this file in the same change.
-
-See [docs/TESTING_STRATEGY.md](../../docs/TESTING_STRATEGY.md) for the full critical-flow checklist.
+When testing strategy or tooling changes, update this file and [docs/security.md](../../docs/security.md) in the same change.

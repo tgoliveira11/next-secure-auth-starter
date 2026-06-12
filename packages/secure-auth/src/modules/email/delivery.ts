@@ -1,4 +1,4 @@
-import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export type AccountEmailPayload = {
   to: string;
@@ -8,8 +8,11 @@ export type AccountEmailPayload = {
 };
 
 /** Sends account email through the injected EmailProvider — no transport-specific logic. */
-export async function deliverAccountEmail(input: AccountEmailPayload): Promise<void> {
-  const { email } = getSecureAuthConfig();
+export async function deliverAccountEmail(
+  config: SecureAuthConfig,
+  input: AccountEmailPayload
+): Promise<void> {
+  const { email } = config;
   await email.provider.send({
     to: input.to,
     subject: input.subject,

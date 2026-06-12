@@ -2,21 +2,17 @@ import { cookies } from "next/headers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorLoginVerifySchema } from "@/lib/validation/two-factor";
 import {
-  authLoginService,
   InvalidTwoFactorChallengeError,
   InvalidTwoFactorCodeError,
 } from "@/modules/auth/services/auth-login-service";
-import {
-  clearLoginChallengeCookie,
-  getTwoFactorLoginChallengeCookieName,
-} from "@/modules/two-factor/lib/login-challenge-cookie";
-import {
-  getLoginPendingTokenCookieOptions,
-  getLoginPendingTokenCookieName,
-} from "@/modules/auth/lib/login-pending-cookie";
-import { authTraceRedirect } from "@/modules/auth/lib/auth-trace";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function handleCredentialsTwoFactorFormPost(request: Request) {
+export async function handleCredentialsTwoFactorFormPost(
+  request: Request,
+  services: SecureAuthServices
+) {
+  const { ctx, authLoginService } = services;
+
   try {
     const formData = await request.formData();
     const parsed = twoFactorLoginVerifySchema.safeParse({
@@ -24,7 +20,7 @@ export async function handleCredentialsTwoFactorFormPost(request: Request) {
       backupCode: String(formData.get("backupCode") ?? "").trim() || undefined,
     });
     if (!parsed.success) {
-      return authTraceRedirect(
+      return ctx.authTrace.authTraceRedirect(
         request,
         "/login/2fa?mode=credentials&error=invalid_request",
         "2fa_form_invalid_payload"
@@ -32,9 +28,9 @@ export async function handleCredentialsTwoFactorFormPost(request: Request) {
     }
 
     const cookieStore = await cookies();
-    const challengeToken = cookieStore.get(getTwoFactorLoginChallengeCookieName())?.value;
+    const challengeToken = cookieStore.get(ctx.getTwoFactorLoginChallengeCookieName())?.value;
     if (!challengeToken) {
-      return authTraceRedirect(
+      return ctx.authTrace.authTraceRedirect(
         request,
         "/login?error=expired_challenge",
         "2fa_form_missing_challenge_cookie",
@@ -48,34 +44,34 @@ export async function handleCredentialsTwoFactorFormPost(request: Request) {
       getClientIp(request)
     );
 
-    const response = authTraceRedirect(request, "/login/complete", "2fa_form_verified", {
+    const response = ctx.authTrace.authTraceRedirect(request, "/login/complete", "2fa_form_verified", {
       pendingLoginCookieSet: true,
     });
-    clearLoginChallengeCookie(response);
+    ctx.clearLoginChallengeCookie(response);
     response.cookies.set(
-      getLoginPendingTokenCookieName(),
+      ctx.getLoginPendingTokenCookieName(),
       result.loginToken,
-      getLoginPendingTokenCookieOptions()
+      ctx.getLoginPendingTokenCookieOptions()
     );
     return response;
   } catch (error) {
     if (error instanceof InvalidTwoFactorChallengeError) {
-      const response = authTraceRedirect(
+      const response = ctx.authTrace.authTraceRedirect(
         request,
         "/login?error=expired_challenge",
         "2fa_form_expired_challenge"
       );
-      clearLoginChallengeCookie(response);
+      ctx.clearLoginChallengeCookie(response);
       return response;
     }
     if (error instanceof InvalidTwoFactorCodeError) {
-      return authTraceRedirect(
+      return ctx.authTrace.authTraceRedirect(
         request,
         "/login/2fa?mode=credentials&error=invalid_code",
         "2fa_form_invalid_code"
       );
     }
-    return authTraceRedirect(
+    return ctx.authTrace.authTraceRedirect(
       request,
       "/login/2fa?mode=credentials&error=unavailable",
       "2fa_form_unavailable"

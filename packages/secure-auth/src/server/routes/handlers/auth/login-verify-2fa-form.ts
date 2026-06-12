@@ -1,5 +1,6 @@
 import { handleCredentialsTwoFactorFormPost } from "@/modules/auth/lib/credentials-two-factor-form-handler";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
-  return handleCredentialsTwoFactorFormPost(request);
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => handleCredentialsTwoFactorFormPost(request, services);
 }

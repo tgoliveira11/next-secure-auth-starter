@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import LoginPage from "@/app/(auth)/login/page";
+import { renderWithStarterUi } from "@/test/helpers/render-with-starter-ui";
 import { CredentialsLoginForm } from "@/components/auth/credentials-login-form";
 import { LoginPasskeySection } from "@/components/auth/login-passkey-section";
 import {
@@ -52,8 +53,8 @@ describe("login page credentials form", () => {
   });
 
   it("renders the login page shell", () => {
-    render(<LoginPage />);
-    expect(screen.getByRole("heading", { name: /welcome back/i })).toBeTruthy();
+    renderWithStarterUi(<LoginPage />);
+    expect(screen.getByRole("heading", { name: /sign in/i })).toBeTruthy();
     expect(screen.getByLabelText("Email")).toBeTruthy();
     expect(screen.getByLabelText("Password")).toBeTruthy();
   });

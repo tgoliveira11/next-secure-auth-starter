@@ -1,14 +1,17 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { traceAuth } from "@/modules/auth/lib/auth-trace";
-import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function GET() {
+async function loginChallengeStatusGet(services: SecureAuthServices) {
   const cookieStore = await cookies();
-  const challengeToken = cookieStore.get(getTwoFactorLoginChallengeCookieName())?.value;
+  const challengeToken = cookieStore.get(services.ctx.getTwoFactorLoginChallengeCookieName())?.value;
   const pending = typeof challengeToken === "string" && challengeToken.length >= 16;
 
-  traceAuth("challenge_status", { pending });
+  services.ctx.authTrace.traceAuth("challenge_status", { pending });
 
   return NextResponse.json({ pending });
+}
+
+export function createGetHandler(services: SecureAuthServices) {
+  return () => loginChallengeStatusGet(services);
 }

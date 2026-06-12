@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { userRepository } from "@/modules/account/repositories/user-repository";
 import { hashPassword } from "@/modules/security/policies/password-hashing";
 import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
 } from "@/modules/security/policies/auth-password-input";
-import { enforceRateLimit, RateLimitError } from "@/modules/rate-limit/index";
+import { RateLimitError } from "@/modules/rate-limit/index";
 import { safeLogger } from "@/modules/security/logger/index";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { apiError } from "@/lib/api-helpers";
-import { accountAuthService } from "@/modules/account/services/account-auth-service";
-import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
-import { validatePasswordForSubmission } from "@/modules/security/password-policy/index";
 import { ValidationError } from "@/modules/account/services/account-service";
+import type { SecureAuthServices } from "@/core/types";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -42,13 +39,15 @@ function registrationErrorMessage(error: unknown): string {
   return "Registration failed. Please try again.";
 }
 
-export async function POST(request: Request) {
+async function registerPost(request: Request, services: SecureAuthServices) {
+  const { ctx, repos, rateLimit, accountAuthService } = services;
+
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
     assertPasswordNotInUrl(request.url);
 
     const ip = getClientIp(request);
-    await enforceRateLimit({
+    await rateLimit.enforceRateLimit({
       operation: "auth.register",
       ip,
       endpoint: "/api/auth/register",
@@ -60,14 +59,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
 
-    const existing = await userRepository.findByEmail(parsed.data.email);
+    const existing = await repos.userRepository.findByEmail(parsed.data.email);
     if (existing) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
     const { email, password } = parsed.data;
 
-    const policyResult = validatePasswordForSubmission(password);
+    const policyResult = ctx.validatePasswordForSubmission(password);
     if (!policyResult.valid) {
       throw new ValidationError(
         policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
@@ -76,18 +75,13 @@ export async function POST(request: Request) {
 
     const passwordHash = await hashPassword(password);
 
-    const user = await userRepository.create({
+    const user = await repos.userRepository.create({
       email,
       authProvider: "credentials",
       passwordHash,
     });
 
-    const secureConfig = getSecureAuthConfig();
-    const policy = secureConfig.accountPolicy ?? {
-      sendVerificationOnRegister: true,
-      requireEmailVerificationBeforeSignIn:
-        secureConfig.auth.requireEmailVerificationBeforeSignIn,
-    };
+    const policy = ctx.getAccountPolicyConfig();
     if (policy.sendVerificationOnRegister) {
       await accountAuthService.sendVerificationEmailForUser(user.id, ip);
     }
@@ -119,4 +113,8 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => registerPost(request, services);
 }

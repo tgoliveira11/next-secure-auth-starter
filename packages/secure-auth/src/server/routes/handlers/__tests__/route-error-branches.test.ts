@@ -13,7 +13,9 @@ import {
   twoFactorSetupStartPost as setupStartPost,
   twoFactorDisablePost as disablePost,
 } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
@@ -39,71 +41,79 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
-  twoFactorService: {
-    getStatus: mocks.getStatus,
-    startSetup: mocks.startSetup,
-    disable: mocks.disable,
-    regenerateBackupCodes: mocks.regenerateBackupCodes,
-  },
-}));
+let services: SecureAuthServices;
 
-vi.mock("@/modules/sessions/services/account-session-service", () => ({
-  accountSessionService: {
-    enrichFromRequest: mocks.pingSession,
-    revokeAllSessions: mocks.revokeAllSessions,
-    revokeCurrentSession: mocks.revokeCurrentSession,
-  },
-}));
-
-vi.mock("@/modules/passkeys/services/passkey-account-service", () => ({
-  passkeyAccountService: {
-    listPasskeys: mocks.listPasskeys,
-    removePasskey: mocks.removePasskey,
-  },
-}));
-
-vi.mock("@/modules/account/services/account-service", () => ({
-  accountService: {
-    getDeletionRequirements: mocks.getDeletionRequirements,
-  },
-}));
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    twoFactorService: {
+      ...base.twoFactorService,
+      getStatus: mocks.getStatus,
+      startSetup: mocks.startSetup,
+      disable: mocks.disable,
+      regenerateBackupCodes: mocks.regenerateBackupCodes,
+    },
+    accountSessionService: {
+      ...base.accountSessionService,
+      enrichFromRequest: mocks.pingSession,
+      revokeAllSessions: mocks.revokeAllSessions,
+      revokeCurrentSession: mocks.revokeCurrentSession,
+    },
+    passkeyAccountService: {
+      ...base.passkeyAccountService,
+      listPasskeys: mocks.listPasskeys,
+      removePasskey: mocks.removePasskey,
+    },
+    accountService: {
+      ...base.accountService,
+      getDeletionRequirements: mocks.getDeletionRequirements,
+    },
+  }));
+}
 
 describe("API route error branches", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
     });
     mocks.requireSessionUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
+    services = await buildServices();
   });
 
   it("maps unexpected two-factor route failures", async () => {
     mocks.getStatus.mockRejectedValue(new Error("db down"));
-    expect((await twoFactorStatusGet()).status).toBeGreaterThanOrEqual(400);
+    expect((await twoFactorStatusGet(services)).status).toBeGreaterThanOrEqual(400);
 
     mocks.startSetup.mockRejectedValue(new Error("db down"));
-    expect((await setupStartPost(new Request("http://localhost"))).status).toBeGreaterThanOrEqual(400);
+    expect(
+      (await setupStartPost(new Request("http://localhost"), services)).status
+    ).toBeGreaterThanOrEqual(400);
 
     mocks.disable.mockRejectedValue(new Error("db down"));
     expect(
-      (await disablePost(
-        new Request("http://localhost", {
-          method: "POST",
-          body: JSON.stringify({ code: "123456" }),
-        })
-      )).status
+      (
+        await disablePost(
+          new Request("http://localhost", {
+            method: "POST",
+            body: JSON.stringify({ code: "123456" }),
+          }),
+          services
+        )
+      ).status
     ).toBeGreaterThanOrEqual(400);
 
     mocks.regenerateBackupCodes.mockRejectedValue(new Error("db down"));
     expect(
-      (await regeneratePost(
-        new Request("http://localhost", {
-          method: "POST",
-          body: JSON.stringify({ code: "123456" }),
-        })
-      )).status
+      (
+        await regeneratePost(
+          new Request("http://localhost", {
+            method: "POST",
+            body: JSON.stringify({ code: "123456" }),
+          }),
+          services
+        )
+      ).status
     ).toBeGreaterThanOrEqual(400);
   });
 
@@ -114,31 +124,31 @@ describe("API route error branches", () => {
       accountSessionId: "session-id",
     });
     mocks.pingSession.mockRejectedValue(new Error("db down"));
-    expect((await sessionsPingPost(new Request("http://localhost"))).status).toBe(500);
+    expect((await sessionsPingPost(new Request("http://localhost"), services)).status).toBe(500);
 
     mocks.revokeAllSessions.mockRejectedValue(new Error("db down"));
-    expect((await revokeAllPost(new Request("http://localhost"))).status).toBe(500);
+    expect((await revokeAllPost(new Request("http://localhost"), services)).status).toBe(500);
 
     mocks.revokeCurrentSession.mockRejectedValue(new Error("db down"));
-    expect(
-      (await revokeCurrentPost(new Request("http://localhost"))).status
-    ).toBe(500);
+    expect((await revokeCurrentPost(services)).status).toBe(500);
 
     mocks.listPasskeys.mockRejectedValue(new Error("db down"));
-    expect((await passkeysGet()).status).toBe(500);
+    expect((await passkeysGet(services)).status).toBe(500);
 
     mocks.removePasskey.mockRejectedValue(new Error("db down"));
     expect(
       (
-        await passkeyDelete(new Request("http://localhost"), {
-          params: Promise.resolve({ id: "pk-1" }),
-        })
+        await passkeyDelete(
+          new Request("http://localhost"),
+          { params: Promise.resolve({ id: "pk-1" }) },
+          services
+        )
       ).status
     ).toBe(500);
   });
 
   it("maps unexpected account route failures", async () => {
     mocks.getDeletionRequirements.mockRejectedValue(new Error("db down"));
-    expect((await accountGet()).status).toBe(500);
+    expect((await accountGet(services)).status).toBe(500);
   });
 });

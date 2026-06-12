@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { getTestServices } from "@/test/helpers/mock-services";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   requestPasswordReset: vi.fn(),
@@ -13,19 +15,6 @@ const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
 }));
 
-vi.mock("@/modules/account/services/account-auth-service", () => ({
-  accountAuthService: {
-    requestPasswordReset: mocks.requestPasswordReset,
-    confirmEmailVerification: mocks.confirmEmailVerification,
-    resetPassword: mocks.resetPassword,
-    validatePasswordResetToken: mocks.validatePasswordResetToken,
-    changePassword: mocks.changePassword,
-    resendVerificationByEmail: mocks.resendVerificationByEmail,
-    sendVerificationEmailForUser: mocks.sendVerificationEmailForUser,
-    getAccountAuthStatus: mocks.getAccountAuthStatus,
-  },
-}));
-
 vi.mock("@/modules/auth/lib/session", () => ({
   requireSessionUser: mocks.requireSessionUser,
   requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
@@ -34,13 +23,32 @@ vi.mock("@/modules/auth/lib/session", () => ({
   },
 }));
 
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    accountAuthService: {
+      ...base.accountAuthService,
+      requestPasswordReset: mocks.requestPasswordReset,
+      confirmEmailVerification: mocks.confirmEmailVerification,
+      resetPassword: mocks.resetPassword,
+      validatePasswordResetToken: mocks.validatePasswordResetToken,
+      changePassword: mocks.changePassword,
+      resendVerificationByEmail: mocks.resendVerificationByEmail,
+      sendVerificationEmailForUser: mocks.sendVerificationEmailForUser,
+      getAccountAuthStatus: mocks.getAccountAuthStatus,
+    },
+  }));
+}
+
 describe("account auth API routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireSessionUser.mockResolvedValue({ id: "550e8400-e29b-41d4-a716-446655440000" });
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({
       id: "550e8400-e29b-41d4-a716-446655440000",
     });
+    services = await buildServices();
   });
 
   it("POST /api/auth/forgot-password rejects invalid email", async () => {
@@ -49,7 +57,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "not-an-email" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -63,7 +72,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
@@ -78,7 +88,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
   });
@@ -86,7 +97,8 @@ describe("account auth API routes", () => {
   it("POST /api/auth/verify-email/confirm rejects invalid body", async () => {
     const { verifyEmailConfirmPost: POST } = await import("@/test/helpers/handlers");
     const res = await POST(
-      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) })
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -101,7 +113,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ token: "bad" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -113,7 +126,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ token: "abc" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
   });
@@ -128,7 +142,8 @@ describe("account auth API routes", () => {
           token: "abc",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -139,7 +154,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "reset", token: "abc" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -151,7 +167,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "validate", token: "bad" }),
-      })
+      }),
+      services
     );
     expect((await invalidRes.json()).valid).toBe(false);
 
@@ -160,7 +177,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "validate", token: "abc" }),
-      })
+      }),
+      services
     );
     expect(validateRes.status).toBe(200);
 
@@ -174,7 +192,8 @@ describe("account auth API routes", () => {
           token: "abc",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(badReset.status).toBe(400);
 
@@ -187,7 +206,8 @@ describe("account auth API routes", () => {
           token: "abc",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(resetRes.status).toBe(200);
   });
@@ -201,7 +221,8 @@ describe("account auth API routes", () => {
           currentPassword: "old-password",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -212,7 +233,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ currentPassword: "x" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -228,7 +250,8 @@ describe("account auth API routes", () => {
           currentPassword: "wrong",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(401);
   });
@@ -243,7 +266,8 @@ describe("account auth API routes", () => {
           currentPassword: "old-password",
           newPassword: "long-enough-password",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
   });
@@ -251,14 +275,14 @@ describe("account auth API routes", () => {
   it("POST /api/auth/verify-email/resend reports already verified", async () => {
     mocks.sendVerificationEmailForUser.mockResolvedValue({ alreadyVerified: true });
     const { verifyEmailResendPost: POST } = await import("@/test/helpers/handlers");
-    const res = await POST(new Request("http://localhost", { method: "POST", body: "{}" }));
+    const res = await POST(new Request("http://localhost", { method: "POST", body: "{}" }), services);
     expect((await res.json()).message).toContain("already verified");
   });
 
   it("POST /api/auth/verify-email/resend works for authenticated users", async () => {
     mocks.sendVerificationEmailForUser.mockResolvedValue({ alreadyVerified: false });
     const { verifyEmailResendPost: POST } = await import("@/test/helpers/handlers");
-    const res = await POST(new Request("http://localhost", { method: "POST", body: "{}" }));
+    const res = await POST(new Request("http://localhost", { method: "POST", body: "{}" }), services);
     expect(res.status).toBe(200);
   });
 
@@ -268,7 +292,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "not-email" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     expect(mocks.resendVerificationByEmail).not.toHaveBeenCalled();
@@ -281,7 +306,8 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
   });
@@ -290,7 +316,7 @@ describe("account auth API routes", () => {
     const { NotFoundError } = await import("@/modules/account/services/account-service");
     mocks.getAccountAuthStatus.mockRejectedValue(new NotFoundError("Account not found"));
     const { accountAuthStatusGet: GET } = await import("@/test/helpers/handlers");
-    const res = await GET();
+    const res = await GET(services);
     expect(res.status).toBe(404);
   });
 
@@ -303,7 +329,7 @@ describe("account auth API routes", () => {
       authProvider: "credentials",
     });
     const { accountAuthStatusGet: GET } = await import("@/test/helpers/handlers");
-    const res = await GET();
+    const res = await GET(services);
     expect(res.status).toBe(200);
   });
 });

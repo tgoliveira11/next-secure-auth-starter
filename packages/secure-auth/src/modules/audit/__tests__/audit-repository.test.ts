@@ -1,18 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-
-const mocks = vi.hoisted(() => {
-  const values = vi.fn().mockResolvedValue(undefined);
-  const insert = vi.fn(() => ({ values }));
-  return { values, insert };
-});
-
-vi.mock("@/lib/db", () => ({
-  db: { insert: mocks.insert },
-}));
-
-import { auditRepository } from "../repositories/audit-repository";
+import { createAuditRepository } from "../repositories/audit-repository";
 
 describe("auditRepository", () => {
+  const values = vi.fn().mockResolvedValue(undefined);
+  const insert = vi.fn(() => ({ values }));
+  const db = { insert } as unknown as Parameters<typeof createAuditRepository>[0];
+  const auditRepository = createAuditRepository(db);
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -24,8 +18,8 @@ describe("auditRepository", () => {
       method: "session",
     });
 
-    expect(mocks.insert).toHaveBeenCalled();
-    expect(mocks.values).toHaveBeenCalledWith(
+    expect(insert).toHaveBeenCalled();
+    expect(values).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: "account_deletion_requested",
         userId: "user-1",

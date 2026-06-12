@@ -4,7 +4,9 @@ import {
   passkeyRegisterPost as registerPost,
   passkeyDelete as deletePasskey,
 } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   requireSessionUser: vi.fn(),
@@ -22,19 +24,25 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/passkeys/services/passkey-account-service", () => ({
-  passkeyAccountService: {
-    listPasskeys: mocks.listPasskeys,
-    getRegistrationOptions: mocks.getRegistrationOptions,
-    verifyRegistration: mocks.verifyRegistration,
-    removePasskey: mocks.removePasskey,
-  },
-}));
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    passkeyAccountService: {
+      ...base.passkeyAccountService,
+      listPasskeys: mocks.listPasskeys,
+      getRegistrationOptions: mocks.getRegistrationOptions,
+      verifyRegistration: mocks.verifyRegistration,
+      removePasskey: mocks.removePasskey,
+    },
+  }));
+}
 
 describe("account passkeys API routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireSessionUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
+    services = await buildServices();
   });
 
   it("lists account passkeys", async () => {
@@ -45,7 +53,7 @@ describe("account passkeys API routes", () => {
         capabilityLabel: "Sign-in only",
       },
     ]);
-    const res = await listGet();
+    const res = await listGet(services);
     expect(res.status).toBe(200);
   });
 
@@ -55,7 +63,8 @@ describe("account passkeys API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "options" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     expect(mocks.requireSessionUser).toHaveBeenCalled();
@@ -67,7 +76,8 @@ describe("account passkeys API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "verify", response: { id: "cred" }, friendlyName: "Laptop" }),
-      })
+      }),
+      services
     );
     expect(ok.status).toBe(200);
 
@@ -75,7 +85,8 @@ describe("account passkeys API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "verify" }),
-      })
+      }),
+      services
     );
     expect(missingResponse.status).toBe(400);
 
@@ -83,7 +94,8 @@ describe("account passkeys API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "unknown" }),
-      })
+      }),
+      services
     );
     expect(invalid.status).toBe(400);
   });
@@ -94,16 +106,19 @@ describe("account passkeys API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ action: "verify", response: { id: "cred" } }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
   });
 
   it("deletes a passkey by id", async () => {
     mocks.removePasskey.mockResolvedValue({ success: true });
-    const res = await deletePasskey(new Request("http://localhost"), {
-      params: Promise.resolve({ id: "pk-1" }),
-    });
+    const res = await deletePasskey(
+      new Request("http://localhost"),
+      { params: Promise.resolve({ id: "pk-1" }) },
+      services
+    );
     expect(res.status).toBe(200);
   });
 });

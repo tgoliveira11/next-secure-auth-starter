@@ -1,6 +1,6 @@
 {
   "name": "@tgoliveira/secure-auth",
-  "version": "0.1.1-internal",
+  "version": "0.1.2-internal",
   "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (private/internal, experimental)",
   "type": "module",
   "repository": {
@@ -69,7 +69,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup --config tsup.core.config.ts && tsup --config tsup.react-client.config.ts && tsup --config tsup.ui.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "echo 'Package lint: configure eslint in 0.2.x'",
     "test": "vitest run --config vitest.config.ts"

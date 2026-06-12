@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { accountAuthService } from "@/modules/account/services/account-auth-service";
+import type { SecureAuthServices } from "@/core/types";
 
 const bodySchema = z.object({
   email: z.string().email(),
 });
 
-export async function POST(request: Request) {
+async function forgotPasswordPost(request: Request, services: SecureAuthServices) {
   try {
     const body = await parseJsonBody(request);
     const parsed = bodySchema.safeParse(body);
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
-    const result = await accountAuthService.requestPasswordReset(
+    const result = await services.accountAuthService.requestPasswordReset(
       parsed.data.email,
       getClientIp(request)
     );
@@ -24,4 +24,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/auth/forgot-password");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => forgotPasswordPost(request, services);
 }

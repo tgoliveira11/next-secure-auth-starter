@@ -14,7 +14,7 @@ describe("password policy", () => {
 
   it("allows weak passwords in warn mode", () => {
     const result = validatePasswordForSubmission("password12345", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       enforcement: "warn",
       minLength: 8,
     });
@@ -23,7 +23,7 @@ describe("password policy", () => {
 
   it("blocks weak passwords in enforce mode", () => {
     const result = validatePasswordForSubmission("password1234", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       enforcement: "enforce",
       minLength: 12,
       blockCommonPasswords: true,
@@ -35,7 +35,7 @@ describe("password policy", () => {
 
   it("treats too-short passwords as allowed in off enforcement mode", () => {
     const assessment = assessPassword("short", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       enforcement: "off",
       minLength: 12,
     });
@@ -44,7 +44,7 @@ describe("password policy", () => {
 
   it("reports too short passwords", () => {
     const assessment = assessPassword("short", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       minLength: 12,
     });
     expect(assessment.label).toBe("too_short");
@@ -66,7 +66,7 @@ describe("password policy", () => {
 
   it("allows passwords in off mode", () => {
     const result = validatePasswordForSubmission("a", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       enforcement: "off",
       minLength: 12,
     });
@@ -89,7 +89,7 @@ describe("password policy", () => {
 
   it("enforces required character classes when configured", () => {
     const assessment = assessPassword("alllowercasepassword", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       minLength: 8,
       requireUppercase: true,
       requireNumber: true,
@@ -100,7 +100,7 @@ describe("password policy", () => {
 
   it("scores longer mixed passwords as strong", () => {
     const assessment = assessPassword("Riverstone-Kettle-2026!", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       minLength: 12,
     });
     expect(assessment.label).toBe("strong");
@@ -108,12 +108,12 @@ describe("password policy", () => {
 
   it("falls back to warn for unknown enforcement values", () => {
     expect(
-      getPasswordPolicyConfig({ enforcement: "invalid" as never }).enforcement
+      getPasswordPolicyConfig(undefined, { enforcement: "invalid" as never }).enforcement
     ).toBe("invalid");
   });
 
   it("merges explicit config overrides", () => {
-    const config = getPasswordPolicyConfig({
+    const config = getPasswordPolicyConfig(undefined, {
       enforcement: "enforce",
       minLength: 16,
       requireSymbol: true,
@@ -127,7 +127,7 @@ describe("password policy", () => {
 
   it("labels moderate passwords as okay", () => {
     const assessment = assessPassword("riverstone-kettle", {
-      ...getPasswordPolicyConfig({}),
+      ...getPasswordPolicyConfig(),
       minLength: 8,
       blockCommonPasswords: false,
     });

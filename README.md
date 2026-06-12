@@ -1,16 +1,28 @@
 # secure-auth monorepo
 
-Opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** authentication — packaged as `@tgoliveira/secure-auth` with `apps/starter` as the integration harness.
+**`@tgoliveira/secure-auth`** is the product — opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** account authentication.
 
-**Maturity:** `0.1.1-internal` experimental — not production-ready. See [docs/security-hardening.md](docs/security-hardening.md) and [docs/repository-readiness.md](docs/repository-readiness.md).
+**`apps/starter`** is the reference consumer that demonstrates integration through public exports only.
+
+**Maturity:** `0.1.2-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
 ```text
 packages/secure-auth/   @tgoliveira/secure-auth — reusable auth package (private)
-apps/starter/           @secure-auth/starter — reference consumer app
-docs/                   Architecture, security, migrations
+apps/starter/           @secure-auth/starter — reference integration app
+docs/                   Architecture, security, consumer guides
 ```
+
+## Integration model
+
+1. Install `@tgoliveira/secure-auth` in your Next.js app.
+2. Call **`createSecureAuth(config)`** once — sole composition root for routes and UI defaults.
+3. Wire **`secureAuth.routes.*`** as thin App Router handlers.
+4. Wrap your layout with **`SecureAuthUIProvider`** using **`secureAuth.uiConfig`**.
+5. Mount package page components (`LoginPage`, `RegisterPage`, …) as thin route wrappers.
+
+Start here: [docs/consumer-quick-start.md](docs/consumer-quick-start.md)
 
 ---
 
@@ -127,6 +139,7 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 | Microsoft OAuth | Use Entra **client ID** (GUID), Web redirect URI, restart after env changes |
 | Passkeys fail locally | `WEBAUTHN_ORIGIN` must match browser URL exactly; use `localhost` not `127.0.0.1` |
 | Emails not arriving | Use Mailpit UI (`http://localhost:8025`) when `EMAIL_PROVIDER=smtp` |
+| Page copy/paths wrong | Pass `secureAuth.uiConfig` to `SecureAuthUIProvider` in root layout |
 
 ---
 
@@ -137,14 +150,13 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 | **[docs/consumer-quick-start.md](docs/consumer-quick-start.md)** | **New consumer onboarding (start here)** |
 | [docs/minimal-consumer-example.md](docs/minimal-consumer-example.md) | Smallest working integration |
 | [docs/consumer-validation-checklist.md](docs/consumer-validation-checklist.md) | Integration sign-off checklist |
-| [docs/package-api.md](docs/package-api.md) | Supported / unsupported public exports |
+| [docs/package-api.md](docs/package-api.md) | Supported public exports, `uiConfig`, routes |
+| [docs/customization.md](docs/customization.md) | UI, email, and auth flow customization |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package overview |
-| [apps/starter/README.md](apps/starter/README.md) | Reference consumer (this monorepo) |
-| [docs/architecture.md](docs/architecture.md) | Composition root, runtime, boundaries |
-| [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) | Hardening audit (historical + current) |
+| [apps/starter/README.md](apps/starter/README.md) | Reference consumer |
+| [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, boundaries |
+| [docs/security.md](docs/security.md) | Security requirements and readiness |
+| [docs/migrations.md](docs/migrations.md) | Database migrations and upgrade notes |
 | [docs/publishing-private-package.md](docs/publishing-private-package.md) | GitHub Packages install |
-| [docs/migrations.md](docs/migrations.md) | Database migrations |
-| [docs/security-hardening.md](docs/security-hardening.md) | Security tracker |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
-
-Legacy: [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md) — prefer `docs/` versions.
+| [AGENTS.md](AGENTS.md) | AI agent instructions |

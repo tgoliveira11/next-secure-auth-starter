@@ -1,6 +1,1 @@
-import { LoginPage } from "@tgoliveira/secure-auth/react";
-import { APP_SLUG } from "@/lib/brand";
-
-export default function Page() {
-  return <LoginPage appSlug={APP_SLUG} />;
-}
+export { LoginPage as default } from "@tgoliveira/secure-auth/react";

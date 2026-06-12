@@ -1,6 +1,6 @@
 # Package API
 
-Package: `@tgoliveira/secure-auth` @ `0.1.1-internal`
+Package: `@tgoliveira/secure-auth` @ `0.1.2-internal`
 
 **Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
@@ -89,6 +89,32 @@ Server-safe primitives (Button, Card, Input, …) do not require `"use client"`.
 | `DashboardPlaceholderPage` | `/dashboard` | **Optional** demo/starter only |
 
 Shared customization props (all pages): `title`, `description`, `subtitle`, `brand`, `footer`, `header`, `className`, `width`, `paths`, `appName`.
+
+When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.uiConfig` (`appSlug`, `appName`, `paths`, `messages`, `passwordPolicy`). Props on individual pages override provider values.
+
+#### SecureAuthUIProvider
+
+| Export | Purpose |
+| --- | --- |
+| `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
+| `useSecureAuthUi()` | Read provider config in package pages or custom components |
+| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets) |
+
+```tsx
+// app/layout.tsx
+import { SecureAuthUIProvider } from "@tgoliveira/secure-auth/react";
+import { secureAuth } from "@/lib/secure-auth";
+
+export default function RootLayout({ children }) {
+  return (
+    <SecureAuthUIProvider config={secureAuth.uiConfig}>
+      {children}
+    </SecureAuthUIProvider>
+  );
+}
+```
+
+Build config in `createSecureAuth({ ui: { paths, messages, cssVariables } })`. See [customization.md](./customization.md).
 
 Path overrides via `paths` or per-page props such as `afterLoginPath`, `loginPath`, `registerPath`.
 
@@ -194,7 +220,7 @@ Not a TypeScript import — use in CSS only.
 
 | Import / API | Status |
 | --- | --- |
-| `@tgoliveira/secure-auth/server` | **Removed** — export path deleted in `0.1.1-internal` |
+| `@tgoliveira/secure-auth/server` | **Removed** — export path deleted in `0.1.2-internal` |
 | `createRoutes` | **Internal** — use `createSecureAuth(config).routes.*` |
 | `createAuthServices` | **Internal** — use `createSecureAuth(config)` |
 | `createRouteHandlers` | **Removed** — legacy 501 stubs; never use |
@@ -239,13 +265,23 @@ createSecureAuth({
 });
 ```
 
+Returns:
+
+| Property | Purpose |
+| --- | --- |
+| `routes` | All API route handlers |
+| `uiConfig` | Serializable UI defaults for `SecureAuthUIProvider` |
+| `getPublicUIConfig()` | Same as `uiConfig` |
+| `getServices()` | Advanced; prefer `routes.*` |
+| `config` | Original `SecureAuthConfig` |
+
 See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 
 ---
 
-## Runtime ownership (0.1.x temporary limitation)
+## Dependency injection
 
-`createSecureAuth(config)` binds scoped runtime state for Next.js route compatibility. Acceptable for single-app deployments; not ideal for multiple isolated auth instances per process. **0.2.x target:** constructor-based DI. See [architecture.md](./architecture.md).
+`createSecureAuth(config)` is the sole composition root. Services receive `config` and `db` via constructor injection — **no global runtime state**. Do not call internal helpers from consumer code.
 
 ---
 
@@ -254,14 +290,14 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 `secureAuth.routes.health.GET` returns:
 
 ```json
-{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.1-internal" }
+{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.2-internal" }
 ```
 
 Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route string.
 
 ---
 
-## `secureAuth.routes` (0.1.1-internal)
+## `secureAuth.routes` (0.1.2-internal)
 
 All routes are real implementations — no 501 stubs.
 

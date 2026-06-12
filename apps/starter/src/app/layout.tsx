@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/layout/skip-link";
 import { APP_NAME } from "@/lib/brand";
+import { secureAuth } from "@/lib/secure-auth";
 
 export const metadata: Metadata = {
   title: APP_NAME,
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="relative min-h-screen antialiased">
         <SkipLink />
-        <Providers>{children}</Providers>
+        <Providers uiConfig={secureAuth.uiConfig}>{children}</Providers>
       </body>
     </html>
   );

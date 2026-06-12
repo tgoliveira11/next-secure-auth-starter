@@ -1,4 +1,4 @@
-export { accountSessionService } from "./services/account-session-service";
+export { createAccountSessionService } from "./services/account-session-service";
 export * from "./lib/account-session-types";
 export * from "./lib/session-config";
 export * from "../security/ip/session-ip";

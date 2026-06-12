@@ -3,23 +3,31 @@ import {
   passkeyLoginOptionsPost as optionsPost,
   passkeyLoginVerifyPost as verifyPost,
 } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   getLoginOptions: vi.fn(),
   verifyLogin: vi.fn(),
 }));
 
-vi.mock("@/modules/passkeys/services/passkey-login-service", () => ({
-  passkeyLoginService: {
-    getLoginOptions: mocks.getLoginOptions,
-    verifyLogin: mocks.verifyLogin,
-  },
-}));
+let services: SecureAuthServices;
+
+async function buildServices() {
+  return getTestServices({}, (base) => ({
+    passkeyLoginService: {
+      ...base.passkeyLoginService,
+      getLoginOptions: mocks.getLoginOptions,
+      verifyLogin: mocks.verifyLogin,
+    },
+  }));
+}
 
 describe("passkey login API routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    services = await buildServices();
   });
 
   it("returns login options", async () => {
@@ -30,7 +38,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({}),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
   });
@@ -40,7 +49,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "not-an-email" }),
-      })
+      }),
+      services
     );
     expect(invalid.status).toBe(400);
 
@@ -49,7 +59,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ userId: USER_ID }),
-      })
+      }),
+      services
     );
     expect(failed.status).toBeGreaterThanOrEqual(400);
   });
@@ -64,7 +75,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ response: { id: "cred" } }),
-      })
+      }),
+      services
     );
     const body = await res.json();
     expect(res.status).toBe(200);
@@ -76,7 +88,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({}),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -88,7 +101,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ response: { id: "cred" } }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -103,7 +117,8 @@ describe("passkey login API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ response: { id: "cred" } }),
-      })
+      }),
+      services
     );
     const text = await res.text();
     expect(text).not.toContain("SENTINEL-PRIVATE-LETTER");

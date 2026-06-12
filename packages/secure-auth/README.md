@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.1-internal` (experimental — not production-ready)
+**Version:** `0.1.2-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -14,23 +14,49 @@ Opinionated authentication package for **Next.js App Router**, **TypeScript**, *
 import { createSecureAuth } from "@tgoliveira/secure-auth/next";
 
 export const secureAuth = createSecureAuth(config);
+// secureAuth.routes.register.POST
+// secureAuth.uiConfig → SecureAuthUIProvider
 ```
 
 | Do | Don't |
 | --- | --- |
 | Create **one** `secureAuth` instance in app bootstrap | Import `@tgoliveira/secure-auth/server` (removed) |
 | Wire routes: `secureAuth.routes.register.POST` | Call `createRoutes` or `createAuthServices` |
-| Pass config + `EmailProvider` explicitly | Call internal runtime helpers |
+| Pass `secureAuth.uiConfig` to `SecureAuthUIProvider` | Call internal runtime helpers |
 | Map env vars in **your app** | Expect the package to read `process.env` |
 
 **Onboarding docs:** [consumer-quick-start.md](../../docs/consumer-quick-start.md) · [minimal-consumer-example.md](../../docs/minimal-consumer-example.md) · [package-api.md](../../docs/package-api.md)
 
 ---
 
+## UI provider
+
+Page copy, paths, and password policy defaults come from config — not global state.
+
+```tsx
+// app/layout.tsx
+import { SecureAuthUIProvider } from "@tgoliveira/secure-auth/react";
+import { secureAuth } from "@/lib/secure-auth";
+
+export default function RootLayout({ children }) {
+  return (
+    <SecureAuthUIProvider config={secureAuth.uiConfig}>
+      {children}
+    </SecureAuthUIProvider>
+  );
+}
+```
+
+Configure via `createSecureAuth({ ui: { paths, messages, cssVariables } })`. Package pages use `useSecureAuthUi()` internally.
+
+See [customization.md](../../docs/customization.md) and [architecture.md](../../docs/architecture.md).
+
+---
+
 ## Install (consumer app)
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.1-internal \
+npm install @tgoliveira/secure-auth@0.1.2-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2
 ```
 
@@ -44,7 +70,7 @@ See [publishing-private-package.md](../../docs/publishing-private-package.md) fo
 | --- | --- |
 | `@tgoliveira/secure-auth/next` | **`createSecureAuth(config)`** — composition root |
 | `@tgoliveira/secure-auth` | Types, `SECURE_AUTH_PACKAGE_VERSION`, `authSchema`, `safeLogger` |
-| `@tgoliveira/secure-auth/react` | UI primitives **and ready-to-use pages** |
+| `@tgoliveira/secure-auth/react` | UI primitives, pages, **`SecureAuthUIProvider`**, `SecureAuthUIPublicConfig` |
 | `@tgoliveira/secure-auth/react/client` | Client-only UI, passkey sign-in, default sign-out |
 | `@tgoliveira/secure-auth/client` | Browser API client, passkey helpers |
 | `@tgoliveira/secure-auth/client/password-policy` | Password policy helpers |
@@ -87,6 +113,10 @@ export const secureAuth = createSecureAuth({
     rpName: "My App",
     origin: process.env.WEBAUTHN_ORIGIN!,
   },
+  ui: {
+    paths: { login: "/login", register: "/register" },
+    messages: { loginTitle: "Sign in to My App" },
+  },
 });
 ```
 
@@ -122,9 +152,7 @@ Reference: `apps/starter/src/modules/email/core/` + `apps/starter/src/lib/secure
 
 The package does **not** read runtime environment variables. Map secrets at the app boundary in `createSecureAuth(config)`.
 
-### Runtime (0.1.x — temporary)
-
-Scoped runtime state backs Next.js route handlers. Fine for single-app Next.js; not ideal for multiple isolated instances per process. **0.2.x:** constructor-based DI. Do not call runtime helpers from consumer code.
+Services receive `config` and `db` via constructor injection — there is no global runtime state.
 
 See [architecture.md](../../docs/architecture.md).
 
@@ -141,9 +169,9 @@ See [migrations.md](../../docs/migrations.md) and [consumer-quick-start.md](../.
 | Range | Meaning |
 | --- | --- |
 | `0.1.x` | Experimental internal |
-| `0.2.x` | DB contract may break; DI refactor |
+| `0.2.x` | DB contract may break; API stabilization |
 | `1.0.0` | Production-ready contract |
 
 ## Security
 
-See [security-hardening.md](../../docs/security-hardening.md). Not production-ready at `0.1.x`.
+See [security.md](../../docs/security.md). Not production-ready at `0.1.x`.

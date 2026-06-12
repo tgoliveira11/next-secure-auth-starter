@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
 import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
-import { accountSessionService } from "@/modules/sessions/services/account-session-service";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
+async function sessionsPingPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser();
+    const user = await requireFullyAuthenticatedUser(services);
     if (user.accountSessionId) {
-      await accountSessionService.enrichFromRequest(
+      await services.accountSessionService.enrichFromRequest(
         user.accountSessionId,
         user.id,
         request
@@ -17,4 +17,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/account/sessions/ping");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => sessionsPingPost(request, services);
 }

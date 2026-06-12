@@ -1,6 +1,6 @@
 # Consumer validation checklist
 
-Use this when integrating `@tgoliveira/secure-auth@0.1.1-internal` into a **new** consumer application (including the second consumer app in this monorepo).
+Use this when integrating `@tgoliveira/secure-auth@0.1.2-internal` into a **new** consumer application (including the second consumer app in this monorepo).
 
 Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 
@@ -8,7 +8,7 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 
 ## Installation
 
-- [ ] `@tgoliveira/secure-auth@0.1.1-internal` installed from registry
+- [ ] `@tgoliveira/secure-auth@0.1.2-internal` installed from registry
 - [ ] Peer dependencies installed: `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`
 - [ ] PostgreSQL driver installed (`postgres` or equivalent)
 - [ ] `.npmrc` configured for GitHub Packages (if private registry)
@@ -70,7 +70,7 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 ## Routes
 - [ ] Auth routes use `secureAuth.routes.*` (thin `route.ts` wrappers)
 - [ ] Account routes use `secureAuth.routes.*`
-- [ ] Health route returns `version: "0.1.1-internal"`
+- [ ] Health route returns `version: "0.1.2-internal"`
 
 ---
 
@@ -78,9 +78,11 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 
 - [ ] `@import "@tgoliveira/secure-auth/styles.css"` in app global CSS
 - [ ] Theme CSS variables defined (`:root { --primary, --card, ... }`)
+- [ ] `SecureAuthUIProvider` wraps app with `secureAuth.uiConfig`
+- [ ] UI defaults configured in `createSecureAuth({ ui: { paths, messages } })`
 - [ ] Package UI components render with expected styling
-- [ ] Auth/account routes use package page components (`LoginPage`, `RegisterPage`, …) as thin wrappers
-- [ ] Pages customized via props (`appSlug`, `paths`, `onSignOut`) where needed
+- [ ] Auth/account routes use package page components as thin wrappers
+- [ ] Pages customized via provider config or per-page props where needed
 
 ---
 
@@ -106,6 +108,6 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md)
 | Field | Value |
 | --- | --- |
 | Consumer app name | |
-| Package version | `0.1.1-internal` |
+| Package version | `0.1.2-internal` |
 | Validated by | |
 | Date | |

@@ -7,11 +7,10 @@ import Link from "next/link";
 import { PageShell } from "../layouts/page-shell.js";
 import { PageHeader } from "../primitives/page-header.js";
 import { LoadingState } from "../primitives/loading-state.js";
-import { resolveAuthPaths, type LoginCompletePageProps } from "./types.js";
+import { type LoginCompletePageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function LoginCompletePage({
-  title = "Signing you in",
-  description = "Finishing your sign-in securely.",
   brand,
   header,
   className,
@@ -19,10 +18,23 @@ export function LoginCompletePage({
   paths,
   afterLoginPath,
   errorMessage = "Your sign-in session expired. Please sign in again.",
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: LoginCompletePageProps) {
   const router = useRouter();
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "loginCompleteTitle",
+    "Signing you in"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "loginCompleteDescription",
+    "Finishing your sign-in securely."
+  );
   const [error, setError] = useState("");
 
   useEffect(() => {

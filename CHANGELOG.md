@@ -6,23 +6,34 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.2-internal] - 2026-06-11
+
 ### Added
 
+- **`SecureAuthUIProvider`** — client context for page defaults from `createSecureAuth(config).uiConfig`.
+- **`buildPublicUIConfig`** — serializable `SecureAuthUIPublicConfig` (paths, messages, password policy; no secrets).
+- **Constructor-based DI** — services receive `config` and `db` via factories; global runtime state removed.
 - **Ready-to-use page components** — `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage` exported from `@tgoliveira/secure-auth/react`.
-- **UI feature blocks** — auth/settings feature components (forms, passkey/2FA settings) for optional composition from the same export.
+- **UI feature blocks** — auth/settings feature components for optional composition.
 - **Client helpers** — `defaultSignOutAccount`, `signInWithPasskey`, `buildPasskeyLoginOptionsPayload` on `@tgoliveira/secure-auth/react/client`.
-- **Package tests** — page export, render smoke, and client/server boundary tests.
+- **Package tests** — page export, render smoke, UI provider, and client/server boundary tests.
 
 ### Changed
 
-- **`apps/starter`** — auth/account/security routes are thin wrappers around package pages.
-- **`@tgoliveira/secure-auth/react`** — documents ready-to-use pages, customization props, and path helpers (`DEFAULT_AUTH_PATHS`, `resolveAuthPaths`).
+- **`apps/starter`** — auth/account/security routes are thin wrappers; layout passes `secureAuth.uiConfig` to `SecureAuthUIProvider`.
+- **Documentation** — package-first architecture cleanup; obsolete phase logs and starter-first docs removed; consolidated security and architecture docs under `docs/`.
+- **`@tgoliveira/secure-auth/react`** — documents `SecureAuthUIProvider`, `uiConfig`, and path helpers.
+
+### Removed
+
+- Global runtime state (`initSecureAuthRuntime`, `getSecureAuthConfig`, `getSecureAuthDb`).
+- Obsolete documentation: root `ARCHITECTURE.md`, `SECURITY.md`, phase logs, migration history docs (see [documentation-audit.md](docs/documentation-audit.md)).
 
 ## [0.1.1-internal] - 2026-06-11
 
 ### Added
 
-- **Package hardening phase** — [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) documents full audit.
+- **Package hardening phase** — documented in CHANGELOG and [docs/security.md](docs/security.md).
 - **`SecureAuthConfig` extensions** — `passwordPolicy`, `sessions`, `rateLimit`, `server.cookieSecure`, `debug.authTrace`.
 - **Config resolvers** — `src/core/config-resolvers.ts`, `src/core/app-brand.ts`.
 - **Cookie name builders** — `buildLoginPendingTokenCookieName(slug)`, `buildTwoFactorLoginChallengeCookieName(slug)`.
@@ -101,8 +112,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Experimental** — not production-ready; version `0.1.0-internal`.
 - **Repository DI** — services use runtime-bound `db` proxy; constructor injection planned for 0.2.x.
-- **npm audit** — 11 transitive vulnerabilities (documented in `docs/security-hardening.md`).
+- **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.2-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.2-internal
 [0.1.1-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.1-internal
 [0.1.0-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/v0.1.0-internal

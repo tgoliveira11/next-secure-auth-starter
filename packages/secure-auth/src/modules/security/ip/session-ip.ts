@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { requireNextAuthSecret } from "@/core/app-brand.js";
+import { requireNextAuthSecret } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 /** Mask IPv4/IPv6 for display — never show full IP in session UI. */
 export function maskIp(ip: string): string {
@@ -26,8 +27,8 @@ export function maskIp(ip: string): string {
 }
 
 /** Hashed IP for audit/security — not reversible. */
-export function hashIp(ip: string): string {
-  const pepper = requireNextAuthSecret();
+export function hashIp(config: SecureAuthConfig, ip: string): string {
+  const pepper = requireNextAuthSecret(config);
   const normalized = ip.trim().toLowerCase();
   return createHash("sha256").update(`${pepper}:ip:${normalized}`).digest("hex");
 }

@@ -2,15 +2,15 @@ import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { requireFullyAuthenticatedUser, UnauthorizedError } from "@/modules/auth/lib/session";
-import { accountSessionService } from "@/modules/sessions/services/account-session-service";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
+async function sessionsRevokeOthersPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser();
+    const user = await requireFullyAuthenticatedUser(services);
     if (!user.accountSessionId) {
       throw new UnauthorizedError("Current session could not be identified");
     }
-    const result = await accountSessionService.revokeOtherSessions(
+    const result = await services.accountSessionService.revokeOtherSessions(
       user.id,
       user.accountSessionId,
       getClientIp(request)
@@ -19,4 +19,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/account/sessions/revoke-others");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => sessionsRevokeOthersPost(request, services);
 }

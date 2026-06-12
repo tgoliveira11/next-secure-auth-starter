@@ -1,4 +1,4 @@
-import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 function parseOrigin(value: string | undefined): URL | null {
   if (!value) return null;
@@ -23,20 +23,19 @@ function localhostAlias(origin: URL): URL | null {
   return null;
 }
 
-export function getPrimaryWebAuthnOrigin(): string {
-  const { webauthn } = getSecureAuthConfig();
-  const configured = parseOrigin(webauthn.origin);
+export function getPrimaryWebAuthnOrigin(config: SecureAuthConfig): string {
+  const configured = parseOrigin(config.webauthn.origin);
   if (configured) return configured.origin;
 
-  const baseUrl = parseOrigin(getSecureAuthConfig().app.baseUrl);
+  const baseUrl = parseOrigin(config.app.baseUrl);
   if (baseUrl) return baseUrl.origin;
 
   return "http://localhost:3001";
 }
 
-export function getWebAuthnOrigins(): string[] {
+export function getWebAuthnOrigins(config: SecureAuthConfig): string[] {
   const origins = new Set<string>();
-  const primary = getPrimaryWebAuthnOrigin();
+  const primary = getPrimaryWebAuthnOrigin(config);
   origins.add(primary);
 
   const primaryUrl = parseOrigin(primary);
@@ -45,7 +44,7 @@ export function getWebAuthnOrigins(): string[] {
     if (alias) origins.add(alias.origin);
   }
 
-  const configured = parseOrigin(getSecureAuthConfig().webauthn.origin);
+  const configured = parseOrigin(config.webauthn.origin);
   if (configured) {
     origins.add(configured.origin);
     const alias = localhostAlias(configured);
@@ -55,25 +54,28 @@ export function getWebAuthnOrigins(): string[] {
   return [...origins];
 }
 
-export function getWebAuthnRpId(): string {
-  const rpId = getSecureAuthConfig().webauthn.rpId?.trim();
+export function getWebAuthnRpId(config: SecureAuthConfig): string {
+  const rpId = config.webauthn.rpId?.trim();
   if (rpId) return rpId;
 
-  const origin = parseOrigin(getPrimaryWebAuthnOrigin());
+  const origin = parseOrigin(getPrimaryWebAuthnOrigin(config));
   if (origin?.hostname) return origin.hostname;
 
   return "localhost";
 }
 
-export function getWebAuthnRpName(): string {
-  return getSecureAuthConfig().webauthn.rpName || getSecureAuthConfig().app.name;
+export function getWebAuthnRpName(config: SecureAuthConfig): string {
+  return config.webauthn.rpName || config.app.name;
 }
 
-export function toPasskeyVerificationErrorMessage(error: unknown): string {
+export function toPasskeyVerificationErrorMessage(
+  config: SecureAuthConfig,
+  error: unknown
+): string {
   const message = error instanceof Error ? error.message : String(error);
 
   if (/origin/i.test(message)) {
-    return `Passkey sign-in must use ${getPrimaryWebAuthnOrigin()}. Open the app at that address and try again.`;
+    return `Passkey sign-in must use ${getPrimaryWebAuthnOrigin(config)}. Open the app at that address and try again.`;
   }
 
   if (/expired|timeout/i.test(message)) {

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { requireNextAuthSecret } from "@/core/app-brand.js";
+import { requireNextAuthSecret } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
 
 export type DeviceFormFactor = "desktop" | "mobile" | "tablet" | "unknown";
 
@@ -51,7 +52,7 @@ export function parseUserAgentMetadata(
   };
 }
 
-export function hashUserAgent(userAgent: string): string {
-  const pepper = requireNextAuthSecret();
+export function hashUserAgent(config: SecureAuthConfig, userAgent: string): string {
+  const pepper = requireNextAuthSecret(config);
   return createHash("sha256").update(`${pepper}:user-agent:${userAgent}`).digest("hex");
 }

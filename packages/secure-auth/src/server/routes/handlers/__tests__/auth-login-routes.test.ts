@@ -3,7 +3,9 @@ import {
   loginVerify2faOauthPost as verifyOAuthPost,
   twoFactorBackupCodesPost as regeneratePost,
 } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   getSessionUser: vi.fn(),
@@ -22,26 +24,24 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
-  twoFactorService: {
-    isEnabledForUser: mocks.isEnabledForUser,
-    regenerateBackupCodes: mocks.regenerateBackupCodes,
-  },
-}));
+let services: SecureAuthServices;
 
-vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
-  return {
-    ...actual,
+async function buildServices() {
+  return getTestServices({}, (base) => ({
     authLoginService: {
-      ...actual.authLoginService,
+      ...base.authLoginService,
       verifyOAuthTwoFactor: mocks.verifyOAuthTwoFactor,
     },
-  };
-});
+    twoFactorService: {
+      ...base.twoFactorService,
+      isEnabledForUser: mocks.isEnabledForUser,
+      regenerateBackupCodes: mocks.regenerateBackupCodes,
+    },
+  }));
+}
 
 describe("auth login and backup code API routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mocks.getSessionUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({
@@ -49,6 +49,7 @@ describe("auth login and backup code API routes", () => {
       email: "user@example.com",
     });
     mocks.isEnabledForUser.mockResolvedValue(true);
+    services = await buildServices();
   });
 
   it("verify-2fa-oauth returns upgrade token", async () => {
@@ -57,7 +58,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ upgradeToken: "upgrade-token" });
@@ -69,7 +71,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(noSession.status).toBe(401);
 
@@ -78,7 +81,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(disabled.status).toBe(400);
 
@@ -86,7 +90,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "12" }),
-      })
+      }),
+      services
     );
     expect(invalid.status).toBe(400);
   });
@@ -98,7 +103,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(401);
   });
@@ -109,7 +115,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ backupCodes: ["AAAA-BBBB-CCCC"] });
@@ -120,7 +127,8 @@ describe("auth login and backup code API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "12" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });

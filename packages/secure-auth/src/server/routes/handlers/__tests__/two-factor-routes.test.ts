@@ -6,8 +6,9 @@ import { twoFactorDisablePost as disablePost } from "@/test/helpers/handlers";
 import { loginStartPost } from "@/test/helpers/handlers";
 import { loginChallengeStatusGet as challengeStatusGet } from "@/test/helpers/handlers";
 import { loginVerify2faPost as verify2faPost } from "@/test/helpers/handlers";
+import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
-import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
+import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
@@ -34,39 +35,38 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
-  twoFactorService: {
-    getStatus: mocks.getStatus,
-    startSetup: mocks.startSetup,
-    verifySetup: mocks.verifySetup,
-    disable: mocks.disable,
-  },
-}));
+let services: SecureAuthServices;
 
-vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
-  return {
-    ...actual,
+async function buildServices() {
+  return getTestServices({}, (base) => ({
     authLoginService: {
-      ...actual.authLoginService,
+      ...base.authLoginService,
       startCredentialsLogin: mocks.startCredentialsLogin,
       verifyTwoFactorLogin: mocks.verifyTwoFactorLogin,
     },
-  };
-});
+    twoFactorService: {
+      ...base.twoFactorService,
+      getStatus: mocks.getStatus,
+      startSetup: mocks.startSetup,
+      verifySetup: mocks.verifySetup,
+      disable: mocks.disable,
+    },
+  }));
+}
 
 describe("two-factor API routes", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
     });
+    services = await buildServices();
   });
 
   it("GET status returns 2FA state", async () => {
     mocks.getStatus.mockResolvedValue({ enabled: false, enabledAt: null, hasPendingSetup: false });
-    const res = await statusGet();
+    const res = await statusGet(services);
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({
       enabled: false,
@@ -83,7 +83,7 @@ describe("two-factor API routes", () => {
       issuer: "Next Secure Auth Starter",
       accountLabel: "user@example.com",
     });
-    const res = await setupStartPost(new Request("http://localhost"));
+    const res = await setupStartPost(new Request("http://localhost"), services);
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body).not.toHaveProperty("otpauthUrl");
@@ -96,7 +96,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     await expect(res.json()).resolves.toEqual({
       success: true,
@@ -113,28 +114,29 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     await expect(res.json()).resolves.toEqual({
       requiresTwoFactor: true,
       challengeToken: "challenge-token-1234567890",
     });
-    expect(res.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe(
+    expect(res.cookies.get(services.ctx.getTwoFactorLoginChallengeCookieName())?.value).toBe(
       "challenge-token-1234567890"
     );
   });
 
   it("challenge status reflects pending cookie state", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
-    const pending = await challengeStatusGet();
+    const pending = await challengeStatusGet(services);
     await expect(pending.json()).resolves.toEqual({ pending: true });
 
     mocks.cookiesGet.mockReturnValue(undefined);
-    const missing = await challengeStatusGet();
+    const missing = await challengeStatusGet(services);
     await expect(missing.json()).resolves.toEqual({ pending: false });
   });
 
@@ -144,7 +146,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "not-an-email", password: "" }),
-      })
+      }),
+      services
     );
     expect(badPayload.status).toBe(400);
 
@@ -153,7 +156,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "wrongpass" }),
-      })
+      }),
+      services
     );
     expect(invalid.status).toBe(401);
   });
@@ -163,7 +167,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost/api/auth/login/start?password=secret", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -174,7 +179,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ success: true });
@@ -182,12 +188,14 @@ describe("two-factor API routes", () => {
 
   it("setup verify and disable reject invalid payloads", async () => {
     const badVerify = await setupVerifyPost(
-      new Request("http://localhost", { method: "POST", body: JSON.stringify({ code: "12" }) })
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({ code: "12" }) }),
+      services
     );
     expect(badVerify.status).toBe(400);
 
     const badDisable = await disablePost(
-      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) })
+      new Request("http://localhost", { method: "POST", body: JSON.stringify({}) }),
+      services
     );
     expect(badDisable.status).toBe(400);
   });
@@ -198,7 +206,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ code: "123456" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
   });
@@ -206,7 +215,7 @@ describe("two-factor API routes", () => {
   it("verify-2fa returns login token on success", async () => {
     mocks.verifyTwoFactorLogin.mockResolvedValue({ loginToken: "login-token" });
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -216,11 +225,12 @@ describe("two-factor API routes", () => {
         body: JSON.stringify({
           code: "123456",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ loginToken: "login-token" });
-    expect(res.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe("");
+    expect(res.cookies.get(services.ctx.getTwoFactorLoginChallengeCookieName())?.value).toBe("");
   });
 
   it("verify-2fa rejects invalid payloads", async () => {
@@ -229,7 +239,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ challengeToken: "short", code: "12" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(400);
   });
@@ -241,7 +252,7 @@ describe("two-factor API routes", () => {
 
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new InvalidTwoFactorChallengeError());
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -251,13 +262,14 @@ describe("two-factor API routes", () => {
         body: JSON.stringify({
           code: "123456",
         }),
-      })
+      }),
+      services
     );
     expect(challengeFailure.status).toBe(401);
 
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new InvalidTwoFactorCodeError());
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -267,7 +279,8 @@ describe("two-factor API routes", () => {
         body: JSON.stringify({
           code: "123456",
         }),
-      })
+      }),
+      services
     );
     expect(codeFailure.status).toBe(401);
   });
@@ -275,7 +288,7 @@ describe("two-factor API routes", () => {
   it("verify-2fa maps unexpected service failures", async () => {
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new Error("db down"));
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === getTwoFactorLoginChallengeCookieName()
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -285,7 +298,8 @@ describe("two-factor API routes", () => {
         body: JSON.stringify({
           code: "123456",
         }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
   });
@@ -296,7 +310,8 @@ describe("two-factor API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({ email: "user@example.com", password: "password123" }),
-      })
+      }),
+      services
     );
     expect(res.status).toBe(500);
   });

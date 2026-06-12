@@ -6,17 +6,17 @@ Docs are part of the product. Update documentation in the **same change** as the
 
 Update:
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md)
-- [docs/MODULE_BOUNDARIES.md](../../docs/MODULE_BOUNDARIES.md)
+- [docs/architecture.md](../../docs/architecture.md)
 - [.cursor/rules/architecture.md](architecture.md) if rule behavior changes
+- [docs/package-api.md](../../docs/package-api.md) if public exports change
 
-Examples: new module, route model change, Auth.js integration change, dependency rule change.
+Examples: new module, route model change, `uiConfig` / `SecureAuthUIProvider` changes, dependency rule change.
 
 ## When security behavior changes
 
 Update:
 
-- [SECURITY.md](../../SECURITY.md)
+- [docs/security.md](../../docs/security.md)
 - [.cursor/rules/security.md](security.md) if rule behavior changes
 
 Examples: token lifetime, session policy, OAuth scopes, TOTP storage, rate-limit policy, deletion behavior.
@@ -26,30 +26,25 @@ Examples: token lifetime, session policy, OAuth scopes, TOTP storage, rate-limit
 Update:
 
 - [README.md](../../README.md) (if user-facing)
-- [docs/USAGE_GUIDE.md](../../docs/USAGE_GUIDE.md)
-- `.env.example` (once Phase 1 begins)
+- [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md)
+- `.env.example`
 
-## When routes or providers change
+## When routes, providers, or UI config change
 
 Update:
 
-- [ARCHITECTURE.md](../../ARCHITECTURE.md)
-- [docs/USAGE_GUIDE.md](../../docs/USAGE_GUIDE.md) if setup steps change
+- [docs/architecture.md](../../docs/architecture.md)
+- [docs/package-api.md](../../docs/package-api.md)
+- [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md) if setup steps change
+- [docs/customization.md](../../docs/customization.md) if customization options change
 - [README.md](../../README.md) if getting-started steps change
 
 ## When testing strategy changes
 
 Update:
 
-- [docs/TESTING_STRATEGY.md](../../docs/TESTING_STRATEGY.md)
 - [.cursor/rules/testing.md](testing.md)
-
-## When implementation phase or scope changes
-
-Update:
-
-- [docs/IMPLEMENTATION_ROADMAP.md](../../docs/IMPLEMENTATION_ROADMAP.md)
-- [README.md](../../README.md) status section
+- [docs/security.md](../../docs/security.md) if security test requirements change
 
 ## Agent instructions
 
@@ -60,3 +55,4 @@ Update [AGENTS.md](../../AGENTS.md) when agent workflow, stop conditions, or non
 - Leave docs stale after a behavioral change.
 - Document product-specific vault or letter functionality.
 - Lower documented coverage thresholds without explicit architectural review.
+- Preserve obsolete phase logs or migration history in active docs.

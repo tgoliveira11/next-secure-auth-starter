@@ -1,12 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { initSecureAuthRuntime } from "@/core/secure-auth-runtime";
+import { describe, it, expect } from "vitest";
 import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
 import { hashUserAgent, parseUserAgentMetadata } from "@/modules/security/user-agent/metadata";
 
 describe("user agent metadata", () => {
-  beforeEach(() => {
-    initSecureAuthRuntime(buildTestSecureAuthConfig());
-  });
+  const config = buildTestSecureAuthConfig();
 
   it("parses Android tablet", () => {
     const ua = "Mozilla/5.0 (Linux; Android 13; SM-X700) AppleWebKit/537.36 Tablet Safari";
@@ -64,7 +61,7 @@ describe("user agent metadata", () => {
   });
 
   it("hashes user agent without storing raw value in hash output", () => {
-    const hash = hashUserAgent("Mozilla/5.0 test");
+    const hash = hashUserAgent(config, "Mozilla/5.0 test");
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
     expect(hash).not.toContain("Mozilla");
   });

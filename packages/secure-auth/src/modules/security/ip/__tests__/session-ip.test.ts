@@ -1,12 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { initSecureAuthRuntime } from "@/core/secure-auth-runtime";
+import { describe, it, expect } from "vitest";
 import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
 import { hashIp, maskIp } from "@/modules/security/ip/session-ip";
 
 describe("session IP utilities", () => {
-  beforeEach(() => {
-    initSecureAuthRuntime(buildTestSecureAuthConfig());
-  });
+  const config = buildTestSecureAuthConfig();
 
   it("masks IPv4 addresses", () => {
     expect(maskIp("187.45.12.99")).toBe("187.45.12.xxx");
@@ -17,7 +14,7 @@ describe("session IP utilities", () => {
   });
 
   it("hashes IPs without returning the raw value", () => {
-    const hash = hashIp("192.168.1.10");
+    const hash = hashIp(config, "192.168.1.10");
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
     expect(hash).not.toContain("192.168.1.10");
   });

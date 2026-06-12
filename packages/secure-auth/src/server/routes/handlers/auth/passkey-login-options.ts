@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { passkeyLoginService } from "@/modules/passkeys/services/passkey-login-service";
+import type { SecureAuthServices } from "@/core/types";
 
 const bodySchema = z.object({
   email: z.string().email().optional(),
@@ -10,7 +10,7 @@ const bodySchema = z.object({
   credentialId: z.string().min(1).optional(),
 });
 
-export async function POST(request: Request) {
+async function passkeyLoginOptionsPost(request: Request, services: SecureAuthServices) {
   try {
     const body = await parseJsonBody(request);
     const parsed = bodySchema.safeParse(body);
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const result = await passkeyLoginService.getLoginOptions({
+    const result = await services.passkeyLoginService.getLoginOptions({
       email: parsed.data.email,
       userId: parsed.data.userId,
       credentialId: parsed.data.credentialId,
@@ -28,4 +28,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/auth/passkey/login/options");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => passkeyLoginOptionsPost(request, services);
 }

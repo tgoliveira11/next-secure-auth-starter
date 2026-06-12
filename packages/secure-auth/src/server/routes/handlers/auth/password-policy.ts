@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import { getPasswordPolicyConfig } from "@/modules/security/password-policy/index";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function GET() {
-  return NextResponse.json(getPasswordPolicyConfig());
+async function passwordPolicyGet(services: SecureAuthServices) {
+  return NextResponse.json(services.ctx.getPasswordPolicyConfig());
+}
+
+export function createGetHandler(services: SecureAuthServices) {
+  return () => passwordPolicyGet(services);
 }

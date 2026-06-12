@@ -1,6 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
-import { db } from "@/lib/db";
+import type { DbClient } from "@/lib/db/types";
 import type { RateLimitAdapter, RateLimitResult, RateLimitScope } from "../core/types";
 import { buildRateLimitKey } from "../core/types";
 
@@ -9,6 +9,8 @@ import { buildRateLimitKey } from "../core/types";
  * Uses atomic upsert so limits are shared across app instances.
  */
 export class PostgresRateLimitAdapter implements RateLimitAdapter {
+  constructor(private readonly db: DbClient) {}
+
   async check(
     scope: RateLimitScope,
     maxAttempts: number,
@@ -18,7 +20,7 @@ export class PostgresRateLimitAdapter implements RateLimitAdapter {
     const now = new Date();
     const resetAt = new Date(now.getTime() + windowMs);
 
-    const result = await db.execute<{ count: number; reset_at: Date }>(sql`
+    const result = await this.db.execute<{ count: number; reset_at: Date }>(sql`
       INSERT INTO rate_limit_buckets (bucket_key, count, reset_at)
       VALUES (${key}, 1, ${resetAt})
       ON CONFLICT (bucket_key) DO UPDATE SET
@@ -48,6 +50,6 @@ export class PostgresRateLimitAdapter implements RateLimitAdapter {
 
   async reset(scope: RateLimitScope): Promise<void> {
     const key = buildRateLimitKey(scope);
-    await db.execute(sql`DELETE FROM rate_limit_buckets WHERE bucket_key = ${key}`);
+    await this.db.execute(sql`DELETE FROM rate_limit_buckets WHERE bucket_key = ${key}`);
   }
 }

@@ -1,6 +1,6 @@
 # Consumer quick start
 
-**Package:** `@tgoliveira/secure-auth@0.1.1-internal`  
+**Package:** `@tgoliveira/secure-auth@0.1.2-internal`  
 **Audience:** Engineers integrating the package into a **brand-new** Next.js App Router application.
 
 This guide is self-contained. You do not need to read package source code.
@@ -37,7 +37,7 @@ Configure GitHub Packages (private registry):
 
 ```bash
 export GITHUB_PACKAGES_TOKEN=ghp_...
-npm install @tgoliveira/secure-auth@0.1.1-internal
+npm install @tgoliveira/secure-auth@0.1.2-internal
 ```
 
 ---
@@ -258,7 +258,7 @@ import "@/lib/secure-auth";
 import NextAuth from "next-auth";
 import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
 
-export const { GET, POST } = createNextAuthRouteHandlers(NextAuth);
+export const { GET, POST } = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);
 ```
 
 Register redirect URIs with each provider:
@@ -386,7 +386,57 @@ Define theme CSS variables (copy from `apps/starter/src/app/globals.css` or defi
 
 Import UI from `@tgoliveira/secure-auth/react`.
 
-### Ready-to-use pages
+---
+
+## 13. Wire SecureAuthUIProvider
+
+Page defaults (copy, paths, password policy) come from `secureAuth.uiConfig` — built from your `createSecureAuth({ ui: { ... } })` config.
+
+### Configure UI in createSecureAuth
+
+```typescript
+export const secureAuth = createSecureAuth({
+  // ... db, auth, email, webauthn ...
+  ui: {
+    paths: {
+      login: "/login",
+      register: "/register",
+      account: "/settings/account",
+      security: "/settings/security",
+    },
+    messages: {
+      loginTitle: "Sign in to My App",
+      registerTitle: "Create your account",
+    },
+  },
+});
+```
+
+### Wrap the app layout
+
+```tsx
+// app/layout.tsx
+import { SecureAuthUIProvider } from "@tgoliveira/secure-auth/react";
+import { secureAuth } from "@/lib/secure-auth";
+
+export default function RootLayout({ children }) {
+  return (
+    <SecureAuthUIProvider config={secureAuth.uiConfig}>
+      {children}
+    </SecureAuthUIProvider>
+  );
+}
+```
+
+With NextAuth, wrap both providers (see `apps/starter/src/components/providers.tsx`).
+
+Package pages call `useSecureAuthUi()` internally. Per-page props still override provider defaults.
+
+See [customization.md](./customization.md).
+
+---
+
+## 14. Ready-to-use pages
 
 Prefer thin route wrappers instead of rebuilding auth screens:
 
@@ -401,11 +451,11 @@ export default function Page() {
 
 Available pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage`.
 
-Customize via props (`title`, `paths`, `afterLoginPath`, `onSignOut`, `appSlug`, …). See [package-api.md](./package-api.md).
+Customize via props (`title`, `paths`, `afterLoginPath`, `onSignOut`, …) or via `uiConfig` provider defaults. See [package-api.md](./package-api.md).
 
 ---
 
-## 13. Start the application
+## 15. Start the application
 
 Required environment variables (minimum):
 
@@ -436,9 +486,9 @@ export default nextConfig;
 
 ---
 
-## 14. Verify installation
+## 16. Verify installation
 
-1. `GET /api/auth/package-health` returns `{ ok: true, version: "0.1.1-internal" }`.
+1. `GET /api/auth/package-health` returns `{ ok: true, version: "0.1.2-internal" }`.
 2. Register a user at `/register`.
 3. Complete email verification (check console/Mailpit).
 4. Sign in at `/login`.
@@ -449,12 +499,26 @@ Reference implementation: `apps/starter/` in this monorepo.
 
 ---
 
+## Production checklist
+
+Before production deployment:
+
+- [ ] Configure real SMTP provider (see email providers table in [apps/starter/README.md](../apps/starter/README.md))
+- [ ] Configure OAuth redirect URIs for production domain
+- [ ] Rotate all secrets (Auth.js, OAuth, TOTP encryption, SMTP)
+- [ ] Verify logging redaction in production log sink
+- [ ] Verify rate limits on sensitive endpoints
+- [ ] Run full test suite with ≥ 95% coverage
+- [ ] Review [security.md](./security.md)
+
+---
+
 ## What not to do
 
 | Do not | Do instead |
 | --- | --- |
 | Import `@tgoliveira/secure-auth/server` | Use `@tgoliveira/secure-auth/next` → `createSecureAuth` |
 | Call `createRoutes` or `createAuthServices` | Use `secureAuth.routes.*` |
-| Call `getSecureAuthConfig()` or other runtime helpers | Pass config via `createSecureAuth` |
+| Call `getSecureAuthConfig()` or other runtime helpers | Pass config via `createSecureAuth`; use `secureAuth.uiConfig` for UI |
 | Deep-import `packages/secure-auth/src/**` | Use [public entry points](./package-api.md) only |
 | Read auth secrets from package `process.env` | Map env → `createSecureAuth(config)` in your app |

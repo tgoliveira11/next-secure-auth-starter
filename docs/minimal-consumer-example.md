@@ -1,6 +1,6 @@
 # Minimal consumer example
 
-Smallest working integration of `@tgoliveira/secure-auth@0.1.1-internal` in a new Next.js App Router app.
+Smallest working integration of `@tgoliveira/secure-auth@0.1.2-internal` in a new Next.js App Router app.
 
 Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-start.md) for the full guide.
 
@@ -9,7 +9,7 @@ Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-sta
 ## Install
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.1-internal \
+npm install @tgoliveira/secure-auth@0.1.2-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 npm install -D drizzle-kit
 ```
@@ -71,7 +71,55 @@ export const secureAuth = createSecureAuth({
     rpName: "My App",
     origin: process.env.APP_BASE_URL ?? "http://localhost:3000",
   },
+  ui: {
+    paths: { login: "/login", register: "/register" },
+    messages: { loginTitle: "Sign in" },
+  },
 });
+```
+
+---
+
+## UI provider
+
+`src/components/providers.tsx`:
+
+```tsx
+"use client";
+import { SessionProvider } from "next-auth/react";
+import { SecureAuthUIProvider } from "@tgoliveira/secure-auth/react";
+import type { SecureAuthUIPublicConfig } from "@tgoliveira/secure-auth/react";
+
+export function Providers({
+  children,
+  uiConfig,
+}: {
+  children: React.ReactNode;
+  uiConfig: SecureAuthUIPublicConfig;
+}) {
+  return (
+    <SessionProvider>
+      <SecureAuthUIProvider config={uiConfig}>{children}</SecureAuthUIProvider>
+    </SessionProvider>
+  );
+}
+```
+
+`src/app/layout.tsx`:
+
+```tsx
+import { Providers } from "@/components/providers";
+import { secureAuth } from "@/lib/secure-auth";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers uiConfig={secureAuth.uiConfig}>{children}</Providers>
+      </body>
+    </html>
+  );
+}
 ```
 
 ---
@@ -97,7 +145,7 @@ import "@/lib/secure-auth";
 import NextAuth from "next-auth";
 import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
 
-export const { GET, POST } = createNextAuthRouteHandlers(NextAuth);
+export const { GET, POST } = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);
 ```
 
 ---
@@ -156,9 +204,11 @@ npm run db:migrate   # script: "drizzle-kit migrate"
 import { LoginPage } from "@tgoliveira/secure-auth/react";
 
 export default function Page() {
-  return <LoginPage appSlug="my-app" />;
+  return <LoginPage />;
 }
 ```
+
+With `SecureAuthUIProvider` wired, `appSlug` and paths come from `uiConfig`. Pass props to override.
 
 `src/app/(auth)/register/page.tsx`:
 
@@ -166,7 +216,7 @@ export default function Page() {
 import { RegisterPage } from "@tgoliveira/secure-auth/react";
 
 export default function Page() {
-  return <RegisterPage appSlug="my-app" />;
+  return <RegisterPage />;
 }
 ```
 
@@ -178,5 +228,5 @@ Account/security routes: `AccountSettingsPage`, `SecuritySettingsPage`, `Session
 
 ```bash
 curl http://localhost:3000/api/auth/package-health
-# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.1-internal"}
+# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.2-internal"}
 ```

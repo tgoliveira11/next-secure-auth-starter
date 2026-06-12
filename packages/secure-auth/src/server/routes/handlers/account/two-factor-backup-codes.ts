@@ -3,18 +3,18 @@ import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorVerifySchema } from "@/lib/validation/two-factor";
-import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import type { SecureAuthServices } from "@/core/types";
 
-export async function POST(request: Request) {
+async function twoFactorBackupCodesPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser();
+    const user = await requireFullyAuthenticatedUser(services);
     const body = await parseJsonBody(request);
     const parsed = twoFactorVerifySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const result = await twoFactorService.regenerateBackupCodes(
+    const result = await services.twoFactorService.regenerateBackupCodes(
       user.id,
       parsed.data,
       getClientIp(request)
@@ -23,4 +23,8 @@ export async function POST(request: Request) {
   } catch (error) {
     return apiError(error, "POST /api/account/2fa/backup-codes/regenerate");
   }
+}
+
+export function createPostHandler(services: SecureAuthServices) {
+  return (request: Request) => twoFactorBackupCodesPost(request, services);
 }

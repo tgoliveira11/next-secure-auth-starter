@@ -1,6 +1,6 @@
 import "server-only";
-import "@/lib/secure-auth";
 import NextAuth from "next-auth";
 import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
+import { secureAuth } from "@/lib/secure-auth";
 
-export const { GET, POST } = createNextAuthRouteHandlers(NextAuth);
+export const { GET, POST } = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);

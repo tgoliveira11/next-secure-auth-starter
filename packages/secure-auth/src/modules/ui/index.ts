@@ -17,5 +17,7 @@ export * from "./primitives/textarea";
 
 export * from "./layouts/page-shell";
 export * from "./layouts/auth-page-shell";
+export * from "./secure-auth-ui-provider";
 export * from "./features/index";
 export * from "./pages/index";
+export type { SecureAuthUIPublicConfig } from "../../core/ui-config.js";

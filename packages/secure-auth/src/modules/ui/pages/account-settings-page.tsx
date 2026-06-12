@@ -22,10 +22,9 @@ import { defaultSignOutAccount } from "@tgoliveira/secure-auth/react/client";
 import { EmailVerificationSettings } from "../features/settings/email-verification-settings.js";
 import { ChangePasswordSettings } from "../features/settings/change-password-settings.js";
 import { resolveAuthPaths, type AccountSettingsPageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function AccountSettingsPage({
-  title = "Account settings",
-  description = "Manage your email, password, verification, and account lifecycle.",
   brand,
   header,
   className,
@@ -34,8 +33,21 @@ export function AccountSettingsPage({
   onSignOut = defaultSignOutAccount,
   afterDeletePath,
   deleteSubmitLabel = "Delete my account permanently",
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: AccountSettingsPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "accountSettingsTitle",
+    "Account settings"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "accountSettingsDescription",
+    "Manage your email, password, verification, and account lifecycle."
+  );
   const deleteDestination = afterDeletePath ?? resolved.accountDeleted;
   const { data: session, status } = useSession();
   const router = useRouter();

@@ -4,21 +4,34 @@ import Link from "next/link";
 import { PageShell } from "../layouts/page-shell.js";
 import { Button } from "../primitives/button.js";
 import { Card, CardDescription, CardHeader, CardTitle } from "../primitives/card.js";
-import { resolveAuthPaths, type AccountDeletedPageProps } from "./types.js";
+import { type AccountDeletedPageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 export function AccountDeletedPage({
-  title = "Your account has been deleted",
-  description = "Your account and related data have been removed from active storage. Local private material on this browser was cleared when possible.",
   brand,
   header,
   className,
   width = "medium",
   paths,
   homePath,
-  returnHomeLabel = "Return home",
+  returnHomeLabel: returnHomeLabelProp,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: AccountDeletedPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
   const destination = homePath ?? resolved.home;
+  const title = usePageTitle(
+    { title: titleProp, subtitle },
+    "accountDeletedTitle",
+    "Your account has been deleted"
+  );
+  const description = useUiMessage(
+    descriptionProp,
+    "accountDeletedDescription",
+    "Your account and related data have been removed from active storage. Local private material on this browser was cleared when possible."
+  );
+  const returnHomeLabel = useUiMessage(returnHomeLabelProp, "returnHomeLabel", "Return home");
 
   return (
     <PageShell width={width} className={className ?? "text-center"}>

@@ -9,19 +9,27 @@ import { PageHeader } from "../primitives/page-header.js";
 import { Card, CardDescription, CardHeader, CardTitle } from "../primitives/card.js";
 import { Button } from "../primitives/button.js";
 import { LoadingState } from "../primitives/loading-state.js";
-import { resolveAuthPaths, type DashboardPlaceholderPageProps } from "./types.js";
+import { type DashboardPlaceholderPageProps } from "./types.js";
+import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 
 /** Optional placeholder dashboard for starter/demo apps — not a core auth requirement. */
 export function DashboardPlaceholderPage({
-  title = "Dashboard",
-  description = "You are signed in. Manage your account security settings below.",
   brand,
   header,
   className,
   width = "medium",
   paths,
+  title: titleProp,
+  subtitle,
+  description: descriptionProp,
 }: DashboardPlaceholderPageProps) {
-  const resolved = resolveAuthPaths(paths);
+  const resolved = useUiPaths(paths);
+  const title = usePageTitle({ title: titleProp, subtitle }, "dashboardTitle", "Dashboard");
+  const description = useUiMessage(
+    descriptionProp,
+    "dashboardDescription",
+    "You are signed in. Manage your account security settings below."
+  );
   const { status } = useSession();
   const router = useRouter();
 
