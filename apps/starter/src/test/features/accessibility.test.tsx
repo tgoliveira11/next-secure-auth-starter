@@ -7,7 +7,7 @@ import LoginPage from "@/app/(auth)/login/page";
 import RegisterPage from "@/app/(auth)/register/page";
 import AccountDeletedPage from "@/app/(public)/account-deleted/page";
 import { SkipLink } from "@/components/layout/skip-link";
-import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/react";
+import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/client";
 
 vi.mock("next-auth/react", () => ({
   useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),

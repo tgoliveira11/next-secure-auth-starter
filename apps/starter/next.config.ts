@@ -35,8 +35,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@tgoliveira/secure-auth"],
-  serverExternalPackages: ["nodemailer", "postgres", "bcryptjs", "@simplewebauthn/server"],
+  // next-auth/react is CJS and can resolve a second React copy under Turbopack without this.
+  transpilePackages: ["next-auth"],
+  serverExternalPackages: [
+    "nodemailer",
+    "postgres",
+    "bcryptjs",
+    "@simplewebauthn/server",
+  ],
   headers: async () => [
     {
       source: "/((?!_next/static|_next/image|favicon.ico).*)",

@@ -30,6 +30,10 @@ export * from "../lib/ui/format-auth-method.js";
 export * from "../lib/ui/format-auth-provider.js";
 export * from "../lib/ui/format-session-datetime.js";
 
+export { cn } from "../modules/ui/lib/cn.js";
+export { BRAND_MARK_SVG, brandMarkDataUrl } from "../modules/ui/lib/brand-mark.js";
+export { MAIN_CONTENT_ID } from "../modules/ui/lib/main-content.js";
+
 export {
   MICROSOFT_OAUTH_PROVIDER_ID,
   MICROSOFT_OAUTH_SCOPES,

@@ -67,6 +67,10 @@ npm run typecheck -w @secure-auth/starter
 | SMTP / Mailpit | `EMAIL_PROVIDER=smtp`, open http://localhost:8025 |
 | OAuth Configuration error | Restart dev server after env changes |
 | Account deletion blocked | OAuth-only accounts need a **recent** sign-in (15 min); sign in again |
+| `/api/auth/session` 500 / `dynamic require` | NextAuth is app-owned (`src/lib/nextauth-route.ts`); clear cache: `rm -rf apps/starter/.next` and restart dev |
+| `Invalid hook call` / `useState` is null on `/` | Ensure `next-auth` is in `transpilePackages` but **not** in `serverExternalPackages` (see `next.config.ts`); then `rm -rf apps/starter/.next` and restart |
+| `EADDRINUSE` on port 3001 | Stop the other process: `lsof -ti :3001 \| xargs kill` or run `next dev -p 3002` |
+| Build fails with `useState` during prerender | Rebuild the package (`npm run build -w @tgoliveira/secure-auth`); root layout uses `dynamic = "force-dynamic"` for session-aware pages |
 
 ## Validation (hardening phase)
 

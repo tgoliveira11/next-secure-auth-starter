@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { brandMarkDataUrl } from "@tgoliveira/secure-auth/react";
+import { brandMarkDataUrl } from "@tgoliveira/secure-auth/client";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";

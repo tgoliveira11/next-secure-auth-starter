@@ -1,4 +1,4 @@
-import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/react";
+import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/client";
 
 export function SkipLink() {
   return (

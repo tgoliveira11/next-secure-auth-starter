@@ -1,4 +1,4 @@
-import { APP_NAME } from "@/lib/brand";
+import { APP_NAME } from "../../../lib/brand.js";
 
 /** Shared brand mark SVG (matches src/app/icon.svg). */
 export const BRAND_MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="${APP_NAME}">

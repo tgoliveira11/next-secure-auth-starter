@@ -1,4 +1,4 @@
-import { APP_SLUG } from "@/lib/brand";
+import { APP_SLUG } from "../../../lib/brand.js";
 import { TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS } from "./constants";
 
 export const TWO_FACTOR_LOGIN_CHALLENGE_COOKIE = `${APP_SLUG}-2fa-challenge`;

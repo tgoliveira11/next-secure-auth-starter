@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { BRAND_MARK_SVG } from "@tgoliveira/secure-auth/react";
+import { BRAND_MARK_SVG } from "@tgoliveira/secure-auth/client";
 
 describe("app brand icon", () => {
   it("uses design-system colors in favicon SVG", () => {

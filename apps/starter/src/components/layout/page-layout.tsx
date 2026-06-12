@@ -1,6 +1,7 @@
+"use client";
+
 import { Nav } from "@/components/layout/nav";
-import { cn } from "@tgoliveira/secure-auth/react";
-import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/react";
+import { cn, MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/client";
 
 type PageWidth = "narrow" | "medium" | "wide";
 

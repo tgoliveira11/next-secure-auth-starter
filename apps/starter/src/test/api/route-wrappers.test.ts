@@ -18,9 +18,12 @@ function collectRouteFiles(dir: string): string[] {
   return files;
 }
 
-const packageOwnedRoutes = collectRouteFiles(API_ROOT).filter(
-  (path) => !relative(API_ROOT, path).startsWith("openapi")
-);
+const appOwnedRoutePrefixes = ["openapi", "auth/[...nextauth]"];
+
+const packageOwnedRoutes = collectRouteFiles(API_ROOT).filter((path) => {
+  const rel = relative(API_ROOT, path);
+  return !appOwnedRoutePrefixes.some((prefix) => rel.startsWith(prefix));
+});
 
 describe("starter API route wrappers", () => {
   it.each(
@@ -41,6 +44,15 @@ describe("starter API route wrappers", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body).toHaveProperty("openapi");
+  });
+
+  it("nextauth route remains app-owned for next-auth bundling boundary", async () => {
+    const source = readFileSync(join(API_ROOT, "auth/[...nextauth]/route.ts"), "utf8");
+    expect(source).not.toContain("secureAuth.routes");
+    expect(source).toContain("@/lib/nextauth-route");
+    const nextAuthRoute = readFileSync(join(process.cwd(), "src/lib/nextauth-route.ts"), "utf8");
+    expect(nextAuthRoute).toContain('from "next-auth"');
+    expect(nextAuthRoute).toContain("createNextAuthRouteHandlers");
   });
 });
 

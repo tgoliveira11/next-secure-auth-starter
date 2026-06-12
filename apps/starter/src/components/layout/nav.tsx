@@ -8,7 +8,7 @@ import { useId, useState } from "react";
 import { Button } from "@tgoliveira/secure-auth/react";
 import { AppMark } from "@tgoliveira/secure-auth/react";
 import { APP_NAME } from "@/lib/brand";
-import { cn } from "@tgoliveira/secure-auth/react";
+import { cn } from "@tgoliveira/secure-auth/client";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },

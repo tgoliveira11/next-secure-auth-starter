@@ -1,2 +1,2 @@
-export * from "../modules/ui/index.js";
-export type { SecureAuthConfig } from "../core/types.js";
+export * from "../modules/ui/index";
+export type { SecureAuthConfig } from "../core/types";

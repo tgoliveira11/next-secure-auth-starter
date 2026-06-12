@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Suspense } from "react";
 import { FormField } from "@tgoliveira/secure-auth/react";
 import { Input } from "@tgoliveira/secure-auth/react";
 import { OAuthSignInError } from "@/components/auth/oauth-sign-in-error";
 import { LoginCredentialsError } from "@/components/auth/login-credentials-error";
-import { cn } from "@tgoliveira/secure-auth/react";
+import { cn } from "@tgoliveira/secure-auth/client";
 
 const submitButtonClassName = cn(
   "min-h-11 w-full rounded-[var(--radius)] px-4 py-2.5 text-sm font-medium transition-colors",

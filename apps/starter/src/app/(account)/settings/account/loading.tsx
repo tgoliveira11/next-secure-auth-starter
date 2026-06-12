@@ -1,3 +1,5 @@
+"use client";
+
 import { PageLayout } from "@/components/layout/page-layout";
 import { LoadingState } from "@tgoliveira/secure-auth/react";
 

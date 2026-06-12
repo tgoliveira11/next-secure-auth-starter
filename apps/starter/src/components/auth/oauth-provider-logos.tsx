@@ -1,4 +1,4 @@
-import { cn } from "@tgoliveira/secure-auth/react";
+import { cn } from "@tgoliveira/secure-auth/client";
 import { MICROSOFT_OAUTH_PROVIDER_ID } from "@tgoliveira/secure-auth/client";
 
 export type OAuthProviderLogoId = "google" | "apple" | typeof MICROSOFT_OAUTH_PROVIDER_ID;

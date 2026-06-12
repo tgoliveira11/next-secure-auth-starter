@@ -1,4 +1,5 @@
 import path from "node:path";
+import { readdirSync, statSync } from "node:fs";
 import { defineConfig } from "tsup";
 
 const shared = {
@@ -17,6 +18,7 @@ const shared = {
     "drizzle-orm/pg-core",
     "drizzle-orm/postgres-js",
     "next",
+    "next-auth",
     "react",
     "react-dom",
     "postgres",
@@ -25,6 +27,24 @@ const shared = {
     "server-only",
   ],
 };
+
+function collectUiEntries(dir: string, relativeBase: string): Record<string, string> {
+  const entries: Record<string, string> = {};
+  for (const name of readdirSync(dir)) {
+    const filePath = path.join(dir, name);
+    const relativePath = path.join(relativeBase, name);
+    if (statSync(filePath).isDirectory()) {
+      if (relativePath.endsWith("/components")) continue;
+      Object.assign(entries, collectUiEntries(filePath, relativePath));
+      continue;
+    }
+    if (!/\.tsx?$/.test(name) || name.includes(".test.")) continue;
+    entries[relativePath.replace(/\.tsx?$/, "")] = filePath;
+  }
+  return entries;
+}
+
+const uiEntries = collectUiEntries(path.resolve("src/modules/ui"), "modules/ui");
 
 export default defineConfig([
   {
@@ -35,11 +55,25 @@ export default defineConfig([
     banner: { js: '"use client";' },
   },
   {
+    format: ["esm"] as const,
+    dts: true,
+    sourcemap: true,
+    splitting: false,
+    target: "es2022" as const,
+    external: ["react", "react-dom"],
+    entry: {
+      "react/index": "src/react/index.ts",
+      ...uiEntries,
+    },
+    outDir: "dist",
+    clean: false,
+    bundle: false,
+  },
+  {
     ...shared,
     entry: {
       index: "src/index.ts",
       "next/index": "src/next/index.ts",
-      "react/index": "src/react/index.ts",
       "server/index": "src/server/index.ts",
       "drizzle/schema": "src/drizzle/schema.ts",
       "email/index": "src/email/index.ts",

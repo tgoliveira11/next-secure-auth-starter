@@ -1,11 +1,23 @@
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage } from "node:async_hooks";
 
-const loginRequestStore = new AsyncLocalStorage<{ ip: string }>();
+const STORE_KEY = Symbol.for("@tgoliveira/secure-auth/login-request-store");
+
+type LoginRequestStore = AsyncLocalStorage<{ ip: string }>;
+
+function store(): LoginRequestStore {
+  const globalStore = globalThis as typeof globalThis & {
+    [STORE_KEY]?: LoginRequestStore;
+  };
+  if (!globalStore[STORE_KEY]) {
+    globalStore[STORE_KEY] = new AsyncLocalStorage<{ ip: string }>();
+  }
+  return globalStore[STORE_KEY];
+}
 
 export function runWithLoginRequestContext<T>(ip: string, fn: () => T): T {
-  return loginRequestStore.run({ ip }, fn);
+  return store().run({ ip }, fn);
 }
 
 export function getLoginRequestIp(): string | undefined {
-  return loginRequestStore.getStore()?.ip;
+  return store().getStore()?.ip;
 }

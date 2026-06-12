@@ -1,20 +1,17 @@
-import NextAuth from "next-auth";
-import { getAuthOptions } from "@/modules/auth/lib/auth-options";
-import { getClientIp } from "@/lib/request-ip";
-import { runWithLoginRequestContext } from "@/modules/auth/lib/login-request-context";
+import { createNextAuthRouteHandlers } from "./create-nextauth-route-handlers";
 
-let handler: ReturnType<typeof NextAuth> | undefined;
+let handlers: ReturnType<typeof createNextAuthRouteHandlers> | undefined;
 
-function getHandler() {
-  if (!handler) {
-    handler = NextAuth(getAuthOptions());
+async function getHandlers() {
+  if (!handlers) {
+    const { default: NextAuth } = await import("next-auth");
+    handlers = createNextAuthRouteHandlers(NextAuth);
   }
-  return handler;
+  return handlers;
 }
 
-async function wrappedHandler(request: Request, context: unknown) {
-  const ip = getClientIp(request);
-  return runWithLoginRequestContext(ip, () => getHandler()(request, context));
+function lazyHandler(request: Request, context: unknown) {
+  return getHandlers().then(({ GET }) => GET(request, context));
 }
 
-export { wrappedHandler as GET, wrappedHandler as POST };
+export { lazyHandler as GET, lazyHandler as POST };

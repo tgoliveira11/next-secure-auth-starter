@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/react";
+import { MAIN_CONTENT_ID } from "@tgoliveira/secure-auth/client";
 import { SwaggerUi } from "./swagger-ui";
 
 export default function ApiDocsPage() {

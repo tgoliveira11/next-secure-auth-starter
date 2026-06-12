@@ -14,6 +14,3 @@ export * from "./primitives/loading-state";
 export * from "./primitives/page-header";
 export * from "./primitives/success-state";
 export * from "./primitives/textarea";
-export * from "./lib/cn";
-export * from "./lib/brand-mark";
-export * from "./lib/main-content";
