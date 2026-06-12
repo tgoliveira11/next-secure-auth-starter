@@ -1,4 +1,4 @@
-import type { AccountAuthMethod } from "@/lib/account-session-types";
+import type { AccountAuthMethod } from "@/modules/sessions/lib/account-session-types";
 
 export function formatAuthMethod(method: AccountAuthMethod | string): string {
   switch (method) {

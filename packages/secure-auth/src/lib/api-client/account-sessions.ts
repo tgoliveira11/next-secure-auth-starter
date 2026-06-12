@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client/client";
-import type { AccountSessionView } from "@/lib/account-session-types";
+import type { AccountSessionView } from "@/modules/sessions/lib/account-session-types";
 
 export const accountSessionsApi = {
   list: () =>

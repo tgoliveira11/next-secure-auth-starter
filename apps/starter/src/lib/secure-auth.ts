@@ -76,6 +76,15 @@ export const secureAuth = createSecureAuth({
     rpName: appName,
     origin: process.env.WEBAUTHN_ORIGIN ?? process.env.APP_BASE_URL ?? "http://localhost:3001",
   },
+  server: {
+    cookieSecure: process.env.NODE_ENV === "production",
+  },
+  rateLimit: {
+    store: process.env.RATE_LIMIT_STORE === "postgres" ? "postgres" : "memory",
+  },
+  debug: {
+    authTrace: process.env.AUTH_DEBUG_TRACE === "true",
+  },
   ui: {
     brand: { name: appName },
     paths: {

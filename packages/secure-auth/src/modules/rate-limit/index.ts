@@ -8,13 +8,14 @@ import type {
 import { RATE_LIMIT_POLICIES } from "./core/types";
 import { InMemoryRateLimitAdapter } from "./adapters/in-memory-adapter";
 import { PostgresRateLimitAdapter } from "./adapters/postgres-adapter";
+import { resolveRateLimitStore } from "@/core/config-resolvers.js";
 
 let adapter: RateLimitAdapter | null = null;
 
 function resolveAdapter(): RateLimitAdapter {
   if (adapter) return adapter;
 
-  const store = process.env.RATE_LIMIT_STORE ?? "memory";
+  const store = resolveRateLimitStore();
   if (store === "postgres") {
     adapter = new PostgresRateLimitAdapter();
   } else {

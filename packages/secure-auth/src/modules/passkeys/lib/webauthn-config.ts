@@ -1,4 +1,4 @@
-import { APP_NAME } from "@/lib/brand";
+import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
 
 function parseOrigin(value: string | undefined): URL | null {
   if (!value) return null;
@@ -24,11 +24,12 @@ function localhostAlias(origin: URL): URL | null {
 }
 
 export function getPrimaryWebAuthnOrigin(): string {
-  const configured = parseOrigin(process.env.WEBAUTHN_ORIGIN);
+  const { webauthn } = getSecureAuthConfig();
+  const configured = parseOrigin(webauthn.origin);
   if (configured) return configured.origin;
 
-  const authUrl = parseOrigin(process.env.NEXTAUTH_URL);
-  if (authUrl) return authUrl.origin;
+  const baseUrl = parseOrigin(getSecureAuthConfig().app.baseUrl);
+  if (baseUrl) return baseUrl.origin;
 
   return "http://localhost:3001";
 }
@@ -44,7 +45,7 @@ export function getWebAuthnOrigins(): string[] {
     if (alias) origins.add(alias.origin);
   }
 
-  const configured = parseOrigin(process.env.WEBAUTHN_ORIGIN);
+  const configured = parseOrigin(getSecureAuthConfig().webauthn.origin);
   if (configured) {
     origins.add(configured.origin);
     const alias = localhostAlias(configured);
@@ -55,7 +56,8 @@ export function getWebAuthnOrigins(): string[] {
 }
 
 export function getWebAuthnRpId(): string {
-  if (process.env.WEBAUTHN_RP_ID) return process.env.WEBAUTHN_RP_ID;
+  const rpId = getSecureAuthConfig().webauthn.rpId?.trim();
+  if (rpId) return rpId;
 
   const origin = parseOrigin(getPrimaryWebAuthnOrigin());
   if (origin?.hostname) return origin.hostname;
@@ -64,7 +66,7 @@ export function getWebAuthnRpId(): string {
 }
 
 export function getWebAuthnRpName(): string {
-  return process.env.WEBAUTHN_RP_NAME ?? APP_NAME;
+  return getSecureAuthConfig().webauthn.rpName || getSecureAuthConfig().app.name;
 }
 
 export function toPasskeyVerificationErrorMessage(error: unknown): string {

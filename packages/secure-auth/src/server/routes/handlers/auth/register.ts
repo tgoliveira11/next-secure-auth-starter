@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { userRepository } from "@/server/repositories/user-repository";
-import { hashPassword } from "@/server/policies/password-hashing";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { hashPassword } from "@/modules/security/policies/password-hashing";
 import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
-import { enforceRateLimit, RateLimitError } from "@/server/policies/rate-limit";
-import { safeLogger } from "@/lib/logger";
-import { getClientIp } from "@/lib/request-ip";
+} from "@/modules/security/policies/auth-password-input";
+import { enforceRateLimit, RateLimitError } from "@/modules/rate-limit/index";
+import { safeLogger } from "@/modules/security/logger/index";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import { apiError } from "@/lib/api-helpers";
-import { accountAuthService } from "@/server/services/account-auth-service";
-import { getSecureAuthConfig } from "@/core/auth-config-store";
-import { validatePasswordForSubmission } from "@/lib/password-policy";
-import { ValidationError } from "@/server/services/account-service";
+import { accountAuthService } from "@/modules/account/services/account-auth-service";
+import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
+import { validatePasswordForSubmission } from "@/modules/security/password-policy/index";
+import { ValidationError } from "@/modules/account/services/account-service";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -33,10 +33,10 @@ function registrationErrorMessage(error: unknown): string {
     message.includes("econnrefused") ||
     message.includes("connection")
   ) {
-    return "Database unavailable. Start PostgreSQL (docker compose up -d) and run migrations (npm run db:migrate).";
+    return "Database unavailable. Verify database connectivity and retry.";
   }
   if (message.includes("relation") && message.includes("does not exist")) {
-    return "Database schema missing. Run migrations: npm run db:migrate";
+    return "Database schema missing. Apply migrations for your consuming application.";
   }
 
   return "Registration failed. Please try again.";

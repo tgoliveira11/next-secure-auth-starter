@@ -61,36 +61,19 @@ export const DEFAULT_PASSWORD_POLICY: PasswordPolicyConfig = {
   minScore: 2,
 };
 
-function readBoolean(value: string | undefined, fallback: boolean): boolean {
-  if (value === undefined) return fallback;
-  return value === "true" || value === "1";
-}
-
-function readEnforcement(value: string | undefined): PasswordPolicyEnforcement {
-  if (value === "off" || value === "enforce" || value === "warn") return value;
-  return DEFAULT_PASSWORD_POLICY.enforcement;
-}
+import { resolvePasswordPolicyConfig } from "@/core/config-resolvers.js";
 
 export function getPasswordPolicyConfig(
-  env: Record<string, string | undefined> = typeof process !== "undefined"
-    ? process.env
-    : {}
+  override?: Partial<PasswordPolicyConfig>
 ): PasswordPolicyConfig {
-  const minLength = Number.parseInt(env.PASSWORD_MIN_LENGTH ?? "", 10);
-  const minScore = Number.parseInt(env.PASSWORD_MIN_SCORE ?? "", 10);
-  return {
-    enforcement: readEnforcement(env.PASSWORD_POLICY_ENFORCEMENT),
-    minLength: Number.isFinite(minLength) ? minLength : DEFAULT_PASSWORD_POLICY.minLength,
-    requireUppercase: readBoolean(env.PASSWORD_REQUIRE_UPPERCASE, false),
-    requireLowercase: readBoolean(env.PASSWORD_REQUIRE_LOWERCASE, false),
-    requireNumber: readBoolean(env.PASSWORD_REQUIRE_NUMBER, false),
-    requireSymbol: readBoolean(env.PASSWORD_REQUIRE_SYMBOL, false),
-    blockCommonPasswords: readBoolean(
-      env.PASSWORD_BLOCK_COMMON_PASSWORDS,
-      DEFAULT_PASSWORD_POLICY.blockCommonPasswords
-    ),
-    minScore: Number.isFinite(minScore) ? minScore : DEFAULT_PASSWORD_POLICY.minScore,
-  };
+  let base: PasswordPolicyConfig;
+  try {
+    base = resolvePasswordPolicyConfig();
+  } catch {
+    base = DEFAULT_PASSWORD_POLICY;
+  }
+  if (!override) return base;
+  return { ...base, ...override };
 }
 
 export function assessPassword(

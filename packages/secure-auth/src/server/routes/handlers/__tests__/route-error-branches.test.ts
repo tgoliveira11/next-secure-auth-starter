@@ -30,8 +30,8 @@ const mocks = vi.hoisted(() => ({
   regenerateBackupCodes: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/session", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth/session")>();
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
     requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
@@ -39,7 +39,7 @@ vi.mock("@/lib/auth/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/server/services/two-factor-service", () => ({
+vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
   twoFactorService: {
     getStatus: mocks.getStatus,
     startSetup: mocks.startSetup,
@@ -48,7 +48,7 @@ vi.mock("@/server/services/two-factor-service", () => ({
   },
 }));
 
-vi.mock("@/server/services/account-session-service", () => ({
+vi.mock("@/modules/sessions/services/account-session-service", () => ({
   accountSessionService: {
     enrichFromRequest: mocks.pingSession,
     revokeAllSessions: mocks.revokeAllSessions,
@@ -56,14 +56,14 @@ vi.mock("@/server/services/account-session-service", () => ({
   },
 }));
 
-vi.mock("@/server/services/passkey-account-service", () => ({
+vi.mock("@/modules/passkeys/services/passkey-account-service", () => ({
   passkeyAccountService: {
     listPasskeys: mocks.listPasskeys,
     removePasskey: mocks.removePasskey,
   },
 }));
 
-vi.mock("@/server/services/account-service", () => ({
+vi.mock("@/modules/account/services/account-service", () => ({
   accountService: {
     getDeletionRequirements: mocks.getDeletionRequirements,
   },

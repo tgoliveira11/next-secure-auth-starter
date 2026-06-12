@@ -3,20 +3,20 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
-import { passkeyRepository } from "@/server/repositories/passkey-repository";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { userRepository } from "@/server/repositories/user-repository";
-import { enforceRateLimit } from "@/server/policies/rate-limit";
+import { passkeyRepository } from "@/modules/passkeys/repositories/passkey-repository";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { enforceRateLimit } from "@/modules/rate-limit/index";
 import {
   getWebAuthnOrigins,
   getWebAuthnRpId,
   toPasskeyVerificationErrorMessage,
-} from "@/lib/passkey/webauthn-config";
-import { authLoginService } from "@/server/services/auth-login-service";
-import { authService } from "@/server/services/auth-service";
-import { assertCredentialsEmailVerifiedForSignIn } from "@/lib/account-policy-config";
-import { ChallengeError, NotFoundError } from "@/server/services/passkey-service";
-import { ValidationError } from "@/server/services/account-service";
+} from "@/modules/passkeys/lib/webauthn-config";
+import { authLoginService } from "@/modules/auth/services/auth-login-service";
+import { authService } from "@/modules/auth/services/auth-service";
+import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
+import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
+import { ValidationError } from "@/modules/account/services/account-service";
 
 const rpID = getWebAuthnRpId();
 const origins = getWebAuthnOrigins();

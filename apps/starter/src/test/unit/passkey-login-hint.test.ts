@@ -29,46 +29,46 @@ describe("passkey login hint", () => {
         document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       }
     }
-    clearPasskeyLoginHint();
+    clearPasskeyLoginHint(APP_SLUG);
   });
 
   it("stores and reads userId with optional credentialId", () => {
-    setPasskeyLoginHint({ userId: USER_ID, credentialId: "cred-id" });
-    expect(getPasskeyLoginHint()).toEqual({ userId: USER_ID, credentialId: "cred-id" });
+    setPasskeyLoginHint(APP_SLUG, { userId: USER_ID, credentialId: "cred-id" });
+    expect(getPasskeyLoginHint(APP_SLUG)).toEqual({ userId: USER_ID, credentialId: "cred-id" });
   });
 
   it("reads credentialId from cookies when localStorage is empty", () => {
-    setPasskeyLoginHint({ credentialId: "cred-from-cookie" });
+    setPasskeyLoginHint(APP_SLUG, { credentialId: "cred-from-cookie" });
     localStorage.removeItem(credentialIdKey);
-    expect(getPasskeyLoginHint()).toEqual({ credentialId: "cred-from-cookie" });
+    expect(getPasskeyLoginHint(APP_SLUG)).toEqual({ credentialId: "cred-from-cookie" });
   });
 
   it("clears stored hint from localStorage and cookies", () => {
-    setPasskeyLoginHint({ userId: USER_ID, credentialId: "cred-id" });
-    clearPasskeyLoginHint();
-    expect(getPasskeyLoginHint()).toBeNull();
+    setPasskeyLoginHint(APP_SLUG, { userId: USER_ID, credentialId: "cred-id" });
+    clearPasskeyLoginHint(APP_SLUG);
+    expect(getPasskeyLoginHint(APP_SLUG)).toBeNull();
     expect(document.cookie).not.toContain(`${credentialIdKey}=`);
   });
 
   it("stores userId without credentialId", () => {
-    setPasskeyLoginHint({ userId: USER_ID });
-    expect(getPasskeyLoginHint()).toEqual({ userId: USER_ID });
+    setPasskeyLoginHint(APP_SLUG, { userId: USER_ID });
+    expect(getPasskeyLoginHint(APP_SLUG)).toEqual({ userId: USER_ID });
   });
 
   it("reads userId from cookies when localStorage is empty", () => {
-    setPasskeyLoginHint({ userId: USER_ID });
+    setPasskeyLoginHint(APP_SLUG, { userId: USER_ID });
     localStorage.removeItem(userIdKey);
-    expect(getPasskeyLoginHint()).toEqual({ userId: USER_ID });
+    expect(getPasskeyLoginHint(APP_SLUG)).toEqual({ userId: USER_ID });
   });
 
   it("clears userId when updating hint without userId", () => {
-    setPasskeyLoginHint({ userId: USER_ID, credentialId: "cred-id" });
-    setPasskeyLoginHint({ credentialId: "cred-only" });
-    expect(getPasskeyLoginHint()).toEqual({ credentialId: "cred-only" });
+    setPasskeyLoginHint(APP_SLUG, { userId: USER_ID, credentialId: "cred-id" });
+    setPasskeyLoginHint(APP_SLUG, { credentialId: "cred-only" });
+    expect(getPasskeyLoginHint(APP_SLUG)).toEqual({ credentialId: "cred-only" });
   });
 
   it("ignores empty cookie values", () => {
     document.cookie = `${userIdKey}=; path=/`;
-    expect(getPasskeyLoginHint()).toBeNull();
+    expect(getPasskeyLoginHint(APP_SLUG)).toBeNull();
   });
 });

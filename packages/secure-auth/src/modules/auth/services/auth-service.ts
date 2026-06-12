@@ -1,6 +1,6 @@
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { userRepository } from "@/server/repositories/user-repository";
-import { enforceRateLimit } from "@/server/policies/rate-limit";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { enforceRateLimit } from "@/modules/rate-limit/index";
 
 export const authService = {
   async recordLoginFailure(email: string) {

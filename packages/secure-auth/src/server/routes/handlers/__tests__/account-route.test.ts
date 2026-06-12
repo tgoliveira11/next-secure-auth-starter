@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { accountDelete as DELETE, accountGet as GET } from "@/test/helpers/handlers";
 import { USER_ID } from "@/test/helpers/fixtures";
-import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/lib/account-deletion";
+import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/modules/account/lib/account-deletion";
 
-vi.mock("@/lib/auth/session", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth/session")>();
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
     requireFullyAuthenticatedUser: vi.fn(async () => ({
@@ -15,7 +15,7 @@ vi.mock("@/lib/auth/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/server/services/account-service", () => ({
+vi.mock("@/modules/account/services/account-service", () => ({
   accountService: {
     getDeletionRequirements: vi.fn(async () => ({
       requiresPassword: true,
@@ -39,14 +39,14 @@ describe("/api/account", () => {
   });
 
   it("maps unexpected GET failures", async () => {
-    const { accountService } = await import("@/server/services/account-service");
+    const { accountService } = await import("@/modules/account/services/account-service");
     vi.mocked(accountService.getDeletionRequirements).mockRejectedValueOnce(new Error("db down"));
     const res = await GET();
     expect(res.status).toBe(500);
   });
 
   it("deletes the authenticated account with confirmation payload", async () => {
-    const { accountService } = await import("@/server/services/account-service");
+    const { accountService } = await import("@/modules/account/services/account-service");
     const res = await DELETE(
       new Request("http://localhost/api/account", {
         method: "DELETE",

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/lib/account-deletion";
+import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/modules/account/lib/account-deletion";
 
 const mocks = vi.hoisted(() => ({
   findById: vi.fn(),
@@ -11,29 +11,29 @@ const mocks = vi.hoisted(() => ({
   runInTransaction: vi.fn(async (fn: (tx: unknown) => Promise<void>) => fn({})),
 }));
 
-vi.mock("@/server/repositories/user-repository", () => ({
+vi.mock("@/modules/account/repositories/user-repository", () => ({
   userRepository: {
     findById: mocks.findById,
     deleteById: mocks.deleteById,
   },
 }));
 
-vi.mock("@/server/repositories/account-session-repository", () => ({
+vi.mock("@/modules/sessions/repositories/account-session-repository", () => ({
   accountSessionRepository: {
     findByIdForUser: mocks.findSession,
   },
 }));
 
-vi.mock("@/server/policies/password-hashing", () => ({
+vi.mock("@/modules/security/policies/password-hashing", () => ({
   verifyPassword: mocks.verifyPassword,
 }));
 
-vi.mock("@/server/policies/rate-limit", () => ({
+vi.mock("@/modules/rate-limit/index", () => ({
   enforceRateLimit: mocks.enforceRateLimit,
   RateLimitError: class RateLimitError extends Error {},
 }));
 
-vi.mock("@/server/repositories/audit-repository", () => ({
+vi.mock("@/modules/audit/repositories/audit-repository", () => ({
   auditRepository: { record: mocks.recordAudit },
 }));
 

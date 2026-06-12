@@ -7,7 +7,7 @@ import { loginStartPost } from "@/test/helpers/handlers";
 import { loginChallengeStatusGet as challengeStatusGet } from "@/test/helpers/handlers";
 import { loginVerify2faPost as verify2faPost } from "@/test/helpers/handlers";
 import { USER_ID } from "@/test/helpers/fixtures";
-import { TWO_FACTOR_LOGIN_CHALLENGE_COOKIE } from "@/modules/two-factor/lib/login-challenge-cookie";
+import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
 
 const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
@@ -26,15 +26,15 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-vi.mock("@/lib/auth/session", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth/session")>();
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
     requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
   };
 });
 
-vi.mock("@/server/services/two-factor-service", () => ({
+vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
   twoFactorService: {
     getStatus: mocks.getStatus,
     startSetup: mocks.startSetup,
@@ -43,8 +43,8 @@ vi.mock("@/server/services/two-factor-service", () => ({
   },
 }));
 
-vi.mock("@/server/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/server/services/auth-login-service")>();
+vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
   return {
     ...actual,
     authLoginService: {
@@ -119,14 +119,14 @@ describe("two-factor API routes", () => {
       requiresTwoFactor: true,
       challengeToken: "challenge-token-1234567890",
     });
-    expect(res.cookies.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value).toBe(
+    expect(res.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe(
       "challenge-token-1234567890"
     );
   });
 
   it("challenge status reflects pending cookie state", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -139,7 +139,7 @@ describe("two-factor API routes", () => {
   });
 
   it("login start rejects invalid payloads and invalid credentials", async () => {
-    const { InvalidCredentialsError } = await import("@/server/services/auth-login-service");
+    const { InvalidCredentialsError } = await import("@/modules/auth/services/auth-login-service");
     const badPayload = await loginStartPost(
       new Request("http://localhost", {
         method: "POST",
@@ -206,7 +206,7 @@ describe("two-factor API routes", () => {
   it("verify-2fa returns login token on success", async () => {
     mocks.verifyTwoFactorLogin.mockResolvedValue({ loginToken: "login-token" });
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -220,7 +220,7 @@ describe("two-factor API routes", () => {
     );
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ loginToken: "login-token" });
-    expect(res.cookies.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value).toBe("");
+    expect(res.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe("");
   });
 
   it("verify-2fa rejects invalid payloads", async () => {
@@ -236,12 +236,12 @@ describe("two-factor API routes", () => {
 
   it("verify-2fa maps challenge and code failures", async () => {
     const { InvalidTwoFactorChallengeError, InvalidTwoFactorCodeError } = await import(
-      "@/server/services/auth-login-service"
+      "@/modules/auth/services/auth-login-service"
     );
 
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new InvalidTwoFactorChallengeError());
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -257,7 +257,7 @@ describe("two-factor API routes", () => {
 
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new InvalidTwoFactorCodeError());
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -275,7 +275,7 @@ describe("two-factor API routes", () => {
   it("verify-2fa maps unexpected service failures", async () => {
     mocks.verifyTwoFactorLogin.mockRejectedValueOnce(new Error("db down"));
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );

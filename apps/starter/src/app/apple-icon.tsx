@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
-import { brandMarkDataUrl } from "@tgoliveira/secure-auth/client";
+import { buildBrandMarkDataUrl } from "@tgoliveira/secure-auth/client";
+import { APP_NAME } from "@/lib/brand";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -17,7 +18,7 @@ export default function AppleIcon() {
           background: "#faf8f5",
         }}
       >
-        <img src={brandMarkDataUrl} alt="" width={180} height={180} />
+        <img src={buildBrandMarkDataUrl(APP_NAME)} alt="" width={180} height={180} />
       </div>
     ),
     size

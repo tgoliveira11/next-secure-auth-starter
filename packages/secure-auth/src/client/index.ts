@@ -13,25 +13,25 @@ export * from "../lib/api-client/passkey-account.js";
 export * from "../lib/api-client/passkey-login.js";
 export * from "../lib/api-client/two-factor.js";
 
-export * from "../lib/account-auth-messages.js";
-export * from "../lib/account-deletion.js";
-export * from "../lib/account-session-types.js";
+export * from "../modules/account/lib/account-auth-messages.js";
+export * from "../modules/account/lib/account-deletion.js";
+export * from "../modules/sessions/lib/account-session-types.js";
 
-export * from "../lib/passkey/credential-label.js";
-export * from "../lib/passkey/login-hint.js";
-export * from "../lib/passkey/messages.js";
-export * from "../lib/passkey/prepare-webauthn-options.js";
+export * from "../modules/passkeys/lib/credential-label.js";
+export * from "../modules/passkeys/lib/login-hint.js";
+export * from "../modules/passkeys/lib/messages.js";
+export * from "../modules/passkeys/lib/prepare-webauthn-options.js";
 
 export * from "../lib/forms/read-named-form-field.js";
 
 export * from "../lib/validation/two-factor.js";
 
-export * from "../lib/ui/format-auth-method.js";
-export * from "../lib/ui/format-auth-provider.js";
-export * from "../lib/ui/format-session-datetime.js";
+export * from "../modules/sessions/lib/format-auth-method.js";
+export * from "../modules/sessions/lib/format-auth-provider.js";
+export * from "../modules/sessions/lib/format-session-datetime.js";
 
 export { cn } from "../modules/ui/lib/cn.js";
-export { BRAND_MARK_SVG, brandMarkDataUrl } from "../modules/ui/lib/brand-mark.js";
+export { buildBrandMarkSvg, buildBrandMarkDataUrl } from "../modules/ui/lib/brand-mark.js";
 export { MAIN_CONTENT_ID } from "../modules/ui/lib/main-content.js";
 
 export {
@@ -45,11 +45,10 @@ export {
 } from "../modules/auth/lib/oauth-sign-in-policy.js";
 
 export {
-  TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
-} from "../modules/two-factor/lib/login-challenge-cookie.js";
-
-export {
-  LOGIN_PENDING_TOKEN_COOKIE,
-  clearLoginPendingTokenCookie,
-  getLoginPendingTokenCookieOptions,
-} from "../modules/auth/lib/login-pending-cookie.js";
+  buildLoginPendingTokenCookieName,
+  buildTwoFactorLoginChallengeCookieName,
+  buildPasskeyLoginUserIdKey,
+  buildPasskeyLoginCredentialIdKey,
+  buildPasskeyLoginUserIdCookie,
+  buildPasskeyLoginCredentialIdCookie,
+} from "../modules/auth/lib/auth-cookie-names.js";

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireSessionUser } from "@/lib/auth/session";
+import { requireSessionUser } from "@/modules/auth/lib/session";
 import { apiError } from "@/lib/api-helpers";
-import { passkeyAccountService } from "@/server/services/passkey-account-service";
+import { passkeyAccountService } from "@/modules/passkeys/services/passkey-account-service";
 
 export async function GET() {
   try {

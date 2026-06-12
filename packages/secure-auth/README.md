@@ -16,7 +16,7 @@ This is **not** a generic auth framework. It encodes specific flows: credentials
 | `@tgoliveira/secure-auth/react/client` | Client-only UI (`ConfirmDialog`, hooks) |
 | `@tgoliveira/secure-auth/client` | Browser-safe API client, passkey helpers, OAuth UI constants, formatters |
 | `@tgoliveira/secure-auth/client/password-policy` | Password policy config (safe for server components) |
-| `@tgoliveira/secure-auth/server` | Server helpers (`createRouteHandlers`, `createAuthServices`) |
+| `@tgoliveira/secure-auth/server` | Server helpers (`createAuthServices`, `createRoutes`) |
 | `@tgoliveira/secure-auth/drizzle/schema` | Auth Drizzle schema (single source of truth) |
 | `@tgoliveira/secure-auth/email` | Email provider types |
 | `@tgoliveira/secure-auth/styles.css` | Tailwind v4 `@source` registration for package UI classes (import from app `globals.css`) |
@@ -106,7 +106,27 @@ Reference implementation: `apps/starter/src/modules/email/core/` wired in `apps/
 
 ## Dependency injection
 
-Call `createSecureAuth(config)` once at app startup. This binds `{ config, db }` into a single runtime used by services and repositories. Services do not read `process.env` directly.
+Call `createSecureAuth(config)` once at app startup. This binds `{ config, db }` into a single runtime used by services and repositories.
+
+**The package does not read runtime environment variables.** Map secrets and policy at the app boundary:
+
+```typescript
+export const secureAuth = createSecureAuth({
+  // ...
+  auth: {
+    nextAuthSecret: process.env.NEXTAUTH_SECRET!,
+    twoFactorEncryptionKey: process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY!,
+  },
+  passwordPolicy: { enforcement: "warn", minLength: 12 /* ... */ },
+  sessions: { maxAgeSeconds: 30 * 24 * 60 * 60 },
+  rateLimit: { store: process.env.RATE_LIMIT_STORE === "postgres" ? "postgres" : "memory" },
+  server: { cookieSecure: process.env.NODE_ENV === "production" },
+});
+```
+
+### Runtime state (0.1.x)
+
+`createSecureAuth` is the composition root. Internal modules use `getSecureAuthConfig()` backed by a process-scoped runtime binding. Repository constructor injection is planned for 0.2.x. See [docs/PACKAGE_HARDENING_REPORT.md](../../docs/PACKAGE_HARDENING_REPORT.md).
 
 ## Database and migrations
 

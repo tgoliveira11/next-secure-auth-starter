@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
-import { requireFullyAuthenticatedUser } from "@/lib/auth/session";
-import { accountSessionService } from "@/server/services/account-session-service";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { accountSessionService } from "@/modules/sessions/services/account-session-service";
 
 export async function GET() {
   try {

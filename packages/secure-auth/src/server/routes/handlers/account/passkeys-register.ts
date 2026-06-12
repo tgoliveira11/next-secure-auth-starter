@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireSessionUser } from "@/lib/auth/session";
-import { passkeyAccountService } from "@/server/services/passkey-account-service";
+import { requireSessionUser } from "@/modules/auth/lib/session";
+import { passkeyAccountService } from "@/modules/passkeys/services/passkey-account-service";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 
 const bodySchema = z.object({
   action: z.enum(["options", "verify"]),

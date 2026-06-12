@@ -1,10 +1,10 @@
 import { runInTransaction } from "@/lib/db/transaction";
-import { userRepository } from "@/server/repositories/user-repository";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { accountSessionRepository } from "@/server/repositories/account-session-repository";
-import { verifyPassword } from "@/server/policies/password-hashing";
-import { enforceRateLimit, RateLimitError } from "@/server/policies/rate-limit";
-import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/lib/account-deletion";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { accountSessionRepository } from "@/modules/sessions/repositories/account-session-repository";
+import { verifyPassword } from "@/modules/security/policies/password-hashing";
+import { enforceRateLimit, RateLimitError } from "@/modules/rate-limit/index";
+import { ACCOUNT_DELETION_CONFIRMATION_PHRASE } from "@/modules/account/lib/account-deletion";
 import { assertPasswordlessDeletionAllowed } from "@/modules/account/lib/account-deletion-policy";
 import {
   NotFoundError,

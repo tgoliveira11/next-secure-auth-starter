@@ -48,7 +48,7 @@ export async function signInWithPasskey(input?: { email?: string }): Promise<{
     return { outcome: "unsupported", redirectTo: "/login" };
   }
 
-  const cachedHint = getPasskeyLoginHint();
+  const cachedHint = getPasskeyLoginHint(APP_SLUG);
   const optionsPayload = buildPasskeyLoginOptionsPayload(input?.email, cachedHint);
 
   let optionsResponse;
@@ -75,7 +75,7 @@ export async function signInWithPasskey(input?: { email?: string }): Promise<{
 
   const verifyResult = await passkeyLoginApi.verify({ response: assertion });
 
-  setPasskeyLoginHint({
+  setPasskeyLoginHint(APP_SLUG, {
     userId: verifyResult.userId,
     credentialId: verifyResult.credentialId ?? assertion.id,
   });

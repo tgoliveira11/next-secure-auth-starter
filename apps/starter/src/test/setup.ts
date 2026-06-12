@@ -1,6 +1,6 @@
 import { vi, expect, beforeAll } from "vitest";
 import { toHaveNoViolations } from "jest-axe";
-import { initSecureAuthRuntime } from "../../../../packages/secure-auth/src/core/init-runtime";
+import { initSecureAuthRuntime } from "../../../../packages/secure-auth/src/core/secure-auth-runtime";
 import { db } from "@/lib/db";
 
 expect.extend(toHaveNoViolations);

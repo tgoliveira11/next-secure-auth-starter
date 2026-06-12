@@ -1,4 +1,4 @@
-import { ACCOUNT_PASSWORD_RESET_NOTE } from "@/lib/account-auth-messages";
+import { ACCOUNT_PASSWORD_RESET_NOTE } from "@/modules/account/lib/account-auth-messages";
 import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
 
 function buildAccountLink(path: string, token: string): string {

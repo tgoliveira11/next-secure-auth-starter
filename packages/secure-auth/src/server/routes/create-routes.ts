@@ -138,30 +138,6 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     sessionsRevokeAll: {
       POST: lazyRoute(() => import("./handlers/account/sessions-revoke-all.js"), "POST"),
     },
-
-    // Legacy aliases (original createSecureAuth route names)
-    loginCompleteLegacy: { POST: lazyRoute(() => import("./handlers/auth/login-complete.js"), "POST") },
-    verifyEmail: {
-      POST: lazyRoute(() => import("./handlers/auth/verify-email-confirm.js"), "POST"),
-    },
-    passwordResetStart: {
-      POST: lazyRoute(() => import("./handlers/auth/forgot-password.js"), "POST"),
-    },
-    passwordResetComplete: {
-      POST: lazyRoute(() => import("./handlers/auth/reset-password.js"), "POST"),
-    },
-    twoFactorSetup: {
-      POST: lazyRoute(() => import("./handlers/account/two-factor-setup-start.js"), "POST"),
-    },
-    twoFactorVerify: {
-      POST: lazyRoute(() => import("./handlers/account/two-factor-setup-verify.js"), "POST"),
-    },
-    passkeyAuthenticate: {
-      POST: lazyRoute(() => import("./handlers/auth/passkey-login-verify.js"), "POST"),
-    },
-    sessions: {
-      GET: lazyRoute(() => import("./handlers/account/sessions-list.js"), "GET"),
-    },
   };
 }
 

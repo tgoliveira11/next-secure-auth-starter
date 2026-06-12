@@ -1,3 +1,5 @@
+import { resolveAccountPolicyConfig } from "@/core/config-resolvers.js";
+
 export type AccountPolicyConfig = {
   sendVerificationOnRegister: boolean;
   requireEmailVerificationBeforeSignIn: boolean;
@@ -8,26 +10,15 @@ export const DEFAULT_ACCOUNT_POLICY: AccountPolicyConfig = {
   requireEmailVerificationBeforeSignIn: false,
 };
 
-function readBoolean(value: string | undefined, fallback: boolean): boolean {
-  if (value === undefined) return fallback;
-  return value === "true" || value === "1";
-}
-
 export function getAccountPolicyConfig(
-  env: Record<string, string | undefined> = typeof process !== "undefined"
-    ? process.env
-    : {}
+  override?: AccountPolicyConfig
 ): AccountPolicyConfig {
-  return {
-    sendVerificationOnRegister: readBoolean(
-      env.EMAIL_VERIFICATION_SEND_ON_REGISTER,
-      DEFAULT_ACCOUNT_POLICY.sendVerificationOnRegister
-    ),
-    requireEmailVerificationBeforeSignIn: readBoolean(
-      env.EMAIL_VERIFICATION_REQUIRE_BEFORE_SIGN_IN,
-      DEFAULT_ACCOUNT_POLICY.requireEmailVerificationBeforeSignIn
-    ),
-  };
+  if (override) return override;
+  try {
+    return resolveAccountPolicyConfig();
+  } catch {
+    return DEFAULT_ACCOUNT_POLICY;
+  }
 }
 
 export function isCredentialsAccount(user: {
@@ -43,9 +34,9 @@ export function credentialsSignInRequiresEmailVerification(
     passwordHash: string | null;
     emailVerifiedAt: Date | null;
   },
-  env?: Record<string, string | undefined>
+  policyOverride?: AccountPolicyConfig
 ): boolean {
-  const policy = getAccountPolicyConfig(env);
+  const policy = getAccountPolicyConfig(policyOverride);
   if (!policy.requireEmailVerificationBeforeSignIn) return false;
   if (!isCredentialsAccount(user)) return false;
   return !user.emailVerifiedAt;
@@ -57,9 +48,9 @@ export function assertCredentialsEmailVerifiedForSignIn(
     passwordHash: string | null;
     emailVerifiedAt: Date | null;
   },
-  env?: Record<string, string | undefined>
+  policyOverride?: AccountPolicyConfig
 ): void {
-  if (credentialsSignInRequiresEmailVerification(user, env)) {
+  if (credentialsSignInRequiresEmailVerification(user, policyOverride)) {
     throw new EmailVerificationRequiredError();
   }
 }

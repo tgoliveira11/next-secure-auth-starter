@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { initSecureAuthRuntime } from "@/core/init-runtime";
+import { initSecureAuthRuntime } from "@/core/secure-auth-runtime";
 import { registerPost as POST } from "@/test/helpers/handlers";
 import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
-import { hashPassword } from "@/server/policies/password-hashing";
+import { hashPassword } from "@/modules/security/policies/password-hashing";
 
 const mocks = vi.hoisted(() => ({
   findByEmail: vi.fn(),
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@/server/repositories/user-repository", () => ({
+vi.mock("@/modules/account/repositories/user-repository", () => ({
   userRepository: mocks.userRepository,
 }));
 
@@ -21,13 +21,13 @@ vi.mock("@/modules/account/repositories/user-repository", () => ({
   userRepository: mocks.userRepository,
 }));
 
-vi.mock("@/server/policies/password-hashing", () => ({
+vi.mock("@/modules/security/policies/password-hashing", () => ({
   hashPassword: vi.fn(
     async () => "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
   ),
 }));
 
-vi.mock("@/server/services/account-auth-service", () => ({
+vi.mock("@/modules/account/services/account-auth-service", () => ({
   accountAuthService: {
     sendVerificationEmailForUser: vi.fn(async () => ({ alreadyVerified: false })),
   },
@@ -93,7 +93,7 @@ describe("register API route", () => {
         },
       })
     );
-    const { accountAuthService } = await import("@/server/services/account-auth-service");
+    const { accountAuthService } = await import("@/modules/account/services/account-auth-service");
 
     mocks.userRepository.findByEmail.mockResolvedValue(null);
     mocks.userRepository.create.mockResolvedValue({ id: "user-1", email: "new@example.com" });
@@ -116,9 +116,20 @@ describe("register API route", () => {
   });
 
   it("rejects weak passwords when policy enforcement is enabled", async () => {
-    const original = process.env.PASSWORD_POLICY_ENFORCEMENT;
-    process.env.PASSWORD_POLICY_ENFORCEMENT = "enforce";
-    process.env.PASSWORD_MIN_LENGTH = "12";
+    initSecureAuthRuntime(
+      buildTestSecureAuthConfig({
+        passwordPolicy: {
+          enforcement: "enforce",
+          minLength: 12,
+          requireUppercase: false,
+          requireLowercase: false,
+          requireNumber: false,
+          requireSymbol: false,
+          blockCommonPasswords: true,
+          minScore: 2,
+        },
+      })
+    );
     mocks.userRepository.findByEmail.mockResolvedValue(null);
 
     const res = await POST(
@@ -133,18 +144,23 @@ describe("register API route", () => {
       error: expect.stringMatching(/common|characters|policy/i),
     });
     expect(mocks.userRepository.create).not.toHaveBeenCalled();
-
-    if (original === undefined) {
-      delete process.env.PASSWORD_POLICY_ENFORCEMENT;
-    } else {
-      process.env.PASSWORD_POLICY_ENFORCEMENT = original;
-    }
   });
 
   it("accepts strong passwords when policy enforcement is enabled", async () => {
-    const original = process.env.PASSWORD_POLICY_ENFORCEMENT;
-    process.env.PASSWORD_POLICY_ENFORCEMENT = "enforce";
-    process.env.PASSWORD_MIN_LENGTH = "12";
+    initSecureAuthRuntime(
+      buildTestSecureAuthConfig({
+        passwordPolicy: {
+          enforcement: "enforce",
+          minLength: 12,
+          requireUppercase: false,
+          requireLowercase: false,
+          requireNumber: false,
+          requireSymbol: false,
+          blockCommonPasswords: true,
+          minScore: 2,
+        },
+      })
+    );
     mocks.userRepository.findByEmail.mockResolvedValue(null);
     mocks.userRepository.create.mockResolvedValue({ id: "user-1", email: "new@example.com" });
 
@@ -160,11 +176,5 @@ describe("register API route", () => {
 
     expect(res.status).toBe(201);
     expect(mocks.userRepository.create).toHaveBeenCalled();
-
-    if (original === undefined) {
-      delete process.env.PASSWORD_POLICY_ENFORCEMENT;
-    } else {
-      process.env.PASSWORD_POLICY_ENFORCEMENT = original;
-    }
   });
 });

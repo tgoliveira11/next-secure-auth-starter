@@ -1,6 +1,6 @@
 import { db, type DbClient } from "@/lib/db";
 import { auditEvents } from "@/lib/db/schema";
-import { sanitizeAuditMetadata } from "@/server/policies/audit-sanitization";
+import { sanitizeAuditMetadata } from "@/modules/audit/core/audit-sanitization";
 
 export const auditRepository = {
   async record(

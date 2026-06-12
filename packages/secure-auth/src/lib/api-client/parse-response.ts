@@ -18,7 +18,7 @@ export async function getErrorMessage(
   if (data?.error) return data.error;
 
   if (res.status >= 500) {
-    return "Server error. Ensure PostgreSQL is running and migrations have been applied (npm run db:migrate).";
+    return "Server error. Check database connectivity and that migrations have been applied.";
   }
 
   return `${fallback} (${res.status})`;

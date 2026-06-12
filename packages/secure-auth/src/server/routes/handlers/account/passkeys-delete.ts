@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { requireSessionUser } from "@/lib/auth/session";
-import { passkeyAccountService } from "@/server/services/passkey-account-service";
+import { requireSessionUser } from "@/modules/auth/lib/session";
+import { passkeyAccountService } from "@/modules/passkeys/services/passkey-account-service";
 import { apiError } from "@/lib/api-helpers";
 
 import type { RouteContext } from "../../create-routes.js";

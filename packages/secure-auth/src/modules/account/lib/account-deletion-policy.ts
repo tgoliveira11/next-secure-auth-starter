@@ -1,4 +1,4 @@
-import type { AccountAuthMethod } from "@/lib/account-session-types";
+import type { AccountAuthMethod } from "@/modules/sessions/lib/account-session-types";
 import { isOAuthOnlyProvider } from "@/modules/auth/lib/oauth-sign-in-policy";
 import { ReauthenticationRequiredError } from "@/modules/account/lib/account-errors";
 

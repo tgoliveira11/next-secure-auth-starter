@@ -1,9 +1,10 @@
-import { APP_SLUG } from "@/lib/brand";
+import {
+  buildPasskeyLoginCredentialIdCookie,
+  buildPasskeyLoginCredentialIdKey,
+  buildPasskeyLoginUserIdCookie,
+  buildPasskeyLoginUserIdKey,
+} from "@/modules/auth/lib/auth-cookie-names.js";
 
-const USER_ID_KEY = `${APP_SLUG}-passkey-login-user-id`;
-const CREDENTIAL_ID_KEY = `${APP_SLUG}-passkey-login-credential-id`;
-const USER_ID_COOKIE = `${APP_SLUG}-passkey-login-user-id`;
-const CREDENTIAL_ID_COOKIE = `${APP_SLUG}-passkey-login-credential-id`;
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 400;
 
 export type PasskeyLoginHint = {
@@ -29,40 +30,50 @@ function clearCookie(name: string): void {
   document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; samesite=lax`;
 }
 
-export function getPasskeyLoginHint(): PasskeyLoginHint | null {
+export function getPasskeyLoginHint(appSlug: string): PasskeyLoginHint | null {
   if (typeof window === "undefined") return null;
 
-  const userId = localStorage.getItem(USER_ID_KEY) ?? readCookie(USER_ID_COOKIE);
-  const credentialId = localStorage.getItem(CREDENTIAL_ID_KEY) ?? readCookie(CREDENTIAL_ID_COOKIE);
+  const userIdKey = buildPasskeyLoginUserIdKey(appSlug);
+  const credentialIdKey = buildPasskeyLoginCredentialIdKey(appSlug);
+  const userIdCookie = buildPasskeyLoginUserIdCookie(appSlug);
+  const credentialIdCookie = buildPasskeyLoginCredentialIdCookie(appSlug);
+
+  const userId = localStorage.getItem(userIdKey) ?? readCookie(userIdCookie);
+  const credentialId = localStorage.getItem(credentialIdKey) ?? readCookie(credentialIdCookie);
 
   if (!userId && !credentialId) return null;
   return { userId: userId ?? undefined, credentialId: credentialId ?? undefined };
 }
 
-export function setPasskeyLoginHint(hint: PasskeyLoginHint): void {
+export function setPasskeyLoginHint(appSlug: string, hint: PasskeyLoginHint): void {
   if (typeof window === "undefined") return;
 
+  const userIdKey = buildPasskeyLoginUserIdKey(appSlug);
+  const credentialIdKey = buildPasskeyLoginCredentialIdKey(appSlug);
+  const userIdCookie = buildPasskeyLoginUserIdCookie(appSlug);
+  const credentialIdCookie = buildPasskeyLoginCredentialIdCookie(appSlug);
+
   if (hint.userId) {
-    localStorage.setItem(USER_ID_KEY, hint.userId);
-    writeCookie(USER_ID_COOKIE, hint.userId);
+    localStorage.setItem(userIdKey, hint.userId);
+    writeCookie(userIdCookie, hint.userId);
   } else {
-    localStorage.removeItem(USER_ID_KEY);
-    clearCookie(USER_ID_COOKIE);
+    localStorage.removeItem(userIdKey);
+    clearCookie(userIdCookie);
   }
 
   if (hint.credentialId) {
-    localStorage.setItem(CREDENTIAL_ID_KEY, hint.credentialId);
-    writeCookie(CREDENTIAL_ID_COOKIE, hint.credentialId);
+    localStorage.setItem(credentialIdKey, hint.credentialId);
+    writeCookie(credentialIdCookie, hint.credentialId);
   } else {
-    localStorage.removeItem(CREDENTIAL_ID_KEY);
-    clearCookie(CREDENTIAL_ID_COOKIE);
+    localStorage.removeItem(credentialIdKey);
+    clearCookie(credentialIdCookie);
   }
 }
 
-export function clearPasskeyLoginHint(): void {
+export function clearPasskeyLoginHint(appSlug: string): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem(USER_ID_KEY);
-  localStorage.removeItem(CREDENTIAL_ID_KEY);
-  clearCookie(USER_ID_COOKIE);
-  clearCookie(CREDENTIAL_ID_COOKIE);
+  localStorage.removeItem(buildPasskeyLoginUserIdKey(appSlug));
+  localStorage.removeItem(buildPasskeyLoginCredentialIdKey(appSlug));
+  clearCookie(buildPasskeyLoginUserIdCookie(appSlug));
+  clearCookie(buildPasskeyLoginCredentialIdCookie(appSlug));
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireFullyAuthenticatedUser } from "@/lib/auth/session";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import { totpCodeSchema } from "@/lib/validation/two-factor";
-import { twoFactorService } from "@/server/services/two-factor-service";
+import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
 
 const verifySetupSchema = z.object({
   code: totpCodeSchema,

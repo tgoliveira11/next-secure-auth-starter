@@ -1,22 +1,22 @@
 import { runInTransaction } from "@/lib/db/transaction";
-import { validatePasswordForSubmission } from "@/lib/password-policy";
-import { userRepository } from "@/server/repositories/user-repository";
+import { validatePasswordForSubmission } from "@/modules/security/password-policy/index";
+import { userRepository } from "@/modules/account/repositories/user-repository";
 import {
   accountTokenRepository,
   type AccountTokenType,
-} from "@/server/repositories/account-token-repository";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { enforceRateLimit } from "@/server/policies/rate-limit";
-import { hashEmailForScope } from "@/server/policies/email-scope";
-import { createOpaqueToken, hashOpaqueToken } from "@/server/policies/login-token";
-import { hashPassword, verifyPassword } from "@/server/policies/password-hashing";
+} from "@/modules/account/repositories/account-token-repository";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { enforceRateLimit } from "@/modules/rate-limit/index";
+import { hashEmailForScope } from "@/modules/security/scopes/email-scope";
+import { createOpaqueToken, hashOpaqueToken } from "@/modules/security/policies/login-token";
+import { hashPassword, verifyPassword } from "@/modules/security/policies/password-hashing";
 import { deliverAccountEmail } from "@/modules/email/delivery";
 import {
   passwordResetEmailContent,
   verificationEmailContent,
-} from "@/server/email/account-email-templates";
-import { GENERIC_FORGOT_PASSWORD_MESSAGE } from "@/lib/account-auth-messages";
-import { isCredentialsAccount } from "@/lib/account-policy-config";
+} from "@/modules/email/templates/account-email-templates";
+import { GENERIC_FORGOT_PASSWORD_MESSAGE } from "@/modules/account/lib/account-auth-messages";
+import { isCredentialsAccount } from "@/modules/account/lib/account-policy-config";
 import {
   NotFoundError,
   ReauthenticationRequiredError,

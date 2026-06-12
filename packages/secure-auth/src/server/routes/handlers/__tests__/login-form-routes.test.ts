@@ -5,9 +5,9 @@ import {
   loginCompletePost as completePost,
 } from "@/test/helpers/handlers";
 import {
-  LOGIN_PENDING_TOKEN_COOKIE,
+  getLoginPendingTokenCookieName,
 } from "@/modules/auth/lib/login-pending-cookie";
-import { TWO_FACTOR_LOGIN_CHALLENGE_COOKIE } from "@/modules/two-factor/lib/login-challenge-cookie";
+import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
 
 const mocks = vi.hoisted(() => ({
   startCredentialsLogin: vi.fn(),
@@ -21,8 +21,8 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-vi.mock("@/server/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/server/services/auth-login-service")>();
+vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
   return {
     ...actual,
     authLoginService: {
@@ -61,7 +61,7 @@ describe("credentials login form routes", () => {
     const response = await startFormPost(request);
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/login/2fa?mode=credentials");
-    expect(response.cookies.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value).toBe(
+    expect(response.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe(
       "challenge-token-1234567890"
     );
   });
@@ -81,11 +81,11 @@ describe("credentials login form routes", () => {
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/login/complete");
-    expect(response.cookies.get(LOGIN_PENDING_TOKEN_COOKIE)?.value).toBe("login-token-1234567890");
+    expect(response.cookies.get(getLoginPendingTokenCookieName())?.value).toBe("login-token-1234567890");
   });
 
   it("start-form redirects to login on invalid credentials", async () => {
-    const { InvalidCredentialsError } = await import("@/server/services/auth-login-service");
+    const { InvalidCredentialsError } = await import("@/modules/auth/services/auth-login-service");
     mocks.startCredentialsLogin.mockRejectedValue(new InvalidCredentialsError());
 
     const response = await startFormPost(
@@ -103,7 +103,7 @@ describe("credentials login form routes", () => {
 
   it("verify-2fa-form redirects to complete on success", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -117,19 +117,19 @@ describe("credentials login form routes", () => {
 
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/login/complete");
-    expect(response.cookies.get(LOGIN_PENDING_TOKEN_COOKIE)?.value).toBe("login-token-1234567890");
-    expect(response.cookies.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value).toBe("");
+    expect(response.cookies.get(getLoginPendingTokenCookieName())?.value).toBe("login-token-1234567890");
+    expect(response.cookies.get(getTwoFactorLoginChallengeCookieName())?.value).toBe("");
   });
 
   it("complete returns the pending login token once", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === LOGIN_PENDING_TOKEN_COOKIE ? { value: "login-token-1234567890" } : undefined
+      name === getLoginPendingTokenCookieName() ? { value: "login-token-1234567890" } : undefined
     );
 
     const response = await completePost();
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ loginToken: "login-token-1234567890" });
-    expect(response.cookies.get(LOGIN_PENDING_TOKEN_COOKIE)?.value).toBe("");
+    expect(response.cookies.get(getLoginPendingTokenCookieName())?.value).toBe("");
   });
 
   it("complete rejects missing pending login tokens", async () => {
@@ -140,7 +140,7 @@ describe("credentials login form routes", () => {
 
   it("complete rejects short pending login tokens", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === LOGIN_PENDING_TOKEN_COOKIE ? { value: "short" } : undefined
+      name === getLoginPendingTokenCookieName() ? { value: "short" } : undefined
     );
     const response = await completePost();
     expect(response.status).toBe(401);

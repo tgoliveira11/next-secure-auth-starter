@@ -5,9 +5,9 @@ import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
-import { getClientIp } from "@/lib/request-ip";
-import { accountAuthService } from "@/server/services/account-auth-service";
+} from "@/modules/security/policies/auth-password-input";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { accountAuthService } from "@/modules/account/services/account-auth-service";
 
 const validateSchema = z.object({
   action: z.literal("validate"),

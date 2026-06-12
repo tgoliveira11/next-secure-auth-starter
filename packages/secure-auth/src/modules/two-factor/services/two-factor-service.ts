@@ -2,29 +2,29 @@ import QRCode from "qrcode";
 import { runInTransaction } from "@/lib/db/transaction";
 import {
   TWO_FACTOR_BACKUP_CODE_COUNT,
-  TWO_FACTOR_ISSUER,
+  getTwoFactorIssuer,
   TWO_FACTOR_SESSION_UPGRADE_TTL_MS,
-} from "@/lib/two-factor/constants";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { twoFactorRepository } from "@/server/repositories/two-factor-repository";
-import { userRepository } from "@/server/repositories/user-repository";
+} from "@/modules/two-factor/lib/constants";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { twoFactorRepository } from "@/modules/two-factor/repositories/two-factor-repository";
+import { userRepository } from "@/modules/account/repositories/user-repository";
 import {
   generateBackupCodes,
   hashBackupCode,
   normalizeBackupCode,
-} from "@/server/policies/backup-code";
-import { createOpaqueToken, hashOpaqueToken } from "@/server/policies/login-token";
-import { enforceRateLimit, RateLimitError } from "@/server/policies/rate-limit";
+} from "@/modules/two-factor/policies/backup-code";
+import { createOpaqueToken, hashOpaqueToken } from "@/modules/security/policies/login-token";
+import { enforceRateLimit, RateLimitError } from "@/modules/rate-limit/index";
 import {
   decryptTwoFactorSecret,
   encryptTwoFactorSecret,
   type EncryptedTwoFactorSecret,
-} from "@/server/policies/two-factor-secret-crypto";
+} from "@/modules/two-factor/policies/two-factor-secret-crypto";
 import {
   buildOtpAuthUri,
   generateTotpSecret,
   verifyTotpCode,
-} from "@/server/policies/totp";
+} from "@/modules/two-factor/policies/totp";
 
 export const twoFactorService = {
   async getStatus(userId: string) {
@@ -70,7 +70,7 @@ export const twoFactorService = {
       qrCodeDataUrl,
       manualSetupKey: secret,
       otpauthUrl,
-      issuer: TWO_FACTOR_ISSUER,
+      issuer: getTwoFactorIssuer(),
       accountLabel: user.email,
     };
   },

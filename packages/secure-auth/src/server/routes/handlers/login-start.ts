@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
+} from "@/modules/security/policies/auth-password-input";
 import { credentialsLoginStartSchema } from "@/lib/validation/two-factor";
 import { InvalidCredentialsError } from "@/modules/auth/services/auth-login-service";
 import {
   clearLoginChallengeCookie,
   getLoginChallengeCookieOptions,
-  TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+  getTwoFactorLoginChallengeCookieName,
 } from "@/modules/two-factor/lib/login-challenge-cookie";
 import type { SecureAuthServices } from "@/core/types";
 
@@ -35,7 +35,7 @@ async function loginStartPost(request: Request, services: SecureAuthServices) {
       const response = NextResponse.json(result);
       if (result.requiresTwoFactor) {
         response.cookies.set(
-          TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+          getTwoFactorLoginChallengeCookieName(),
           result.challengeToken,
           getLoginChallengeCookieOptions()
         );
@@ -60,8 +60,8 @@ export function createLoginStartPostHandler(services: SecureAuthServices) {
 
 /** Direct handler for tests and lazy route loading. */
 export async function POST(request: Request) {
-  const { authLoginService } = await import("@/server/services/auth-login-service");
-  const { getSecureAuthConfig } = await import("@/core/auth-config-store");
+  const { authLoginService } = await import("@/modules/auth/services/auth-login-service");
+  const { getSecureAuthConfig } = await import("@/core/secure-auth-runtime");
   const config = getSecureAuthConfig();
   return loginStartPost(request, {
     config,

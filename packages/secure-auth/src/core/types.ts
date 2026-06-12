@@ -1,6 +1,7 @@
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { ReactNode } from "react";
 import type { AuthSchema } from "../drizzle/schema.js";
+import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -44,6 +45,21 @@ export type SecureAuthConfig = {
   accountPolicy?: {
     sendVerificationOnRegister: boolean;
     requireEmailVerificationBeforeSignIn: boolean;
+  };
+  passwordPolicy?: PasswordPolicyConfig;
+  sessions?: {
+    maxAgeSeconds?: number;
+    lastUsedUpdateIntervalSeconds?: number;
+  };
+  rateLimit?: {
+    store: "memory" | "postgres";
+  };
+  server?: {
+    /** When true, auth cookies use the Secure flag. Set from consumer env (e.g. NODE_ENV). */
+    cookieSecure?: boolean;
+  };
+  debug?: {
+    authTrace?: boolean;
   };
   oauth?: {
     google?: { clientId: string; clientSecret: string };

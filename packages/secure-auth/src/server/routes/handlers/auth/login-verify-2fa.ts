@@ -1,16 +1,16 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorLoginVerifySchema } from "@/lib/validation/two-factor";
 import {
   authLoginService,
   InvalidTwoFactorChallengeError,
   InvalidTwoFactorCodeError,
-} from "@/server/services/auth-login-service";
+} from "@/modules/auth/services/auth-login-service";
 import {
   clearLoginChallengeCookie,
-  TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+  getTwoFactorLoginChallengeCookieName,
 } from "@/modules/two-factor/lib/login-challenge-cookie";
 
 export async function POST(request: Request) {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     const cookieStore = await cookies();
     const challengeToken =
-      parsed.data.challengeToken ?? cookieStore.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value;
+      parsed.data.challengeToken ?? cookieStore.get(getTwoFactorLoginChallengeCookieName())?.value;
     if (!challengeToken) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }

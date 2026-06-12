@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
-import { TwoFactorEncryptionKeyError } from "@/server/policies/two-factor-secret-crypto";
+import { requireTwoFactorEncryptionKey } from "@/core/app-brand.js";
+import { TwoFactorEncryptionKeyError } from "./two-factor-secret-crypto.js";
 
 const BACKUP_CODE_GROUPS = 3;
 const BACKUP_CODE_GROUP_LENGTH = 4;
@@ -13,8 +14,10 @@ export function normalizeBackupCode(code: string): string {
 }
 
 export function hashBackupCode(code: string): string {
-  const pepper = process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY;
-  if (!pepper) {
+  let pepper: string;
+  try {
+    pepper = requireTwoFactorEncryptionKey();
+  } catch {
     throw new TwoFactorEncryptionKeyError();
   }
   const normalized = normalizeBackupCode(code);

@@ -7,7 +7,7 @@ import {
   userTwoFactorSessionUpgrades,
   userTwoFactorSettings,
 } from "@/lib/db/schema";
-import type { EncryptedTwoFactorSecret } from "@/server/policies/two-factor-secret-crypto";
+import type { EncryptedTwoFactorSecret } from "@/modules/two-factor/policies/two-factor-secret-crypto";
 
 export const twoFactorRepository = {
   async findSettingsByUserId(userId: string) {

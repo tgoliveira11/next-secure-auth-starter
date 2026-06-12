@@ -1,4 +1,4 @@
-import { initSecureAuthRuntime } from "../core/init-runtime.js";
+import { initSecureAuthRuntime } from "../core/secure-auth-runtime.js";
 import type { SecureAuthConfig } from "../core/types.js";
 import { createRoutes } from "../server/routes/create-routes.js";
 

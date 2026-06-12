@@ -4,15 +4,15 @@ import {
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
-import { passkeyRepository } from "@/server/repositories/passkey-repository";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { enforceRateLimit } from "@/server/policies/rate-limit";
+import { passkeyRepository } from "@/modules/passkeys/repositories/passkey-repository";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { enforceRateLimit } from "@/modules/rate-limit/index";
 import {
   getWebAuthnOrigins,
   getWebAuthnRpId,
   getWebAuthnRpName,
-} from "@/lib/passkey/webauthn-config";
-import { ChallengeError, NotFoundError } from "@/server/services/passkey-service";
+} from "@/modules/passkeys/lib/webauthn-config";
+import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
 
 const rpName = getWebAuthnRpName();
 const rpID = getWebAuthnRpId();

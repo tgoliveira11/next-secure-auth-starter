@@ -1,12 +1,12 @@
-import { getSessionMaxAgeMs, getSessionLastUsedUpdateIntervalMs } from "@/lib/session-config";
-import { hashIp, maskIp } from "@/lib/session-ip";
-import { parseUserAgentMetadata, hashUserAgent } from "@/lib/user-agent-metadata";
-import type { AccountAuthMethod, AccountSessionView } from "@/lib/account-session-types";
-import { getClientIp } from "@/lib/request-ip";
-import { accountSessionRepository } from "@/server/repositories/account-session-repository";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { enforceRateLimit } from "@/server/policies/rate-limit";
-import { NotFoundError } from "@/server/services/account-service";
+import { getSessionMaxAgeMs, getSessionLastUsedUpdateIntervalMs } from "@/modules/sessions/lib/session-config";
+import { hashIp, maskIp } from "@/modules/security/ip/session-ip";
+import { parseUserAgentMetadata, hashUserAgent } from "@/modules/security/user-agent/metadata";
+import type { AccountAuthMethod, AccountSessionView } from "@/modules/sessions/lib/account-session-types";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { accountSessionRepository } from "@/modules/sessions/repositories/account-session-repository";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { enforceRateLimit } from "@/modules/rate-limit/index";
+import { NotFoundError } from "@/modules/account/services/account-service";
 
 const lastTouchBySession = new Map<string, number>();
 

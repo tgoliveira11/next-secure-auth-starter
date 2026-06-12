@@ -1,5 +1,5 @@
 import { generateSecret, generateURI, verify } from "otplib";
-import { TWO_FACTOR_ISSUER } from "@/lib/two-factor/constants";
+import { getTwoFactorIssuer } from "@/modules/two-factor/lib/constants";
 
 export function generateTotpSecret(): string {
   return generateSecret();
@@ -7,7 +7,7 @@ export function generateTotpSecret(): string {
 
 export function buildOtpAuthUri(email: string, secret: string): string {
   return generateURI({
-    issuer: TWO_FACTOR_ISSUER,
+    issuer: getTwoFactorIssuer(),
     label: email,
     secret,
   });

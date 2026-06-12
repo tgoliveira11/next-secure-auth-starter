@@ -136,7 +136,8 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 | --- | --- |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package API, EmailProvider |
 | [apps/starter/README.md](apps/starter/README.md) | Starter harness |
-| [docs/architecture.md](docs/architecture.md) | DI, modules, boundaries |
+| [docs/package-api.md](docs/package-api.md) | Public exports and route map |
+| [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) | Package-purity hardening audit |
 | [docs/security-hardening.md](docs/security-hardening.md) | Security tracker |
 | [docs/documentation-audit.md](docs/documentation-audit.md) | Doc audit report |
 | [docs/migration-from-starter.md](docs/migration-from-starter.md) | Standalone → monorepo |

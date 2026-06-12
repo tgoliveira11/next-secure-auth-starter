@@ -99,7 +99,7 @@ describe("signInWithPasskey", () => {
       credentialId: "cred-id",
       userId: USER_ID,
     });
-    expect(mocks.setPasskeyLoginHint).toHaveBeenCalledWith({
+    expect(mocks.setPasskeyLoginHint).toHaveBeenCalledWith("next-secure-auth-starter", {
       userId: USER_ID,
       credentialId: "cred-id",
     });

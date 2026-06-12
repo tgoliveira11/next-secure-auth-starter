@@ -8,7 +8,7 @@ vi.mock("@/modules/account/repositories/user-repository", () => ({
   },
 }));
 
-vi.mock("@/server/policies/password-hashing", () => ({
+vi.mock("@/modules/security/policies/password-hashing", () => ({
   hashPassword: vi.fn(
     async () => "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
   ),
@@ -16,12 +16,12 @@ vi.mock("@/server/policies/password-hashing", () => ({
 
 describe("register route error mapping", () => {
   beforeEach(async () => {
-    const { userRepository } = await import("@/server/repositories/user-repository");
+    const { userRepository } = await import("@/modules/account/repositories/user-repository");
     vi.mocked(userRepository.findByEmail).mockResolvedValue(null as never);
   });
 
   it("maps database connection errors", async () => {
-    const { userRepository } = await import("@/server/repositories/user-repository");
+    const { userRepository } = await import("@/modules/account/repositories/user-repository");
     vi.mocked(userRepository.create).mockRejectedValue(new Error("ECONNREFUSED"));
     const res = await POST(
       new Request("http://localhost", {
@@ -36,7 +36,7 @@ describe("register route error mapping", () => {
   });
 
   it("maps missing DATABASE_URL configuration", async () => {
-    const { userRepository } = await import("@/server/repositories/user-repository");
+    const { userRepository } = await import("@/modules/account/repositories/user-repository");
     vi.mocked(userRepository.create).mockRejectedValue(new Error("DATABASE_URL is not set"));
     const res = await POST(
       new Request("http://localhost", {
@@ -51,7 +51,7 @@ describe("register route error mapping", () => {
   });
 
   it("maps missing schema errors", async () => {
-    const { userRepository } = await import("@/server/repositories/user-repository");
+    const { userRepository } = await import("@/modules/account/repositories/user-repository");
     vi.mocked(userRepository.create).mockRejectedValue(
       new Error('relation "users" does not exist')
     );
@@ -63,7 +63,7 @@ describe("register route error mapping", () => {
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
-      error: expect.stringContaining("Run migrations"),
+      error: expect.stringContaining("Apply migrations"),
     });
   });
 

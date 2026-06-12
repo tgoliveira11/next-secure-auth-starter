@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
-import { passkeyLoginService } from "@/server/services/passkey-login-service";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { passkeyLoginService } from "@/modules/passkeys/services/passkey-login-service";
 
 const bodySchema = z.object({
   email: z.string().email().optional(),

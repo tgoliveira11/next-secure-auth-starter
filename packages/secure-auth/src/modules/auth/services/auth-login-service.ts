@@ -1,16 +1,16 @@
 import {
   TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS,
   TWO_FACTOR_LOGIN_TOKEN_TTL_MS,
-} from "@/lib/two-factor/constants";
-import { auditRepository } from "@/server/repositories/audit-repository";
-import { userRepository } from "@/server/repositories/user-repository";
-import { twoFactorRepository } from "@/server/repositories/two-factor-repository";
-import { verifyPassword } from "@/server/policies/password-hashing";
-import { createOpaqueToken, hashOpaqueToken } from "@/server/policies/login-token";
-import { enforceRateLimit, RateLimitError } from "@/server/policies/rate-limit";
-import { authService } from "@/server/services/auth-service";
-import { twoFactorService } from "@/server/services/two-factor-service";
-import { assertCredentialsEmailVerifiedForSignIn } from "@/lib/account-policy-config";
+} from "@/modules/two-factor/lib/constants";
+import { auditRepository } from "@/modules/audit/repositories/audit-repository";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { twoFactorRepository } from "@/modules/two-factor/repositories/two-factor-repository";
+import { verifyPassword } from "@/modules/security/policies/password-hashing";
+import { createOpaqueToken, hashOpaqueToken } from "@/modules/security/policies/login-token";
+import { enforceRateLimit, RateLimitError } from "@/modules/rate-limit/index";
+import { authService } from "@/modules/auth/services/auth-service";
+import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
 
 export const authLoginService = {
   async startCredentialsLogin(email: string, password: string, ip?: string) {

@@ -1,6 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import { getAuthOptions } from "@/modules/auth/lib/auth-options";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import { runWithLoginRequestContext } from "@/modules/auth/lib/login-request-context";
 
 type NextAuthRouteHandler = (request: Request, context: unknown) => Response | Promise<Response>;

@@ -12,4 +12,4 @@ export class ChallengeError extends Error {
   }
 }
 
-export { RateLimitError } from "@/server/policies/rate-limit";
+export { RateLimitError } from "@/modules/rate-limit/index";

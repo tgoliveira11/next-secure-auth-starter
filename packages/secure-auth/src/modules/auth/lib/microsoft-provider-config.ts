@@ -46,7 +46,7 @@ function readEnvValue(env: NodeJS.ProcessEnv, ...keys: string[]): string | undef
 }
 
 export function describeMicrosoftProviderConfigIssue(
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv
 ): MicrosoftProviderConfigIssue | null {
   const clientId = readEnvValue(env, "AUTH_AZURE_AD_ID", "AUTH_MICROSOFT_ID");
   const clientSecret = readEnvValue(env, "AUTH_AZURE_AD_SECRET", "AUTH_MICROSOFT_SECRET");
@@ -69,7 +69,7 @@ export function describeMicrosoftProviderConfigIssue(
 }
 
 export function readMicrosoftProviderEnv(
-  env: NodeJS.ProcessEnv = process.env
+  env: NodeJS.ProcessEnv
 ): MicrosoftProviderEnv | null {
   if (describeMicrosoftProviderConfigIssue(env)) {
     return null;
@@ -85,8 +85,6 @@ export function readMicrosoftProviderEnv(
   return { clientId, clientSecret, tenantId };
 }
 
-export function isMicrosoftProviderConfigured(
-  env: NodeJS.ProcessEnv = process.env
-): boolean {
+export function isMicrosoftProviderConfigured(env: NodeJS.ProcessEnv): boolean {
   return readMicrosoftProviderEnv(env) !== null;
 }

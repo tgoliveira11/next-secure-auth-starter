@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
   regenerateBackupCodes: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/session", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth/session")>();
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
     getSessionUser: mocks.getSessionUser,
@@ -22,15 +22,15 @@ vi.mock("@/lib/auth/session", async (importOriginal) => {
   };
 });
 
-vi.mock("@/server/services/two-factor-service", () => ({
+vi.mock("@/modules/two-factor/services/two-factor-service", () => ({
   twoFactorService: {
     isEnabledForUser: mocks.isEnabledForUser,
     regenerateBackupCodes: mocks.regenerateBackupCodes,
   },
 }));
 
-vi.mock("@/server/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/server/services/auth-login-service")>();
+vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
   return {
     ...actual,
     authLoginService: {
@@ -92,7 +92,7 @@ describe("auth login and backup code API routes", () => {
   });
 
   it("verify-2fa-oauth maps invalid authenticator codes", async () => {
-    const { InvalidTwoFactorCodeError } = await import("@/server/services/auth-login-service");
+    const { InvalidTwoFactorCodeError } = await import("@/modules/auth/services/auth-login-service");
     mocks.verifyOAuthTwoFactor.mockRejectedValue(new InvalidTwoFactorCodeError());
     const res = await verifyOAuthPost(
       new Request("http://localhost", {

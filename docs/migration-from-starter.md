@@ -22,6 +22,8 @@
 
 See [phase-7-route-migration.md](./phase-7-route-migration.md) for the full route map.
 
+After the package-hardening phase, all routes are implemented via `createSecureAuth(config).routes.*` — legacy `createRouteHandlers` and 501 stubs were removed. See [PACKAGE_HARDENING_REPORT.md](./PACKAGE_HARDENING_REPORT.md).
+
 ## What stayed in the app (Phase 10)
 
 - `src/lib/db/index.ts` — Postgres connection

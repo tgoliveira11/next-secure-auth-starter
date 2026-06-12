@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
-import { requireSessionUser } from "@/lib/auth/session";
-import { accountAuthService } from "@/server/services/account-auth-service";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { requireSessionUser } from "@/modules/auth/lib/session";
+import { accountAuthService } from "@/modules/account/services/account-auth-service";
 
 const bodySchema = z.object({
   email: z.string().email().optional(),

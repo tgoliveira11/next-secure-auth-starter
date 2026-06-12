@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { handleCredentialsLoginFormPost } from "@/modules/auth/lib/credentials-login-start-handler";
 import { handleCredentialsTwoFactorFormPost } from "@/modules/auth/lib/credentials-two-factor-form-handler";
-import { TWO_FACTOR_LOGIN_CHALLENGE_COOKIE } from "@/modules/two-factor/lib/login-challenge-cookie";
+import { getTwoFactorLoginChallengeCookieName } from "@/modules/two-factor/lib/login-challenge-cookie";
 
 const mocks = vi.hoisted(() => ({
   startCredentialsLogin: vi.fn(),
@@ -15,8 +15,8 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-vi.mock("@/server/services/auth-login-service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/server/services/auth-login-service")>();
+vi.mock("@/modules/auth/services/auth-login-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/services/auth-login-service")>();
   return {
     ...actual,
     authLoginService: {
@@ -77,7 +77,7 @@ describe("credentials login form handlers", () => {
   });
 
   it("redirects invalid credentials from the login handler", async () => {
-    const { InvalidCredentialsError } = await import("@/server/services/auth-login-service");
+    const { InvalidCredentialsError } = await import("@/modules/auth/services/auth-login-service");
     mocks.startCredentialsLogin.mockRejectedValue(new InvalidCredentialsError());
     const response = await handleCredentialsLoginFormPost(
       formRequest("http://localhost/login", {
@@ -115,9 +115,9 @@ describe("credentials login form handlers", () => {
   });
 
   it("redirects consumed 2FA challenges from the verify handler", async () => {
-    const { InvalidTwoFactorChallengeError } = await import("@/server/services/auth-login-service");
+    const { InvalidTwoFactorChallengeError } = await import("@/modules/auth/services/auth-login-service");
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -129,9 +129,9 @@ describe("credentials login form handlers", () => {
   });
 
   it("redirects invalid 2FA codes from the verify handler", async () => {
-    const { InvalidTwoFactorCodeError } = await import("@/server/services/auth-login-service");
+    const { InvalidTwoFactorCodeError } = await import("@/modules/auth/services/auth-login-service");
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -144,7 +144,7 @@ describe("credentials login form handlers", () => {
 
   it("redirects unavailable 2FA failures from the verify handler", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
@@ -157,7 +157,7 @@ describe("credentials login form handlers", () => {
 
   it("accepts backup codes during 2FA verification", async () => {
     mocks.cookiesGet.mockImplementation((name: string) =>
-      name === TWO_FACTOR_LOGIN_CHALLENGE_COOKIE
+      name === getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );

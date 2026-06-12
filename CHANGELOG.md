@@ -4,6 +4,38 @@ All notable changes to this monorepo are documented here.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.1-internal] - 2026-06-11
+
+### Added
+
+- **Package hardening phase** — [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) documents full audit.
+- **`SecureAuthConfig` extensions** — `passwordPolicy`, `sessions`, `rateLimit`, `server.cookieSecure`, `debug.authTrace`.
+- **Config resolvers** — `src/core/config-resolvers.ts`, `src/core/app-brand.ts`.
+- **Cookie name builders** — `buildLoginPendingTokenCookieName(slug)`, `buildTwoFactorLoginChallengeCookieName(slug)`.
+- **Brand mark builders** — `buildBrandMarkSvg(name)`, `buildBrandMarkDataUrl(name)`.
+- **Package unit tests** — session config, session IP, user-agent metadata, login pending cookie.
+
+### Changed
+
+- **Single route path** — `createSecureAuth(config).routes.*` only; removed `createRouteHandlers` and 501 stubs.
+- **No package runtime `process.env`** — consumer maps env → `createSecureAuth(config)`.
+- **`getPasswordPolicyConfig`** — merges explicit overrides; no env parsing in package.
+- **`styles.css`** — `@source "./dist/modules/ui"` only (published artifact safe).
+- **Microsoft OAuth helpers** — require explicit `env` argument (no default `process.env`).
+
+### Removed
+
+- `packages/secure-auth/src/server/routes/index.ts` (legacy 501 handlers).
+- ~88 `@deprecated` re-export shims under `src/server/*`, `src/lib/*`, UI.
+- Transitional modules: `auth-config-store`, `db-context`, `init-runtime`, `lib/brand.ts`.
+- Client exports: `clearLoginPendingTokenCookie`, `clearLoginChallengeCookie`, cookie option getters (server-only).
+- Static cookie constants and env-driven password policy reads from public client API.
+
+### Fixed
+
+- Cookie setter bug in credentials login form handlers (`getLoginPendingTokenCookieName()` call).
+- Route test mocks targeting removed `@/lib/auth/session` path.
+
 ## [0.1.0-internal] - 2026-06-11
 
 ### Added
@@ -42,4 +74,5 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in `docs/security-hardening.md`).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.1-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.1-internal
 [0.1.0-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/v0.1.0-internal

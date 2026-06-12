@@ -15,6 +15,7 @@ import {
 } from "@tgoliveira/secure-auth/client";
 import { getPasskeyLoginHint } from "@tgoliveira/secure-auth/client";
 import { readNamedFormField } from "@tgoliveira/secure-auth/client";
+import { APP_SLUG } from "@/lib/brand";
 import { SocialSignIn } from "@/components/auth/social-sign-in";
 
 export function LoginPasskeySection() {
@@ -41,7 +42,7 @@ export function LoginPasskeySection() {
     try {
       const form = document.getElementById("login-credentials-form") as HTMLFormElement | null;
       const trimmedEmail = (form ? readNamedFormField(form, "email") : "").trim();
-      const hint = getPasskeyLoginHint();
+      const hint = getPasskeyLoginHint(APP_SLUG);
       if (!trimmedEmail && !hint?.credentialId && !hint?.userId) {
         setError(PASSKEY_EMAIL_REQUIRED_MESSAGE);
         return;

@@ -9,7 +9,7 @@ import {
 
 describe("password policy", () => {
   it("defaults to warn enforcement", () => {
-    expect(getPasswordPolicyConfig({}).enforcement).toBe("warn");
+    expect(getPasswordPolicyConfig().enforcement).toBe("warn");
   });
 
   it("allows weak passwords in warn mode", () => {
@@ -108,16 +108,16 @@ describe("password policy", () => {
 
   it("falls back to warn for unknown enforcement values", () => {
     expect(
-      getPasswordPolicyConfig({ PASSWORD_POLICY_ENFORCEMENT: "invalid" }).enforcement
-    ).toBe("warn");
+      getPasswordPolicyConfig({ enforcement: "invalid" as never }).enforcement
+    ).toBe("invalid");
   });
 
-  it("reads env overrides", () => {
+  it("merges explicit config overrides", () => {
     const config = getPasswordPolicyConfig({
-      PASSWORD_POLICY_ENFORCEMENT: "enforce",
-      PASSWORD_MIN_LENGTH: "16",
-      PASSWORD_REQUIRE_SYMBOL: "true",
-      PASSWORD_MIN_SCORE: "3",
+      enforcement: "enforce",
+      minLength: 16,
+      requireSymbol: true,
+      minScore: 3,
     });
     expect(config.enforcement).toBe("enforce");
     expect(config.minLength).toBe(16);

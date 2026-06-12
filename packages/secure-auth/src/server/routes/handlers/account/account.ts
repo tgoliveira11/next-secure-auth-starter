@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { requireFullyAuthenticatedUser } from "@/lib/auth/session";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { getClientIp } from "@/lib/request-ip";
-import { accountService } from "@/server/services/account-service";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { accountService } from "@/modules/account/services/account-service";
 import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
+} from "@/modules/security/policies/auth-password-input";
 import { z } from "zod";
 
 const deleteSchema = z.object({

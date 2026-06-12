@@ -1,23 +1,23 @@
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
+} from "@/modules/security/policies/auth-password-input";
 import { credentialsLoginStartSchema } from "@/lib/validation/two-factor";
 import {
   authLoginService,
   InvalidCredentialsError,
-} from "@/server/services/auth-login-service";
+} from "@/modules/auth/services/auth-login-service";
 import {
   clearLoginChallengeCookie,
   getLoginChallengeCookieOptions,
-  TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+  getTwoFactorLoginChallengeCookieName,
 } from "@/modules/two-factor/lib/login-challenge-cookie";
 import {
   clearLoginPendingTokenCookie,
   getLoginPendingTokenCookieOptions,
-  LOGIN_PENDING_TOKEN_COOKIE,
+  getLoginPendingTokenCookieName,
 } from "@/modules/auth/lib/login-pending-cookie";
 import { authTraceRedirect } from "@/modules/auth/lib/auth-trace";
 
@@ -49,7 +49,7 @@ export async function handleCredentialsLoginFormPost(request: Request) {
         { challengeCookieSet: true }
       );
       response.cookies.set(
-        TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+        getTwoFactorLoginChallengeCookieName(),
         result.challengeToken,
         getLoginChallengeCookieOptions()
       );
@@ -61,7 +61,7 @@ export async function handleCredentialsLoginFormPost(request: Request) {
       pendingLoginCookieSet: true,
     });
     response.cookies.set(
-      LOGIN_PENDING_TOKEN_COOKIE,
+      getLoginPendingTokenCookieName(),
       result.loginToken,
       getLoginPendingTokenCookieOptions()
     );

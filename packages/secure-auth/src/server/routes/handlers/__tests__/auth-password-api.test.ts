@@ -11,30 +11,30 @@ const mocks = vi.hoisted(() => ({
   getDeletionRequirements: vi.fn(),
 }));
 
-vi.mock("@/server/repositories/user-repository", () => ({
+vi.mock("@/modules/account/repositories/user-repository", () => ({
   userRepository: {
     findByEmail: mocks.findByEmail,
     create: mocks.create,
   },
 }));
 
-vi.mock("@/server/policies/password-hashing", () => ({
+vi.mock("@/modules/security/policies/password-hashing", () => ({
   hashPassword: vi.fn(
     async () => "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
   ),
 }));
 
-vi.mock("@/server/services/account-auth-service", () => ({
+vi.mock("@/modules/account/services/account-auth-service", () => ({
   accountAuthService: {
     sendVerificationEmailForUser: vi.fn(async () => ({ alreadyVerified: false })),
   },
 }));
 
-vi.mock("@/lib/auth/session", () => ({
+vi.mock("@/modules/auth/lib/session", () => ({
   requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
 }));
 
-vi.mock("@/server/services/account-service", () => ({
+vi.mock("@/modules/account/services/account-service", () => ({
   accountService: {
     getDeletionRequirements: mocks.getDeletionRequirements,
   },
@@ -103,7 +103,7 @@ describe("auth password API boundaries", () => {
   });
 
   it("verifies credentials only on the server with bcrypt helpers", () => {
-    const authLoginService = readModuleSource("server/services/auth-login-service.ts");
+    const authLoginService = readModuleSource("modules/auth/services/auth-login-service.ts");
     expect(authLoginService).toContain("verifyPassword");
     expect(authLoginService).not.toMatch(/passwordHash\s*===/);
     expect(authLoginService).not.toContain("bcrypt.compare");

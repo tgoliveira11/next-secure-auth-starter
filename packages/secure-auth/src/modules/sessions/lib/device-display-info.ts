@@ -1,7 +1,7 @@
 import {
   parseUserAgentMetadata,
   type DeviceFormFactor,
-} from "@/lib/user-agent-metadata";
+} from "@/modules/security/user-agent/metadata";
 
 export type { DeviceFormFactor };
 

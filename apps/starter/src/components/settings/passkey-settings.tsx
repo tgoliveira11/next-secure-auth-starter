@@ -14,6 +14,7 @@ import { LoadingState } from "@tgoliveira/secure-auth/react";
 import { SuccessState } from "@tgoliveira/secure-auth/react";
 import { prepareRegistrationOptions } from "@tgoliveira/secure-auth/client";
 import { setPasskeyLoginHint } from "@tgoliveira/secure-auth/client";
+import { APP_SLUG } from "@/lib/brand";
 
 interface PasskeySettingsProps {
   userId: string;
@@ -73,7 +74,7 @@ export function PasskeySettings({ userId }: PasskeySettingsProps) {
       });
 
       if (result.verified) {
-        setPasskeyLoginHint({ userId, credentialId: result.credentialId });
+        setPasskeyLoginHint(APP_SLUG, { userId, credentialId: result.credentialId });
         setSuccess("Passkey added for sign-in.");
         await loadPasskeys();
       }

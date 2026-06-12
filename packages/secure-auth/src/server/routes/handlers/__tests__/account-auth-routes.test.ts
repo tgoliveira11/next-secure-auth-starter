@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
 }));
 
-vi.mock("@/server/services/account-auth-service", () => ({
+vi.mock("@/modules/account/services/account-auth-service", () => ({
   accountAuthService: {
     requestPasswordReset: mocks.requestPasswordReset,
     confirmEmailVerification: mocks.confirmEmailVerification,
@@ -26,7 +26,7 @@ vi.mock("@/server/services/account-auth-service", () => ({
   },
 }));
 
-vi.mock("@/lib/auth/session", () => ({
+vi.mock("@/modules/auth/lib/session", () => ({
   requireSessionUser: mocks.requireSessionUser,
   requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
   UnauthorizedError: class UnauthorizedError extends Error {
@@ -92,7 +92,7 @@ describe("account auth API routes", () => {
   });
 
   it("POST /api/auth/verify-email/confirm maps validation failures", async () => {
-    const { ValidationError } = await import("@/server/services/account-service");
+    const { ValidationError } = await import("@/modules/account/services/account-service");
     mocks.confirmEmailVerification.mockRejectedValue(
       new ValidationError("This verification link is invalid or expired.")
     );
@@ -164,7 +164,7 @@ describe("account auth API routes", () => {
     );
     expect(validateRes.status).toBe(200);
 
-    const { ValidationError } = await import("@/server/services/account-service");
+    const { ValidationError } = await import("@/modules/account/services/account-service");
     mocks.resetPassword.mockRejectedValue(new ValidationError("expired"));
     const badReset = await POST(
       new Request("http://localhost", {
@@ -218,7 +218,7 @@ describe("account auth API routes", () => {
   });
 
   it("POST /api/account/change-password maps reauthentication failures", async () => {
-    const { ReauthenticationRequiredError } = await import("@/server/services/account-service");
+    const { ReauthenticationRequiredError } = await import("@/modules/account/services/account-service");
     mocks.changePassword.mockRejectedValue(new ReauthenticationRequiredError("Incorrect password"));
     const { changePasswordPost: POST } = await import("@/test/helpers/handlers");
     const res = await POST(
@@ -287,7 +287,7 @@ describe("account auth API routes", () => {
   });
 
   it("GET /api/account/auth-status surfaces not found errors", async () => {
-    const { NotFoundError } = await import("@/server/services/account-service");
+    const { NotFoundError } = await import("@/modules/account/services/account-service");
     mocks.getAccountAuthStatus.mockRejectedValue(new NotFoundError("Account not found"));
     const { accountAuthStatusGet: GET } = await import("@/test/helpers/handlers");
     const res = await GET();

@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   verifyLogin: vi.fn(),
 }));
 
-vi.mock("@/server/services/passkey-login-service", () => ({
+vi.mock("@/modules/passkeys/services/passkey-login-service", () => ({
   passkeyLoginService: {
     getLoginOptions: mocks.getLoginOptions,
     verifyLogin: mocks.verifyLogin,
@@ -82,7 +82,7 @@ describe("passkey login API routes", () => {
   });
 
   it("rejects reused challenge via service error", async () => {
-    const { ChallengeError } = await import("@/server/services/passkey-service");
+    const { ChallengeError } = await import("@/modules/passkeys/services/passkey-service");
     mocks.verifyLogin.mockRejectedValue(new ChallengeError("Invalid or expired challenge"));
     const res = await verifyPost(
       new Request("http://localhost", {

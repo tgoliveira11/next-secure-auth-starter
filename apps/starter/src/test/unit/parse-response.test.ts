@@ -25,7 +25,7 @@ describe("parse response helpers", () => {
   it("getErrorMessage returns migration hint for 500", async () => {
     const res = new Response("", { status: 500 });
     const message = await getErrorMessage(res);
-    expect(message).toContain("PostgreSQL");
+    expect(message).toContain("migrations");
   });
 
   it("getErrorMessage falls back to status text", async () => {

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { requireNextAuthSecret } from "@/core/app-brand.js";
 
 export type DeviceFormFactor = "desktop" | "mobile" | "tablet" | "unknown";
 
@@ -51,9 +52,6 @@ export function parseUserAgentMetadata(
 }
 
 export function hashUserAgent(userAgent: string): string {
-  const pepper = process.env.NEXTAUTH_SECRET;
-  if (!pepper) {
-    throw new Error("NEXTAUTH_SECRET is not configured");
-  }
+  const pepper = requireNextAuthSecret();
   return createHash("sha256").update(`${pepper}:user-agent:${userAgent}`).digest("hex");
 }

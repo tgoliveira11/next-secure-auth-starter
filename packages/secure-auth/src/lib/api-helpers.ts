@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { UnauthorizedError } from "@/lib/auth/session";
-import { safeLogger } from "@/lib/logger";
-import { TwoFactorEncryptionKeyError } from "@/server/policies/two-factor-secret-crypto";
+import { UnauthorizedError } from "@/modules/auth/lib/session";
+import { safeLogger } from "@/modules/security/logger/index";
+import { TwoFactorEncryptionKeyError } from "@/modules/two-factor/policies/two-factor-secret-crypto";
 
 export function apiError(error: unknown, endpoint: string) {
   if (error instanceof UnauthorizedError) {

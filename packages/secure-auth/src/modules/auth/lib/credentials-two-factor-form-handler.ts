@@ -1,18 +1,18 @@
 import { cookies } from "next/headers";
-import { getClientIp } from "@/lib/request-ip";
+import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorLoginVerifySchema } from "@/lib/validation/two-factor";
 import {
   authLoginService,
   InvalidTwoFactorChallengeError,
   InvalidTwoFactorCodeError,
-} from "@/server/services/auth-login-service";
+} from "@/modules/auth/services/auth-login-service";
 import {
   clearLoginChallengeCookie,
-  TWO_FACTOR_LOGIN_CHALLENGE_COOKIE,
+  getTwoFactorLoginChallengeCookieName,
 } from "@/modules/two-factor/lib/login-challenge-cookie";
 import {
   getLoginPendingTokenCookieOptions,
-  LOGIN_PENDING_TOKEN_COOKIE,
+  getLoginPendingTokenCookieName,
 } from "@/modules/auth/lib/login-pending-cookie";
 import { authTraceRedirect } from "@/modules/auth/lib/auth-trace";
 
@@ -32,7 +32,7 @@ export async function handleCredentialsTwoFactorFormPost(request: Request) {
     }
 
     const cookieStore = await cookies();
-    const challengeToken = cookieStore.get(TWO_FACTOR_LOGIN_CHALLENGE_COOKIE)?.value;
+    const challengeToken = cookieStore.get(getTwoFactorLoginChallengeCookieName())?.value;
     if (!challengeToken) {
       return authTraceRedirect(
         request,
@@ -53,7 +53,7 @@ export async function handleCredentialsTwoFactorFormPost(request: Request) {
     });
     clearLoginChallengeCookie(response);
     response.cookies.set(
-      LOGIN_PENDING_TOKEN_COOKIE,
+      getLoginPendingTokenCookieName(),
       result.loginToken,
       getLoginPendingTokenCookieOptions()
     );

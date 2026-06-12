@@ -5,10 +5,10 @@ import {
   assertAuthPasswordRequestMethod,
   assertPasswordNotInUrl,
   AuthPasswordTransportError,
-} from "@/server/policies/auth-password-input";
-import { getClientIp } from "@/lib/request-ip";
-import { requireFullyAuthenticatedUser } from "@/lib/auth/session";
-import { accountAuthService } from "@/server/services/account-auth-service";
+} from "@/modules/security/policies/auth-password-input";
+import { getClientIp } from "@/modules/security/ip/request-ip";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { accountAuthService } from "@/modules/account/services/account-auth-service";
 
 const bodySchema = z.object({
   currentPassword: z.string().min(1),

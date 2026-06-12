@@ -1,4 +1,5 @@
-import { safeLogger } from "@/lib/logger";
+import { safeLogger } from "@/modules/security/logger/index";
+import { resolveAuthTraceEnabled } from "@/core/config-resolvers";
 import { NextResponse } from "next/server";
 
 const MAX_EVENTS = 50;
@@ -11,7 +12,7 @@ export type AuthTraceEvent = {
 };
 
 export function isAuthTraceEnabled(): boolean {
-  return process.env.AUTH_DEBUG_TRACE === "true";
+  return resolveAuthTraceEnabled();
 }
 
 export function traceAuth(step: string, meta?: Record<string, string | boolean | number>) {

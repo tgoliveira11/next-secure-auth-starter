@@ -14,15 +14,15 @@ const mocks = vi.hoisted(() => ({
   removePasskey: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/session", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth/session")>();
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
     requireSessionUser: mocks.requireSessionUser,
   };
 });
 
-vi.mock("@/server/services/passkey-account-service", () => ({
+vi.mock("@/modules/passkeys/services/passkey-account-service", () => ({
   passkeyAccountService: {
     listPasskeys: mocks.listPasskeys,
     getRegistrationOptions: mocks.getRegistrationOptions,

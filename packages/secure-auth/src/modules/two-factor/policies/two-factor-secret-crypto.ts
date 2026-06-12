@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import { requireTwoFactorEncryptionKey } from "@/core/app-brand.js";
 
 export const TWO_FACTOR_SECRET_PAYLOAD_VERSION = "tf-v1";
 
@@ -12,18 +13,18 @@ export type EncryptedTwoFactorSecret = {
 export class TwoFactorEncryptionKeyError extends Error {
   constructor() {
     super(
-      "Two-factor authentication is not configured on this server. Set TWO_FACTOR_SECRET_ENCRYPTION_KEY in .env.local (see .env.example)."
+      "@tgoliveira/secure-auth: auth.twoFactorEncryptionKey is required in createSecureAuth(config)."
     );
     this.name = "TwoFactorEncryptionKeyError";
   }
 }
 
 function getEncryptionKey(): Buffer {
-  const raw = process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY;
-  if (!raw) {
+  try {
+    return createHash("sha256").update(requireTwoFactorEncryptionKey()).digest();
+  } catch {
     throw new TwoFactorEncryptionKeyError();
   }
-  return createHash("sha256").update(raw).digest();
 }
 
 export function encryptTwoFactorSecret(plaintext: string): EncryptedTwoFactorSecret {

@@ -2,20 +2,20 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getSecureAuthConfig } from "@/core/auth-config-store";
-import { userRepository } from "@/server/repositories/user-repository";
-import { authService } from "@/server/services/auth-service";
-import { authLoginService } from "@/server/services/auth-login-service";
-import { twoFactorService } from "@/server/services/two-factor-service";
-import { accountSessionService } from "@/server/services/account-session-service";
-import { safeLogger } from "@/lib/logger";
+import { getSecureAuthConfig } from "@/core/secure-auth-runtime";
+import { userRepository } from "@/modules/account/repositories/user-repository";
+import { authService } from "@/modules/auth/services/auth-service";
+import { authLoginService } from "@/modules/auth/services/auth-login-service";
+import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import { accountSessionService } from "@/modules/sessions/services/account-session-service";
+import { safeLogger } from "@/modules/security/logger/index";
 import { evaluateOAuthSignIn } from "@/modules/auth/lib/oauth-sign-in-policy";
 import { createMicrosoftAzureAdProvider } from "@/modules/auth/lib/microsoft-azure-ad-provider";
 import {
   isValidMicrosoftApplicationClientId,
   isValidMicrosoftTenantId,
 } from "@/modules/auth/lib/microsoft-provider-config";
-import { credentialsSignInRequiresEmailVerification } from "@/lib/account-policy-config";
+import { credentialsSignInRequiresEmailVerification } from "@/modules/account/lib/account-policy-config";
 
 let cachedAuthOptions: NextAuthOptions | null = null;
 
@@ -277,10 +277,3 @@ export function getAuthOptions(): NextAuthOptions {
 
   return cachedAuthOptions;
 }
-
-/** @deprecated Use getAuthOptions() — lazy proxy for next-auth imports */
-export const authOptions: NextAuthOptions = new Proxy({} as NextAuthOptions, {
-  get(_target, prop) {
-    return Reflect.get(getAuthOptions() as object, prop);
-  },
-});

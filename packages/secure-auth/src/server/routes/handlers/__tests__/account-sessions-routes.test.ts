@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   requireFullyAuthenticatedUser: vi.fn(),
 }));
 
-vi.mock("@/server/services/account-session-service", () => ({
+vi.mock("@/modules/sessions/services/account-session-service", () => ({
   accountSessionService: {
     listSessions: mocks.listSessions,
     revokeSession: mocks.revokeSession,
@@ -24,7 +24,7 @@ vi.mock("@/server/services/account-session-service", () => ({
   },
 }));
 
-vi.mock("@/lib/auth/session", () => ({
+vi.mock("@/modules/auth/lib/session", () => ({
   requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
   UnauthorizedError: class UnauthorizedError extends Error {
     name = "UnauthorizedError";
@@ -42,7 +42,7 @@ describe("account sessions API routes", () => {
   });
 
   it("GET /api/account/sessions requires authentication", async () => {
-    const { UnauthorizedError } = await import("@/lib/auth/session");
+    const { UnauthorizedError } = await import("@/modules/auth/lib/session");
     mocks.requireFullyAuthenticatedUser.mockRejectedValue(
       new UnauthorizedError("Authentication required")
     );
@@ -119,7 +119,7 @@ describe("account sessions API routes", () => {
   });
 
   it("POST /api/account/sessions/revoke-others requires current session id", async () => {
-    const { UnauthorizedError } = await import("@/lib/auth/session");
+    const { UnauthorizedError } = await import("@/modules/auth/lib/session");
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",

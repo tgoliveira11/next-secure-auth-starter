@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { requireFullyAuthenticatedUser } from "@/lib/auth/session";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError } from "@/lib/api-helpers";
-import { twoFactorService } from "@/server/services/two-factor-service";
+import { twoFactorService } from "@/modules/two-factor/services/two-factor-service";
 
 export async function GET() {
   try {

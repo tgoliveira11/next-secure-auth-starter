@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, type DbClient } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { assertPasswordHashFormat } from "@/server/policies/password-hashing";
+import { assertPasswordHashFormat } from "@/modules/security/policies/password-hashing";
 
 function validateStoredPasswordHash(passwordHash: string | null | undefined) {
   if (passwordHash != null) {
