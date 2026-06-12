@@ -22,7 +22,7 @@
     "postinstall": "node scripts/copy-swagger-ui.mjs"
   },
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.0-internal",
+    "@tgoliveira/secure-auth": "0.1.1-internal",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.1",
     "bcryptjs": "^3.0.2",
