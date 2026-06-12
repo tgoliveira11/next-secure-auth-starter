@@ -9,6 +9,17 @@ out/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
+
+# Credentials and keys (never commit)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+.npmrc.local
 
 # Test and coverage output
 coverage/
@@ -25,7 +36,11 @@ build/
 .cache/
 .turbo/
 .vite/
+.pnpm-store/
+.npm-cache/
 .eslintcache
+tmp/
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*

@@ -1,134 +1,147 @@
-# next-secure-auth-starter
+# secure-auth monorepo
 
-Secure, production-oriented starter template for account and authentication systems built with Next.js, Auth.js/NextAuth, PostgreSQL, Drizzle, and React.
+Opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** authentication — packaged as `@tgoliveira/secure-auth` with `apps/starter` as the integration harness.
 
-The goal is to provide a strong foundation for new projects that need secure account management without rebuilding common authentication flows from scratch.
+**Maturity:** `0.1.0-internal` experimental — not production-ready. See [docs/security-hardening.md](docs/security-hardening.md) and [docs/repository-readiness.md](docs/repository-readiness.md).
 
-This starter is not a generic authentication library. It is a complete application template intended to be copied, forked, or used as a GitHub template for new products that share a similar technical stack.
+## Structure
 
-## Status
+```text
+packages/secure-auth/   @tgoliveira/secure-auth — reusable auth package (private)
+apps/starter/           @secure-auth/starter — reference consumer app
+docs/                   Architecture, security, migrations
+```
 
-**Post-hygiene cleanup — account/auth starter**
+---
 
-Vault, letters, and product-specific functionality from the source project have been removed. The codebase retains reusable account/authentication modules, routes, and tests.
+## Local Development Quick Start
 
-See [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) for remaining starter hardening work.
+### Prerequisites
 
-## What this starter provides
-
-The starter is intended to include:
-
-- Email/password authentication
-- Google OAuth
-- Apple Sign in
-- Microsoft sign-in
-- Passkey account authentication
-- Optional TOTP two-factor authentication
-- Email verification
-- Forgot/reset password
-- Change password
-- Account deletion
-- Active session management
-- Session revocation
-- Audit logs
-- Rate limiting
-- Email provider abstraction
-- SMTP/Mailpit support
-- Safe logging and redaction
-- Security-focused documentation
-- Cursor/AI-agent rules
-- PostgreSQL/Drizzle migrations
-- Mobile-first account/security UI
-- High test coverage (≥ 95% on all metrics)
-
-## What this starter does not provide
-
-This starter must not include product-specific functionality from any source project.
-
-It must not include:
-
-- Private encrypted letters
-- User Vault Key lifecycle
-- Letter Key lifecycle
-- Vault unlock
-- Trusted devices for vault unlock
-- Vault recovery code
-- Passkey PRF vault envelopes
-- Spiritual product copy
-- Community or prayer features
-- Anonymous sharing
-- Content moderation for letters
-
-This starter is **account/auth/security infrastructure only**.
-
-## Target stack
-
-| Layer | Technology |
+| Tool | Version |
 | --- | --- |
-| Framework | Next.js (App Router) |
-| Language | TypeScript |
-| UI | React |
-| Auth | Auth.js / NextAuth |
-| Database | PostgreSQL |
-| ORM | Drizzle |
-| Unit/integration tests | Vitest |
-| Component tests | Testing Library |
-| E2E tests (optional) | Playwright |
-| Local email | Mailpit |
-| Production email | SMTP |
+| Node.js | 20+ |
+| npm | 10+ |
+| Docker | 24+ (for PostgreSQL + Mailpit) |
+| PostgreSQL | 16 (via Docker Compose) |
 
-## Quality bar
+### Install
 
-All core functionality must be covered by tests.
-
-Minimum coverage target:
-
-```text
-Statements: >= 95%
-Lines:      >= 95%
-Functions:  >= 95%
-Branches:   >= 95%
+```bash
+git clone <repo-url> secure-auth
+cd secure-auth
+npm install
+npm run build -w @tgoliveira/secure-auth
 ```
 
-Coverage thresholds must not be lowered to make tests pass.
+### Environment
 
-## Security principle
-
-Authentication is **account access only**.
-
-This starter must not include any app-specific encrypted vault model. Future projects may add domain-specific encryption, but that must remain separate from the starter's account/auth modules.
-
-If a security-sensitive design decision is unclear during implementation, stop and mark:
-
-```text
-TODO_SECURITY_REVIEW_REQUIRED:
-This behavior affects account security and requires human review.
+```bash
+cp .env.example apps/starter/.env.local
 ```
+
+Edit `apps/starter/.env.local`. Minimum required values:
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | Session signing secret (long random string) |
+| `NEXTAUTH_URL` / `APP_BASE_URL` | App URL (default `http://localhost:3001` or `3002` per `.env.example`) |
+| `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | 32-byte base64 key for TOTP secrets at rest |
+| `WEBAUTHN_RP_ID` | Passkey RP ID (`localhost` for dev) |
+| `WEBAUTHN_ORIGIN` | Passkey origin (match app URL) |
+| `EMAIL_PROVIDER` | `console` (dev) or `smtp` (Mailpit) |
+| `EMAIL_FROM` | Sender address when not using console |
+
+OAuth (optional for local dev):
+
+| Variable | Provider |
+| --- | --- |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google |
+| `APPLE_CLIENT_ID` / `APPLE_CLIENT_SECRET` | Apple |
+| `AUTH_MICROSOFT_ID` / `AUTH_MICROSOFT_SECRET` | Microsoft |
+
+Passkeys use `WEBAUTHN_*` above. SMTP dev defaults target Mailpit (`SMTP_HOST=localhost`, `SMTP_PORT=1025`).
+
+### Infrastructure
+
+```bash
+docker compose up -d
+```
+
+Starts PostgreSQL and Mailpit.
+
+### Database
+
+```bash
+npm run db:migrate
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+Open the URL from `NEXTAUTH_URL` (e.g. http://localhost:3001).
+
+Register → verify email (console logs link when `EMAIL_PROVIDER=console`) → sign in → explore `/settings/security` for 2FA and passkeys.
+
+### Tests
+
+```bash
+npm run test
+```
+
+Package only: `npm run test -w @tgoliveira/secure-auth`  
+Starter only: `npm run test -w @secure-auth/starter`
+
+Optional live DB integration:
+
+```bash
+INTEGRATION_DATABASE_URL="$DATABASE_URL" npm run test -w @tgoliveira/secure-auth -- src/test/integration
+```
+
+### Build
+
+```bash
+npm run build
+npm run typecheck
+npm run lint
+```
+
+### Private package publish
+
+See [docs/publishing-private-package.md](docs/publishing-private-package.md). **Not published publicly.**
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+| --- | --- |
+| Build fails on first run | Run `npm run build -w @tgoliveira/secure-auth` before `npm run dev` |
+| `database not initialized` | Ensure API routes load `@/lib/secure-auth` (calls `createSecureAuth`) |
+| Migrations fail | `docker compose up -d`; check `DATABASE_URL` port matches compose |
+| OAuth redirect errors | Match callback URL in provider console to `{APP_BASE_URL}/api/auth/callback/{provider}` |
+| Microsoft OAuth | Use Entra **client ID** (GUID), Web redirect URI, restart after env changes |
+| Passkeys fail locally | `WEBAUTHN_ORIGIN` must match browser URL exactly; use `localhost` not `127.0.0.1` |
+| Emails not arriving | Use Mailpit UI (`http://localhost:8025`) when `EMAIL_PROVIDER=smtp` |
+
+---
 
 ## Documentation
 
-| Document | Purpose |
+| Doc | Topic |
 | --- | --- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Modular monolith structure, modules, routing model |
-| [SECURITY.md](SECURITY.md) | Security principles, token handling, logging |
-| [AGENTS.md](AGENTS.md) | Instructions for AI coding agents |
-| [docs/PRODUCT_PURPOSE.md](docs/PRODUCT_PURPOSE.md) | Why this starter exists and who it is for |
-| [docs/MODULE_BOUNDARIES.md](docs/MODULE_BOUNDARIES.md) | Module dependency rules and server/client separation |
-| [docs/USAGE_GUIDE.md](docs/USAGE_GUIDE.md) | How to fork, configure, and deploy |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Coverage targets and critical test flows |
-| [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) | Phased implementation plan |
-| [.cursor/rules/](.cursor/rules/) | Cursor rules for architecture, security, testing, docs |
+| [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package API, EmailProvider |
+| [apps/starter/README.md](apps/starter/README.md) | Starter harness |
+| [docs/architecture.md](docs/architecture.md) | DI, modules, boundaries |
+| [docs/security-hardening.md](docs/security-hardening.md) | Security tracker |
+| [docs/documentation-audit.md](docs/documentation-audit.md) | Doc audit report |
+| [docs/migration-from-starter.md](docs/migration-from-starter.md) | Standalone → monorepo |
+| [CHANGELOG.md](CHANGELOG.md) | Release history |
+| [docs/repository-readiness.md](docs/repository-readiness.md) | Pre-push audit |
+| [docs/git-release-strategy.md](docs/git-release-strategy.md) | Git tags, branch, PR strategy |
 
-## Getting started
-
-For humans and AI agents beginning work on this repository:
-
-1. Read all files in [docs/](docs/).
-2. Read [AGENTS.md](AGENTS.md).
-3. Read [.cursor/rules/](.cursor/rules/).
-4. Follow [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md) incrementally.
-5. Keep docs updated with every architectural or security change.
-6. Keep coverage at or above 95%.
-7. Do not introduce product-specific code from any source project.
-
-Implementation commands (`npm install`, migrations, etc.) will be documented here once Phase 1 begins.
+Legacy: [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md) — prefer `docs/` versions.

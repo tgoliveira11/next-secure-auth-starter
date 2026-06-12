@@ -1,0 +1,108 @@
+{
+  "name": "@tgoliveira/secure-auth",
+  "version": "0.1.0-internal",
+  "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (private/internal, experimental)",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tgoliveira11/next-secure-auth-starter.git",
+    "directory": "packages/secure-auth"
+  },
+  "bugs": {
+    "url": "https://github.com/tgoliveira11/next-secure-auth-starter/issues"
+  },
+  "homepage": "https://github.com/tgoliveira11/next-secure-auth-starter#readme",
+  "keywords": [
+    "nextjs",
+    "authentication",
+    "drizzle",
+    "postgresql",
+    "passkeys",
+    "oauth",
+    "2fa"
+  ],
+  "license": "UNLICENSED",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./react/client": {
+      "types": "./dist/react/client.d.ts",
+      "import": "./dist/react/client.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    },
+    "./drizzle/schema": {
+      "types": "./dist/drizzle/schema.d.ts",
+      "import": "./dist/drizzle/schema.js"
+    },
+    "./email": {
+      "types": "./dist/email/index.d.ts",
+      "import": "./dist/email/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./client/password-policy": {
+      "types": "./dist/client/password-policy.d.ts",
+      "import": "./dist/client/password-policy.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migrations",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "echo 'Package lint: configure eslint in 0.2.x'",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "^0.44.2",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.1.0",
+    "@simplewebauthn/server": "^13.1.1",
+    "bcryptjs": "^3.0.2",
+    "otplib": "^13.4.1",
+    "qrcode": "^1.5.4",
+    "server-only": "^0.0.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.25.56"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.15.29",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.1.6",
+    "@types/uuid": "^10.0.0",
+    "drizzle-orm": "^0.44.2",
+    "next": "^16.2.9",
+    "react": "^19.1.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.2"
+  }
+}

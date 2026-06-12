@@ -29,6 +29,7 @@ The starter should include:
 | Security regression tests | No token/password leakage in responses or logs |
 | Boundary tests | Forbidden imports blocked statically |
 | Integration tests | Database + service flows where valuable |
+| Opt-in PostgreSQL integration | `INTEGRATION_DATABASE_URL` — see `packages/secure-auth/src/test/integration/` |
 
 Playwright E2E tests are optional but recommended for critical auth journeys.
 

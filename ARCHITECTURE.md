@@ -1,4 +1,6 @@
-# Architecture
+# Architecture (legacy)
+
+> **Superseded by [docs/architecture.md](docs/architecture.md)** — this file describes the pre-monorepo standalone starter. The current layout uses `packages/secure-auth` + `apps/starter`.
 
 ## Architecture style
 
