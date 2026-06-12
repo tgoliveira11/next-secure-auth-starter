@@ -30,11 +30,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Transitional modules: `auth-config-store`, `db-context`, `init-runtime`, `lib/brand.ts`.
 - Client exports: `clearLoginPendingTokenCookie`, `clearLoginChallengeCookie`, cookie option getters (server-only).
 - Static cookie constants and env-driven password policy reads from public client API.
+- Public exports: `createAuthServices`, `createRoutes`, `@tgoliveira/secure-auth/server` entry path.
 
 ### Fixed
 
 - Cookie setter bug in credentials login form handlers (`getLoginPendingTokenCookieName()` call).
 - Route test mocks targeting removed `@/lib/auth/session` path.
+
+### Package-readiness (same release)
+
+- **`next-auth` peer dependency** — declared in `peerDependencies` and `devDependencies` (`^4.24.11`).
+- **`SECURE_AUTH_PACKAGE_VERSION`** — centralized constant; health route reports `0.1.1-internal`.
+- **Public API narrowed** — `createAuthServices` and `createRoutes` no longer exported; `@tgoliveira/secure-auth/server` export path removed.
+- **Sourcemaps** — build omits `sourcesContent` from generated `.map` files.
+- **Runtime documentation** — scoped runtime state documented as temporary 0.1.x limitation; 0.2.x constructor DI target.
+
+### Consumer onboarding documentation
+
+- [docs/consumer-quick-start.md](docs/consumer-quick-start.md)
+- [docs/minimal-consumer-example.md](docs/minimal-consumer-example.md)
+- [docs/consumer-validation-checklist.md](docs/consumer-validation-checklist.md)
+- Updated [docs/package-api.md](docs/package-api.md) with supported / unsupported entry points
 
 ## [0.1.0-internal] - 2026-06-11
 
@@ -42,7 +58,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Monorepo layout** — `packages/secure-auth` (`@tgoliveira/secure-auth`) + `apps/starter` integration harness.
 - **`createSecureAuth(config)`** — single factory for auth domain wiring (db, email, OAuth, WebAuthn, UI).
-- **Public package exports** — `/next`, `/react`, `/react/client`, `/client`, `/server`, `/drizzle/schema`, `/email`.
+- **Public package exports** — `/next`, `/react`, `/react/client`, `/client`, `/drizzle/schema`, `/email` (historical; `/server` was removed in `0.1.1-internal`).
 - **Route handler migration** — auth/account API handlers in package; starter exposes thin App Router wrappers.
 - **`EmailProvider` abstraction** — package sends email only through injected provider; SMTP/console live in starter.
 - **Security hardening** — OAuth-only account deletion policy (session-bound re-auth, 15-minute window).

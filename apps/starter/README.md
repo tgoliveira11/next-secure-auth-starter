@@ -1,21 +1,41 @@
 # @secure-auth/starter
 
-Integration harness for `@tgoliveira/secure-auth`. Demonstrates how a downstream Next.js app consumes the package through **official public exports only**.
+Reference consumer for `@tgoliveira/secure-auth@0.1.1-internal`. Demonstrates integration through **official public exports only**.
 
-## Local Development Quick Start
+**Building a new app?** Start with [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md), not this README alone.
 
-From the **monorepo root**:
+---
+
+## How this app consumes the package
+
+| Concern | Location | Public export |
+| --- | --- | --- |
+| Composition root | `src/lib/secure-auth.ts` | `@tgoliveira/secure-auth/next` → `createSecureAuth` |
+| Email transport | `src/modules/email/core/` | `@tgoliveira/secure-auth/email` → `EmailProvider` |
+| DB connection | `src/lib/db/index.ts` | `@tgoliveira/secure-auth/drizzle/schema` |
+| API routes | `src/app/api/**/route.ts` | `secureAuth.routes.*` |
+| NextAuth OAuth | `src/lib/nextauth-route.ts` | `createNextAuthRouteHandlers` from `/next` |
+| UI | `src/components/` + package primitives | `@tgoliveira/secure-auth/react` |
+| Styles | `src/app/globals.css` | `@import "@tgoliveira/secure-auth/styles.css"` |
+
+**Not used:** `@tgoliveira/secure-auth/server`, `createRoutes`, `createAuthServices`.
+
+---
+
+## Local development (monorepo)
+
+From repository root:
 
 ```bash
 npm install
 npm run build -w @tgoliveira/secure-auth
-cp .env.example apps/starter/.env.local   # or apps/starter/.env.local.example
+cp .env.example apps/starter/.env.local
 docker compose up -d
 npm run db:migrate
 npm run dev
 ```
 
-Open `NEXTAUTH_URL` from your env file (typically http://localhost:3001 or :3002).
+Open `NEXTAUTH_URL` from env (typically http://localhost:3001).
 
 ### Required environment
 
@@ -30,23 +50,13 @@ See root [`.env.example`](../../.env.example). Minimum:
 
 ### OAuth (optional)
 
-Set provider client ID/secret in `.env.local`. Redirect URIs must match `{APP_BASE_URL}/api/auth/callback/{provider}`.
+Set provider client ID/secret. Redirect URIs: `{APP_BASE_URL}/api/auth/callback/{provider}`.
 
 ### Passkeys
 
-Use `WEBAUTHN_ORIGIN` equal to the browser URL. Prefer `localhost` over `127.0.0.1`.
+`WEBAUTHN_ORIGIN` must match the browser URL. Use `localhost`, not `127.0.0.1`.
 
-## How this app consumes the package
-
-| Concern | Location |
-| --- | --- |
-| `createSecureAuth` | `src/lib/secure-auth.ts` |
-| Email transport (SMTP/console) | `src/modules/email/core/` → `EmailProvider` |
-| DB connection | `src/lib/db/index.ts` |
-| API routes | Thin wrappers → `secureAuth.routes.*` |
-| UI | `@tgoliveira/secure-auth/react` + app `components/` |
-
-See [docs/starter-module-dedup-candidates.md](../../docs/starter-module-dedup-candidates.md).
+---
 
 ## Commands
 
@@ -57,6 +67,20 @@ npm run build -w @secure-auth/starter
 npm run typecheck -w @secure-auth/starter
 ```
 
+---
+
+## Validation
+
+Use [docs/consumer-validation-checklist.md](../../docs/consumer-validation-checklist.md) when verifying a new consumer integration.
+
+| Check | Status (starter) |
+| --- | --- |
+| Package tests | Pass |
+| Starter tests | Pass |
+| build / typecheck | Pass |
+
+---
+
 ## Troubleshooting
 
 | Issue | Fix |
@@ -66,16 +90,7 @@ npm run typecheck -w @secure-auth/starter
 | No verification email | `EMAIL_PROVIDER=console` logs links to terminal |
 | SMTP / Mailpit | `EMAIL_PROVIDER=smtp`, open http://localhost:8025 |
 | OAuth Configuration error | Restart dev server after env changes |
-| Account deletion blocked | OAuth-only accounts need a **recent** sign-in (15 min); sign in again |
-| `/api/auth/session` 500 / `dynamic require` | NextAuth is app-owned (`src/lib/nextauth-route.ts`); clear cache: `rm -rf apps/starter/.next` and restart dev |
-| `Invalid hook call` / `useState` is null on `/` | Ensure `next-auth` is in `transpilePackages` but **not** in `serverExternalPackages` (see `next.config.ts`); then `rm -rf apps/starter/.next` and restart |
-| `EADDRINUSE` on port 3001 | Stop the other process: `lsof -ti :3001 \| xargs kill` or run `next dev -p 3002` |
-| Build fails with `useState` during prerender | Rebuild the package (`npm run build -w @tgoliveira/secure-auth`); root layout uses `dynamic = "force-dynamic"` for session-aware pages |
-| UI looks unstyled / cards clip text / buttons lack color | Tailwind v4 must scan package UI sources — ensure `globals.css` imports `@tgoliveira/secure-auth/styles.css`; then `rm -rf apps/starter/.next` and restart dev |
+| UI unstyled | Import `@tgoliveira/secure-auth/styles.css` in `globals.css`; restart dev |
+| Passkeys fail | Match `WEBAUTHN_ORIGIN` to browser URL exactly |
 
-## Validation (hardening phase)
-
-| Check | Status |
-| --- | --- |
-| starter tests (230) | Pass |
-| build / typecheck | Pass |
+See also [consumer-quick-start.md](../../docs/consumer-quick-start.md#14-verify-installation).

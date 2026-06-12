@@ -1,4 +1,5 @@
 import type { SecureAuthServices } from "../../core/types.js";
+import { SECURE_AUTH_PACKAGE_VERSION } from "../../core/package-version.js";
 
 export type RouteContext = { params: Promise<Record<string, string | string[]>> };
 
@@ -33,10 +34,17 @@ function lazyLoginStart(getServices: () => Promise<SecureAuthServices>): RouteHa
  */
 export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
   const healthGet = async () =>
-    new Response(JSON.stringify({ ok: true, package: "@tgoliveira/secure-auth", version: "0.1.0" }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+    new Response(
+      JSON.stringify({
+        ok: true,
+        package: "@tgoliveira/secure-auth",
+        version: SECURE_AUTH_PACKAGE_VERSION,
+      }),
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }
+    );
 
   return {
     health: { GET: healthGet },

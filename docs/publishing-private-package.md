@@ -8,7 +8,7 @@
 | --- | --- |
 | Name | `@tgoliveira/secure-auth` |
 | Registry | `https://npm.pkg.github.com` |
-| Version | `0.1.0-internal` |
+| Version | `0.1.1-internal` |
 
 ## Registry setup (consumer)
 
@@ -29,20 +29,29 @@
 
 ## Install (consumer repo)
 
+See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding flow.
+
 ```bash
 export GITHUB_PACKAGES_TOKEN=ghp_...
-npm install @tgoliveira/secure-auth@0.1.0-internal
+npm install @tgoliveira/secure-auth@0.1.1-internal \
+  next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 ```
 
 ```json
 {
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.0"
+    "@tgoliveira/secure-auth": "0.1.1-internal",
+    "next": "^16.0.0",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "drizzle-orm": "^0.44.2",
+    "postgres": "^3.4.0"
   }
 }
 ```
 
-Peer dependencies: `next`, `react`, `react-dom`, `drizzle-orm`.
+**Required peer dependencies:** `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`.
 
 ## Publish (maintainer)
 

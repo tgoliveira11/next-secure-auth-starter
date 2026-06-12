@@ -1,7 +1,7 @@
 # Phase 7 — Route migration status
 
 **Date:** 2026-06-12  
-**Package:** `@tgoliveira/secure-auth@0.1.0` (experimental)
+**Package:** `@tgoliveira/secure-auth@0.1.1-internal` (experimental)
 
 ## Summary
 

@@ -30,17 +30,52 @@ secure-auth/                    # npm workspaces root
 
 ## Dependency injection
 
+> **Consumer docs:** [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
+
+### Composition root
+
+**`createSecureAuth(config)` from `@tgoliveira/secure-auth/next` is the only supported consumer entry point.**
+
+Consumers must:
+
+- create one `secureAuth` instance;
+- register API routes via `secureAuth.routes.*`;
+- inject `EmailProvider`, OAuth, WebAuthn, and secrets through `SecureAuthConfig`;
+- map environment variables in app code.
+
+Consumers must **not**:
+
+- import `@tgoliveira/secure-auth/server` (removed in `0.1.1-internal`);
+- call `createRoutes`, `createAuthServices`, or internal runtime helpers.
+
 ```mermaid
 flowchart LR
   App["apps/starter\nlib/secure-auth.ts"] --> Factory["createSecureAuth(config)"]
   Factory --> Runtime["initSecureAuthRuntime({ config, db })"]
-  Runtime --> Services["createAuthServices(config)"]
-  Services --> Handlers["Route handlers"]
+  Runtime --> Services["createAuthServices (internal)"]
+  Services --> Handlers["Route handlers via secureAuth.routes.*"]
   Handlers --> Repos["Repositories"]
-  Repos --> DB["config.db via getSecureAuthDb()"]
+  Repos --> DB["config.db via getSecureAuthDb() (internal)"]
 ```
 
-### What was found (hardening phase)
+### Consumer-facing API (0.1.1-internal)
+
+Consumers call **`createSecureAuth(config)` only**. `createAuthServices` and `createRoutes` are internal implementation details — not exported from public package entrypoints.
+
+### Scoped runtime (0.1.x — temporary)
+
+`createSecureAuth(config)` is the composition root. The package still uses **scoped runtime state** internally so Next.js App Router route handlers and existing module-level services work without a full DI refactor.
+
+| Use case | Fit |
+| --- | --- |
+| Single Next.js app, one `createSecureAuth` call | **Good** |
+| Multiple isolated auth instances in one Node process | **Poor** |
+| Multi-tenant runtime isolation in one worker | **Poor** |
+| Highly parallel tests without re-init | **Requires care** |
+
+**0.2.x target:** pure constructor-based repository/service dependency injection. Consumers must not call `getSecureAuthConfig()`, `getSecureAuthDb()`, or other runtime helpers.
+
+### Hardening phase patterns
 
 | Pattern | Status |
 | --- | --- |
@@ -85,7 +120,7 @@ Account emails flow: `account-auth-service` → `deliverAccountEmail()` → `con
 
 | Module | Responsibility |
 | --- | --- |
-| `core/` | Types, `createAuthServices`, `secure-auth-runtime` |
+| `core/` | Types, internal `createAuthServices`, `secure-auth-runtime` (not public API) |
 | `drizzle/` | Auth schema |
 | `modules/account` | Users, tokens, deletion policy, account lifecycle |
 | `modules/auth` | Login, NextAuth options, OAuth policy |
@@ -97,8 +132,8 @@ Account emails flow: `account-auth-service` → `deliverAccountEmail()` → `con
 | `modules/email` | `deliverAccountEmail` + default templates only |
 | `modules/security` | Hashing, IP, logging, password policy |
 | `modules/ui` | Default UI primitives |
-| `next/` | `createSecureAuth` |
-| `server/routes/` | Next.js route handler factories |
+| `next/` | **`createSecureAuth`** (public) |
+| `server/routes/` | Internal route handler registry (via `secureAuth.routes.*` only) |
 
 ## Starter as integration harness
 

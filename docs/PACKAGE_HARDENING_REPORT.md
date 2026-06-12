@@ -4,7 +4,9 @@ Phase: **package-hardening / package-purity** (pre–second consumer)
 
 Date: 2026-06-11
 
-Package: `@tgoliveira/secure-auth@0.1.0-internal`
+Package: `@tgoliveira/secure-auth@0.1.1-internal`
+
+> **Historical note:** The first monorepo extraction shipped as `0.1.0-internal` (tag `secure-auth-v0.1.0-internal`). Current package version is `0.1.1-internal` (tag `secure-auth-v0.1.1-internal`).
 
 ## Summary
 
@@ -26,13 +28,10 @@ The package was refactored to behave like a clean, reusable internal product. Le
 
 ### Resolutions
 
-- **Deleted** `packages/secure-auth/src/server/routes/index.ts`.
-- **Single authoritative path:** `createSecureAuth(config)` → `createRoutes(getServices)` in `src/next/create-secure-auth.ts`.
-- **Removed** legacy route aliases from `create-routes.ts`.
-- **`@tgoliveira/secure-auth/server`** now exports only:
-  - `createAuthServices`
-  - `createRoutes`
-  - `SecureAuthRoutes` (type)
+- **Deleted** `packages/secure-auth/src/server/routes/index.ts` (legacy 501 handlers).
+- **Single authoritative consumer path:** `createSecureAuth(config)` → `secureAuth.routes.*`.
+- **Internal wiring:** `createRoutes` / `createAuthServices` remain **internal** (not exported).
+- **`@tgoliveira/secure-auth/server`:** export path **removed** in `0.1.1-internal`.
 
 ---
 
@@ -117,12 +116,11 @@ Full repository constructor injection deferred to 0.2.x to avoid a large refacto
 
 ### Changes
 
-| Export path | Action |
+| Export path | Final state (`0.1.1-internal`) |
 | --- | --- |
-| `@tgoliveira/secure-auth/server` | Removed `createRouteHandlers`; exports `createRoutes` only |
-| `@tgoliveira/secure-auth/client` | Removed server-only cookie helpers (`clearLoginPendingTokenCookie`, `getLoginPendingTokenCookieOptions`, `clearLoginChallengeCookie`, `getLoginChallengeCookieOptions`) |
-| `@tgoliveira/secure-auth/client` | Kept browser-safe builders (`buildLoginPendingTokenCookieName`, passkey localStorage keys, API client, formatters) |
-| Root `@tgoliveira/secure-auth` | Types, `createAuthServices`, `authSchema`, `safeLogger` |
+| `@tgoliveira/secure-auth/server` | **Removed** — do not import |
+| `@tgoliveira/secure-auth/next` | **`createSecureAuth(config)`** — sole consumer entry |
+| Root `@tgoliveira/secure-auth` | Types, `SECURE_AUTH_PACKAGE_VERSION`, `authSchema`, `safeLogger` |
 
 ### Breaking consumer changes
 
@@ -163,9 +161,11 @@ Temporary consumer workspace created from `npm pack` tarball (outside monorepo).
 | `styles.css` does not `@source` unpublished trees | Pass |
 | Runtime import without `next-auth` installed | Expected failure — consumer must install NextAuth peer |
 
-Validated imports:
+Validated imports (public entry points only):
 
-- `@tgoliveira/secure-auth`, `/next`, `/server`, `/react`, `/client`, `/client/password-policy`, `/email`, `/drizzle/schema`
+- `@tgoliveira/secure-auth`, `/next`, `/react`, `/client`, `/client/password-policy`, `/email`, `/drizzle/schema`, `/styles.css`
+
+**Not validated (unsupported):** `@tgoliveira/secure-auth/server`
 
 Styles: import in app CSS (`@import "@tgoliveira/secure-auth/styles.css"`), not as a TypeScript module.
 
@@ -213,3 +213,29 @@ Updated:
 | Documentation updated | ✅ |
 | Validation commands pass | ✅ |
 | Ready for brand-new consumer application | ✅ |
+
+---
+
+## Package-readiness follow-up (0.1.1-internal)
+
+Additional changes to prepare for a brand-new consumer without open design questions:
+
+| Decision | Implementation |
+| --- | --- |
+| `next-auth` peer + dev dependency | `peerDependencies` and `devDependencies` in `package.json` |
+| Centralized health version | `SECURE_AUTH_PACKAGE_VERSION` in `src/core/package-version.ts`; health route + test |
+| Remove internal APIs from public exports | `createAuthServices`, `createRoutes` removed from `@tgoliveira/secure-auth` and `@tgoliveira/secure-auth/server`; `./server` export path removed |
+| Scoped runtime documented | `docs/architecture.md`, package README, security-hardening |
+| Sourcemaps without embedded source | tsup `esbuildOptions.sourcesContent = false` |
+| Docs at `0.1.1-internal` | README, package-api, publishing, phase-7, consumer onboarding docs |
+
+---
+
+## Consumer onboarding documentation (post-hardening)
+
+| Document | Purpose |
+| --- | --- |
+| [consumer-quick-start.md](./consumer-quick-start.md) | Full new-app integration guide |
+| [minimal-consumer-example.md](./minimal-consumer-example.md) | Smallest working example |
+| [consumer-validation-checklist.md](./consumer-validation-checklist.md) | Sign-off checklist |
+| [package-api.md](./package-api.md) | Supported / unsupported entry points |

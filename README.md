@@ -2,7 +2,7 @@
 
 Opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** authentication — packaged as `@tgoliveira/secure-auth` with `apps/starter` as the integration harness.
 
-**Maturity:** `0.1.0-internal` experimental — not production-ready. See [docs/security-hardening.md](docs/security-hardening.md) and [docs/repository-readiness.md](docs/repository-readiness.md).
+**Maturity:** `0.1.1-internal` experimental — not production-ready. See [docs/security-hardening.md](docs/security-hardening.md) and [docs/repository-readiness.md](docs/repository-readiness.md).
 
 ## Structure
 
@@ -134,15 +134,17 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 
 | Doc | Topic |
 | --- | --- |
-| [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package API, EmailProvider |
-| [apps/starter/README.md](apps/starter/README.md) | Starter harness |
-| [docs/package-api.md](docs/package-api.md) | Public exports and route map |
-| [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) | Package-purity hardening audit |
+| **[docs/consumer-quick-start.md](docs/consumer-quick-start.md)** | **New consumer onboarding (start here)** |
+| [docs/minimal-consumer-example.md](docs/minimal-consumer-example.md) | Smallest working integration |
+| [docs/consumer-validation-checklist.md](docs/consumer-validation-checklist.md) | Integration sign-off checklist |
+| [docs/package-api.md](docs/package-api.md) | Supported / unsupported public exports |
+| [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package overview |
+| [apps/starter/README.md](apps/starter/README.md) | Reference consumer (this monorepo) |
+| [docs/architecture.md](docs/architecture.md) | Composition root, runtime, boundaries |
+| [docs/PACKAGE_HARDENING_REPORT.md](docs/PACKAGE_HARDENING_REPORT.md) | Hardening audit (historical + current) |
+| [docs/publishing-private-package.md](docs/publishing-private-package.md) | GitHub Packages install |
+| [docs/migrations.md](docs/migrations.md) | Database migrations |
 | [docs/security-hardening.md](docs/security-hardening.md) | Security tracker |
-| [docs/documentation-audit.md](docs/documentation-audit.md) | Doc audit report |
-| [docs/migration-from-starter.md](docs/migration-from-starter.md) | Standalone → monorepo |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
-| [docs/repository-readiness.md](docs/repository-readiness.md) | Pre-push audit |
-| [docs/git-release-strategy.md](docs/git-release-strategy.md) | Git tags, branch, PR strategy |
 
 Legacy: [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md) — prefer `docs/` versions.

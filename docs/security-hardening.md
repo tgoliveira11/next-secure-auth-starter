@@ -2,6 +2,8 @@
 
 **Maturity:** `0.1.x` — experimental. **Not production-ready.**
 
+**Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
+
 Last validation: 2026-06-11 (hardening phase)
 
 ## Validation results
@@ -27,7 +29,10 @@ Last validation: 2026-06-11 (hardening phase)
 | Duplicate module code (starter + package) | **Done** | — | Phase 10 deduplication |
 | Email provider abstraction | **Done** | — | Package uses `EmailProvider` only; SMTP in starter |
 | Runtime dependency binding | **Done (single runtime)** | Low | `initSecureAuthRuntime(config)` binds `{ config, db }` once |
-| Repository constructor DI | **Deferred 0.2.x** | Low | Repositories use `config.db` via runtime accessor; no hidden service locator |
+| Repository constructor DI | **Deferred 0.2.x** | Low | Scoped runtime acceptable for single-app Next.js; see [architecture.md](./architecture.md) |
+| `next-auth` peer dependency | **Done** | — | Declared in package `peerDependencies` + `devDependencies` |
+| Public API surface | **Done** | — | `createAuthServices` / `createRoutes` removed from exports; `/server` path removed |
+| Sourcemap `sourcesContent` | **Done** | Low | tsup builds omit embedded source in `.map` files |
 | npm audit findings | **Open** | Medium | Do not `audit fix --force` (breaks Next.js) |
 | OAuth integration E2E | **Partial** | Medium | Policy unit tests; manual provider validation documented |
 | Live PostgreSQL integration | **Opt-in** | Low | `INTEGRATION_DATABASE_URL` test; CI skips by default |
@@ -132,6 +137,9 @@ If `.env.local` or credentials were ever exposed:
 - [x] OAuth-only account deletion reviewed and implemented
 - [x] Email delivery abstracted behind `EmailProvider`
 - [x] Single explicit runtime binding (`createSecureAuth`)
+- [x] Scoped runtime documented as temporary 0.1.x limitation
+- [x] `next-auth` peer dependency declared
+- [x] Internal wiring (`createAuthServices`, `createRoutes`) not public API
 - [ ] Repository constructor injection (0.2.x)
 - [ ] npm audit clean or accepted with documented exceptions
 - [ ] Security review sign-off documented

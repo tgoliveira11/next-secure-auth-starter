@@ -8,7 +8,7 @@ Phase 10 removed duplicated auth/account/security modules from `apps/starter` no
 
 | Path | Replacement |
 | --- | --- |
-| `modules/account/` | `@tgoliveira/secure-auth` / `@tgoliveira/secure-auth/server` |
+| `@tgoliveira/secure-auth` | `@tgoliveira/secure-auth` only (via `/next`, `/client`, etc.) |
 | `modules/auth/` | `@tgoliveira/secure-auth/next` (`getAuthOptions`, route handlers) |
 | `modules/sessions/` | Package services + `@tgoliveira/secure-auth/client` |
 | `modules/two-factor/` | Package services + client APIs |

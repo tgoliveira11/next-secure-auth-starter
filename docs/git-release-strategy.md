@@ -1,7 +1,8 @@
 # Git release strategy — monorepo transition
 
 **Date:** 2026-06-11  
-**Status:** Recommendations only — tags and push not executed.
+**Current package version:** `0.1.1-internal` (tag `secure-auth-v0.1.1-internal`)  
+**Status:** Tags published; see historical notes below for `0.1.0-internal`.
 
 ---
 

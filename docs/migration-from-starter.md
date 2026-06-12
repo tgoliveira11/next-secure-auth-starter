@@ -57,14 +57,16 @@ See [phase-7-route-migration.md](./phase-7-route-migration.md#test-architecture-
 
 ## Consumer migration checklist
 
-1. Add `@tgoliveira/secure-auth` dependency.
-2. Replace local schema with package import.
-3. Add `src/lib/secure-auth.ts` config factory.
-4. Point `drizzle.config.ts` at package schema + migrations output.
-5. Convert API routes to `secureAuth.routes` wrappers (per route).
-6. Run `npm run db:migrate`.
-7. Remove any duplicated auth module code from the app.
+For a **brand-new app**, use [consumer-quick-start.md](./consumer-quick-start.md) and [consumer-validation-checklist.md](./consumer-validation-checklist.md).
+
+1. Install `@tgoliveira/secure-auth@0.1.1-internal` and peer dependencies (`next-auth`, etc.).
+2. Replace local schema with `@tgoliveira/secure-auth/drizzle/schema`.
+3. Add `src/lib/secure-auth.ts` with `createSecureAuth(config)` — **do not** use `@tgoliveira/secure-auth/server`.
+4. Point `drizzle.config.ts` at package schema + migrations.
+5. Convert API routes to `secureAuth.routes.*` wrappers.
+6. Run migrations; import `@tgoliveira/secure-auth/styles.css` in global CSS.
+7. Remove duplicated auth module code from the app.
 
 ## Fork / template users
 
-If you forked the pre-monorepo starter, compare against `apps/starter` and adopt package imports incrementally. See [docs/package-api.md](./package-api.md).
+If you forked the pre-monorepo starter, compare against `apps/starter` and adopt package imports incrementally. See [package-api.md](./package-api.md) and [consumer-quick-start.md](./consumer-quick-start.md).

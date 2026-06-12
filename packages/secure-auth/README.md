@@ -1,29 +1,62 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.0-internal` (experimental — not production-ready)
+**Version:** `0.1.1-internal` (experimental — not production-ready)
 
-Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**. Designed for **private/internal** consumption first (GitHub Packages).
+Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
-This is **not** a generic auth framework. It encodes specific flows: credentials + OAuth, email verification, password reset, TOTP 2FA, passkeys, sessions, and audit logging.
+---
 
-## Public imports
+## Composition root (read this first)
+
+**Consumers integrate exclusively through:**
+
+```typescript
+import { createSecureAuth } from "@tgoliveira/secure-auth/next";
+
+export const secureAuth = createSecureAuth(config);
+```
+
+| Do | Don't |
+| --- | --- |
+| Create **one** `secureAuth` instance in app bootstrap | Import `@tgoliveira/secure-auth/server` (removed) |
+| Wire routes: `secureAuth.routes.register.POST` | Call `createRoutes` or `createAuthServices` |
+| Pass config + `EmailProvider` explicitly | Call internal runtime helpers |
+| Map env vars in **your app** | Expect the package to read `process.env` |
+
+**Onboarding docs:** [consumer-quick-start.md](../../docs/consumer-quick-start.md) · [minimal-consumer-example.md](../../docs/minimal-consumer-example.md) · [package-api.md](../../docs/package-api.md)
+
+---
+
+## Install (consumer app)
+
+```bash
+npm install @tgoliveira/secure-auth@0.1.1-internal \
+  next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2
+```
+
+See [publishing-private-package.md](../../docs/publishing-private-package.md) for GitHub Packages registry setup.
+
+---
+
+## Supported public entry points
 
 | Import | Purpose |
 | --- | --- |
-| `@tgoliveira/secure-auth` | Core types, `createAuthServices`, schema re-exports |
-| `@tgoliveira/secure-auth/next` | `createSecureAuth(config)` — main entry point |
-| `@tgoliveira/secure-auth/react` | Default UI primitives (server-safe components) |
-| `@tgoliveira/secure-auth/react/client` | Client-only UI (`ConfirmDialog`, hooks) |
-| `@tgoliveira/secure-auth/client` | Browser-safe API client, passkey helpers, OAuth UI constants, formatters |
-| `@tgoliveira/secure-auth/client/password-policy` | Password policy config (safe for server components) |
-| `@tgoliveira/secure-auth/server` | Server helpers (`createAuthServices`, `createRoutes`) |
-| `@tgoliveira/secure-auth/drizzle/schema` | Auth Drizzle schema (single source of truth) |
-| `@tgoliveira/secure-auth/email` | Email provider types |
-| `@tgoliveira/secure-auth/styles.css` | Tailwind v4 `@source` registration for package UI classes (import from app `globals.css`) |
+| `@tgoliveira/secure-auth/next` | **`createSecureAuth(config)`** — composition root |
+| `@tgoliveira/secure-auth` | Types, `SECURE_AUTH_PACKAGE_VERSION`, `authSchema`, `safeLogger` |
+| `@tgoliveira/secure-auth/react` | UI primitives |
+| `@tgoliveira/secure-auth/react/client` | Client-only UI |
+| `@tgoliveira/secure-auth/client` | Browser API client, passkey helpers |
+| `@tgoliveira/secure-auth/client/password-policy` | Password policy helpers |
+| `@tgoliveira/secure-auth/drizzle/schema` | Auth Drizzle schema |
+| `@tgoliveira/secure-auth/email` | `EmailProvider` types |
+| `@tgoliveira/secure-auth/styles.css` | Tailwind v4 source registration (CSS import) |
 
-The root export also exposes `safeLogger` for app-owned adapters (e.g. SMTP delivery in the starter).
+**Unsupported:** `@tgoliveira/secure-auth/server`, `createRoutes`, `createAuthServices`, deep `src/**` imports.
 
-Deep imports into `packages/secure-auth/src/**` are **not supported**.
+Full reference: [package-api.md](../../docs/package-api.md).
+
+---
 
 ## Quick start
 
@@ -54,109 +87,63 @@ export const secureAuth = createSecureAuth({
     rpName: "My App",
     origin: process.env.WEBAUTHN_ORIGIN!,
   },
-  ui: {
-    brand: { name: "My App" },
-    paths: { login: "/login", register: "/register", account: "/account", security: "/account/security" },
-  },
 });
 ```
 
 ## Route handlers
 
-Expose thin App Router wrappers in the consuming app:
+Thin App Router wrappers in the consuming app:
 
 ```typescript
-// app/api/auth/login/start/route.ts
-export async function POST(request: Request) {
-  const { secureAuth } = await import("@/lib/secure-auth");
-  return secureAuth.routes.loginStart.POST(request);
-}
+// src/app/api/auth/register/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+
+export const POST = secureAuth.routes.register.POST;
 ```
 
-All auth/account API route handlers are available on `secureAuth.routes.*` (Phase 7). The starter app wraps them in thin `app/api/**/route.ts` files.
+All handlers: `secureAuth.routes.*`. Route map: [package-api.md](../../docs/package-api.md).
 
 ## Tailwind CSS (v4)
-
-UI primitives use Tailwind utility classes. Tailwind v4 only auto-scans the consuming app — register package sources in the app stylesheet:
 
 ```css
 @import "tailwindcss";
 @import "@tgoliveira/secure-auth/styles.css";
 ```
 
-Copy the CSS variables from `apps/starter/src/app/globals.css` (`:root { --primary, --card, … }`) or define your own theme tokens. The package components reference those variables.
+Define `:root` CSS variables for theme tokens (see starter `globals.css`).
 
-## EmailProvider contract
+## EmailProvider
 
-The package sends account email (verification, password reset) only through the injected provider:
+Account email flows through your injected provider only. Transport lives in the app; templates use `config.app.name` and `config.app.baseUrl`.
 
-```typescript
-import type { EmailProvider } from "@tgoliveira/secure-auth/email";
+Reference: `apps/starter/src/modules/email/core/` + `apps/starter/src/lib/secure-auth.ts`.
 
-export const emailProvider: EmailProvider = {
-  async send({ to, subject, html, text }) {
-    await myTransport.send({ from: process.env.EMAIL_FROM!, to, subject, html, text });
-  },
-};
-```
+## Configuration
 
-The package includes default **templates** (`verificationEmailContent`, `passwordResetEmailContent`) using `config.app.baseUrl` and `config.app.name`. Transport (SMTP, Resend, SES, console) belongs in the consuming app.
+The package does **not** read runtime environment variables. Map secrets at the app boundary in `createSecureAuth(config)`.
 
-Reference implementation: `apps/starter/src/modules/email/core/` wired in `apps/starter/src/lib/secure-auth.ts`.
+### Runtime (0.1.x — temporary)
 
-## Dependency injection
+Scoped runtime state backs Next.js route handlers. Fine for single-app Next.js; not ideal for multiple isolated instances per process. **0.2.x:** constructor-based DI. Do not call runtime helpers from consumer code.
 
-Call `createSecureAuth(config)` once at app startup. This binds `{ config, db }` into a single runtime used by services and repositories.
+See [architecture.md](../../docs/architecture.md).
 
-**The package does not read runtime environment variables.** Map secrets and policy at the app boundary:
-
-```typescript
-export const secureAuth = createSecureAuth({
-  // ...
-  auth: {
-    nextAuthSecret: process.env.NEXTAUTH_SECRET!,
-    twoFactorEncryptionKey: process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY!,
-  },
-  passwordPolicy: { enforcement: "warn", minLength: 12 /* ... */ },
-  sessions: { maxAgeSeconds: 30 * 24 * 60 * 60 },
-  rateLimit: { store: process.env.RATE_LIMIT_STORE === "postgres" ? "postgres" : "memory" },
-  server: { cookieSecure: process.env.NODE_ENV === "production" },
-});
-```
-
-### Runtime state (0.1.x)
-
-`createSecureAuth` is the composition root. Internal modules use `getSecureAuthConfig()` backed by a process-scoped runtime binding. Repository constructor injection is planned for 0.2.x. See [docs/PACKAGE_HARDENING_REPORT.md](../../docs/PACKAGE_HARDENING_REPORT.md).
-
-## Database and migrations
+## Database
 
 - Schema: `@tgoliveira/secure-auth/drizzle/schema`
-- SQL migrations: `packages/secure-auth/migrations/`
-- The **app owns** the `DATABASE_URL` connection; the **package owns** auth tables.
+- Migrations: shipped in package `migrations/` folder
+- App owns `DATABASE_URL`; package owns auth tables
 
-See [docs/migrations.md](../../docs/migrations.md).
-
-## UI customization
-
-Pass `ui` config to `createSecureAuth`:
-
-- `brand.name`, optional `brand.logo`
-- `paths` (login, register, account, security)
-- `messages` — string overrides
-- `cssVariables` — design tokens
-- Optional email templates via `email.templates`
-
-Import default components from `@tgoliveira/secure-auth/react`.
+See [migrations.md](../../docs/migrations.md) and [consumer-quick-start.md](../../docs/consumer-quick-start.md).
 
 ## Versioning
 
 | Range | Meaning |
 | --- | --- |
-| `0.1.x` | Experimental internal package |
-| `0.2.x` | Migrations / DB contract still unstable |
-| `0.5.x` | API reasonably stable |
-| `1.0.0` | Production-ready public contract |
+| `0.1.x` | Experimental internal |
+| `0.2.x` | DB contract may break; DI refactor |
+| `1.0.0` | Production-ready contract |
 
 ## Security
 
-See [docs/security-hardening.md](../../docs/security-hardening.md). Do not treat `0.1.x` as production-ready.
+See [security-hardening.md](../../docs/security-hardening.md). Not production-ready at `0.1.x`.

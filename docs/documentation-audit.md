@@ -1,8 +1,20 @@
 # Documentation audit (hardening phase)
 
-**Date:** 2026-06-11
+**Date:** 2026-06-11 (updated: consumer onboarding pass)
 
-## Summary
+## Consumer onboarding pass (2026-06-11)
+
+Added:
+
+- [consumer-quick-start.md](./consumer-quick-start.md)
+- [minimal-consumer-example.md](./minimal-consumer-example.md)
+- [consumer-validation-checklist.md](./consumer-validation-checklist.md)
+
+Updated all docs to remove obsolete `@tgoliveira/secure-auth/server`, `createRoutes`, and `createAuthServices` **as consumer-facing APIs**. Historical references remain only in CHANGELOG, hardening audit, and git-release tag history.
+
+**Current version:** `0.1.1-internal` · **Composition root:** `createSecureAuth(config)` from `@tgoliveira/secure-auth/next`
+
+## Summary (initial hardening)
 
 | Action | Count |
 | --- | --- |

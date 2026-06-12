@@ -1,6 +1,16 @@
 # Usage Guide
 
-## How to use this starter
+## Integrating `@tgoliveira/secure-auth` in a new app
+
+**Start here:** [consumer-quick-start.md](./consumer-quick-start.md)
+
+For the smallest example: [minimal-consumer-example.md](./minimal-consumer-example.md)
+
+Sign-off checklist: [consumer-validation-checklist.md](./consumer-validation-checklist.md)
+
+---
+
+## How to use this monorepo starter
 
 This repository is intended to be used as a template for new secure Next.js applications.
 

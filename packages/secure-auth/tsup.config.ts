@@ -3,10 +3,11 @@ import { readdirSync, statSync } from "node:fs";
 import { defineConfig } from "tsup";
 
 const shared = {
-  esbuildOptions(options: { alias?: Record<string, string> }) {
+  esbuildOptions(options: { alias?: Record<string, string>; sourcesContent?: boolean }) {
     options.alias = {
       "@": path.resolve("src"),
     };
+    options.sourcesContent = false;
   },
   format: ["esm"] as const,
   dts: true,
@@ -60,6 +61,9 @@ export default defineConfig([
     sourcemap: true,
     splitting: false,
     target: "es2022" as const,
+    esbuildOptions(options: { sourcesContent?: boolean }) {
+      options.sourcesContent = false;
+    },
     external: ["react", "react-dom"],
     entry: {
       "react/index": "src/react/index.ts",
@@ -74,7 +78,6 @@ export default defineConfig([
     entry: {
       index: "src/index.ts",
       "next/index": "src/next/index.ts",
-      "server/index": "src/server/index.ts",
       "drizzle/schema": "src/drizzle/schema.ts",
       "email/index": "src/email/index.ts",
       "client/index": "src/client/index.ts",

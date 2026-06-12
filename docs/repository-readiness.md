@@ -32,9 +32,9 @@ See [git-release-strategy.md](./git-release-strategy.md) for branch, tag, commit
 
 | Package | Version | Maturity |
 | --- | --- | --- |
-| Root `secure-auth` | `0.1.0-internal` | Experimental monorepo |
-| `@tgoliveira/secure-auth` | `0.1.0-internal` | Experimental internal package |
-| `@secure-auth/starter` | `0.1.0-internal` | Private integration harness |
+| Root `secure-auth` | `0.1.1-internal` | Experimental monorepo |
+| `@tgoliveira/secure-auth` | `0.1.1-internal` | Experimental internal package |
+| `@secure-auth/starter` | `0.1.1-internal` | Private integration harness |
 
 **Strategy:** Stay on `0.1.x` prerelease (`-internal`) until API and migrations stabilize. Do **not** release `1.0.0` until security review sign-off and production readiness gate in `docs/security-hardening.md`.
 
@@ -99,7 +99,7 @@ Swagger UI assets in starter are copied at `postinstall` (not committed as dupli
 | Field | Value |
 | --- | --- |
 | name | `@tgoliveira/secure-auth` |
-| version | `0.1.0-internal` |
+| version | `0.1.1-internal` |
 | license | `UNLICENSED` (internal) |
 | repository | GitHub monorepo, `directory: packages/secure-auth` |
 | publishConfig.registry | `https://npm.pkg.github.com` |

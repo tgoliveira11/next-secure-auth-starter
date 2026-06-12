@@ -6,12 +6,12 @@ The **package owns** the authentication schema and versioned SQL migrations. The
 
 | Artifact | Location |
 | --- | --- |
-| Drizzle schema | `packages/secure-auth/src/drizzle/schema.ts` |
+| Drizzle schema | `packages/secure-auth/src/drizzle/schema.ts` (monorepo) |
 | Public export | `@tgoliveira/secure-auth/drizzle/schema` |
-| SQL migrations | `packages/secure-auth/migrations/` |
+| SQL migrations | `packages/secure-auth/migrations/` (published in tarball) |
 | Drizzle meta | `packages/secure-auth/migrations/meta/` |
 
-## Starter app (local)
+## Starter app (local monorepo)
 
 `apps/starter/drizzle.config.ts`:
 
@@ -27,9 +27,11 @@ npm run db:migrate    # apply to local Postgres
 
 ## Downstream repos
 
-1. Install `@tgoliveira/secure-auth` from GitHub Packages.
-2. Point `drizzle.config.ts` at the package schema (source path in monorepo, or `node_modules/@tgoliveira/secure-auth` + published `migrations/` folder).
-3. Run `drizzle-kit migrate` in CI/CD or release pipeline.
+See **[consumer-quick-start.md](./consumer-quick-start.md)** (sections 4–5) for full schema import and migration setup.
+
+1. Install `@tgoliveira/secure-auth@0.1.1-internal` and peer dependencies.
+2. Point `drizzle.config.ts` at `node_modules/@tgoliveira/secure-auth/dist/drizzle/schema.js` and `migrations/`.
+3. Run `drizzle-kit migrate` in CI or release pipeline.
 4. **Do not duplicate** auth table definitions — import `authSchema` when configuring Drizzle.
 
 ### Coexisting app schemas
