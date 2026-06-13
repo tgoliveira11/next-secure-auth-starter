@@ -29,7 +29,7 @@ npm run db:migrate    # apply to local Postgres
 
 See **[consumer-quick-start.md](./consumer-quick-start.md)** (sections 4–5) for full schema import and migration setup.
 
-1. Install `@tgoliveira/secure-auth@0.1.2-internal` and peer dependencies.
+1. Install `@tgoliveira/secure-auth@0.1.3-internal` and peer dependencies.
 2. Point `drizzle.config.ts` at `node_modules/@tgoliveira/secure-auth/dist/drizzle/schema.js` and `migrations/`.
 3. Run `drizzle-kit migrate` in CI or release pipeline.
 4. **Do not duplicate** auth table definitions — import `authSchema` when configuring Drizzle.
@@ -79,7 +79,7 @@ When upgrading `@tgoliveira/secure-auth`:
 3. Rebuild the package (`npm run build -w @tgoliveira/secure-auth` in monorepo).
 4. Verify `createSecureAuth(config)` options — removed APIs are listed in [package-api.md](./package-api.md#unsupported-entry-points).
 
-Removed in `0.1.2-internal` (do not use):
+Removed in `0.1.3-internal` (do not use):
 
 - `@tgoliveira/secure-auth/server`
 - `createRoutes`, `createAuthServices`, `createRouteHandlers`

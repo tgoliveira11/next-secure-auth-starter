@@ -1,6 +1,6 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.2-internal` is experimental — **not production-ready**.
+**Maturity:** `@tgoliveira/secure-auth@0.1.3-internal` is experimental — **not production-ready**.
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 

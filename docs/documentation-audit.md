@@ -3,7 +3,7 @@
 **Date:** 2026-06-12  
 **Scope:** Package-first architecture cleanup — final state
 
-**Current version:** `0.1.2-internal`  
+**Current version:** `0.1.3-internal`  
 **Composition root:** `createSecureAuth(config)` from `@tgoliveira/secure-auth/next`  
 **UI defaults:** `secureAuth.uiConfig` → `SecureAuthUIProvider`
 

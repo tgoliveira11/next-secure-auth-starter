@@ -1,6 +1,6 @@
 # Package API
 
-Package: `@tgoliveira/secure-auth` @ `0.1.2-internal`
+Package: `@tgoliveira/secure-auth` @ `0.1.3-internal`
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
@@ -220,7 +220,7 @@ Not a TypeScript import — use in CSS only.
 
 | Import / API | Status |
 | --- | --- |
-| `@tgoliveira/secure-auth/server` | **Removed** — export path deleted in `0.1.2-internal` |
+| `@tgoliveira/secure-auth/server` | **Removed** — export path deleted in `0.1.3-internal` |
 | `createRoutes` | **Internal** — use `createSecureAuth(config).routes.*` |
 | `createAuthServices` | **Internal** — use `createSecureAuth(config)` |
 | `createRouteHandlers` | **Removed** — legacy 501 stubs; never use |
@@ -300,14 +300,14 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 `secureAuth.routes.health.GET` returns:
 
 ```json
-{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.2-internal" }
+{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.3-internal" }
 ```
 
 Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route string.
 
 ---
 
-## `secureAuth.routes` (0.1.2-internal)
+## `secureAuth.routes` (0.1.3-internal)
 
 All routes are real implementations — no 501 stubs.
 

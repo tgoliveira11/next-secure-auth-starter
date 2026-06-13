@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.3-internal] - 2026-06-11
+
 ### Added
 
 - **`sessions.singleActiveSession`** — optional opt-in policy that revokes all other active sessions for a user after each successful login (email/password, passkey, OAuth, and post-2FA completion). Default remains multi-session.
@@ -22,6 +24,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`passwordStrengthPosition` page prop** — per-page override on `RegisterPage`, `ResetPasswordPage`, `AccountSettingsPage`, and `ChangePasswordSettings` (precedence: prop → provider → default).
 - **`PasswordFieldFeedbackPlacement`** — shared helper for consistent feedback ordering and spacing.
 - **Starter home documentation links** — GitHub doc links section on the unauthenticated home page.
+- **`apps/consumer-demo`** — canonical minimal downstream consumer validation app (public exports only).
 
 ### Changed
 
@@ -30,6 +33,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Password strength / validation feedback now renders **above** the relevant password field by default everywhere it appears in package UI.
 - Password feedback uses a **stable reserved region** — neutral requirements show before typing; strength updates in place without remounting the input or stealing focus.
 - Single active session: revoked browsers **sign out locally** (not only end the DB session) within the configured poll interval or immediately when refocusing a revoked tab.
+
+### Release
+
+- **npm publication preparation** — package version `0.1.3-internal`; `publishConfig.access: public` for manual publish to the public npm registry (publish not executed in CI).
 
 ## [0.1.2-internal] - 2026-06-11
 
@@ -140,6 +147,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.3-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.3-internal
 [0.1.2-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.2-internal
 [0.1.1-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.1-internal
 [0.1.0-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/v0.1.0-internal

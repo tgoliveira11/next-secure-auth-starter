@@ -1,7 +1,7 @@
 # Consumer demo validation report
 
 **App:** `apps/consumer-demo` (`@secure-auth/consumer-demo`)  
-**Package:** `@tgoliveira/secure-auth@0.1.2-internal`  
+**Package:** `@tgoliveira/secure-auth@0.1.3-internal`  
 **Date:** 2026-06-12
 
 ## Summary
@@ -122,7 +122,7 @@ Console provider logs `to`, `subject`, `text`, and `html` — no SMTP, no starte
 
 | Issue | Fix |
 | --- | --- |
-| `workspace:*` unsupported by npm in this environment | Use `"0.1.2-internal"` with npm workspaces (resolves to local package) |
+| `workspace:*` unsupported by npm in this environment | Use `"0.1.3-internal"` with npm workspaces (resolves to local package) |
 | Import boundary test flagged its own forbidden strings | Scan only `src/app`, `src/lib`, `src/components` |
 | Default DB port 5432 vs monorepo Docker 5433 | Updated `.env.example` and `drizzle.config.ts` to port 5433 |
 
