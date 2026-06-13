@@ -2,7 +2,7 @@
 
 Package: `@tgoliveira/secure-auth` @ `0.1.2-internal`
 
-**Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
+**Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
 ---
 
@@ -86,7 +86,7 @@ Server-safe primitives (Button, Card, Input, …) do not require `"use client"`.
 | `SecuritySettingsPage` | `/settings/security` | Requires `appSlug` for passkey/2FA |
 | `SessionsSettingsPage` | `/settings/sessions` | Optional `onSignOut` |
 | `AccountDeletedPage` | `/account-deleted` | Post-deletion confirmation |
-| `DashboardPlaceholderPage` | `/dashboard` | **Optional** demo/starter only |
+| `DashboardPlaceholderPage` | `/dashboard` | Optional placeholder; used by consumer-demo |
 
 Shared customization props (all pages): `title`, `description`, `subtitle`, `brand`, `footer`, `header`, `className`, `width`, `paths`, `appName`.
 

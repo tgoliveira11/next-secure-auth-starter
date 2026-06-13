@@ -2,7 +2,9 @@
 
 **`@tgoliveira/secure-auth`** is the product — opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** account authentication.
 
-**`apps/starter`** is the reference consumer that demonstrates integration through public exports only.
+**`apps/starter`** is a reference consumer that demonstrates integration through public exports only.
+
+**`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
 **Maturity:** `0.1.2-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
@@ -10,7 +12,8 @@
 
 ```text
 packages/secure-auth/   @tgoliveira/secure-auth — reusable auth package (private)
-apps/starter/           @secure-auth/starter — reference integration app
+apps/starter/           @secure-auth/starter — reference integration app (feature-rich)
+apps/consumer-demo/     @secure-auth/consumer-demo — minimal consumer validation app
 docs/                   Architecture, security, consumer guides
 ```
 
@@ -97,6 +100,17 @@ npm run dev
 
 Open the URL from `NEXTAUTH_URL` (e.g. http://localhost:3001).
 
+### Consumer demo (minimal validation app)
+
+```bash
+cp apps/consumer-demo/.env.example apps/consumer-demo/.env.local
+# Set NEXTAUTH_SECRET and TWO_FACTOR_SECRET_ENCRYPTION_KEY
+npm run db:migrate:consumer
+npm run dev:consumer
+```
+
+Open http://localhost:3002 — see [apps/consumer-demo/README.md](apps/consumer-demo/README.md).
+
 Register → verify email (console logs link when `EMAIL_PROVIDER=console`) → sign in → explore `/settings/security` for 2FA and passkeys.
 
 ### Tests
@@ -106,7 +120,8 @@ npm run test
 ```
 
 Package only: `npm run test -w @tgoliveira/secure-auth`  
-Starter only: `npm run test -w @secure-auth/starter`
+Starter only: `npm run test -w @secure-auth/starter`  
+Consumer demo: `npm run test -w @secure-auth/consumer-demo`
 
 Optional live DB integration:
 

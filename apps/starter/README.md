@@ -2,6 +2,8 @@
 
 Reference consumer for `@tgoliveira/secure-auth@0.1.2-internal`. Demonstrates integration through **official public exports only**.
 
+For a **minimal** downstream consumer with no starter dependencies, see [apps/consumer-demo](../consumer-demo).
+
 **Building a new app?** Start with [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md), not this README alone.
 
 ---

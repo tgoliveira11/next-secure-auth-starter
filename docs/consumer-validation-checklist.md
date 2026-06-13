@@ -1,8 +1,10 @@
 # Consumer validation checklist
 
-Use this when integrating `@tgoliveira/secure-auth@0.1.2-internal` into a **new** consumer application (including the second consumer app in this monorepo).
+Use this when integrating `@tgoliveira/secure-auth@0.1.2-internal` into a **new** consumer application.
 
-Reference: [consumer-quick-start.md](./consumer-quick-start.md)
+**Canonical in-repo example:** [apps/consumer-demo](../apps/consumer-demo) — run `npm run dev:consumer` after setup.
+
+Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-demo-validation.md](./consumer-demo-validation.md)
 
 ---
 

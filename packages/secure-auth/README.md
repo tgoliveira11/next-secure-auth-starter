@@ -27,6 +27,8 @@ export const secureAuth = createSecureAuth(config);
 
 **Onboarding docs:** [consumer-quick-start.md](../../docs/consumer-quick-start.md) · [minimal-consumer-example.md](../../docs/minimal-consumer-example.md) · [package-api.md](../../docs/package-api.md)
 
+**In-repo validation app:** [apps/consumer-demo](../../apps/consumer-demo) — minimal consumer with public exports only (see [consumer-demo-validation.md](../../docs/consumer-demo-validation.md)).
+
 ---
 
 ## UI provider

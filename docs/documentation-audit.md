@@ -13,8 +13,8 @@
 
 | Action | Count |
 | --- | --- |
-| Kept | 15 |
-| Updated | 15 |
+| Kept | 17 |
+| Updated | 18 |
 | Merged | 4 |
 | Deleted | 18 |
 
@@ -29,6 +29,8 @@
 | `CHANGELOG.md` | Release history |
 | `packages/secure-auth/README.md` | Package overview |
 | `apps/starter/README.md` | Reference consumer |
+| `apps/consumer-demo/README.md` | Canonical minimal consumer validation app |
+| `docs/consumer-demo-validation.md` | Consumer demo validation report |
 | `docs/architecture.md` | Package-first model, composition root, UI provider, boundaries |
 | `docs/security.md` | Security requirements and readiness |
 | `docs/package-api.md` | Public exports, routes, `uiConfig` |

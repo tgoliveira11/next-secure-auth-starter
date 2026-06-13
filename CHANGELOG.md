@@ -6,6 +6,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`apps/consumer-demo`** — canonical minimal consumer validation app (`@secure-auth/consumer-demo`) using public package exports only.
+- **[docs/consumer-demo-validation.md](docs/consumer-demo-validation.md)** — validation report for the consumer demo.
+- Root scripts: `dev:consumer`, `build:consumer`, `typecheck:consumer`, `lint:consumer`, `db:migrate:consumer`.
+
 ## [0.1.2-internal] - 2026-06-11
 
 ### Added

@@ -8,6 +8,8 @@ This guide is self-contained. You do not need to read package source code.
 **Related docs:**
 
 - [minimal-consumer-example.md](./minimal-consumer-example.md) — smallest working integration
+- [apps/consumer-demo](../apps/consumer-demo) — canonical in-repo validation app
+- [consumer-demo-validation.md](./consumer-demo-validation.md) — validation report
 - [package-api.md](./package-api.md) — supported public entry points
 - [consumer-validation-checklist.md](./consumer-validation-checklist.md) — verify your integration
 - [publishing-private-package.md](./publishing-private-package.md) — registry install

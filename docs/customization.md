@@ -2,6 +2,8 @@
 
 Consumers customize behavior through `createSecureAuth(config)` and `SecureAuthUIProvider` — no file copying required.
 
+See [apps/consumer-demo](../apps/consumer-demo) for a working minimal integration that uses page wrappers, route wrappers, and `secureAuth.uiConfig` without recreating auth UI.
+
 ## UI configuration flow
 
 ```text

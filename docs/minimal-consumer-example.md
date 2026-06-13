@@ -4,6 +4,8 @@ Smallest working integration of `@tgoliveira/secure-auth@0.1.2-internal` in a ne
 
 Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-start.md) for the full guide.
 
+**Working reference in this monorepo:** [apps/consumer-demo](../apps/consumer-demo) implements this pattern end-to-end.
+
 ---
 
 ## Install
