@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import type { SecureAuthUIPublicConfig } from "../../core/ui-config.js";
+import { SingleActiveSessionMonitor } from "./single-active-session-monitor.js";
 
 const SecureAuthUIContext = createContext<SecureAuthUIPublicConfig | null>(null);
 
@@ -24,7 +25,10 @@ export function SecureAuthUIProvider({ config, children }: SecureAuthUIProviderP
   }, [value?.cssVariables]);
 
   return (
-    <SecureAuthUIContext.Provider value={value}>{children}</SecureAuthUIContext.Provider>
+    <SecureAuthUIContext.Provider value={value}>
+      {value?.sessionPolicy.singleActiveSession ? <SingleActiveSessionMonitor /> : null}
+      {children}
+    </SecureAuthUIContext.Provider>
   );
 }
 

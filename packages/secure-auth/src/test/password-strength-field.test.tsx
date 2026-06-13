@@ -30,6 +30,10 @@ const baseUiConfig: SecureAuthUIPublicConfig = {
   messages: {},
   passwordPolicy: warnPolicy,
   passwordStrength: { position: "above" },
+  sessionPolicy: {
+    singleActiveSession: false,
+    revocationPollIntervalSeconds: 0,
+  },
 };
 
 function strengthIsBeforeInput() {

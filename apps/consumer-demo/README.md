@@ -12,7 +12,7 @@ This app proves a **brand-new Next.js consumer** can adopt the package using **p
 - `SecureAuthUIProvider` + `SessionProvider` (`src/components/providers.tsx`)
 - Thin page wrappers (`src/app/**/page.tsx`)
 - Thin API route wrappers (`src/app/api/**/route.ts`)
-- Environment variables (`.env.example`)
+- Environment variables ([`.env.example`](./.env.example) — see [docs/configuration-reference.md](../../docs/configuration-reference.md))
 
 ## What the package owns
 
@@ -39,6 +39,10 @@ Open http://localhost:3002
 - **`/login`** — passes `title="Prop override: custom sign-in title"` to `LoginPage`, overriding `ui.messages.loginTitle` from `SecureAuthUIProvider`. Validates **prop → provider → default** precedence for page copy.
 - **`/reset-password`** — passes `passwordStrengthPosition="below"` to `ResetPasswordPage`, overriding the package default (`above`) for password feedback placement only on that page.
 
+## Optional session policy
+
+Set `AUTH_SINGLE_ACTIVE_SESSION=true` in `.env.local` (mapped to `sessions.singleActiveSession` in `src/lib/env/secure-auth-from-env.ts`). Default is multi-session. See [docs/configuration-reference.md](../../docs/configuration-reference.md).
+
 ## Health check
 
 ```bash
@@ -47,5 +51,6 @@ curl http://localhost:3002/api/auth/package-health
 
 ## See also
 
+- [docs/configuration-reference.md](../../docs/configuration-reference.md)
 - [docs/consumer-demo-validation.md](../../docs/consumer-demo-validation.md)
 - [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md)

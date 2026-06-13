@@ -2,7 +2,7 @@
 
 **Maturity:** `@tgoliveira/secure-auth@0.1.2-internal` is experimental — **not production-ready**.
 
-**Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
+**Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
 ---
 
@@ -102,6 +102,8 @@ Users must be able to:
 - revoke all other sessions
 
 Session revocation is enforced server-side. Revoked sessions must not remain authorized.
+
+Optional **single active session** mode (`sessions.singleActiveSession: true` in `createSecureAuth`) revokes all other sessions automatically after each successful login. Default is multi-session (unchanged). See [customization.md](./customization.md).
 
 Session tokens are stored hashed server-side where applicable.
 

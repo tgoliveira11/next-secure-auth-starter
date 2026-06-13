@@ -25,7 +25,7 @@ export const secureAuth = createSecureAuth(config);
 | Pass `secureAuth.uiConfig` to `SecureAuthUIProvider` | Call internal runtime helpers |
 | Map env vars in **your app** | Expect the package to read `process.env` |
 
-**Onboarding docs:** [consumer-quick-start.md](../../docs/consumer-quick-start.md) · [minimal-consumer-example.md](../../docs/minimal-consumer-example.md) · [package-api.md](../../docs/package-api.md)
+**Onboarding docs:** [configuration-reference.md](../../docs/configuration-reference.md) · [consumer-quick-start.md](../../docs/consumer-quick-start.md) · [minimal-consumer-example.md](../../docs/minimal-consumer-example.md) · [package-api.md](../../docs/package-api.md)
 
 **In-repo validation app:** [apps/consumer-demo](../../apps/consumer-demo) — minimal consumer with public exports only (see [consumer-demo-validation.md](../../docs/consumer-demo-validation.md)).
 
@@ -154,9 +154,25 @@ Reference: `apps/starter/src/modules/email/core/` + `apps/starter/src/lib/secure
 
 The package does **not** read runtime environment variables. Map secrets at the app boundary in `createSecureAuth(config)`.
 
+**Canonical reference:** [configuration-reference.md](../../docs/configuration-reference.md) — every env variable, TypeScript config path, defaults, and parsing rules.
+
 Services receive `config` and `db` via constructor injection — there is no global runtime state.
 
 See [architecture.md](../../docs/architecture.md).
+
+Optional session policy — multiple concurrent sessions is the default. Enable single active session per user via env or config:
+
+```bash
+AUTH_SINGLE_ACTIVE_SESSION=true
+```
+
+```typescript
+createSecureAuth({
+  sessions: { singleActiveSession: true },
+});
+```
+
+See [customization.md](../../docs/customization.md) and [security.md](../../docs/security.md).
 
 ## Database
 

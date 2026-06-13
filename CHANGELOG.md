@@ -8,14 +8,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`sessions.singleActiveSession`** — optional opt-in policy that revokes all other active sessions for a user after each successful login (email/password, passkey, OAuth, and post-2FA completion). Default remains multi-session.
+- **`sessions.revocationPollIntervalSeconds`** — client poll interval (default **10s**, range 5–300) used when single active session is enabled so revoked browsers detect invalidation and sign out.
+- **`SingleActiveSessionMonitor`** — client component (mounted by `SecureAuthUIProvider` when the policy is on) that polls `getSession()`, calls `signOut`, and hard-redirects to login when the server session no longer has a user; also checks on tab focus.
+- **`SecureAuthUIPublicConfig.sessionPolicy`** — serializable `{ singleActiveSession, revocationPollIntervalSeconds }` for `SessionProvider refetchInterval` and the monitor.
+- **App-level env → config mapping** — `buildSecureAuthConfigFromEnv()` and parsing helpers (`readBooleanEnv`, `readNumberEnv`, `readEnumEnv`, …) in `apps/starter` and `apps/consumer-demo`; maps `AUTH_*` variables into `createSecureAuth(config)` without package `process.env` reads.
+- **[docs/configuration-reference.md](docs/configuration-reference.md)** — canonical env variable and TypeScript config reference (defaults, allowed values, unsupported options).
+- **Env templates** — root [`.env.example`](.env.example), [`apps/starter/.env.example`](apps/starter/.env.example), and updated [`apps/consumer-demo/.env.example`](apps/consumer-demo/.env.example) with grouped sections and comments.
+- **Env variables** (app boundary): `AUTH_SINGLE_ACTIVE_SESSION`, `AUTH_SESSION_REVOCATION_POLL_SECONDS`, `AUTH_PASSWORD_STRENGTH_POSITION`, `AUTH_PASSWORD_*`, `AUTH_SESSION_*`, `AUTH_COOKIE_SECURE`, `AUTH_TRACE`, OAuth `AUTH_*` names (with legacy aliases), and related app/base URL vars — see configuration reference.
+- **Tests** — env parsing and mapping (`secure-auth-from-env`, `env-parse`), single active session service/auth-options, `SingleActiveSessionMonitor`, and `sessionPolicy` in `buildPublicUIConfig`.
+- **Audit event** — `sessions_revoked_on_login` when other sessions are revoked on login.
 - **`ui.passwordStrength.position`** — global package UI setting for password strength / validation feedback placement (`"above"` default, `"below"` for legacy behavior). Flows through `secureAuth.uiConfig` → `SecureAuthUIProvider` → `PasswordStrengthField` and all password forms.
 - **`passwordStrengthPosition` page prop** — per-page override on `RegisterPage`, `ResetPasswordPage`, `AccountSettingsPage`, and `ChangePasswordSettings` (precedence: prop → provider → default).
 - **`PasswordFieldFeedbackPlacement`** — shared helper for consistent feedback ordering and spacing.
+- **Starter home documentation links** — GitHub doc links section on the unauthenticated home page.
 
 ### Changed
 
+- **`apps/starter` and `apps/consumer-demo`** — `secure-auth.ts` uses `buildSecureAuthConfigFromEnv()`; `SessionProvider` sets `refetchInterval` from `uiConfig.sessionPolicy` when single active session is enabled.
+- **Documentation** — README, starter/consumer READMEs, package README, `customization`, `package-api`, `security`, and `consumer-quick-start` link to [configuration-reference.md](docs/configuration-reference.md) instead of duplicating large config tables.
 - Password strength / validation feedback now renders **above** the relevant password field by default everywhere it appears in package UI.
 - Password feedback uses a **stable reserved region** — neutral requirements show before typing; strength updates in place without remounting the input or stealing focus.
+- Single active session: revoked browsers **sign out locally** (not only end the DB session) within the configured poll interval or immediately when refocusing a revoked tab.
 
 ## [0.1.2-internal] - 2026-06-11
 

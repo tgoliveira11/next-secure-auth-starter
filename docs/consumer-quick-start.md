@@ -163,7 +163,9 @@ See [migrations.md](./migrations.md) for monorepo vs downstream details.
 
 ## 6. Create the `secureAuth` instance
 
-**`createSecureAuth(config)` is the only supported composition root.** Create one instance in `src/lib/secure-auth.ts`:
+**`createSecureAuth(config)` is the only supported composition root.** Create one instance in `src/lib/secure-auth.ts`.
+
+In-repo apps use `buildSecureAuthConfigFromEnv()` (`apps/starter/src/lib/env/`, `apps/consumer-demo/src/lib/env/`) to map `.env` values into config — see [configuration-reference.md](./configuration-reference.md). You may inline `process.env` reads in your app or use a similar helper; the package must receive typed config only.
 
 ```typescript
 import "server-only";
@@ -329,6 +331,25 @@ export const POST = secureAuth.routes.twoFactorSetupStart.POST;
 
 Use `@tgoliveira/secure-auth/client` (`twoFactorApi`) in settings components.
 
+### Session policy (optional)
+
+By default users may stay signed in on multiple browsers/devices at once.
+
+To enforce **single active session** (each login revokes other sessions for that user):
+
+```typescript
+export const secureAuth = createSecureAuth({
+  // ...
+  sessions: {
+    singleActiveSession: true,
+  },
+});
+```
+
+The current session is preserved; other devices lose access on their next request. Applies after successful email/password, passkey, OAuth, and post-2FA login completion.
+
+See [customization.md](./customization.md) and [security.md](./security.md).
+
 ---
 
 ## 11. Create route handlers
@@ -459,7 +480,7 @@ Customize via props (`title`, `paths`, `afterLoginPath`, `passwordStrengthPositi
 
 ## 15. Start the application
 
-Required environment variables (minimum):
+Required environment variables (minimum) — full list in [configuration-reference.md](./configuration-reference.md):
 
 ```env
 DATABASE_URL=postgresql://...

@@ -40,4 +40,8 @@ export const starterTestUiConfig: SecureAuthUIPublicConfig = {
     minScore: 2,
   },
   passwordStrength: { position: "above" },
+  sessionPolicy: {
+    singleActiveSession: false,
+    revocationPollIntervalSeconds: 0,
+  },
 };

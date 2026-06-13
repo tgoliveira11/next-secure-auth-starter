@@ -13,8 +13,10 @@ export function Providers({
   children: React.ReactNode;
   uiConfig: SecureAuthUIPublicConfig;
 }) {
+  const refetchInterval = uiConfig.sessionPolicy.revocationPollIntervalSeconds;
+
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={refetchInterval > 0 ? refetchInterval : undefined}>
       <SecureAuthUIProvider config={uiConfig}>{children}</SecureAuthUIProvider>
     </SessionProvider>
   );

@@ -53,7 +53,7 @@ Open `NEXTAUTH_URL` from env (typically http://localhost:3001).
 
 ### Required environment
 
-See root [`.env.example`](../../.env.example). Minimum:
+See [docs/configuration-reference.md](../../docs/configuration-reference.md) and [`.env.example`](../../.env.example) (or [apps/starter/.env.example](./.env.example)). Minimum:
 
 - `DATABASE_URL`
 - `NEXTAUTH_SECRET`

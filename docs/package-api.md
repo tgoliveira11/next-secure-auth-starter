@@ -2,7 +2,7 @@
 
 Package: `@tgoliveira/secure-auth` @ `0.1.2-internal`
 
-**Consumer onboarding:** [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
+**Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
 ---
 
@@ -245,7 +245,9 @@ Also required (consumer-owned, not package peers): PostgreSQL driver (`postgres`
 
 ## Configuration (`SecureAuthConfig`)
 
-The package does **not** read runtime environment variables. Map env → config in your app:
+The package does **not** read runtime environment variables. Map env → config in your app.
+
+**Canonical reference:** [configuration-reference.md](./configuration-reference.md)
 
 ```typescript
 createSecureAuth({
@@ -264,6 +266,14 @@ createSecureAuth({
   passwordPolicy?, sessions?, rateLimit?, server?, debug?, accountPolicy?, ui?,
 });
 ```
+
+**`sessions` options:**
+
+| Option | Default | Purpose |
+| --- | --- | --- |
+| `maxAgeSeconds` | 30 days | Account session row expiry |
+| `lastUsedUpdateIntervalSeconds` | 300 | Throttle for `lastUsedAt` updates |
+| `singleActiveSession` | `false` | When `true`, revoke all other sessions after each successful login |
 
 Returns:
 

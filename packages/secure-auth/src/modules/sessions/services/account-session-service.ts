@@ -2,6 +2,7 @@ import { parseUserAgentMetadata } from "@/modules/security/user-agent/metadata";
 import type { AccountAuthMethod, AccountSessionView } from "@/modules/sessions/lib/account-session-types";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { NotFoundError } from "@/modules/account/lib/account-errors";
+import { isSingleActiveSessionEnabled } from "@/modules/sessions/lib/session-config";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -181,6 +182,31 @@ export function createAccountSessionService(deps: AccountSessionServiceDeps) {
         revoked: true,
         signOut: sessionId === currentSessionId,
       };
+    },
+
+    async enforceSingleActiveSessionOnLogin(input: {
+      userId: string;
+      currentSessionId: string;
+      authMethod: AccountAuthMethod;
+    }) {
+      if (!isSingleActiveSessionEnabled(config)) {
+        return { revokedCount: 0 };
+      }
+
+      const revoked = await repos.accountSessionRepository.revokeAllExcept(
+        input.userId,
+        input.currentSessionId
+      );
+
+      if (revoked.length > 0) {
+        await repos.auditRepository.record("sessions_revoked_on_login", input.userId, {
+          endpoint: "/api/auth/callback",
+          authProvider: input.authMethod,
+          sessionCountRevoked: revoked.length,
+        });
+      }
+
+      return { revokedCount: revoked.length };
     },
 
     async revokeOtherSessions(userId: string, currentSessionId: string, ip?: string) {

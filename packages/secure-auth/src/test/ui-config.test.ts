@@ -24,6 +24,20 @@ describe("buildPublicUIConfig", () => {
     expect(ui.cssVariables).toEqual({ "--primary": "#336699" });
     expect(ui.passwordPolicy.enforcement).toBe("warn");
     expect(ui.passwordStrength.position).toBe("above");
+    expect(ui.sessionPolicy).toEqual({
+      singleActiveSession: false,
+      revocationPollIntervalSeconds: 0,
+    });
+  });
+
+  it("enables session revocation polling when singleActiveSession is true", () => {
+    const config = buildTestSecureAuthConfig({
+      sessions: { singleActiveSession: true },
+    });
+
+    const ui = buildPublicUIConfig(config);
+    expect(ui.sessionPolicy.singleActiveSession).toBe(true);
+    expect(ui.sessionPolicy.revocationPollIntervalSeconds).toBe(10);
   });
 
   it("maps passwordStrength.position from createSecureAuth ui config", () => {

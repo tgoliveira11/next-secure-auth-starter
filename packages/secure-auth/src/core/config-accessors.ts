@@ -64,6 +64,24 @@ export function resolveSessionLastUsedUpdateIntervalMs(config: SecureAuthConfig)
   return seconds * 1000;
 }
 
+export function resolveSingleActiveSessionEnabled(config: SecureAuthConfig): boolean {
+  return config.sessions?.singleActiveSession === true;
+}
+
+export function resolveRevocationPollIntervalSeconds(config: SecureAuthConfig): number {
+  if (config.sessions?.singleActiveSession !== true) {
+    return 0;
+  }
+  const seconds = config.sessions?.revocationPollIntervalSeconds;
+  if (seconds === undefined) {
+    return 10;
+  }
+  if (!Number.isFinite(seconds) || seconds < 5) {
+    return 10;
+  }
+  return Math.min(seconds, 300);
+}
+
 export function resolveCookieSecure(config: SecureAuthConfig): boolean {
   return config.server?.cookieSecure ?? false;
 }

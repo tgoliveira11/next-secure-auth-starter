@@ -55,6 +55,8 @@ npm run build -w @tgoliveira/secure-auth
 cp .env.example apps/starter/.env.local
 ```
 
+**Full variable reference:** [docs/configuration-reference.md](docs/configuration-reference.md)
+
 Edit `apps/starter/.env.local`. Minimum required values:
 
 | Variable | Purpose |
@@ -68,13 +70,13 @@ Edit `apps/starter/.env.local`. Minimum required values:
 | `EMAIL_PROVIDER` | `console` (dev) or `smtp` (Mailpit) |
 | `EMAIL_FROM` | Sender address when not using console |
 
-OAuth (optional for local dev):
+OAuth (optional for local dev) — prefer `AUTH_*` names; legacy aliases still work in starter:
 
 | Variable | Provider |
 | --- | --- |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google |
-| `APPLE_CLIENT_ID` / `APPLE_CLIENT_SECRET` | Apple |
-| `AUTH_MICROSOFT_ID` / `AUTH_MICROSOFT_SECRET` | Microsoft |
+| `AUTH_GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_CLIENT_SECRET` | Google |
+| `AUTH_APPLE_CLIENT_ID` / `AUTH_APPLE_CLIENT_SECRET` | Apple |
+| `AUTH_MICROSOFT_CLIENT_ID` / `AUTH_MICROSOFT_CLIENT_SECRET` | Microsoft |
 
 Passkeys use `WEBAUTHN_*` above. SMTP dev defaults target Mailpit (`SMTP_HOST=localhost`, `SMTP_PORT=1025`).
 
@@ -162,6 +164,7 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 
 | Doc | Topic |
 | --- | --- |
+| **[docs/configuration-reference.md](docs/configuration-reference.md)** | **Canonical env vars and `createSecureAuth` config** |
 | **[docs/consumer-quick-start.md](docs/consumer-quick-start.md)** | **New consumer onboarding (start here)** |
 | [docs/minimal-consumer-example.md](docs/minimal-consumer-example.md) | Smallest working integration |
 | [docs/consumer-validation-checklist.md](docs/consumer-validation-checklist.md) | Integration sign-off checklist |

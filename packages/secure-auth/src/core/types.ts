@@ -63,6 +63,10 @@ export type SecureAuthConfig = {
   sessions?: {
     maxAgeSeconds?: number;
     lastUsedUpdateIntervalSeconds?: number;
+    /** When true, each successful login revokes all other active sessions for the user. Default: false. */
+    singleActiveSession?: boolean;
+    /** Client poll interval (seconds) to sign out browsers whose session was revoked elsewhere. Default: 10 when singleActiveSession is true. */
+    revocationPollIntervalSeconds?: number;
   };
   rateLimit?: {
     store: "memory" | "postgres";

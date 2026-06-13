@@ -1,6 +1,7 @@
 import {
   resolveSessionLastUsedUpdateIntervalMs,
   resolveSessionMaxAgeMs,
+  resolveSingleActiveSessionEnabled,
 } from "@/core/config-accessors.js";
 import type { SecureAuthConfig } from "@/core/types.js";
 
@@ -13,4 +14,8 @@ export function getSessionMaxAgeMs(config: SecureAuthConfig): number {
 
 export function getSessionLastUsedUpdateIntervalMs(config: SecureAuthConfig): number {
   return resolveSessionLastUsedUpdateIntervalMs(config);
+}
+
+export function isSingleActiveSessionEnabled(config: SecureAuthConfig): boolean {
+  return resolveSingleActiveSessionEnabled(config);
 }

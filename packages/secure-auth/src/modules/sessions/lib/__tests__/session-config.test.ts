@@ -3,6 +3,7 @@ import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-aut
 import {
   getSessionLastUsedUpdateIntervalMs,
   getSessionMaxAgeMs,
+  isSingleActiveSessionEnabled,
 } from "@/modules/sessions/lib/session-config";
 
 describe("session config", () => {
@@ -29,5 +30,14 @@ describe("session config", () => {
     });
     expect(getSessionLastUsedUpdateIntervalMs(config)).toBe(300_000);
     expect(getSessionMaxAgeMs(config)).toBe(30 * 24 * 60 * 60 * 1000);
+  });
+
+  it("defaults singleActiveSession to false", () => {
+    expect(isSingleActiveSessionEnabled(buildTestSecureAuthConfig())).toBe(false);
+    expect(
+      isSingleActiveSessionEnabled(
+        buildTestSecureAuthConfig({ sessions: { singleActiveSession: true } })
+      )
+    ).toBe(true);
   });
 });

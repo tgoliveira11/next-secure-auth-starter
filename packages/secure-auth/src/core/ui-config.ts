@@ -5,11 +5,15 @@ import {
   type AuthPaths,
 } from "../modules/ui/pages/types.js";
 import type { SecureAuthConfig } from "./types.js";
+import { resolveRevocationPollIntervalSeconds } from "./config-accessors.js";
 
 export type PasswordStrengthFeedbackPosition = "above" | "below";
 
 export const DEFAULT_PASSWORD_STRENGTH_FEEDBACK_POSITION: PasswordStrengthFeedbackPosition =
   "above";
+
+/** Poll interval for detecting revoked sessions when `singleActiveSession` is enabled. */
+export const SINGLE_ACTIVE_SESSION_REVOCATION_POLL_SECONDS = 10;
 
 /** Serializable UI configuration for client-side pages (no secrets, no ReactNode). */
 export type SecureAuthUIPublicConfig = {
@@ -21,6 +25,12 @@ export type SecureAuthUIPublicConfig = {
   passwordPolicy: PasswordPolicyConfig;
   passwordStrength: {
     position: PasswordStrengthFeedbackPosition;
+  };
+  /** When single active session is enabled, client apps should poll session and sign out revoked browsers. */
+  sessionPolicy: {
+    singleActiveSession: boolean;
+    /** Seconds between session refetches while authenticated; `0` when policy is off. */
+    revocationPollIntervalSeconds: number;
   };
 };
 
@@ -100,6 +110,10 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
     passwordStrength: {
       position:
         config.ui?.passwordStrength?.position ?? DEFAULT_PASSWORD_STRENGTH_FEEDBACK_POSITION,
+    },
+    sessionPolicy: {
+      singleActiveSession: config.sessions?.singleActiveSession === true,
+      revocationPollIntervalSeconds: resolveRevocationPollIntervalSeconds(config),
     },
   };
 }

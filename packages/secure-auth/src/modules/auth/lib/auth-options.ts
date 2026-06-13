@@ -10,6 +10,7 @@ import {
   isValidMicrosoftTenantId,
 } from "@/modules/auth/lib/microsoft-provider-config";
 import { credentialsSignInRequiresEmailVerification } from "@/modules/account/lib/account-policy-config";
+import { isSingleActiveSessionEnabled } from "@/modules/sessions/lib/session-config";
 import type { SecureAuthConfig } from "@/core/types";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { AuthService } from "@/modules/auth/services/auth-service";
@@ -212,6 +213,15 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
           if (verified) {
             token.twoFactorVerified = true;
             token.twoFactorPending = false;
+            if (token.sid && isSingleActiveSessionEnabled(config)) {
+              await accountSessionService.enforceSingleActiveSessionOnLogin({
+                userId: token.sub,
+                currentSessionId: token.sid as string,
+                authMethod: accountSessionService.mapProviderToAuthMethod(
+                  typeof token.provider === "string" ? token.provider : undefined
+                ),
+              });
+            }
           }
         }
 
@@ -222,28 +232,48 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
 
         const userId = typeof token.sub === "string" ? token.sub : undefined;
         let sessionJustCreated = false;
+        let loginAuthMethod: ReturnType<AccountSessionService["mapProviderToAuthMethod"]> =
+          "unknown";
 
         try {
           if (account && userId) {
-            const authMethod = accountSessionService.mapProviderToAuthMethod(
+            loginAuthMethod = accountSessionService.mapProviderToAuthMethod(
               account.provider,
               (user as { authMethod?: string } | undefined)?.authMethod
             );
             const sessionRow = await accountSessionService.createSession({
               userId,
-              authMethod,
+              authMethod: loginAuthMethod,
             });
             token.sid = sessionRow.id;
             sessionJustCreated = true;
           } else if (userId && !token.sid) {
+            loginAuthMethod = accountSessionService.mapProviderToAuthMethod(
+              typeof token.provider === "string" ? token.provider : undefined
+            );
             const sessionRow = await accountSessionService.createSession({
               userId,
-              authMethod: accountSessionService.mapProviderToAuthMethod(
-                typeof token.provider === "string" ? token.provider : undefined
-              ),
+              authMethod: loginAuthMethod,
             });
             token.sid = sessionRow.id;
             sessionJustCreated = true;
+          }
+
+          const fullyAuthenticated =
+            token.twoFactorVerified !== false && token.twoFactorPending !== true;
+
+          if (
+            sessionJustCreated &&
+            token.sid &&
+            userId &&
+            fullyAuthenticated &&
+            isSingleActiveSessionEnabled(config)
+          ) {
+            await accountSessionService.enforceSingleActiveSessionOnLogin({
+              userId,
+              currentSessionId: token.sid as string,
+              authMethod: loginAuthMethod,
+            });
           }
 
           if (token.sid && userId) {

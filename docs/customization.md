@@ -2,6 +2,8 @@
 
 Consumers customize behavior through `createSecureAuth(config)` and `SecureAuthUIProvider` — no file copying required.
 
+**Configuration reference:** [configuration-reference.md](./configuration-reference.md) (env vars, defaults, and TypeScript config paths).
+
 See [apps/consumer-demo](../apps/consumer-demo) for a working minimal integration that uses page wrappers, route wrappers, and `secureAuth.uiConfig` without recreating auth UI.
 
 ## UI configuration flow
@@ -110,6 +112,27 @@ export default function Page() {
 Supported values: `"above"` (default) | `"below"`.
 
 The feedback region is mounted from the first render. Before typing, neutral password requirements appear in that region (when policy feedback is enabled). While typing, strength and validation messages update in the same slot without remounting the password input or stealing focus.
+
+## Session policy
+
+By default, users may have multiple concurrent active sessions (different browsers/devices).
+
+Opt in to single active session mode:
+
+```typescript
+export const secureAuth = createSecureAuth({
+  // ...
+  sessions: {
+    singleActiveSession: true,
+  },
+});
+```
+
+When enabled, each **fully successful** login keeps the current session and revokes all other active sessions for that user. Applies to email/password (including post-2FA), passkey, and OAuth sign-in. The current device stays signed in; other devices are **signed out automatically** — by default within about **10 seconds** via `SingleActiveSessionMonitor` (server session poll + `signOut` + redirect), or immediately when you focus a revoked tab.
+
+Set `AUTH_SINGLE_ACTIVE_SESSION=true` in the app `.env.local` (see [configuration-reference.md](./configuration-reference.md)).
+
+Default (when omitted): `singleActiveSession: false`.
 
 ## Email
 

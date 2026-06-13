@@ -29,6 +29,7 @@ export const AUDIT_EVENT_TYPES = [
   "session_revoke_failed",
   "all_other_sessions_revoked",
   "all_sessions_revoked",
+  "sessions_revoked_on_login",
 ] as const;
 
 export type AuditEventType = (typeof AUDIT_EVENT_TYPES)[number];
@@ -44,6 +45,7 @@ const ALLOWED_METADATA_KEYS = new Set([
   "credentialId",
   "authProvider",
   "reason",
+  "sessionCountRevoked",
 ]);
 
 const SENSITIVE_METADATA_PATTERNS = [

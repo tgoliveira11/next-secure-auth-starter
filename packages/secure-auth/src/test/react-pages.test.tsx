@@ -97,6 +97,10 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      sessionPolicy: {
+        singleActiveSession: false,
+        revocationPollIntervalSeconds: 0,
+      },
     };
 
     render(
@@ -125,6 +129,10 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      sessionPolicy: {
+        singleActiveSession: false,
+        revocationPollIntervalSeconds: 0,
+      },
     };
 
     render(
@@ -197,6 +205,10 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      sessionPolicy: {
+        singleActiveSession: false,
+        revocationPollIntervalSeconds: 0,
+      },
     };
 
     render(
