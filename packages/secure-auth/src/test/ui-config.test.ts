@@ -23,6 +23,18 @@ describe("buildPublicUIConfig", () => {
     expect(ui.messages.loginTitle).toBe("Sign in now");
     expect(ui.cssVariables).toEqual({ "--primary": "#336699" });
     expect(ui.passwordPolicy.enforcement).toBe("warn");
+    expect(ui.passwordStrength.position).toBe("above");
+  });
+
+  it("maps passwordStrength.position from createSecureAuth ui config", () => {
+    const config = buildTestSecureAuthConfig({
+      ui: {
+        passwordStrength: { position: "below" },
+      },
+    });
+
+    const ui = buildPublicUIConfig(config);
+    expect(ui.passwordStrength.position).toBe("below");
   });
 
   it("does not expose server-only config such as secrets or email provider", () => {

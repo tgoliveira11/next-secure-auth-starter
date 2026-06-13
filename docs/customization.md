@@ -44,7 +44,7 @@ export const secureAuth = createSecureAuth({
 });
 ```
 
-`uiConfig` includes resolved `paths`, `messages`, `appSlug`, `appName`, and `passwordPolicy`. It contains **no secrets** and **no React nodes** — safe to pass from server layout to client provider.
+`uiConfig` includes resolved `paths`, `messages`, `appSlug`, `appName`, `passwordPolicy`, and `passwordStrength`. It contains **no secrets** and **no React nodes** — safe to pass from server layout to client provider.
 
 ### Client provider
 
@@ -77,6 +77,39 @@ export default function Page() {
 ```
 
 Helpers: `DEFAULT_AUTH_PATHS`, `resolveAuthPaths()`, `useSecureAuthUi()`.
+
+## Password strength feedback placement
+
+Password strength, validation, and policy feedback render **above** the relevant password field by default across all package pages and forms (`RegisterPage`, `ResetPasswordPage`, change-password settings, and `PasswordStrengthField`).
+
+Configure globally in `createSecureAuth`:
+
+```typescript
+export const secureAuth = createSecureAuth({
+  // ...
+  ui: {
+    passwordStrength: {
+      position: "below", // legacy placement under the field
+    },
+  },
+});
+```
+
+`uiConfig.passwordStrength.position` flows through `SecureAuthUIProvider` → `useSecureAuthUi()` → package components.
+
+Override on a single page when needed (prop wins over provider):
+
+```tsx
+import { ResetPasswordPage } from "@tgoliveira/secure-auth/react";
+
+export default function Page() {
+  return <ResetPasswordPage passwordStrengthPosition="below" />;
+}
+```
+
+Supported values: `"above"` (default) | `"below"`.
+
+The feedback region is mounted from the first render. Before typing, neutral password requirements appear in that region (when policy feedback is enabled). While typing, strength and validation messages update in the same slot without remounting the password input or stealing focus.
 
 ## Email
 

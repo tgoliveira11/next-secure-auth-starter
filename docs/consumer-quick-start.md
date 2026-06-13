@@ -453,7 +453,7 @@ export default function Page() {
 
 Available pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage`.
 
-Customize via props (`title`, `paths`, `afterLoginPath`, `onSignOut`, …) or via `uiConfig` provider defaults. See [package-api.md](./package-api.md).
+Customize via props (`title`, `paths`, `afterLoginPath`, `passwordStrengthPosition`, `onSignOut`, …) or via `uiConfig` provider defaults (including `passwordStrength.position`). See [package-api.md](./package-api.md) and [customization.md](./customization.md).
 
 ---
 

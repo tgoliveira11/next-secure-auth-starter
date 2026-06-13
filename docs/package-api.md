@@ -88,9 +88,9 @@ Server-safe primitives (Button, Card, Input, …) do not require `"use client"`.
 | `AccountDeletedPage` | `/account-deleted` | Post-deletion confirmation |
 | `DashboardPlaceholderPage` | `/dashboard` | Optional placeholder; used by consumer-demo |
 
-Shared customization props (all pages): `title`, `description`, `subtitle`, `brand`, `footer`, `header`, `className`, `width`, `paths`, `appName`.
+Shared customization props (all pages): `title`, `description`, `subtitle`, `brand`, `footer`, `header`, `className`, `width`, `paths`, `appName`, `passwordStrengthPosition`.
 
-When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.uiConfig` (`appSlug`, `appName`, `paths`, `messages`, `passwordPolicy`). Props on individual pages override provider values.
+When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.uiConfig` (`appSlug`, `appName`, `paths`, `messages`, `passwordPolicy`, `passwordStrength`). Props on individual pages override provider values.
 
 #### SecureAuthUIProvider
 
@@ -98,7 +98,7 @@ When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.
 | --- | --- |
 | `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
 | `useSecureAuthUi()` | Read provider config in package pages or custom components |
-| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets) |
+| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position` |
 
 ```tsx
 // app/layout.tsx
@@ -114,7 +114,7 @@ export default function RootLayout({ children }) {
 }
 ```
 
-Build config in `createSecureAuth({ ui: { paths, messages, cssVariables } })`. See [customization.md](./customization.md).
+Build config in `createSecureAuth({ ui: { paths, messages, cssVariables, passwordStrength } })`. See [customization.md](./customization.md).
 
 Path overrides via `paths` or per-page props such as `afterLoginPath`, `loginPath`, `registerPath`.
 

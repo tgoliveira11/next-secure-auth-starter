@@ -1,6 +1,6 @@
 /** @vitest-environment happy-dom */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import {
   LoginPage,
   RegisterPage,
@@ -96,6 +96,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         blockCommonPasswords: true,
         minScore: 2,
       },
+      passwordStrength: { position: "above" },
     };
 
     render(
@@ -123,6 +124,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         blockCommonPasswords: true,
         minScore: 2,
       },
+      passwordStrength: { position: "above" },
     };
 
     render(
@@ -132,5 +134,83 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
     );
 
     expect(screen.getByRole("heading", { name: /explicit title/i })).toBeTruthy();
+  });
+
+  it("RegisterPage renders password strength feedback above the field by default", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          enforcement: "warn",
+          minLength: 12,
+          requireUppercase: false,
+          requireLowercase: false,
+          requireNumber: false,
+          requireSymbol: false,
+          blockCommonPasswords: true,
+          minScore: 2,
+        }),
+        { status: 200 }
+      )
+    );
+
+    render(<RegisterPage appSlug="test-app" />);
+
+    const passwordInput = await screen.findByLabelText("Password");
+    fireEvent.change(passwordInput, { target: { value: "Riverstone-Kettle-2026!" } });
+
+    const strength = await screen.findByText(/Strength:/);
+    expect(
+      strength.compareDocumentPosition(passwordInput) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("RegisterPage passwordStrengthPosition prop overrides provider config", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          enforcement: "warn",
+          minLength: 12,
+          requireUppercase: false,
+          requireLowercase: false,
+          requireNumber: false,
+          requireSymbol: false,
+          blockCommonPasswords: true,
+          minScore: 2,
+        }),
+        { status: 200 }
+      )
+    );
+
+    const uiConfig: SecureAuthUIPublicConfig = {
+      appSlug: "provider-app",
+      appName: "Provider App",
+      paths: DEFAULT_AUTH_PATHS,
+      messages: {},
+      passwordPolicy: {
+        enforcement: "warn",
+        minLength: 12,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: true,
+        minScore: 2,
+      },
+      passwordStrength: { position: "above" },
+    };
+
+    render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <RegisterPage appSlug="test-app" passwordStrengthPosition="below" />
+      </SecureAuthUIProvider>
+    );
+
+    const passwordInput = await screen.findByLabelText("Password");
+    fireEvent.change(passwordInput, { target: { value: "Riverstone-Kettle-2026!" } });
+
+    const strength = await screen.findByText(/Strength:/);
+    expect(
+      passwordInput.compareDocumentPosition(strength) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 });

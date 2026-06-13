@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
+import type { PasswordStrengthFeedbackPosition } from "../../../core/ui-config.js";
 import type { PasswordPolicyConfig } from "../../security/password-policy/index.js";
+
+export type { PasswordStrengthFeedbackPosition };
 
 export type PageWidth = "narrow" | "medium" | "wide";
 
@@ -62,6 +65,8 @@ export type BasePageProps = {
   header?: ReactNode;
   /** Override default route paths for links and redirects. */
   paths?: AuthPaths;
+  /** Override global password strength/validation feedback placement for this page. */
+  passwordStrengthPosition?: PasswordStrengthFeedbackPosition;
 };
 
 export type SecureAuthPageProps = BasePageProps & {

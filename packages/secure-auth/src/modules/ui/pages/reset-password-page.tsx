@@ -25,6 +25,7 @@ function ResetPasswordContent({
   width = "narrow",
   title: titleProp,
   subtitle,
+  passwordStrengthPosition,
 }: ResetPasswordPageProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -137,6 +138,7 @@ function ResetPasswordContent({
             onChange={setNewPassword}
             autoComplete="new-password"
             confirmValue={confirmPassword}
+            passwordStrengthPosition={passwordStrengthPosition}
           />
           <PasswordStrengthField
             id="reset-confirm-password"
@@ -146,6 +148,7 @@ function ResetPasswordContent({
             autoComplete="new-password"
             confirmValue={newPassword}
             showStrength={false}
+            passwordStrengthPosition={passwordStrengthPosition}
           />
           {error && (
             <p className="text-sm text-[var(--danger)]" role="alert">

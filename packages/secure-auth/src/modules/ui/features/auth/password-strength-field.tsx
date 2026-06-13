@@ -2,14 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Input } from "../../primitives/input.js";
-import { FormField } from "../../primitives/form-field.js";
+import { FormField, fieldDescribedBy } from "../../primitives/form-field.js";
 import {
   assessPassword,
   DEFAULT_PASSWORD_POLICY,
+  getPasswordPolicyHint,
   getPasswordStrengthDisplay,
   shouldShowPasswordStrengthUi,
   type PasswordPolicyConfig,
 } from "@tgoliveira/secure-auth/client/password-policy";
+import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
+import { usePasswordStrengthPosition } from "../../pages/use-page-ui.js";
+import { PasswordFieldFeedbackPlacement } from "./password-feedback-placement.js";
 
 interface PasswordStrengthFieldProps {
   id: string;
@@ -22,6 +26,8 @@ interface PasswordStrengthFieldProps {
   policyConfig?: PasswordPolicyConfig;
   /** When false, hides strength feedback (e.g. current-password or confirm-only fields). */
   showStrength?: boolean;
+  /** Override global password strength/validation feedback placement. */
+  passwordStrengthPosition?: PasswordStrengthFeedbackPosition;
 }
 
 export function PasswordStrengthField({
@@ -34,7 +40,11 @@ export function PasswordStrengthField({
   hint,
   policyConfig,
   showStrength = true,
+  passwordStrengthPosition: passwordStrengthPositionProp,
 }: PasswordStrengthFieldProps) {
+  const position = usePasswordStrengthPosition(passwordStrengthPositionProp);
+  const feedbackId = `${id}-password-feedback`;
+
   const [loadedPolicy, setLoadedPolicy] = useState<PasswordPolicyConfig | null>(
     policyConfig ?? null
   );
@@ -65,37 +75,60 @@ export function PasswordStrengthField({
   const strengthLabel = getPasswordStrengthDisplay(assessment.label);
   const showStrengthFeedback = showStrength && shouldShowPasswordStrengthUi(config);
 
-  const feedback = useMemo(() => {
-    const messages = showStrengthFeedback ? [...assessment.messages] : [];
+  const validationMessages = useMemo(() => {
+    const messages = showStrengthFeedback && value.length > 0 ? [...assessment.messages] : [];
     if (confirmValue !== undefined && confirmValue.length > 0 && confirmValue !== value) {
       messages.push("Passwords do not match.");
     }
     return messages;
   }, [assessment.messages, confirmValue, showStrengthFeedback, value]);
 
-  return (
-    <FormField id={id} label={label} hint={hint}>
-      <Input
-        id={id}
-        type="password"
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        minLength={config.enforcement === "off" ? undefined : config.minLength}
-        required
-      />
-      {value.length > 0 && (showStrengthFeedback || feedback.length > 0) && (
-        <div className="mt-2 space-y-1 text-sm text-[var(--muted)]" aria-live="polite">
-          {showStrengthFeedback && (
-            <p>
-              Strength: <span className="text-[var(--foreground)]">{strengthLabel}</span>
-            </p>
-          )}
-          {feedback.map((message) => (
-            <p key={message}>{message}</p>
-          ))}
-        </div>
+  const guidanceText =
+    hint ?? (showStrengthFeedback ? getPasswordPolicyHint(config) : undefined);
+
+  const feedbackSlotEnabled = showStrengthFeedback || confirmValue !== undefined;
+
+  const describedBy = fieldDescribedBy(
+    id,
+    undefined,
+    undefined,
+    feedbackSlotEnabled
+  );
+
+  const feedbackContent = (
+    <>
+      {value.length === 0 && guidanceText && <p>{guidanceText}</p>}
+      {value.length > 0 && showStrengthFeedback && (
+        <p>
+          Strength: <span className="text-[var(--foreground)]">{strengthLabel}</span>
+        </p>
       )}
+      {validationMessages.map((message) => (
+        <p key={message}>{message}</p>
+      ))}
+    </>
+  );
+
+  return (
+    <FormField id={id} label={label}>
+      <PasswordFieldFeedbackPlacement
+        position={position}
+        feedbackId={feedbackId}
+        input={
+          <Input
+            id={id}
+            type="password"
+            autoComplete={autoComplete}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            minLength={config.enforcement === "off" ? undefined : config.minLength}
+            required
+            aria-describedby={describedBy}
+          />
+        }
+        feedback={feedbackContent}
+        enabled={feedbackSlotEnabled}
+      />
     </FormField>
   );
 }

@@ -118,6 +118,9 @@ export type SecureAuthConfig = {
     };
     messages?: Record<string, string>;
     cssVariables?: Record<string, string>;
+    passwordStrength?: {
+      position?: "above" | "below";
+    };
   };
 };
 

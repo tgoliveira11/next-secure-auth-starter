@@ -8,9 +8,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **`apps/consumer-demo`** — canonical minimal consumer validation app (`@secure-auth/consumer-demo`) using public package exports only.
-- **[docs/consumer-demo-validation.md](docs/consumer-demo-validation.md)** — validation report for the consumer demo.
-- Root scripts: `dev:consumer`, `build:consumer`, `typecheck:consumer`, `lint:consumer`, `db:migrate:consumer`.
+- **`ui.passwordStrength.position`** — global package UI setting for password strength / validation feedback placement (`"above"` default, `"below"` for legacy behavior). Flows through `secureAuth.uiConfig` → `SecureAuthUIProvider` → `PasswordStrengthField` and all password forms.
+- **`passwordStrengthPosition` page prop** — per-page override on `RegisterPage`, `ResetPasswordPage`, `AccountSettingsPage`, and `ChangePasswordSettings` (precedence: prop → provider → default).
+- **`PasswordFieldFeedbackPlacement`** — shared helper for consistent feedback ordering and spacing.
+
+### Changed
+
+- Password strength / validation feedback now renders **above** the relevant password field by default everywhere it appears in package UI.
+- Password feedback uses a **stable reserved region** — neutral requirements show before typing; strength updates in place without remounting the input or stealing focus.
 
 ## [0.1.2-internal] - 2026-06-11
 

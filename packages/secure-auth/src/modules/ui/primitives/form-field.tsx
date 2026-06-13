@@ -30,7 +30,16 @@ export function FormField({ id, label, hint, error, children, className }: FormF
   );
 }
 
-export function fieldDescribedBy(id: string, hint?: string, error?: string): string | undefined {
-  const ids = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean);
+export function fieldDescribedBy(
+  id: string,
+  hint?: string,
+  error?: string,
+  includeFeedback?: boolean
+): string | undefined {
+  const ids = [
+    hint ? `${id}-hint` : null,
+    includeFeedback ? `${id}-password-feedback` : null,
+    error ? `${id}-error` : null,
+  ].filter(Boolean);
   return ids.length > 0 ? ids.join(" ") : undefined;
 }

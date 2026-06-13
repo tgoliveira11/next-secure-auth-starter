@@ -34,9 +34,10 @@ npm run dev -w @secure-auth/consumer-demo
 
 Open http://localhost:3002
 
-## Prop override test
+## Prop override tests
 
-`/login` intentionally passes `title="Prop override: custom sign-in title"` to `LoginPage`, overriding `ui.messages.loginTitle` from `SecureAuthUIProvider`. This validates **prop → provider → default** precedence.
+- **`/login`** — passes `title="Prop override: custom sign-in title"` to `LoginPage`, overriding `ui.messages.loginTitle` from `SecureAuthUIProvider`. Validates **prop → provider → default** precedence for page copy.
+- **`/reset-password`** — passes `passwordStrengthPosition="below"` to `ResetPasswordPage`, overriding the package default (`above`) for password feedback placement only on that page.
 
 ## Health check
 

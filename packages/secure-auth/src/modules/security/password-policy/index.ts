@@ -163,7 +163,7 @@ export function getPasswordPolicyHint(
   if (config.enforcement === "off") {
     return undefined;
   }
-  return `At least ${config.minLength} characters. Strength feedback is shown below.`;
+  return `At least ${config.minLength} characters.`;
 }
 
 export function shouldShowPasswordStrengthUi(

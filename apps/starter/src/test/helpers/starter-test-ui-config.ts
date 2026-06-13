@@ -39,4 +39,5 @@ export const starterTestUiConfig: SecureAuthUIPublicConfig = {
     blockCommonPasswords: true,
     minScore: 2,
   },
+  passwordStrength: { position: "above" },
 };

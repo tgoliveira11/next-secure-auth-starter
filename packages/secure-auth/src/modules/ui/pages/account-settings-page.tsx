@@ -36,6 +36,7 @@ export function AccountSettingsPage({
   title: titleProp,
   subtitle,
   description: descriptionProp,
+  passwordStrengthPosition,
 }: AccountSettingsPageProps) {
   const resolved = useUiPaths(paths);
   const title = usePageTitle(
@@ -171,6 +172,7 @@ export function AccountSettingsPage({
         <ChangePasswordSettings
           canChangePassword={authStatus?.canChangePassword ?? false}
           authProvider={authStatus?.authProvider ?? authProvider}
+          passwordStrengthPosition={passwordStrengthPosition}
         />
       </Card>
 

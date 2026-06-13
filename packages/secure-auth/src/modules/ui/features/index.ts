@@ -7,6 +7,7 @@ export * from "./auth/login-passkey-section.js";
 export * from "./auth/social-sign-in.js";
 export * from "./auth/oauth-provider-logos.js";
 export * from "./auth/password-strength-field.js";
+export * from "./auth/password-feedback-placement.js";
 export * from "./settings/session-card.js";
 export * from "./settings/email-verification-settings.js";
 export * from "./settings/change-password-settings.js";

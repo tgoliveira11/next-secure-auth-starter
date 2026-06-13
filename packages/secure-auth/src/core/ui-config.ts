@@ -6,6 +6,11 @@ import {
 } from "../modules/ui/pages/types.js";
 import type { SecureAuthConfig } from "./types.js";
 
+export type PasswordStrengthFeedbackPosition = "above" | "below";
+
+export const DEFAULT_PASSWORD_STRENGTH_FEEDBACK_POSITION: PasswordStrengthFeedbackPosition =
+  "above";
+
 /** Serializable UI configuration for client-side pages (no secrets, no ReactNode). */
 export type SecureAuthUIPublicConfig = {
   appSlug: string;
@@ -14,6 +19,9 @@ export type SecureAuthUIPublicConfig = {
   messages: Record<string, string>;
   cssVariables?: Record<string, string>;
   passwordPolicy: PasswordPolicyConfig;
+  passwordStrength: {
+    position: PasswordStrengthFeedbackPosition;
+  };
 };
 
 const DEFAULT_UI_MESSAGES: Record<string, string> = {
@@ -89,5 +97,9 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
     },
     cssVariables: config.ui?.cssVariables,
     passwordPolicy: config.passwordPolicy ?? DEFAULT_PASSWORD_POLICY,
+    passwordStrength: {
+      position:
+        config.ui?.passwordStrength?.position ?? DEFAULT_PASSWORD_STRENGTH_FEEDBACK_POSITION,
+    },
   };
 }

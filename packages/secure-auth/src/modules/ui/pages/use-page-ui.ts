@@ -1,6 +1,7 @@
 "use client";
 
 import type { PasswordPolicyConfig } from "../../../modules/security/password-policy/index.js";
+import type { PasswordStrengthFeedbackPosition } from "../../../core/ui-config.js";
 import { useSecureAuthUi } from "../secure-auth-ui-provider.js";
 import { resolveAuthPaths, type AuthPaths } from "./types.js";
 
@@ -46,4 +47,13 @@ export function useUiAppName(prop?: string): string {
 export function useUiPasswordPolicy(prop?: PasswordPolicyConfig): PasswordPolicyConfig | undefined {
   const ui = useSecureAuthUi();
   return prop ?? ui?.passwordPolicy;
+}
+
+/** Resolves password feedback placement: explicit prop → provider config → package default (`above`). */
+export function usePasswordStrengthPosition(
+  prop?: PasswordStrengthFeedbackPosition
+): PasswordStrengthFeedbackPosition {
+  const ui = useSecureAuthUi();
+  if (prop !== undefined) return prop;
+  return ui?.passwordStrength.position ?? "above";
 }

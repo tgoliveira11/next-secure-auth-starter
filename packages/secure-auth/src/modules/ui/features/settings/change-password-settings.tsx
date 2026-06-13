@@ -8,14 +8,19 @@ import { Input } from "../../primitives/input.js";
 import { PasswordStrengthField } from "../auth/password-strength-field.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
 
+import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
+
 export type ChangePasswordSettingsProps = {
   canChangePassword: boolean;
   authProvider: string;
+  /** Override global password strength/validation feedback placement. */
+  passwordStrengthPosition?: PasswordStrengthFeedbackPosition;
 };
 
 export function ChangePasswordSettings({
   canChangePassword,
   authProvider,
+  passwordStrengthPosition,
 }: ChangePasswordSettingsProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -78,6 +83,7 @@ export function ChangePasswordSettings({
         onChange={setNewPassword}
         autoComplete="new-password"
         confirmValue={confirmPassword}
+        passwordStrengthPosition={passwordStrengthPosition}
       />
       <PasswordStrengthField
         id="confirm-new-password"
@@ -87,6 +93,7 @@ export function ChangePasswordSettings({
         autoComplete="new-password"
         confirmValue={newPassword}
         showStrength={false}
+        passwordStrengthPosition={passwordStrengthPosition}
       />
       {error && (
         <p className="text-sm text-[var(--danger)]" role="alert">

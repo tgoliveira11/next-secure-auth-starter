@@ -32,7 +32,7 @@ The starter passes `secureAuth.uiConfig` from the composition root into the clie
 <Providers uiConfig={secureAuth.uiConfig}>{children}</Providers>
 ```
 
-UI defaults (`paths`, `messages`, `passwordPolicy`) are defined in `createSecureAuth({ ui: { ... } })` in `src/lib/secure-auth.ts`.
+UI defaults (`paths`, `messages`, `passwordPolicy`, `passwordStrength`) are defined in `createSecureAuth({ ui: { ... } })` in `src/lib/secure-auth.ts`. Password feedback renders above fields by default.
 
 ---
 

@@ -50,6 +50,7 @@ export function RegisterPage({
   title: titleProp,
   subtitle,
   description: descriptionProp,
+  passwordStrengthPosition,
 }: RegisterPageProps) {
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
@@ -165,6 +166,7 @@ export function RegisterPage({
             autoComplete="new-password"
             policyConfig={passwordPolicy}
             hint={passwordPolicy ? getPasswordPolicyHint(passwordPolicy) : undefined}
+            passwordStrengthPosition={passwordStrengthPosition}
           />
           {error && (
             <p className="text-sm text-[var(--danger)]" role="alert">

@@ -62,7 +62,7 @@ Page defaults (copy, paths, password policy) flow from config — not from globa
 
 ### Server: `createSecureAuth(config).uiConfig`
 
-`uiConfig` is a JSON-serializable `SecureAuthUIPublicConfig` built from `config.ui`, `config.app`, `config.auth`, and `config.passwordPolicy`:
+`uiConfig` is a JSON-serializable `SecureAuthUIPublicConfig` built from `config.ui`, `config.app`, `config.auth`, and `config.passwordPolicy`. It includes `passwordStrength.position` (default `"above"`) for password feedback placement.
 
 ```typescript
 export const secureAuth = createSecureAuth({
