@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 
 /** Client-only React helpers — must build before UI page DTS. */
 export default defineConfig({
-  format: ["esm"] as const,
+  format: ["esm", "cjs"] as const,
   dts: true,
   sourcemap: true,
   splitting: false,

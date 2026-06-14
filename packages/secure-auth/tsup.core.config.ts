@@ -8,7 +8,7 @@ const shared = {
     };
     options.sourcesContent = false;
   },
-  format: ["esm"] as const,
+  format: ["esm", "cjs"] as const,
   dts: true,
   sourcemap: true,
   splitting: false,

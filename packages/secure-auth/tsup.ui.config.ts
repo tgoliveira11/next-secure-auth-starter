@@ -22,7 +22,7 @@ const uiEntries = collectUiEntries(path.resolve("src/modules/ui"), "modules/ui")
 
 /** React UI pages and primitives — runs after core + react/client builds. */
 export default defineConfig({
-  format: ["esm"] as const,
+  format: ["esm", "cjs"] as const,
   dts: true,
   sourcemap: true,
   splitting: false,
@@ -46,5 +46,5 @@ export default defineConfig({
   },
   outDir: "dist",
   clean: false,
-  bundle: false,
+  bundle: true,
 });

@@ -1,6 +1,6 @@
 {
   "name": "@tgoliveira/secure-auth",
-  "version": "0.1.3-internal",
+  "version": "0.1.4-internal",
   "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (experimental internal release)",
   "type": "module",
   "repository": {
@@ -22,40 +22,48 @@
     "2fa"
   ],
   "license": "UNLICENSED",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./next": {
       "types": "./dist/next/index.d.ts",
-      "import": "./dist/next/index.js"
+      "import": "./dist/next/index.js",
+      "require": "./dist/next/index.cjs"
     },
     "./react": {
       "types": "./dist/react/index.d.ts",
-      "import": "./dist/react/index.js"
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
     },
     "./react/client": {
       "types": "./dist/react/client.d.ts",
-      "import": "./dist/react/client.js"
+      "import": "./dist/react/client.js",
+      "require": "./dist/react/client.cjs"
     },
     "./drizzle/schema": {
       "types": "./dist/drizzle/schema.d.ts",
-      "import": "./dist/drizzle/schema.js"
+      "import": "./dist/drizzle/schema.js",
+      "require": "./dist/drizzle/schema.cjs"
     },
     "./email": {
       "types": "./dist/email/index.d.ts",
-      "import": "./dist/email/index.js"
+      "import": "./dist/email/index.js",
+      "require": "./dist/email/index.cjs"
     },
     "./client": {
       "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
     },
     "./client/password-policy": {
       "types": "./dist/client/password-policy.d.ts",
-      "import": "./dist/client/password-policy.js"
+      "import": "./dist/client/password-policy.js",
+      "require": "./dist/client/password-policy.cjs"
     },
     "./styles.css": "./styles.css"
   },

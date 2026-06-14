@@ -1,6 +1,6 @@
 # Minimal consumer example
 
-Smallest working integration of `@tgoliveira/secure-auth@0.1.3-internal` in a new Next.js App Router app.
+Smallest working integration of `@tgoliveira/secure-auth@0.1.4-internal` in a new Next.js App Router app.
 
 Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-start.md) for the full guide.
 
@@ -11,7 +11,7 @@ Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-sta
 ## Install
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.3-internal \
+npm install @tgoliveira/secure-auth@0.1.4-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 npm install -D drizzle-kit
 ```
@@ -230,5 +230,5 @@ Account/security routes: `AccountSettingsPage`, `SecuritySettingsPage`, `Session
 
 ```bash
 curl http://localhost:3000/api/auth/package-health
-# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.3-internal"}
+# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.4-internal"}
 ```

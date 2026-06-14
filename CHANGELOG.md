@@ -6,6 +6,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.4-internal] - 2026-06-11
+
+### Added
+
+- **Dual ESM + CommonJS builds** for all public package entrypoints (`.`, `./next`, `./react`, `./react/client`, `./email`, `./client`, `./client/password-policy`, `./drizzle/schema`) — ESM as `.js`, CommonJS as `.cjs`.
+- **`require` export conditions** in `package.json` pointing to `.cjs` artifacts (e.g. `dist/drizzle/schema.cjs`).
+- **Consumer entrypoint compatibility tests** — validates both `import()` and `require()` for every public subpath.
+- **`apps/consumer-demo/src/lib/auth-schema.ts`** — re-exports `@tgoliveira/secure-auth/drizzle/schema` for drizzle-kit validation.
+
+### Fixed
+
+- **`ERR_PACKAGE_PATH_NOT_EXPORTED`** when consumers `require("@tgoliveira/secure-auth/drizzle/schema")` (drizzle-kit and other CJS toolchains).
+
 ## [0.1.3-internal] - 2026-06-11
 
 ### Added
@@ -147,6 +160,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.4-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.4-internal
 [0.1.3-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.3-internal
 [0.1.2-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.2-internal
 [0.1.1-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.1-internal
