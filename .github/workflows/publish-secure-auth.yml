@@ -51,4 +51,4 @@ jobs:
         run: npm pack -w @tgoliveira/secure-auth --dry-run
 
       - name: Publish to npm
-        run: npm publish -w @tgoliveira/secure-auth --access public
+        run: npm publish -w @tgoliveira/secure-auth --access restricted --tag internal
