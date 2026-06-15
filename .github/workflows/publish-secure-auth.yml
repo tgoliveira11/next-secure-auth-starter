@@ -3,7 +3,7 @@ name: Publish secure-auth to npm
 on:
   push:
     tags:
-      - "secure-auth-v0.1.*-internal"
+      - "secure-auth-v0.*.*-internal"
 
 permissions:
   contents: read
@@ -49,6 +49,12 @@ jobs:
 
       - name: Pack dry run
         run: npm pack -w @tgoliveira/secure-auth --dry-run
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Show npm version
+        run: npm --version
 
       - name: Publish to npm
         env:
