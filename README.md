@@ -6,7 +6,7 @@
 
 **`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
-**Maturity:** `0.1.9-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.1.10-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
@@ -138,6 +138,19 @@ npm run build
 npm run typecheck
 npm run lint
 ```
+
+### Dependency security audit
+
+Before each release, run:
+
+```bash
+npm run audit:security        # fails on high/critical (same gate as publish CI)
+npm run audit:security:all    # full report
+```
+
+Policy, remediation history, and override rationale: [docs/security/dependency-audit.md](docs/security/dependency-audit.md).
+
+The publish workflow runs `npm run audit:security` before `npm publish`.
 
 ### npm publish (automated)
 

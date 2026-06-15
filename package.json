@@ -1,6 +1,6 @@
 {
   "name": "secure-auth",
-  "version": "0.1.9-internal",
+  "version": "0.1.10-internal",
   "private": true,
   "description": "Opinionated Next.js authentication monorepo — @tgoliveira/secure-auth package + starter app (experimental)",
   "repository": {
@@ -23,11 +23,27 @@
     "typecheck:consumer": "npm run typecheck -w @secure-auth/consumer-demo",
     "test": "npm run test -w @tgoliveira/secure-auth && npm run test -w @secure-auth/starter && npm run test -w @secure-auth/consumer-demo",
     "test:coverage": "npm run test:coverage -w @secure-auth/starter",
+    "audit:security": "npm audit --audit-level=high",
+    "audit:security:json": "npm audit --json",
+    "audit:security:all": "npm audit",
     "db:generate": "npm run db:generate -w @secure-auth/starter",
     "db:migrate": "npm run db:migrate -w @secure-auth/starter",
     "db:migrate:consumer": "npm run db:migrate -w @secure-auth/consumer-demo",
     "db:push": "npm run db:push -w @secure-auth/starter",
     "db:studio": "npm run db:studio -w @secure-auth/starter"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "postcss": "8.5.15",
+    "nodemailer": "8.0.5",
+    "uuid": "11.1.1",
+    "happy-dom": "20.10.3",
+    "next": {
+      "postcss": "8.5.15"
+    },
+    "next-auth": {
+      "uuid": "11.1.1"
+    }
   },
   "engines": {
     "node": ">=20"

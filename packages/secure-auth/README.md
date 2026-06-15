@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.9-internal` (experimental — not production-ready)
+**Version:** `0.1.10-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -193,6 +193,8 @@ See [migrations.md](../../docs/migrations.md) and [consumer-quick-start.md](../.
 ## Security
 
 See [security.md](../../docs/security.md). Not production-ready at `0.1.x`.
+
+Before releases: `npm run audit:security` from the monorepo root. Details: [dependency-audit.md](../../docs/security/dependency-audit.md).
 
 ## License
 

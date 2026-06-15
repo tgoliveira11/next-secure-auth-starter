@@ -6,6 +6,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.10-internal] - 2026-06-15
+
+### Security
+
+- **Dependency upgrades** — `drizzle-orm@0.45.2` (SQL injection advisory), `happy-dom@20.10.3`, `drizzle-kit@0.31.10`, `next-auth@4.24.14`, `nodemailer@8.0.5`, `vitest@3.2.6`, `tsup@8.5.1`.
+- **Root overrides** — `esbuild@0.28.1`, `postcss@8.5.15`, `uuid@11.1.1` (NextAuth nested), `happy-dom@20.10.3` — lockfile regenerated so overrides apply.
+- **`npm audit`** — 0 vulnerabilities at release time.
+- **`npm run audit:security`** — new script (`npm audit --audit-level=high`).
+- **Publish CI** — audit gate before `npm publish`.
+- **Documentation** — [docs/security/dependency-audit.md](docs/security/dependency-audit.md).
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.10-internal`.
+- **`drizzle-orm` peer** — `^0.45.2` (consumers must upgrade).
+
 ## [0.1.9-internal] - 2026-06-15
 
 ### Fixed
@@ -205,6 +221,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.10-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.10-internal
 [0.1.9-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.9-internal
 [0.1.8-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.8-internal
 [0.1.7-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.7-internal

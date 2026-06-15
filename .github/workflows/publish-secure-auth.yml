@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security audit (high/critical)
+        run: npm run audit:security
+
       - name: Validate package version matches tag
         run: |
           PACKAGE_VERSION=$(node -p "require('./packages/secure-auth/package.json').version")
@@ -59,4 +62,4 @@ jobs:
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish -w @tgoliveira/secure-auth --access public --tag internal
+        run: npm publish -w @tgoliveira/secure-auth --access public --tag latest

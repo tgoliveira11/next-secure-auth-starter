@@ -1,6 +1,6 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.9-internal` is experimental — **not production-ready**.
+**Maturity:** `@tgoliveira/secure-auth@0.1.10-internal` is experimental — **not production-ready**.
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
@@ -204,6 +204,16 @@ If credentials were ever exposed, rotate:
 - [ ] `DATABASE_URL` password
 - [ ] SMTP credentials
 - [ ] `GITHUB_PACKAGES_TOKEN`
+
+---
+
+## Dependency audit
+
+- **Policy:** [security/dependency-audit.md](./security/dependency-audit.md)
+- **Before release:** `npm run audit:security` (blocks high/critical)
+- **Publish CI:** audit gate in `.github/workflows/publish-secure-auth.yml`
+
+Overrides in root `package.json` pin safe transitive versions when NextAuth v4 or Next.js still declare vulnerable ranges (see dependency audit doc for residual risk).
 
 ---
 
