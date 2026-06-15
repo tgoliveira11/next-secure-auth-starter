@@ -1,6 +1,6 @@
 # @secure-auth/starter
 
-Reference consumer for `@tgoliveira/secure-auth@0.1.7-internal`. Demonstrates integration through **official public exports only**.
+Reference consumer for `@tgoliveira/secure-auth@0.1.9-internal`. Demonstrates integration through **official public exports only**.
 
 For a **minimal** downstream consumer with no starter dependencies, see [apps/consumer-demo](../consumer-demo).
 
@@ -121,5 +121,6 @@ Use [docs/consumer-validation-checklist.md](../../docs/consumer-validation-check
 | UI unstyled | Import `@tgoliveira/secure-auth/styles.css` in `globals.css`; restart dev |
 | Passkeys fail | Match `WEBAUTHN_ORIGIN` to browser URL exactly |
 | Wrong page copy/paths | Verify `SecureAuthUIProvider` receives `secureAuth.uiConfig` |
+| Starter tests fail on `next/link` or `localStorage` | Use the monorepo `file:../../packages/secure-auth` dependency (not a registry copy under `apps/starter/node_modules`). On Node 22+, remove any broken experimental `localStorage` before happy-dom tests (handled in `src/test/setup.ts`). |
 
 See also [consumer-quick-start.md](../../docs/consumer-quick-start.md#14-verify-installation).

@@ -6,6 +6,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.9-internal] - 2026-06-15
+
+### Fixed
+
+- **Starter test suite** — Vitest now resolves `@tgoliveira/secure-auth` from monorepo **source** (not a nested registry `dist/` copy), with Next.js ESM aliases (`next/link.js`, `next/server.js`, `next/navigation.js`) so tests pass on Node 22+.
+- **Node 22+ `localStorage`** — test setup strips Node’s broken experimental `localStorage` global so happy-dom passkey and client tests work.
+- **Monorepo package resolution** — `apps/starter` and `apps/consumer-demo` depend on `file:../../packages/secure-auth` so `npm install` does not shadow the workspace package with a published tarball.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — aligned with `packages/secure-auth/package.json` (`0.1.9-internal`).
+- **Starter README** — troubleshooting entry for registry-copy and `localStorage` test failures.
+
+## [0.1.8-internal] - 2026-06-15
+
+### Changed
+
+- Version bump to `0.1.8-internal` for npm republication after publish workflow updates.
+
 ## [0.1.7-internal] - 2026-06-15
 
 ### Added
@@ -186,6 +205,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.9-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.9-internal
+[0.1.8-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.8-internal
 [0.1.7-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.7-internal
 [0.1.6-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.6-internal
 [0.1.5-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.5-internal

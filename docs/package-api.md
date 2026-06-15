@@ -1,6 +1,6 @@
 # Package API
 
-Package: `@tgoliveira/secure-auth` @ `0.1.7-internal`
+Package: `@tgoliveira/secure-auth` @ `0.1.9-internal`
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
@@ -300,7 +300,7 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 `secureAuth.routes.health.GET` returns:
 
 ```json
-{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.7-internal" }
+{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.9-internal" }
 ```
 
 Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route string.

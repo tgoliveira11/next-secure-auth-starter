@@ -29,7 +29,7 @@ npm run db:migrate    # apply to local Postgres
 
 See **[consumer-quick-start.md](./consumer-quick-start.md)** (sections 4–5) for full schema import and migration setup.
 
-1. Install `@tgoliveira/secure-auth@0.1.7-internal` and peer dependencies.
+1. Install `@tgoliveira/secure-auth@0.1.9-internal` and peer dependencies.
 2. Point `drizzle.config.ts` at `node_modules/@tgoliveira/secure-auth/dist/drizzle/schema.js` and `migrations/`.
 3. Run `drizzle-kit migrate` in CI or release pipeline.
 4. **Do not duplicate** auth table definitions — import `authSchema` when configuring Drizzle.

@@ -1,9 +1,27 @@
-import { vi, expect } from "vitest";
+import { vi, expect, beforeEach } from "vitest";
 import { toHaveNoViolations } from "jest-axe";
 
 expect.extend(toHaveNoViolations);
 
 vi.mock("server-only", () => ({}));
+
+/**
+ * Node 22+ may expose a non-functional experimental `localStorage` global
+ * (`--localstorage-file` without a valid path). Remove it so happy-dom can
+ * provide a working Storage implementation in browser-oriented tests.
+ */
+function stripBrokenNodeLocalStorage(): void {
+  const storage = globalThis.localStorage;
+  if (storage && typeof storage.getItem !== "function") {
+    Reflect.deleteProperty(globalThis, "localStorage");
+  }
+}
+
+stripBrokenNodeLocalStorage();
+
+beforeEach(() => {
+  stripBrokenNodeLocalStorage();
+});
 
 vi.mock("@/lib/db/transaction", () => ({
   runInTransaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn({})),
