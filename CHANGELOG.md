@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.5-internal] - 2026-06-15
+
 ### Fixed
 
 - **Password policy override** — `AUTH_PASSWORD_MIN_LENGTH=5` (and other values below the previous env floor) now maps correctly in starter and consumer-demo apps. `resolvePasswordPolicyConfig()` merges partial `passwordPolicy` overrides with package defaults; `buildPublicUIConfig()` uses the resolved policy. `PasswordStrengthField`, reset-password, and change-password flows read policy from `SecureAuthUIProvider` instead of falling back to the default `minLength: 12`.
@@ -168,6 +170,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.5-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.5-internal
 [0.1.4-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.4-internal
 [0.1.3-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.3-internal
 [0.1.2-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.2-internal

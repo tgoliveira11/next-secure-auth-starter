@@ -1,6 +1,6 @@
 # @secure-auth/starter
 
-Reference consumer for `@tgoliveira/secure-auth@0.1.4-internal`. Demonstrates integration through **official public exports only**.
+Reference consumer for `@tgoliveira/secure-auth@0.1.5-internal`. Demonstrates integration through **official public exports only**.
 
 For a **minimal** downstream consumer with no starter dependencies, see [apps/consumer-demo](../consumer-demo).
 

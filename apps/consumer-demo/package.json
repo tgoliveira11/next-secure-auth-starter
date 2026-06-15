@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/consumer-demo",
-  "version": "0.1.4-internal",
+  "version": "0.1.5-internal",
   "private": true,
   "description": "Canonical consumer validation app for @tgoliveira/secure-auth",
   "scripts": {
@@ -16,7 +16,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.4-internal",
+    "@tgoliveira/secure-auth": "0.1.5-internal",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.1",
     "bcryptjs": "^3.0.2",

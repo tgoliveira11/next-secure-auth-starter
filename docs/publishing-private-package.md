@@ -8,7 +8,7 @@
 | --- | --- |
 | Name | `@tgoliveira/secure-auth` |
 | Registry | `https://npm.pkg.github.com` |
-| Version | `0.1.4-internal` |
+| Version | `0.1.5-internal` |
 
 ## Registry setup (consumer)
 
@@ -33,14 +33,14 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding
 
 ```bash
 export GITHUB_PACKAGES_TOKEN=ghp_...
-npm install @tgoliveira/secure-auth@0.1.4-internal \
+npm install @tgoliveira/secure-auth@0.1.5-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 ```
 
 ```json
 {
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.4-internal",
+    "@tgoliveira/secure-auth": "0.1.5-internal",
     "next": "^16.0.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",

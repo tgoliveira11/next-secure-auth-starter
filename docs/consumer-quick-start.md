@@ -1,6 +1,6 @@
 # Consumer quick start
 
-**Package:** `@tgoliveira/secure-auth@0.1.4-internal`  
+**Package:** `@tgoliveira/secure-auth@0.1.5-internal`  
 **Audience:** Engineers integrating the package into a **brand-new** Next.js App Router application.
 
 This guide is self-contained. You do not need to read package source code.
@@ -39,7 +39,7 @@ Configure GitHub Packages (private registry):
 
 ```bash
 export GITHUB_PACKAGES_TOKEN=ghp_...
-npm install @tgoliveira/secure-auth@0.1.4-internal
+npm install @tgoliveira/secure-auth@0.1.5-internal
 ```
 
 ---
@@ -519,7 +519,7 @@ export default nextConfig;
 
 ## 16. Verify installation
 
-1. `GET /api/auth/package-health` returns `{ ok: true, version: "0.1.4-internal" }`.
+1. `GET /api/auth/package-health` returns `{ ok: true, version: "0.1.5-internal" }`.
 2. Register a user at `/register`.
 3. Complete email verification (check console/Mailpit).
 4. Sign in at `/login`.
