@@ -112,7 +112,7 @@ export function buildSecureAuthConfigFromEnv(
         env,
         ["AUTH_PASSWORD_MIN_LENGTH", "PASSWORD_MIN_LENGTH"],
         12,
-        { min: 8, max: 128 }
+        { min: 1, max: 128 }
       ),
       requireUppercase: readBooleanEnv(
         env,

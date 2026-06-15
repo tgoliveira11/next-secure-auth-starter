@@ -6,6 +6,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Password policy override** — `AUTH_PASSWORD_MIN_LENGTH=5` (and other values below the previous env floor) now maps correctly in starter and consumer-demo apps. `resolvePasswordPolicyConfig()` merges partial `passwordPolicy` overrides with package defaults; `buildPublicUIConfig()` uses the resolved policy. `PasswordStrengthField`, reset-password, and change-password flows read policy from `SecureAuthUIProvider` instead of falling back to the default `minLength: 12`.
+
+### Added
+
+- **Tests** — env mapping for `AUTH_PASSWORD_MIN_LENGTH=5`, UI provider propagation, register API acceptance/rejection at configured min length, and `PasswordStrengthField` `minLength` / hint text.
+
 ## [0.1.4-internal] - 2026-06-11
 
 ### Added

@@ -42,9 +42,11 @@ export const secureAuth = createSecureAuth({
       "--sa-brand": "#2563eb",
     },
   },
-  passwordPolicy: { enforcement: "warn" },
+  passwordPolicy: { enforcement: "warn", minLength: 12 },
 });
 ```
+
+Override `passwordPolicy.minLength` in app env (`AUTH_PASSWORD_MIN_LENGTH`) or TypeScript config. The package merges partial overrides with defaults (`minLength` defaults to **12** when omitted). The effective policy is exposed as `secureAuth.uiConfig.passwordPolicy` and used consistently by register, reset-password, and change-password flows.
 
 `uiConfig` includes resolved `paths`, `messages`, `appSlug`, `appName`, `passwordPolicy`, and `passwordStrength`. It contains **no secrets** and **no React nodes** — safe to pass from server layout to client provider.
 

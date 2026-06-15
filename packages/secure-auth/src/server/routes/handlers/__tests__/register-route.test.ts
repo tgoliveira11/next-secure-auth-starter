@@ -179,4 +179,62 @@ describe("register API route", () => {
     expect(res.status).toBe(201);
     expect(mocks.create).toHaveBeenCalled();
   });
+
+  it("accepts a 5-character password when minLength is 5", async () => {
+    services = await buildServices({
+      passwordPolicy: {
+        enforcement: "enforce",
+        minLength: 5,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: false,
+        minScore: 0,
+      },
+    });
+    mocks.findByEmail.mockResolvedValue(null);
+    mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com" });
+
+    const res = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email: "new@example.com", password: "abcde" }),
+      }),
+      services
+    );
+
+    expect(res.status).toBe(201);
+    expect(mocks.create).toHaveBeenCalled();
+  });
+
+  it("rejects a 4-character password when minLength is 5", async () => {
+    services = await buildServices({
+      passwordPolicy: {
+        enforcement: "enforce",
+        minLength: 5,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: false,
+        minScore: 0,
+      },
+    });
+    mocks.findByEmail.mockResolvedValue(null);
+
+    const res = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email: "new@example.com", password: "abcd" }),
+      }),
+      services
+    );
+
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toMatchObject({
+      error: expect.stringMatching(/5 characters/i),
+    });
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
 });

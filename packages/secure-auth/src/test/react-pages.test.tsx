@@ -70,6 +70,40 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
     expect(screen.getByRole("heading", { name: /create your account/i })).toBeTruthy();
   });
 
+  it("RegisterPage displays configured minLength from SecureAuthUIProvider", () => {
+    const uiConfig: SecureAuthUIPublicConfig = {
+      appSlug: "provider-app",
+      appName: "Provider App",
+      paths: DEFAULT_AUTH_PATHS,
+      messages: {},
+      passwordPolicy: {
+        enforcement: "warn",
+        minLength: 5,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: true,
+        minScore: 2,
+      },
+      passwordStrength: { position: "above" },
+      sessionPolicy: {
+        singleActiveSession: false,
+        revocationPollIntervalSeconds: 0,
+      },
+    };
+
+    render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <RegisterPage />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.getByText(/At least 5 characters/)).toBeTruthy();
+    const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
+    expect(passwordInput.minLength).toBe(5);
+  });
+
   it("ForgotPasswordPage renders without crashing", () => {
     render(<ForgotPasswordPage />);
     expect(screen.getByRole("heading", { name: /forgot your password/i })).toBeTruthy();

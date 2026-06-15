@@ -59,7 +59,7 @@ export type SecureAuthConfig = {
     sendVerificationOnRegister: boolean;
     requireEmailVerificationBeforeSignIn: boolean;
   };
-  passwordPolicy?: PasswordPolicyConfig;
+  passwordPolicy?: Partial<PasswordPolicyConfig>;
   sessions?: {
     maxAgeSeconds?: number;
     lastUsedUpdateIntervalSeconds?: number;

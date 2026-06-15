@@ -51,6 +51,23 @@ describe("buildPublicUIConfig", () => {
     expect(ui.passwordStrength.position).toBe("below");
   });
 
+  it("resolves partial passwordPolicy overrides with package defaults", () => {
+    const config = buildTestSecureAuthConfig({
+      passwordPolicy: { minLength: 5 },
+    });
+
+    const ui = buildPublicUIConfig(config);
+
+    expect(ui.passwordPolicy.minLength).toBe(5);
+    expect(ui.passwordPolicy.enforcement).toBe("warn");
+    expect(ui.passwordPolicy.blockCommonPasswords).toBe(true);
+  });
+
+  it("defaults passwordPolicy.minLength to 12 when omitted", () => {
+    const ui = buildPublicUIConfig(buildTestSecureAuthConfig());
+    expect(ui.passwordPolicy.minLength).toBe(12);
+  });
+
   it("does not expose server-only config such as secrets or email provider", () => {
     const config = buildTestSecureAuthConfig({
       auth: {

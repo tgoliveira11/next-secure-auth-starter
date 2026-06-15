@@ -11,9 +11,12 @@ import { Button } from "../primitives/button.js";
 import { LoadingState } from "../primitives/loading-state.js";
 import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
-import { assessPassword } from "@tgoliveira/secure-auth/client/password-policy";
+import {
+  assessPassword,
+  validatePasswordForSubmission,
+} from "@tgoliveira/secure-auth/client/password-policy";
 import { type ResetPasswordPageProps } from "./types.js";
-import { usePageTitle, useUiPaths } from "./use-page-ui.js";
+import { usePageTitle, useUiPaths, useUiPasswordPolicy } from "./use-page-ui.js";
 
 type ResetState = "loading" | "invalid" | "ready" | "success";
 
@@ -35,6 +38,7 @@ function ResetPasswordContent({
     "resetPasswordTitle",
     "Choose a new password"
   );
+  const passwordPolicy = useUiPasswordPolicy();
   const token = tokenProp ?? searchParams.get("token") ?? "";
   const [state, setState] = useState<ResetState>("loading");
   const [newPassword, setNewPassword] = useState("");
@@ -68,10 +72,20 @@ function ResetPasswordContent({
       setError("Passwords do not match.");
       return;
     }
-    const assessment = assessPassword(newPassword);
-    if (!assessment.meetsPolicy && assessment.label === "too_short") {
-      setError(assessment.messages[0] ?? "Password is too short.");
-      return;
+    if (passwordPolicy?.enforcement === "enforce") {
+      const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
+      if (!policyResult.valid) {
+        setError(
+          policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
+        );
+        return;
+      }
+    } else {
+      const assessment = assessPassword(newPassword, passwordPolicy);
+      if (!assessment.meetsPolicy && assessment.label === "too_short") {
+        setError(assessment.messages[0] ?? "Password is too short.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -138,6 +152,7 @@ function ResetPasswordContent({
             onChange={setNewPassword}
             autoComplete="new-password"
             confirmValue={confirmPassword}
+            policyConfig={passwordPolicy}
             passwordStrengthPosition={passwordStrengthPosition}
           />
           <PasswordStrengthField
@@ -148,6 +163,7 @@ function ResetPasswordContent({
             autoComplete="new-password"
             confirmValue={newPassword}
             showStrength={false}
+            policyConfig={passwordPolicy}
             passwordStrengthPosition={passwordStrengthPosition}
           />
           {error && (

@@ -67,4 +67,15 @@ describe("buildSecureAuthConfigFromEnv", () => {
     });
     expect(config.server?.cookieSecure).toBe(false);
   });
+
+  it("maps AUTH_PASSWORD_MIN_LENGTH=5 to passwordPolicy.minLength", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_PASSWORD_MIN_LENGTH: "5",
+    });
+    expect(config.passwordPolicy?.minLength).toBe(5);
+  });
+
+  it("defaults AUTH_PASSWORD_MIN_LENGTH to 12 when omitted", () => {
+    expect(buildSecureAuthConfigFromEnv(defaults, {}).passwordPolicy?.minLength).toBe(12);
+  });
 });

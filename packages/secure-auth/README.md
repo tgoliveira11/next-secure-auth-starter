@@ -49,7 +49,7 @@ export default function RootLayout({ children }) {
 }
 ```
 
-Configure via `createSecureAuth({ ui: { paths, messages, cssVariables, passwordStrength } })`. Package pages use `useSecureAuthUi()` internally.
+Configure via `createSecureAuth({ ui: { paths, messages, cssVariables, passwordStrength }, passwordPolicy: { minLength } })`. Package pages use `useSecureAuthUi()` internally. Default minimum password length is **12**; map `AUTH_PASSWORD_MIN_LENGTH` in your app env into `passwordPolicy.minLength` to override (the package never reads env directly).
 
 Password strength and validation feedback render **above** password fields by default. Set `ui.passwordStrength.position` to `"below"` to restore legacy placement. The feedback region is stable from first render (neutral requirements before typing; strength updates in place without focus loss). See [customization.md](../../docs/customization.md).
 

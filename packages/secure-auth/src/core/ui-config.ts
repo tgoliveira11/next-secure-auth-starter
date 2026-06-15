@@ -1,11 +1,13 @@
 import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
-import { DEFAULT_PASSWORD_POLICY } from "../modules/security/password-policy/index.js";
 import {
   DEFAULT_AUTH_PATHS,
   type AuthPaths,
 } from "../modules/ui/pages/types.js";
 import type { SecureAuthConfig } from "./types.js";
-import { resolveRevocationPollIntervalSeconds } from "./config-accessors.js";
+import {
+  resolvePasswordPolicyConfig,
+  resolveRevocationPollIntervalSeconds,
+} from "./config-accessors.js";
 
 export type PasswordStrengthFeedbackPosition = "above" | "below";
 
@@ -106,7 +108,7 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
       ...config.ui?.messages,
     },
     cssVariables: config.ui?.cssVariables,
-    passwordPolicy: config.passwordPolicy ?? DEFAULT_PASSWORD_POLICY,
+    passwordPolicy: resolvePasswordPolicyConfig(config),
     passwordStrength: {
       position:
         config.ui?.passwordStrength?.position ?? DEFAULT_PASSWORD_STRENGTH_FEEDBACK_POSITION,

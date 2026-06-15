@@ -7,8 +7,10 @@ import { FormField } from "../../primitives/form-field.js";
 import { Input } from "../../primitives/input.js";
 import { PasswordStrengthField } from "../auth/password-strength-field.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
+import { validatePasswordForSubmission } from "@tgoliveira/secure-auth/client/password-policy";
 
 import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
+import { useUiPasswordPolicy } from "../../pages/use-page-ui.js";
 
 export type ChangePasswordSettingsProps = {
   canChangePassword: boolean;
@@ -28,6 +30,7 @@ export function ChangePasswordSettings({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const passwordPolicy = useUiPasswordPolicy();
 
   if (!canChangePassword) {
     return (
@@ -47,6 +50,16 @@ export function ChangePasswordSettings({
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
+    }
+
+    if (passwordPolicy?.enforcement === "enforce") {
+      const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
+      if (!policyResult.valid) {
+        setError(
+          policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
+        );
+        return;
+      }
     }
 
     setLoading(true);
@@ -83,6 +96,7 @@ export function ChangePasswordSettings({
         onChange={setNewPassword}
         autoComplete="new-password"
         confirmValue={confirmPassword}
+        policyConfig={passwordPolicy}
         passwordStrengthPosition={passwordStrengthPosition}
       />
       <PasswordStrengthField
@@ -93,6 +107,7 @@ export function ChangePasswordSettings({
         autoComplete="new-password"
         confirmValue={newPassword}
         showStrength={false}
+        policyConfig={passwordPolicy}
         passwordStrengthPosition={passwordStrengthPosition}
       />
       {error && (

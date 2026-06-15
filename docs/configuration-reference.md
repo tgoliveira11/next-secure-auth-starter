@@ -172,7 +172,7 @@ Other browsers/devices are revoked in the database on login. The starter and con
 | Variable | Type | Default | Allowed | Maps to |
 | --- | --- | --- | --- | --- |
 | `AUTH_PASSWORD_POLICY_ENFORCEMENT` | enum | `warn` | `off`, `warn`, `enforce` | `passwordPolicy.enforcement` |
-| `AUTH_PASSWORD_MIN_LENGTH` | number | `12` | 8–128 | `passwordPolicy.minLength` |
+| `AUTH_PASSWORD_MIN_LENGTH` | number | `12` | 1–128 | `passwordPolicy.minLength` |
 | `AUTH_PASSWORD_REQUIRE_UPPERCASE` | boolean | `false` | | `passwordPolicy.requireUppercase` |
 | `AUTH_PASSWORD_REQUIRE_LOWERCASE` | boolean | `false` | | `passwordPolicy.requireLowercase` |
 | `AUTH_PASSWORD_REQUIRE_NUMBER` | boolean | `false` | | `passwordPolicy.requireNumber` |
@@ -182,6 +182,14 @@ Other browsers/devices are revoked in the database on login. The starter and con
 | `AUTH_PASSWORD_STRENGTH_POSITION` | enum | `above` | `above`, `below` | `ui.passwordStrength.position` |
 
 Legacy `PASSWORD_*` names are supported for policy fields (not strength position).
+
+The package does **not** read `process.env` for password policy. Your app maps `AUTH_PASSWORD_MIN_LENGTH` (and related vars) into `createSecureAuth({ passwordPolicy: { minLength } })`. The resolved value drives UI copy, browser `minLength`, client validation, server validation, and `GET /api/auth/password-policy`.
+
+**Example — shorter minimum length for local development:**
+
+```bash
+AUTH_PASSWORD_MIN_LENGTH=5
+```
 
 **Example — strength feedback below the field:**
 

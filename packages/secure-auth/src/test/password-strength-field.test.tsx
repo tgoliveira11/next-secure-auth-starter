@@ -346,4 +346,47 @@ describe("PasswordStrengthField", () => {
     expect(await screen.findByText(/Strength:/)).toBeTruthy();
     expect(fetch).toHaveBeenCalledWith("/api/auth/password-policy");
   });
+
+  it("uses minLength from provider config when policyConfig is omitted", () => {
+    const shortPolicy: PasswordPolicyConfig = {
+      ...warnPolicy,
+      minLength: 5,
+    };
+
+    render(
+      <SecureAuthUIProvider config={{ ...baseUiConfig, passwordPolicy: shortPolicy }}>
+        <PasswordStrengthField
+          id="password"
+          label="Password"
+          value=""
+          onChange={() => undefined}
+        />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.getByText(/At least 5 characters/)).toBeTruthy();
+    const input = screen.getByLabelText("Password") as HTMLInputElement;
+    expect(input.minLength).toBe(5);
+  });
+
+  it("uses minLength from explicit policyConfig override", () => {
+    const shortPolicy: PasswordPolicyConfig = {
+      ...warnPolicy,
+      minLength: 5,
+    };
+
+    render(
+      <PasswordStrengthField
+        id="password"
+        label="Password"
+        value=""
+        onChange={() => undefined}
+        policyConfig={shortPolicy}
+      />
+    );
+
+    expect(screen.getByText(/At least 5 characters/)).toBeTruthy();
+    const input = screen.getByLabelText("Password") as HTMLInputElement;
+    expect(input.minLength).toBe(5);
+  });
 });

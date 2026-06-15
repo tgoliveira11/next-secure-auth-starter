@@ -33,7 +33,7 @@ export function requireTwoFactorEncryptionKey(config: SecureAuthConfig): string 
 }
 
 export function resolvePasswordPolicyConfig(config: SecureAuthConfig): PasswordPolicyConfig {
-  return config.passwordPolicy ?? DEFAULT_PASSWORD_POLICY;
+  return { ...DEFAULT_PASSWORD_POLICY, ...config.passwordPolicy };
 }
 
 export function resolveAccountPolicyConfig(config: SecureAuthConfig): AccountPolicyConfig {

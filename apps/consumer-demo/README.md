@@ -39,6 +39,10 @@ Open http://localhost:3002
 - **`/login`** — passes `title="Prop override: custom sign-in title"` to `LoginPage`, overriding `ui.messages.loginTitle` from `SecureAuthUIProvider`. Validates **prop → provider → default** precedence for page copy.
 - **`/reset-password`** — passes `passwordStrengthPosition="below"` to `ResetPasswordPage`, overriding the package default (`above`) for password feedback placement only on that page.
 
+## Password policy override
+
+Default minimum password length is **12** (`AUTH_PASSWORD_MIN_LENGTH=12` in `.env.example`). Set `AUTH_PASSWORD_MIN_LENGTH=5` in `.env.local` to verify env → `createSecureAuth({ passwordPolicy: { minLength: 5 } })` → UI and validation. Automated coverage: `src/test/secure-auth-from-env.test.ts`.
+
 ## Optional session policy
 
 Set `AUTH_SINGLE_ACTIVE_SESSION=true` in `.env.local` (mapped to `sessions.singleActiveSession` in `src/lib/env/secure-auth-from-env.ts`). Default is multi-session. See [docs/configuration-reference.md](../../docs/configuration-reference.md).

@@ -12,7 +12,7 @@ import {
   type PasswordPolicyConfig,
 } from "@tgoliveira/secure-auth/client/password-policy";
 import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
-import { usePasswordStrengthPosition } from "../../pages/use-page-ui.js";
+import { usePasswordStrengthPosition, useUiPasswordPolicy } from "../../pages/use-page-ui.js";
 import { PasswordFieldFeedbackPlacement } from "./password-feedback-placement.js";
 
 interface PasswordStrengthFieldProps {
@@ -44,14 +44,12 @@ export function PasswordStrengthField({
 }: PasswordStrengthFieldProps) {
   const position = usePasswordStrengthPosition(passwordStrengthPositionProp);
   const feedbackId = `${id}-password-feedback`;
+  const effectivePolicy = useUiPasswordPolicy(policyConfig);
 
-  const [loadedPolicy, setLoadedPolicy] = useState<PasswordPolicyConfig | null>(
-    policyConfig ?? null
-  );
+  const [fetchedPolicy, setFetchedPolicy] = useState<PasswordPolicyConfig | null>(null);
 
   useEffect(() => {
-    if (policyConfig) {
-      setLoadedPolicy(policyConfig);
+    if (effectivePolicy) {
       return;
     }
 
@@ -59,18 +57,18 @@ export function PasswordStrengthField({
     fetch("/api/auth/password-policy")
       .then((response) => (response.ok ? response.json() : DEFAULT_PASSWORD_POLICY))
       .then((config: PasswordPolicyConfig) => {
-        if (!cancelled) setLoadedPolicy(config);
+        if (!cancelled) setFetchedPolicy(config);
       })
       .catch(() => {
-        if (!cancelled) setLoadedPolicy(DEFAULT_PASSWORD_POLICY);
+        if (!cancelled) setFetchedPolicy(DEFAULT_PASSWORD_POLICY);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [policyConfig]);
+  }, [effectivePolicy]);
 
-  const config = loadedPolicy ?? policyConfig ?? DEFAULT_PASSWORD_POLICY;
+  const config = effectivePolicy ?? fetchedPolicy ?? DEFAULT_PASSWORD_POLICY;
   const assessment = useMemo(() => assessPassword(value, config), [value, config]);
   const strengthLabel = getPasswordStrengthDisplay(assessment.label);
   const showStrengthFeedback = showStrength && shouldShowPasswordStrengthUi(config);

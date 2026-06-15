@@ -415,6 +415,14 @@ Import UI from `@tgoliveira/secure-auth/react`.
 
 Page defaults (copy, paths, password policy) come from `secureAuth.uiConfig` — built from your `createSecureAuth({ ui: { ... } })` config.
 
+Password minimum length defaults to **12**. Override in app env (the package does not read env):
+
+```bash
+AUTH_PASSWORD_MIN_LENGTH=5
+```
+
+Map env into config via `buildSecureAuthConfigFromEnv()` (see `apps/starter` / `apps/consumer-demo`) or set `passwordPolicy: { minLength: 5 }` directly in `createSecureAuth(config)`. The effective value controls UI hints, browser validation, client checks, and server registration/reset/change-password validation.
+
 ### Configure UI in createSecureAuth
 
 ```typescript
