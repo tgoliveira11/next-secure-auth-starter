@@ -51,4 +51,6 @@ jobs:
         run: npm pack -w @tgoliveira/secure-auth --dry-run
 
       - name: Publish to npm
-        run: npm publish -w @tgoliveira/secure-auth --tag internal
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish -w @tgoliveira/secure-auth --access public --tag internal
