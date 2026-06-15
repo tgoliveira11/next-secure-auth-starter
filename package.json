@@ -1,13 +1,13 @@
 {
   "name": "secure-auth",
-  "version": "0.1.6-internal",
+  "version": "0.1.7-internal",
   "private": true,
   "description": "Opinionated Next.js authentication monorepo — @tgoliveira/secure-auth package + starter app (experimental)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tgoliveira11/next-secure-auth-starter.git"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "workspaces": [
     "packages/*",
     "apps/*"

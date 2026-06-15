@@ -1,6 +1,6 @@
 {
   "name": "@tgoliveira/secure-auth",
-  "version": "0.1.6-internal",
+  "version": "0.1.7-internal",
   "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (experimental internal release)",
   "type": "module",
   "repository": {
@@ -21,7 +21,7 @@
     "oauth",
     "2fa"
   ],
-  "license": "UNLICENSED",
+  "license": "MIT",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -71,7 +71,8 @@
     "dist",
     "migrations",
     "styles.css",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"

@@ -2,7 +2,8 @@
 
 **Package:** `@tgoliveira/secure-auth`  
 **Registry:** [npm public registry](https://www.npmjs.com/package/@tgoliveira/secure-auth)  
-**npm dist-tag:** `internal` (install with `@tgoliveira/secure-auth@internal` or an explicit version)
+**npm dist-tag:** `internal` (install with `@tgoliveira/secure-auth@internal` or an explicit version)  
+**License:** MIT — see [LICENSE](../LICENSE) in the repository and the published package tarball.
 
 This monorepo publishes `@tgoliveira/secure-auth` automatically when a release tag is pushed. **No long-lived npm token** and **no `NPM_TOKEN` GitHub secret** are used — authentication uses **npm Trusted Publishing (OIDC)**.
 
@@ -18,8 +19,8 @@ secure-auth-v0.1.*-internal
 
 Examples:
 
-- `secure-auth-v0.1.6-internal`
 - `secure-auth-v0.1.7-internal`
+- `secure-auth-v0.1.8-internal`
 
 The tag suffix (after `secure-auth-v`) must match `packages/secure-auth/package.json` `version` exactly.
 
@@ -94,8 +95,8 @@ If Trusted Publisher is **not** configured, the workflow will fail at **Publish 
 4. Create and push an annotated tag:
 
 ```bash
-git tag -a secure-auth-v0.1.6-internal -m "Release secure-auth v0.1.6-internal"
-git push origin secure-auth-v0.1.6-internal
+git tag -a secure-auth-v0.1.7-internal -m "Release secure-auth v0.1.7-internal"
+git push origin secure-auth-v0.1.7-internal
 ```
 
 5. Watch the workflow: [GitHub Actions](https://github.com/tgoliveira11/next-secure-auth-starter/actions)
@@ -108,7 +109,7 @@ git push origin secure-auth-v0.1.6-internal
 ```bash
 npm install @tgoliveira/secure-auth@internal
 # or pin a version:
-npm install @tgoliveira/secure-auth@0.1.6-internal
+npm install @tgoliveira/secure-auth@0.1.7-internal
 ```
 
 Peer dependencies (`next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`) must be installed in the consumer app. See [consumer-quick-start.md](./consumer-quick-start.md).

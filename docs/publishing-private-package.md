@@ -33,7 +33,7 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding
 ```json
 {
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.6-internal",
+    "@tgoliveira/secure-auth": "0.1.7-internal",
     "next": "^16.0.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",

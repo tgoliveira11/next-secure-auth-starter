@@ -6,7 +6,7 @@
 
 **`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
-**Maturity:** `0.1.6-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.1.7-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
@@ -181,3 +181,7 @@ See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 | [docs/publishing-private-package.md](docs/publishing-private-package.md) | Publishing overview (npm public registry) |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [AGENTS.md](AGENTS.md) | AI agent instructions |
+
+## License
+
+MIT © 2026 Thiago Oliveira. See [LICENSE](LICENSE).

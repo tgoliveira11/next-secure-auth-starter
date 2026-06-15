@@ -6,6 +6,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.7-internal] - 2026-06-15
+
+### Added
+
+- **MIT License** — root [LICENSE](LICENSE) file and [packages/secure-auth/LICENSE](packages/secure-auth/LICENSE) included in the published npm tarball.
+- **Package metadata** — `@tgoliveira/secure-auth` `package.json` now declares `"license": "MIT"` (replaces `UNLICENSED` on npm).
+
 ## [0.1.6-internal] - 2026-06-15
 
 ### Added
@@ -179,6 +186,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.7-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.7-internal
 [0.1.6-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.6-internal
 [0.1.5-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.5-internal
 [0.1.4-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.4-internal

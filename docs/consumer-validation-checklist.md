@@ -1,6 +1,6 @@
 # Consumer validation checklist
 
-Use this when integrating `@tgoliveira/secure-auth@0.1.6-internal` into a **new** consumer application.
+Use this when integrating `@tgoliveira/secure-auth@0.1.7-internal` into a **new** consumer application.
 
 **Canonical in-repo example:** [apps/consumer-demo](../apps/consumer-demo) — run `npm run dev:consumer` after setup.
 
@@ -10,7 +10,7 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-dem
 
 ## Installation
 
-- [ ] `@tgoliveira/secure-auth@0.1.6-internal` installed from registry
+- [ ] `@tgoliveira/secure-auth@0.1.7-internal` installed from registry
 - [ ] Peer dependencies installed: `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`
 - [ ] PostgreSQL driver installed (`postgres` or equivalent)
 - [ ] `.npmrc` configured for GitHub Packages (if private registry)
@@ -72,7 +72,7 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-dem
 ## Routes
 - [ ] Auth routes use `secureAuth.routes.*` (thin `route.ts` wrappers)
 - [ ] Account routes use `secureAuth.routes.*`
-- [ ] Health route returns `version: "0.1.6-internal"`
+- [ ] Health route returns `version: "0.1.7-internal"`
 
 ---
 
@@ -110,6 +110,6 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-dem
 | Field | Value |
 | --- | --- |
 | Consumer app name | |
-| Package version | `0.1.6-internal` |
+| Package version | `0.1.7-internal` |
 | Validated by | |
 | Date | |
