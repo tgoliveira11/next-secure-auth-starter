@@ -6,7 +6,7 @@
 
 **`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
-**Maturity:** `0.1.5-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.1.6-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
@@ -139,9 +139,11 @@ npm run typecheck
 npm run lint
 ```
 
-### Private package publish
+### npm publish (automated)
 
-See [docs/publishing-private-package.md](docs/publishing-private-package.md). **Not published publicly.**
+Releases are published to [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth) when tags matching `secure-auth-v0.1.*-internal` are pushed. Uses GitHub Actions + npm Trusted Publishing (OIDC) — no `NPM_TOKEN` secret.
+
+See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 
 ---
 
@@ -175,6 +177,7 @@ See [docs/publishing-private-package.md](docs/publishing-private-package.md). **
 | [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, boundaries |
 | [docs/security.md](docs/security.md) | Security requirements and readiness |
 | [docs/migrations.md](docs/migrations.md) | Database migrations and upgrade notes |
-| [docs/publishing-private-package.md](docs/publishing-private-package.md) | GitHub Packages install |
+| [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md) | Automated npm publish (Trusted Publishing) |
+| [docs/publishing-private-package.md](docs/publishing-private-package.md) | Publishing overview (npm public registry) |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [AGENTS.md](AGENTS.md) | AI agent instructions |

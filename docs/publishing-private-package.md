@@ -1,46 +1,39 @@
-# Publishing private package (GitHub Packages)
+# Publishing `@tgoliveira/secure-auth`
 
-**Status:** Prepared, not published publicly. Current maturity: `0.1.x` experimental.
+**Status:** Published publicly on [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth). Automated releases use GitHub Actions + npm Trusted Publishing (OIDC).
 
 ## Package identity
 
 | Field | Value |
 | --- | --- |
 | Name | `@tgoliveira/secure-auth` |
-| Registry | `https://npm.pkg.github.com` |
-| Version | `0.1.5-internal` |
+| Registry | `https://registry.npmjs.org` |
+| Current version | See `packages/secure-auth/package.json` |
+| npm dist-tag | `internal` |
 
-## Registry setup (consumer)
+## Automated publishing (recommended)
 
-`.npmrc` (use environment variables only — never commit tokens):
+Push a tag matching `secure-auth-v0.1.*-internal` after bumping the package version on `main`.
 
-```ini
-@tgoliveira:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
-```
+Full instructions: **[publishing-npm-automation.md](./publishing-npm-automation.md)**
 
-## GitHub token scopes
+- Workflow: `.github/workflows/publish-secure-auth.yml`
+- **Trusted Publisher** must be configured on npm (no `NPM_TOKEN` secret)
+- GitHub repo: `tgoliveira11/next-secure-auth-starter`
 
-| Scope | Purpose |
-| --- | --- |
-| `read:packages` | Install in consumer repos / CI |
-| `write:packages` | Publish from maintainer CI or local release |
-| `repo` | Required when the package repo is private |
-
-## Install (consumer repo)
-
-See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding flow.
+## Install (consumer)
 
 ```bash
-export GITHUB_PACKAGES_TOKEN=ghp_...
-npm install @tgoliveira/secure-auth@0.1.5-internal \
+npm install @tgoliveira/secure-auth@internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 ```
+
+See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding flow.
 
 ```json
 {
   "dependencies": {
-    "@tgoliveira/secure-auth": "0.1.5-internal",
+    "@tgoliveira/secure-auth": "0.1.6-internal",
     "next": "^16.0.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
@@ -53,14 +46,14 @@ npm install @tgoliveira/secure-auth@0.1.5-internal \
 
 **Required peer dependencies:** `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`.
 
-## Publish (maintainer)
+## Manual publish (emergency only)
+
+Prefer the automated workflow. If you must publish locally, use an npm account with publish access and **do not** commit tokens:
 
 ```bash
 npm run build -w @tgoliveira/secure-auth
-npm publish -w @tgoliveira/secure-auth
+npm publish -w @tgoliveira/secure-auth --access public --tag internal
 ```
-
-`publishConfig.registry` is set in `packages/secure-auth/package.json`.
 
 ## Versioning rules
 
@@ -73,9 +66,6 @@ npm publish -w @tgoliveira/secure-auth
 
 Bump patch for fixes, minor for additive API, major (post-1.0) for breaking changes.
 
-## CI recommendation
+## Legacy: GitHub Packages
 
-1. `npm ci`
-2. `npm run build -w @tgoliveira/secure-auth`
-3. `npm run test`
-4. Publish on tagged release only after security hardening checklist passes.
+Early internal releases used GitHub Packages (`npm.pkg.github.com`). **Current consumers should use the public npm registry.** If you still need GitHub Packages for a private fork, configure `.npmrc` with `GITHUB_PACKAGES_TOKEN` locally — that path is not used by this repository's publish workflow.

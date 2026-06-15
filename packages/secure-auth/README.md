@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.5-internal` (experimental — not production-ready)
+**Version:** `0.1.6-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -58,11 +58,11 @@ Password strength and validation feedback render **above** password fields by de
 ## Install (consumer app)
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.5-internal \
+npm install @tgoliveira/secure-auth@0.1.6-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2
 ```
 
-See [publishing-private-package.md](../../docs/publishing-private-package.md) for GitHub Packages registry setup.
+See [publishing-npm-automation.md](../../docs/publishing-npm-automation.md) for automated npm releases and [consumer-quick-start.md](../../docs/consumer-quick-start.md) for install.
 
 ---
 

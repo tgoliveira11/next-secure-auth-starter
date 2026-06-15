@@ -6,6 +6,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.6-internal] - 2026-06-15
+
+### Added
+
+- **GitHub Actions npm publish automation** — [`.github/workflows/publish-secure-auth.yml`](../.github/workflows/publish-secure-auth.yml) publishes `@tgoliveira/secure-auth` to the public npm registry when tags matching `secure-auth-v0.1.*-internal` are pushed.
+- **npm Trusted Publishing (OIDC)** — workflow uses `id-token: write` and `actions/setup-node` with `registry-url`; no `NPM_TOKEN` secret or committed npm tokens.
+- **[docs/publishing-npm-automation.md](docs/publishing-npm-automation.md)** — Trusted Publisher setup, release checklist, and consumer install notes.
+- **Updated publishing docs** — [docs/publishing-private-package.md](docs/publishing-private-package.md) now points at public npm and automated releases.
+
 ## [0.1.5-internal] - 2026-06-15
 
 ### Fixed
@@ -170,6 +179,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.6-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.6-internal
 [0.1.5-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.5-internal
 [0.1.4-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.4-internal
 [0.1.3-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.3-internal
