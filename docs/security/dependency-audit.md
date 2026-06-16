@@ -1,7 +1,7 @@
 # Dependency security audit
 
 **Last updated:** 2026-06-15  
-**Package:** `@tgoliveira/secure-auth@0.1.10-internal`
+**Package:** `@tgoliveira/secure-auth@0.1.11-internal`
 
 This document records npm advisory findings, remediation actions, and residual risk for the monorepo. It complements [../security.md](../security.md).
 
@@ -41,7 +41,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 
 ---
 
-## Remediation summary (0.1.10-internal)
+## Remediation summary (0.1.11-internal)
 
 | Package | Severity | Class | Path | Fix | Fixed version | Affects consumers? |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 | `drizzle-kit` | high | B | apps dev | Direct upgrade | `0.31.10` | No |
 | `vitest` / `vite` | high | B | apps + package dev | Direct upgrade + esbuild override | vitest `3.2.6` | No |
 | `tsup` | high | B | package dev | Direct upgrade + esbuild override | `8.5.1` | No |
-| `nodemailer` | moderate | B | starter direct | Direct upgrade + override | `8.0.5` | No (app-only; not in published package) |
+| `nodemailer` | moderate | B | starter direct; `next-auth` optional peer | Direct upgrade + override | `8.0.11` | No (app-only; not in published package) |
 | `uuid` | moderate | A/C | `next-auth` nested | `next-auth@4.24.14` + root override | `11.1.1` | Indirect — override replaces nested `uuid@8` used by NextAuth v4 |
 | `postcss` | moderate | C | `next` bundled | Root override `next > postcss` | `8.5.15` | Indirect — Next still declares `8.4.31`; override supplies patched PostCSS at install time |
 | `@esbuild-kit/*` | high | B | `drizzle-kit` transitive | esbuild override dedupes to safe build | `0.28.1` | No |
@@ -92,15 +92,15 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 - **Consumer impact:** none  
 - **Residual risk:** none at audit time; `@esbuild-kit/*` packages are deprecated (merged into `tsx`) — monitor drizzle-kit for removal of legacy loader  
 
-### nodemailer (moderate)
+### nodemailer (moderate — GHSA-268h-hp4c-crq3, GHSA-wqvq-jvpq-h66f, GHSA-r7g4-qg5f-qqm2)
 
 - **Severity:** moderate  
-- **Type:** direct in starter; optional via email providers  
+- **Type:** direct in starter; optional transitive via `next-auth`  
 - **Production:** starter app only  
-- **Dependency path:** `apps/starter` → `nodemailer`  
-- **Strategy:** Upgrade to `^8.0.5`; root override for consistency  
+- **Dependency path:** `apps/starter` → `nodemailer`; `next-auth` optional email provider  
+- **Strategy:** Upgrade to `^8.0.11` (fixes require `>8.0.8`); root override + `next-auth > nodemailer`  
 - **Consumer impact:** none in published package (consumers supply their own `EmailProvider`)  
-- **Residual risk:** none  
+- **Residual risk:** none at audit time  
 
 ### uuid via next-auth (GHSA-w5hq-g745-h8pq)
 
@@ -132,11 +132,11 @@ Applied when upstream manifests block safe transitive versions:
 "overrides": {
   "esbuild": "0.28.1",
   "postcss": "8.5.15",
-  "nodemailer": "8.0.5",
+  "nodemailer": "8.0.11",
   "uuid": "11.1.1",
   "happy-dom": "20.10.3",
   "next": { "postcss": "8.5.15" },
-  "next-auth": { "uuid": "11.1.1" }
+  "next-auth": { "uuid": "11.1.1", "nodemailer": "8.0.11" }
 }
 ```
 

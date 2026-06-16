@@ -1,2 +1,2 @@
 /** Published package version — keep in sync with packages/secure-auth/package.json. */
-export const SECURE_AUTH_PACKAGE_VERSION = "0.1.10-internal" as const;
+export const SECURE_AUTH_PACKAGE_VERSION = "0.1.11-internal" as const;

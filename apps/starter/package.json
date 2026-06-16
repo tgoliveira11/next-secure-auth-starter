@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/starter",
-  "version": "0.1.10-internal",
+  "version": "0.1.11-internal",
   "private": true,
   "description": "Integration harness for @tgoliveira/secure-auth",
   "scripts": {
@@ -29,7 +29,7 @@
     "drizzle-orm": "^0.45.2",
     "next": "^16.2.9",
     "next-auth": "^4.24.14",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "^8.0.11",
     "otplib": "^13.4.1",
     "postgres": "^3.4.7",
     "qrcode": "^1.5.4",
