@@ -6,6 +6,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.16-internal] - 2026-06-11
+
+### Fixed
+
+- **WebAuthn origin validation** — Passkey registration and login now accept both apex and `www` variants of the configured origin (e.g. `https://example.com` and `https://www.example.com`). Fixes passkey register/verify failures when users reach the app on the paired hostname.
+
+### Added
+
+- **`webauthn.origins`** — optional extra allowed origins (e.g. subdomains).
+- **Tests** — `getWebAuthnOrigins` apex/www and localhost alias coverage.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.16-internal`.
+- **Docs** — WebAuthn origin policy in security.md, configuration-reference.md, consumer-quick-start.md.
+
 ## [0.1.15-internal] - 2026-06-11
 
 ### Fixed
@@ -290,6 +306,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.16-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.16-internal
 [0.1.15-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.15-internal
 [0.1.14-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.14-internal
 [0.1.13-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.13-internal

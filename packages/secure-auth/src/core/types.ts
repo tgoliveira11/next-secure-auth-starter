@@ -97,6 +97,8 @@ export type SecureAuthConfig = {
     rpId: string;
     rpName: string;
     origin: string;
+    /** Additional allowed WebAuthn origins (optional). Apex/www variants of `origin` are accepted automatically. */
+    origins?: string[];
   };
   ui?: {
     brand?: {

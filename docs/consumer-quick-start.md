@@ -297,7 +297,7 @@ webauthn: {
 | Variable | Rule |
 | --- | --- |
 | `WEBAUTHN_RP_ID` | Hostname only (`localhost` in dev — not `127.0.0.1`) |
-| `WEBAUTHN_ORIGIN` | Full origin including scheme and port; must match the browser URL exactly |
+| `WEBAUTHN_ORIGIN` | Full origin including scheme and port. Set to your canonical URL; the package also accepts the paired apex or `www` hostname automatically. Use `webauthn.origins` for extra hostnames (e.g. subdomains). |
 
 Expose passkey API routes via `secureAuth.routes`:
 

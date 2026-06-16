@@ -49,7 +49,8 @@ Required top-level fields when calling `createSecureAuth`:
 | `email.provider` | `EmailProvider` | App-implemented send function |
 | `webauthn.rpId` | `string` | WebAuthn RP ID |
 | `webauthn.rpName` | `string` | WebAuthn RP display name |
-| `webauthn.origin` | `string` | WebAuthn origin |
+| `webauthn.origin` | `string` | WebAuthn origin (primary) |
+| `webauthn.origins` | `string[]` | optional | Additional allowed origins (e.g. subdomains). Apex ↔ www of `origin` is accepted automatically. |
 
 Optional nested config (defaults applied when omitted):
 
@@ -166,7 +167,7 @@ Provider id in NextAuth and account records: `github`. UI label: **GitHub**. The
 | --- | --- | --- | --- | --- |
 | `WEBAUTHN_RP_ID` | string | `localhost` | `webauthn.rpId` | Relying party ID |
 | `WEBAUTHN_RP_NAME` | string | `APP_NAME` | `webauthn.rpName` | RP display name |
-| `WEBAUTHN_ORIGIN` | string | `APP_BASE_URL` | `webauthn.origin` | Expected origin |
+| `WEBAUTHN_ORIGIN` | string | `APP_BASE_URL` | `webauthn.origin` | Primary expected origin; paired apex/www is accepted automatically |
 
 ### Sessions
 
