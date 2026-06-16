@@ -1,6 +1,6 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.14-internal` is experimental — **not production-ready**.
+**Maturity:** `@tgoliveira/secure-auth@0.1.15-internal` is experimental — **not production-ready**.
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
@@ -119,6 +119,8 @@ TOTP verification endpoints are rate-limited.
 
 During credentials login with 2FA enabled, the pending login challenge is stored in an **httpOnly cookie** (not `sessionStorage`). Middleware rewrites password-manager POSTs to form handler routes.
 
+Passkey login follows the same policy: when TOTP 2FA is enabled, passkey verification alone does not finalize the session. The verify endpoint creates a pending login challenge (same cookie and `/login/2fa` flow as credentials). A fully authenticated session is created only after valid TOTP verification.
+
 ---
 
 ## Passkeys
@@ -128,6 +130,7 @@ Passkeys are account authentication only:
 - Do not use WebAuthn signatures or PRF as encryption keys.
 - Do not introduce vault unlock or trusted-device vault behavior.
 - WebAuthn challenges are single-use and consumed atomically.
+- Passkey sign-in is a strong primary factor but **does not bypass TOTP** when app-level 2FA is enabled. Users must complete the same TOTP step as credentials/OAuth logins.
 
 Configure via `webauthn` in `createSecureAuth(config)`. `WEBAUTHN_ORIGIN` must match the browser URL exactly.
 

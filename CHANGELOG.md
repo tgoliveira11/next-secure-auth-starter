@@ -6,6 +6,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.15-internal] - 2026-06-11
+
+### Fixed
+
+- **Passkey login + TOTP 2FA** — Passkey verification no longer bypasses app-level TOTP. When `twoFactorEnabled` is true, passkey verify creates a pending login challenge (same httpOnly cookie and `/login/2fa` flow as credentials/OAuth) instead of issuing a login token. Session finalization and single-active-session revocation run only after successful TOTP verification.
+
+### Added
+
+- **Audit event** — `two_factor_login_required` after passkey verify when TOTP is required.
+- **Tests** — Passkey login with/without 2FA, 2FA completion with passkey auth provider, route handler cookie behavior, client redirect to 2FA page.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.15-internal`.
+- **Docs** — Passkey + TOTP policy in README, security.md, package-api.md, consumer-quick-start.md.
+
 ## [0.1.14-internal] - 2026-06-16
 
 ### Fixed
@@ -274,6 +290,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.15-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.15-internal
 [0.1.14-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.14-internal
 [0.1.13-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.13-internal
 [0.1.12-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.12-internal

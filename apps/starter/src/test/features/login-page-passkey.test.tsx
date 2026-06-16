@@ -83,6 +83,27 @@ describe("login page passkey sign-in", () => {
     expect(await screen.findByRole("button", { name: "Sign in with passkey" })).toBeTruthy();
   });
 
+  it("routes to two-factor page when passkey login requires TOTP", async () => {
+    mocks.getPasskeyLoginHint.mockReturnValue({
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      credentialId: "cred-id",
+    });
+    mocks.signInWithPasskey.mockResolvedValue({
+      outcome: "requires-two-factor",
+      redirectTo: "/login/2fa?mode=credentials",
+    });
+    render(
+      <>
+        <CredentialsLoginForm />
+        <LoginPasskeySection appSlug="test-app" />
+      </>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Sign in with passkey" }));
+    await waitFor(() => {
+      expect(mocks.push).toHaveBeenCalledWith("/login/2fa?mode=credentials");
+    });
+  });
+
   it("routes to dashboard when passkey sign-in succeeds", async () => {
     mocks.getPasskeyLoginHint.mockReturnValue({
       userId: "550e8400-e29b-41d4-a716-446655440000",

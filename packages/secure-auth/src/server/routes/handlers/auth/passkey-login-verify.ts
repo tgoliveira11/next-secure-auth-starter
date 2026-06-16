@@ -16,11 +16,24 @@ async function passkeyLoginVerifyPost(request: Request, services: SecureAuthServ
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
+    const { ctx } = services;
     const result = await services.passkeyLoginService.verifyLogin(
       parsed.data.response as Parameters<SecureAuthServices["passkeyLoginService"]["verifyLogin"]>[0],
       getClientIp(request)
     );
-    return NextResponse.json(result);
+
+    const response = NextResponse.json(result);
+    if (result.requiresTwoFactor) {
+      response.cookies.set(
+        ctx.getTwoFactorLoginChallengeCookieName(),
+        result.challengeToken,
+        ctx.getLoginChallengeCookieOptions()
+      );
+      ctx.clearLoginPendingTokenCookie(response);
+    } else {
+      ctx.clearLoginChallengeCookie(response);
+    }
+    return response;
   } catch (error) {
     return apiError(error, "POST /api/auth/passkey/login/verify");
   }

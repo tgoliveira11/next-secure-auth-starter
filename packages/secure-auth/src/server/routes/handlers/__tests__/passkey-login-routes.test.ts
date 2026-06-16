@@ -67,6 +67,7 @@ describe("passkey login API routes", () => {
 
   it("returns login verify result with login token", async () => {
     mocks.verifyLogin.mockResolvedValue({
+      requiresTwoFactor: false,
       loginToken: "token",
       userId: USER_ID,
       credentialId: "cred-id",
@@ -107,8 +108,31 @@ describe("passkey login API routes", () => {
     expect(res.status).toBe(400);
   });
 
+  it("sets two-factor challenge cookie when login requires TOTP", async () => {
+    mocks.verifyLogin.mockResolvedValue({
+      requiresTwoFactor: true,
+      challengeToken: "challenge-token-1234567890",
+      userId: USER_ID,
+      credentialId: "cred-id",
+    });
+    const res = await verifyPost(
+      new Request("http://localhost", {
+        method: "POST",
+        body: JSON.stringify({ response: { id: "cred" } }),
+      }),
+      services
+    );
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.requiresTwoFactor).toBe(true);
+    expect(res.cookies.get(services.ctx.getTwoFactorLoginChallengeCookieName())?.value).toBe(
+      "challenge-token-1234567890"
+    );
+  });
+
   it("does not return private-letter sentinel content", async () => {
     mocks.verifyLogin.mockResolvedValue({
+      requiresTwoFactor: false,
       loginToken: "token",
       userId: USER_ID,
       credentialId: "cred-id",

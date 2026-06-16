@@ -13,6 +13,7 @@ export const AUDIT_EVENT_TYPES = [
   "two_factor_backup_code_used",
   "two_factor_login_passed",
   "two_factor_login_failed",
+  "two_factor_login_required",
   "passkey_login_success",
   "passkey_login_failed",
   "email_verification_requested",

@@ -81,6 +81,7 @@ describe("signInWithPasskey", () => {
       clientExtensionResults: {},
     });
     mocks.verify.mockResolvedValue({
+      requiresTwoFactor: false,
       loginToken: "token",
       userId: USER_ID,
       credentialId: "cred-id",
@@ -103,6 +104,22 @@ describe("signInWithPasskey", () => {
     globalThis.PublicKeyCredential = undefined;
     const result = await signInWithPasskey(undefined, PASSKEY_OPTIONS);
     expect(result.outcome).toBe("unsupported");
+  });
+
+  it("routes to two-factor page when passkey verify requires TOTP", async () => {
+    mocks.verify.mockResolvedValue({
+      requiresTwoFactor: true,
+      challengeToken: "challenge-token",
+      userId: USER_ID,
+      credentialId: "cred-id",
+    });
+    const result = await signInWithPasskey(undefined, {
+      ...PASSKEY_OPTIONS,
+      loginTwoFactorPath: "/login/2fa?mode=credentials",
+    });
+    expect(result.outcome).toBe("requires-two-factor");
+    expect(result.redirectTo).toBe("/login/2fa?mode=credentials");
+    expect(mocks.signIn).not.toHaveBeenCalled();
   });
 
   it("signs in and routes to dashboard", async () => {

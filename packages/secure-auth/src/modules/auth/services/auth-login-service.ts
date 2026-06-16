@@ -11,6 +11,10 @@ import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { AuthService } from "./auth-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 
+function loginTokenAuthMethod(authProvider: string): "password" | "passkey" {
+  return authProvider === "passkey" ? "passkey" : "password";
+}
+
 type AuthLoginServiceDeps = {
   config: SecureAuthContext["config"];
   ctx: SecureAuthContext;
@@ -100,7 +104,10 @@ export function createAuthLoginService(deps: AuthLoginServiceDeps) {
         provider: challenge.authProvider,
       });
 
-      const loginToken = await service.issueLoginToken(challenge.userId, "password");
+      const loginToken = await service.issueLoginToken(
+        challenge.userId,
+        loginTokenAuthMethod(challenge.authProvider)
+      );
       await authService.recordLoginSuccess(challenge.userId, challenge.authProvider);
       return { loginToken };
     },

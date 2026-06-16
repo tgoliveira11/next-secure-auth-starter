@@ -6,11 +6,13 @@ import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
 import { ValidationError } from "@/modules/account/lib/account-errors";
+import { TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS } from "@/modules/two-factor/lib/constants";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { AuthLoginService } from "@/modules/auth/services/auth-login-service";
 import type { AuthService } from "@/modules/auth/services/auth-service";
+import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 
 type PasskeyLoginServiceDeps = {
   config: SecureAuthContext["config"];
@@ -19,6 +21,7 @@ type PasskeyLoginServiceDeps = {
   rateLimit: RateLimitApi;
   authLoginService: AuthLoginService;
   authService: AuthService;
+  twoFactorService: TwoFactorService;
 };
 
 async function resolveLoginCredentialAllowList(
@@ -98,7 +101,7 @@ async function resolveLoginContext(
 }
 
 export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
-  const { config, ctx, repos, rateLimit, authLoginService, authService } = deps;
+  const { config, ctx, repos, rateLimit, authLoginService, authService, twoFactorService } = deps;
   const rpID = ctx.getWebAuthnRpId();
   const origins = ctx.getWebAuthnOrigins();
 
@@ -219,11 +222,36 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
       }
       assertCredentialsEmailVerifiedForSignIn(user, config);
 
-      const loginToken = await authLoginService.issueLoginToken(credential.userId, "passkey");
-      await authService.recordLoginSuccess(credential.userId, "passkey");
       await repos.auditRepository.record("passkey_login_success", credential.userId);
 
+      const twoFactorEnabled = await twoFactorService.isEnabledForUser(credential.userId);
+      if (twoFactorEnabled) {
+        const challengeToken = ctx.createOpaqueToken();
+        const challengeTokenHash = ctx.hashOpaqueToken(challengeToken);
+        await repos.twoFactorRepository.createLoginChallenge({
+          userId: credential.userId,
+          challengeTokenHash,
+          authProvider: "passkey",
+          expiresAt: new Date(Date.now() + TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS),
+        });
+        await repos.auditRepository.record("two_factor_login_required", credential.userId, {
+          endpoint: "/api/auth/passkey/login/verify",
+          provider: "passkey",
+        });
+
+        return {
+          requiresTwoFactor: true as const,
+          challengeToken,
+          userId: credential.userId,
+          credentialId: credential.credentialId,
+        };
+      }
+
+      const loginToken = await authLoginService.issueLoginToken(credential.userId, "passkey");
+      await authService.recordLoginSuccess(credential.userId, "passkey");
+
       return {
+        requiresTwoFactor: false as const,
         loginToken,
         userId: credential.userId,
         credentialId: credential.credentialId,

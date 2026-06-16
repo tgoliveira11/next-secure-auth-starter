@@ -309,6 +309,8 @@ export const POST = secureAuth.routes.passkeyLoginOptions.POST;
 
 Use `@tgoliveira/secure-auth/client` helpers in login UI (`passkeyLoginApi`, `prepareAuthenticationOptions`).
 
+When TOTP 2FA is enabled, passkey verify returns `requiresTwoFactor: true` and sets the same httpOnly challenge cookie as credentials login. The client redirects to `ui.paths.loginTwoFactor` (default `/login/2fa?mode=credentials`); the session is finalized only after TOTP verification.
+
 ---
 
 ## 10. Configure 2FA
@@ -353,7 +355,7 @@ export const secureAuth = createSecureAuth({
 });
 ```
 
-The current session is preserved; other devices lose access on their next request. Applies after successful email/password, passkey, OAuth, and post-2FA login completion.
+The current session is preserved; other devices lose access on their next request. Applies after successful email/password, passkey, OAuth, and post-2FA login completion. With 2FA enabled, revocation runs only after TOTP verification — not after the initial passkey or password step.
 
 See [customization.md](./customization.md) and [security.md](./security.md).
 

@@ -21,12 +21,14 @@ export type LoginPasskeySectionProps = {
   appSlug: string;
   afterLoginPath?: string;
   loginPath?: string;
+  loginTwoFactorPath?: string;
 };
 
 export function LoginPasskeySection({
   appSlug,
   afterLoginPath = "/dashboard",
   loginPath = "/login",
+  loginTwoFactorPath = "/login/2fa?mode=credentials",
 }: LoginPasskeySectionProps) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -61,6 +63,7 @@ export function LoginPasskeySection({
         appSlug,
         loginPath,
         afterLoginPath,
+        loginTwoFactorPath,
       });
       if (result.outcome === "cancelled") {
         setError(PASSKEY_LOGIN_CANCELLED_MESSAGE);
@@ -68,6 +71,10 @@ export function LoginPasskeySection({
       }
       if (result.outcome === "unsupported") {
         setError(getPasskeyLoginUnsupportedMessage());
+        return;
+      }
+      if (result.outcome === "requires-two-factor") {
+        router.push(result.redirectTo);
         return;
       }
       router.push(result.redirectTo);

@@ -44,6 +44,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     rateLimit,
     authLoginService,
     authService,
+    twoFactorService,
   });
   const passkeyAccountService = createPasskeyAccountService({
     ctx,

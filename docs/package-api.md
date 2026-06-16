@@ -74,7 +74,7 @@ Server-safe primitives (Button, Card, Input, …) do not require `"use client"`.
 
 | Export | Route (defaults) | Notes |
 | --- | --- | --- |
-| `LoginPage` | `/login` | Email/password, passkey, OAuth |
+| `LoginPage` | `/login` | Email/password, passkey, OAuth; passkey + TOTP when 2FA enabled |
 | `RegisterPage` | `/register` | Optional `passwordPolicy` prop |
 | `ForgotPasswordPage` | `/forgot-password` | |
 | `ResetPasswordPage` | `/reset-password` | Reads `?token=` |
@@ -328,7 +328,7 @@ All routes are real implementations — no 501 stubs.
 | `loginVerify2faForm` | POST |
 | `loginChallengeStatus` | GET |
 | `passkeyLoginOptions` | POST |
-| `passkeyLoginVerify` | POST |
+| `passkeyLoginVerify` | POST | Returns `loginToken` or `requiresTwoFactor` + sets challenge cookie |
 | `passwordPolicy` | GET |
 | `account` | GET, DELETE |
 | `accountAuthStatus` | GET |

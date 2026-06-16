@@ -48,8 +48,8 @@ function LoginTwoFactorContent({
 
       <Card className="space-y-4">
         <Alert variant="info">
-          This code protects your account sign-in only. It does not replace passkey sign-in or
-          OAuth provider verification.
+          Enter the one-time code from your authenticator app to finish signing in. When two-factor
+          authentication is enabled, it is required after password, passkey, and OAuth sign-in.
         </Alert>
 
         {mode === "credentials" ? (

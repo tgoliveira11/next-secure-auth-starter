@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.14-internal` (experimental — not production-ready)
+**Version:** `0.1.15-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -173,6 +173,12 @@ createSecureAuth({
 ```
 
 See [customization.md](../../docs/customization.md) and [security.md](../../docs/security.md).
+
+When `singleActiveSession` is enabled, other sessions are revoked only after **final** login completion (including post-TOTP verification for passkey and credentials logins).
+
+## Passkeys and two-factor authentication
+
+Passkey sign-in is a primary authentication method. When TOTP 2FA is enabled on the account, passkey verification creates a pending login challenge (same httpOnly cookie and `/login/2fa` flow as email/password). The session is finalized only after valid TOTP verification — passkeys do not bypass app-level 2FA.
 
 ## OAuth providers
 

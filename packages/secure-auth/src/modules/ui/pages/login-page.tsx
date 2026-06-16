@@ -51,6 +51,7 @@ export function LoginPage({
           appSlug={appSlug}
           afterLoginPath={destination}
           loginPath={resolved.login}
+          loginTwoFactorPath={`${resolved.loginTwoFactor}?mode=credentials`}
         />
       </Card>
       {footer ?? (

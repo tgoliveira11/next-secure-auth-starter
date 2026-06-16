@@ -8,12 +8,13 @@ import {
   type PasskeyLoginHint,
 } from "@tgoliveira/secure-auth/client";
 
-export type PasskeyLoginOutcome = "signed-in" | "cancelled" | "unsupported";
+export type PasskeyLoginOutcome = "signed-in" | "requires-two-factor" | "cancelled" | "unsupported";
 
 export type SignInWithPasskeyOptions = {
   appSlug: string;
   loginPath?: string;
   afterLoginPath?: string;
+  loginTwoFactorPath?: string;
 };
 
 export function buildPasskeyLoginOutcomeKey(appSlug: string): string {
@@ -56,6 +57,7 @@ export async function signInWithPasskey(
 }> {
   const loginPath = options.loginPath ?? "/login";
   const afterLoginPath = options.afterLoginPath ?? "/dashboard";
+  const loginTwoFactorPath = options.loginTwoFactorPath ?? "/login/2fa?mode=credentials";
 
   if (!isPasskeyLoginSupported()) {
     return { outcome: "unsupported", redirectTo: loginPath };
@@ -92,6 +94,10 @@ export async function signInWithPasskey(
     userId: verifyResult.userId,
     credentialId: verifyResult.credentialId ?? assertion.id,
   });
+
+  if (verifyResult.requiresTwoFactor) {
+    return { outcome: "requires-two-factor", redirectTo: loginTwoFactorPath };
+  }
 
   const authResult = await signIn("login-token", {
     loginToken: verifyResult.loginToken,
