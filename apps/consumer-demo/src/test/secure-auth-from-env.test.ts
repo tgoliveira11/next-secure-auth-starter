@@ -47,4 +47,15 @@ describe("buildSecureAuthConfigFromEnv (consumer-demo)", () => {
   it("defaults AUTH_PASSWORD_MIN_LENGTH to 12 when omitted", () => {
     expect(buildSecureAuthConfigFromEnv(defaults, {}).passwordPolicy?.minLength).toBe(12);
   });
+
+  it("maps GitHub OAuth when both credentials are present", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_GITHUB_CLIENT_ID: "gh-id",
+      AUTH_GITHUB_CLIENT_SECRET: "gh-secret",
+    });
+    expect(config.oauth?.github).toEqual({
+      clientId: "gh-id",
+      clientSecret: "gh-secret",
+    });
+  });
 });

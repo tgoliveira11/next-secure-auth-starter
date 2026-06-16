@@ -19,6 +19,8 @@ export function mapUserAuthProviderToSessionMethod(authProvider: string): Accoun
       return "google";
     case "apple":
       return "apple";
+    case "github":
+      return "github";
     case "microsoft":
     case "azure-ad":
       return "microsoft";
@@ -32,6 +34,7 @@ function normalizeAuthMethod(value: string): AccountAuthMethod {
     case "password":
     case "google":
     case "apple":
+    case "github":
     case "microsoft":
     case "passkey":
       return value;

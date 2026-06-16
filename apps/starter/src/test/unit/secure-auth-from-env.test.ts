@@ -52,6 +52,24 @@ describe("buildSecureAuthConfigFromEnv", () => {
     });
   });
 
+  it("maps GitHub OAuth when both credentials are present", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_GITHUB_CLIENT_ID: "gh-id",
+      AUTH_GITHUB_CLIENT_SECRET: "gh-secret",
+    });
+    expect(config.oauth?.github).toEqual({
+      clientId: "gh-id",
+      clientSecret: "gh-secret",
+    });
+  });
+
+  it("omits GitHub OAuth when credentials are incomplete", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_GITHUB_CLIENT_ID: "gh-id",
+    });
+    expect(config.oauth?.github).toBeUndefined();
+  });
+
   it("uses NODE_ENV for cookie secure when AUTH_COOKIE_SECURE is unset", () => {
     const prod = buildSecureAuthConfigFromEnv(defaults, { NODE_ENV: "production" });
     expect(prod.server?.cookieSecure).toBe(true);

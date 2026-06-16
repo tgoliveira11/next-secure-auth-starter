@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/consumer-demo",
-  "version": "0.1.11-internal",
+  "version": "0.1.12-internal",
   "private": true,
   "description": "Canonical consumer validation app for @tgoliveira/secure-auth",
   "scripts": {

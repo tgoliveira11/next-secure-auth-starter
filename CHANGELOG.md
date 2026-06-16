@@ -6,6 +6,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.12-internal] - 2026-06-16
+
+### Added
+
+- **GitHub OAuth** — optional `oauth.github` config (`clientId`, `clientSecret`); NextAuth `GitHubProvider` when both are set; social sign-in button and logo; provider id `github`; env mapping via `AUTH_GITHUB_CLIENT_ID` / `AUTH_GITHUB_CLIENT_SECRET` in starter and consumer-demo.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.12-internal`.
+- **Account/session labels** — `formatAuthProvider` and `formatAuthMethod` display **GitHub** for `github` provider.
+
 ## [0.1.11-internal] - 2026-06-16
 
 ### Security
@@ -231,6 +242,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.12-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.12-internal
 [0.1.11-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.11-internal
 [0.1.10-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.10-internal
 [0.1.9-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.9-internal

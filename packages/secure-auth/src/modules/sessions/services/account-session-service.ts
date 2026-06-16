@@ -18,6 +18,7 @@ function normalizeAuthMethod(value?: string | null): AccountAuthMethod {
     case "password":
     case "google":
     case "apple":
+    case "github":
     case "microsoft":
     case "passkey":
       return value;
@@ -32,6 +33,7 @@ export function mapProviderToAuthMethod(
 ): AccountAuthMethod {
   if (provider === "google") return "google";
   if (provider === "apple") return "apple";
+  if (provider === "github") return "github";
   if (provider === "azure-ad") return "microsoft";
   if (provider === "login-token") {
     return normalizeAuthMethod(loginAuthMethod ?? "password");

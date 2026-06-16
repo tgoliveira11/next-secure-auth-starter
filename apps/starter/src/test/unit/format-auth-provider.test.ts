@@ -7,9 +7,10 @@ describe("formatAuthProvider", () => {
     expect(formatAuthProvider("google")).toBe("Google");
     expect(formatAuthProvider("apple")).toBe("Apple");
     expect(formatAuthProvider("azure-ad")).toBe("Microsoft");
+    expect(formatAuthProvider("github")).toBe("GitHub");
   });
 
   it("returns the raw provider id for unknown values", () => {
-    expect(formatAuthProvider("github")).toBe("github");
+    expect(formatAuthProvider("custom-provider")).toBe("custom-provider");
   });
 });

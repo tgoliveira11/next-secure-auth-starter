@@ -6,6 +6,8 @@ export function formatAuthProvider(provider: string): string {
       return "Google";
     case "apple":
       return "Apple";
+    case "github":
+      return "GitHub";
     case "azure-ad":
       return "Microsoft";
     default:

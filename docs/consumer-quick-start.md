@@ -244,6 +244,12 @@ oauth: {
   apple: process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET
     ? { clientId: process.env.APPLE_CLIENT_ID, clientSecret: process.env.APPLE_CLIENT_SECRET }
     : undefined,
+  github: process.env.AUTH_GITHUB_CLIENT_ID && process.env.AUTH_GITHUB_CLIENT_SECRET
+    ? {
+        clientId: process.env.AUTH_GITHUB_CLIENT_ID,
+        clientSecret: process.env.AUTH_GITHUB_CLIENT_SECRET,
+      }
+    : undefined,
   microsoft: process.env.AUTH_MICROSOFT_ID && process.env.AUTH_MICROSOFT_SECRET
     ? {
         clientId: process.env.AUTH_MICROSOFT_ID,
@@ -270,6 +276,7 @@ Register redirect URIs with each provider:
 ```text
 {APP_BASE_URL}/api/auth/callback/google
 {APP_BASE_URL}/api/auth/callback/apple
+{APP_BASE_URL}/api/auth/callback/github
 {APP_BASE_URL}/api/auth/callback/azure-ad
 ```
 

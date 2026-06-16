@@ -179,7 +179,7 @@ webauthn: {
 
 ## OAuth
 
-Pass OAuth credentials in `createSecureAuth({ oauth: { google, apple, microsoft } })`. Mount NextAuth via `createNextAuthRouteHandlers`. Provider secrets stay in app env.
+Pass OAuth credentials in `createSecureAuth({ oauth: { google, apple, github, microsoft } })`. Mount NextAuth via `createNextAuthRouteHandlers`. Provider secrets stay in app env.
 
 ## Theme CSS
 

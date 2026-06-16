@@ -69,6 +69,7 @@ Set provider client ID/secret. Redirect URIs: `{APP_BASE_URL}/api/auth/callback/
 | Provider | Local dev notes |
 | --- | --- |
 | Google | Supports localhost redirect URIs |
+| GitHub | Callback: `http://localhost:3001/api/auth/callback/github` (one URL per OAuth App) |
 | Microsoft | Supports localhost redirect URIs |
 | Apple | Usually requires HTTPS and a real or tunneled domain |
 

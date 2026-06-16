@@ -191,6 +191,11 @@ export function buildSecureAuthConfigFromEnv(
         ["AUTH_APPLE_CLIENT_ID", "APPLE_CLIENT_ID"],
         ["AUTH_APPLE_CLIENT_SECRET", "APPLE_CLIENT_SECRET"]
       ),
+      github: readOAuthPair(
+        env,
+        ["AUTH_GITHUB_CLIENT_ID", "GITHUB_CLIENT_ID"],
+        ["AUTH_GITHUB_CLIENT_SECRET", "GITHUB_CLIENT_SECRET"]
+      ),
       microsoft: microsoftOAuth
         ? {
             ...microsoftOAuth,

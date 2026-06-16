@@ -181,7 +181,7 @@ export function RegisterPage({
         <SocialSignIn dividerLabel="or sign up with" afterLoginPath={destination} />
 
         <p className="text-center text-xs text-[var(--muted)]">
-          Google, Apple, and Microsoft create your account automatically on first sign-in — the same
+          Google, Apple, GitHub, and Microsoft create your account automatically on first sign-in — the same
           providers available on the sign-in page.
         </p>
       </Card>

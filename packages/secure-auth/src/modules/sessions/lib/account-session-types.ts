@@ -2,6 +2,7 @@ export type AccountAuthMethod =
   | "password"
   | "google"
   | "apple"
+  | "github"
   | "microsoft"
   | "passkey"
   | "unknown";

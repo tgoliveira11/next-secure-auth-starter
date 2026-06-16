@@ -64,7 +64,7 @@ Optional nested config (defaults applied when omitted):
 | `rateLimit.store` | `"memory"` \| `"postgres"` | `"memory"` |
 | `server.cookieSecure` | `boolean` | `false` (apps: `true` when `NODE_ENV=production` if env unset) |
 | `debug.authTrace` | `boolean` | `false` |
-| `oauth.google` / `apple` / `microsoft` | provider objects | omitted when credentials missing |
+| `oauth.google` / `apple` / `github` / `microsoft` | provider objects | omitted when credentials missing |
 | `ui.brand.name` | `string` | from `app.name` |
 | `ui.paths.*` | `string` | package defaults (apps override in code) |
 | `ui.messages.*` | `string` | apps override in code |
@@ -120,11 +120,31 @@ Provider blocks are **omitted** unless both client ID and secret are set.
 | `AUTH_GOOGLE_CLIENT_SECRET` | string | `oauth.google.clientSecret` | Legacy: `GOOGLE_CLIENT_SECRET` |
 | `AUTH_APPLE_CLIENT_ID` | string | `oauth.apple.clientId` | Legacy: `APPLE_CLIENT_ID` |
 | `AUTH_APPLE_CLIENT_SECRET` | string | `oauth.apple.clientSecret` | Legacy: `APPLE_CLIENT_SECRET` |
+| `AUTH_GITHUB_CLIENT_ID` | string | `oauth.github.clientId` | Legacy: `GITHUB_CLIENT_ID` |
+| `AUTH_GITHUB_CLIENT_SECRET` | string | `oauth.github.clientSecret` | Legacy: `GITHUB_CLIENT_SECRET` |
 | `AUTH_MICROSOFT_CLIENT_ID` | string | `oauth.microsoft.clientId` | Legacy: `AUTH_MICROSOFT_ID`, `AUTH_AZURE_AD_ID` |
 | `AUTH_MICROSOFT_CLIENT_SECRET` | string | `oauth.microsoft.clientSecret` | Legacy: `AUTH_MICROSOFT_SECRET`, `AUTH_AZURE_AD_SECRET` |
 | `AUTH_MICROSOFT_TENANT_ID` | string | `oauth.microsoft.tenantId` | Default `common`; legacy: `AUTH_AZURE_AD_TENANT_ID` |
 
 Starter also documents `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` for Apple JWT signing in the starter email/OAuth module — not `createSecureAuth` fields.
+
+### GitHub OAuth setup
+
+1. Create a [GitHub OAuth App](https://github.com/settings/developers) (Settings → Developer settings → OAuth Apps).
+2. Set **Authorization callback URL** to your NextAuth callback:
+
+   | Environment | Callback URL |
+   | --- | --- |
+   | Local starter | `http://localhost:3001/api/auth/callback/github` |
+   | Local consumer-demo | `http://localhost:3002/api/auth/callback/github` |
+   | Production | `https://your-domain.com/api/auth/callback/github` |
+
+3. Copy **Client ID** and **Client secret** into `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET`.
+4. Map env in app code — the package does **not** read these variables directly.
+
+GitHub OAuth Apps allow **one** callback URL per app. Use separate OAuth Apps for local, staging, and production, or tunnel local dev through a stable HTTPS URL.
+
+Provider id in NextAuth and account records: `github`. UI label: **GitHub**. The sign-in button appears only when both credentials are configured.
 
 ### Email (app modules)
 

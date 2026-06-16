@@ -1,6 +1,6 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.11-internal` is experimental — **not production-ready**.
+**Maturity:** `@tgoliveira/secure-auth@0.1.12-internal` is experimental — **not production-ready**.
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
@@ -135,7 +135,7 @@ Configure via `webauthn` in `createSecureAuth(config)`. `WEBAUTHN_ORIGIN` must m
 
 ## OAuth
 
-Supported providers: Google, Apple, Microsoft.
+Supported providers: Google, Apple, GitHub, Microsoft.
 
 Rules:
 

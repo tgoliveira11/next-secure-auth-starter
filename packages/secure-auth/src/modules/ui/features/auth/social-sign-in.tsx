@@ -14,6 +14,7 @@ export type SocialSignInProps = {
 const SOCIAL_PROVIDERS = [
   { id: "google", label: "Continue with Google" },
   { id: "apple", label: "Continue with Apple" },
+  { id: "github", label: "Continue with GitHub" },
   { id: MICROSOFT_OAUTH_PROVIDER_ID, label: "Continue with Microsoft" },
 ] as const;
 

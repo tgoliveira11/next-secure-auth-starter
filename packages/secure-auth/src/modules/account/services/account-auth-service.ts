@@ -234,7 +234,7 @@ export function createAccountAuthService(deps: AccountAuthServiceDeps) {
       if (!user) throw new NotFoundError("Account not found");
       if (!user.passwordHash) {
         throw new ValidationError(
-          "This account signs in with Google, Apple, or Microsoft. Password change is not available unless you add an email/password sign-in method."
+          "This account signs in with Google, Apple, GitHub, or Microsoft. Password change is not available unless you add an email/password sign-in method."
         );
       }
 

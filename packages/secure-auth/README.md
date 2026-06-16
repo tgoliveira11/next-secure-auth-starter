@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.11-internal` (experimental — not production-ready)
+**Version:** `0.1.12-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -58,7 +58,7 @@ Password strength and validation feedback render **above** password fields by de
 ## Install (consumer app)
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.9-internal \
+npm install @tgoliveira/secure-auth@0.1.12-internal \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2
 ```
 
@@ -173,6 +173,23 @@ createSecureAuth({
 ```
 
 See [customization.md](../../docs/customization.md) and [security.md](../../docs/security.md).
+
+## OAuth providers
+
+Optional social sign-in via NextAuth v4. Map credentials in **your app** — the package never reads `process.env`:
+
+```typescript
+createSecureAuth({
+  oauth: {
+    google: { clientId, clientSecret },
+    apple: { clientId, clientSecret },
+    github: { clientId, clientSecret },
+    microsoft: { clientId, clientSecret, tenantId },
+  },
+});
+```
+
+Supported provider ids: `google`, `apple`, `github`, `azure-ad` (Microsoft). Buttons render only when the matching config block is present. GitHub callback: `{APP_BASE_URL}/api/auth/callback/github`. See [configuration-reference.md](../../docs/configuration-reference.md).
 
 ## Database
 

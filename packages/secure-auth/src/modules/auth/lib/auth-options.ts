@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
+import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { safeLogger } from "@/modules/security/logger/index";
 import { evaluateOAuthSignIn } from "@/modules/auth/lib/oauth-sign-in-policy";
@@ -96,6 +97,14 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
             AppleProvider({
               clientId: config.oauth.apple.clientId,
               clientSecret: config.oauth.apple.clientSecret,
+            }),
+          ]
+        : []),
+      ...(config.oauth?.github?.clientId && config.oauth.github.clientSecret
+        ? [
+            GitHubProvider({
+              clientId: config.oauth.github.clientId,
+              clientSecret: config.oauth.github.clientSecret,
             }),
           ]
         : []),

@@ -27,6 +27,7 @@ function session(overrides: Partial<{
 describe("account deletion policy", () => {
   it("maps OAuth providers to session auth methods", () => {
     expect(mapUserAuthProviderToSessionMethod("google")).toBe("google");
+    expect(mapUserAuthProviderToSessionMethod("github")).toBe("github");
     expect(mapUserAuthProviderToSessionMethod("azure-ad")).toBe("microsoft");
   });
 

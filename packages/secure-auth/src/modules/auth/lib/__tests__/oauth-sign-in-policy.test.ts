@@ -16,6 +16,15 @@ describe("oauth sign-in policy", () => {
     expect(result).toEqual({ action: "create_user", authProvider: "google" });
   });
 
+  it("creates users for new GitHub OAuth emails", () => {
+    const result = evaluateOAuthSignIn({
+      email: "user@example.com",
+      accountProvider: "github",
+      existingUser: null,
+    });
+    expect(result).toEqual({ action: "create_user", authProvider: "github" });
+  });
+
   it("rejects OAuth when email is missing", () => {
     const result = evaluateOAuthSignIn({
       email: null,

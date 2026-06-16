@@ -47,6 +47,10 @@ Default minimum password length is **12** (`AUTH_PASSWORD_MIN_LENGTH=12` in `.en
 
 Set `AUTH_SINGLE_ACTIVE_SESSION=true` in `.env.local` (mapped to `sessions.singleActiveSession` in `src/lib/env/secure-auth-from-env.ts`). Default is multi-session. See [docs/configuration-reference.md](../../docs/configuration-reference.md).
 
+## Optional OAuth (GitHub)
+
+Map `AUTH_GITHUB_CLIENT_ID` and `AUTH_GITHUB_CLIENT_SECRET` in `.env.local` (see [`.env.example`](./.env.example)). The GitHub sign-in button appears only when both values are set. Callback URL for local dev: `http://localhost:3002/api/auth/callback/github`. GitHub OAuth Apps allow one callback URL per app — use separate apps for local/staging/production. See [docs/configuration-reference.md](../../docs/configuration-reference.md).
+
 ## Health check
 
 ```bash

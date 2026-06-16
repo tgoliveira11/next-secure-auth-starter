@@ -81,6 +81,7 @@ export type SecureAuthConfig = {
   oauth?: {
     google?: { clientId: string; clientSecret: string };
     apple?: { clientId: string; clientSecret: string };
+    github?: { clientId: string; clientSecret: string };
     microsoft?: {
       clientId: string;
       clientSecret: string;
