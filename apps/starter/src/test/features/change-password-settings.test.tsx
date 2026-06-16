@@ -6,7 +6,7 @@ import { ChangePasswordSettings } from "@/components/settings/change-password-se
 describe("ChangePasswordSettings", () => {
   it("hides password form for Microsoft-only accounts", () => {
     render(<ChangePasswordSettings canChangePassword={false} authProvider="azure-ad" />);
-    expect(screen.getByText(/signs in with google, apple, or microsoft/i)).toBeTruthy();
+    expect(screen.getByText(/signs in with google, apple, github, or microsoft/i)).toBeTruthy();
     expect(screen.queryByLabelText("Current password")).toBeNull();
   });
 });
