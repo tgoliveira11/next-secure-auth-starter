@@ -25,7 +25,7 @@ import { type RegisterPageProps } from "./types.js";
 import {
   usePageTitle,
   useUiMessage,
-  useUiPasswordPolicy,
+  useEffectivePasswordPolicy,
   useUiPaths,
 } from "./use-page-ui.js";
 
@@ -54,7 +54,7 @@ export function RegisterPage({
 }: RegisterPageProps) {
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
-  const passwordPolicy = useUiPasswordPolicy(passwordPolicyProp);
+  const passwordPolicy = useEffectivePasswordPolicy(passwordPolicyProp);
   const title = usePageTitle(
     { title: titleProp, subtitle },
     "registerTitle",
@@ -77,7 +77,7 @@ export function RegisterPage({
     setLoading(true);
     setError("");
 
-    if (passwordPolicy?.enforcement === "enforce") {
+    if (passwordPolicy.enforcement === "enforce") {
       const policyResult = validatePasswordForSubmission(password, passwordPolicy);
       if (!policyResult.valid) {
         setError(
@@ -165,7 +165,7 @@ export function RegisterPage({
             onChange={setPassword}
             autoComplete="new-password"
             policyConfig={passwordPolicy}
-            hint={passwordPolicy ? getPasswordPolicyHint(passwordPolicy) : undefined}
+            hint={getPasswordPolicyHint(passwordPolicy)}
             passwordStrengthPosition={passwordStrengthPosition}
           />
           {error && (

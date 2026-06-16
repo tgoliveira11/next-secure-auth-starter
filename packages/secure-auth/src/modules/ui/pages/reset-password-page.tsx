@@ -16,7 +16,7 @@ import {
   validatePasswordForSubmission,
 } from "@tgoliveira/secure-auth/client/password-policy";
 import { type ResetPasswordPageProps } from "./types.js";
-import { usePageTitle, useUiPaths, useUiPasswordPolicy } from "./use-page-ui.js";
+import { usePageTitle, useUiPaths, useEffectivePasswordPolicy } from "./use-page-ui.js";
 
 type ResetState = "loading" | "invalid" | "ready" | "success";
 
@@ -38,7 +38,7 @@ function ResetPasswordContent({
     "resetPasswordTitle",
     "Choose a new password"
   );
-  const passwordPolicy = useUiPasswordPolicy();
+  const passwordPolicy = useEffectivePasswordPolicy();
   const token = tokenProp ?? searchParams.get("token") ?? "";
   const [state, setState] = useState<ResetState>("loading");
   const [newPassword, setNewPassword] = useState("");
@@ -72,7 +72,7 @@ function ResetPasswordContent({
       setError("Passwords do not match.");
       return;
     }
-    if (passwordPolicy?.enforcement === "enforce") {
+    if (passwordPolicy.enforcement === "enforce") {
       const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
       if (!policyResult.valid) {
         setError(

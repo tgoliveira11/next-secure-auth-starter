@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Input } from "../../primitives/input.js";
 import { FormField, fieldDescribedBy } from "../../primitives/form-field.js";
 import {
   assessPassword,
-  DEFAULT_PASSWORD_POLICY,
   getPasswordPolicyHint,
   getPasswordStrengthDisplay,
   shouldShowPasswordStrengthUi,
   type PasswordPolicyConfig,
 } from "@tgoliveira/secure-auth/client/password-policy";
 import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
-import { usePasswordStrengthPosition, useUiPasswordPolicy } from "../../pages/use-page-ui.js";
+import { usePasswordStrengthPosition } from "../../pages/use-page-ui.js";
 import { PasswordFieldFeedbackPlacement } from "./password-feedback-placement.js";
+import { useResolvedPasswordPolicy } from "./use-resolved-password-policy.js";
 
 interface PasswordStrengthFieldProps {
   id: string;
@@ -23,7 +23,7 @@ interface PasswordStrengthFieldProps {
   autoComplete?: string;
   confirmValue?: string;
   hint?: string;
-  policyConfig?: PasswordPolicyConfig;
+  policyConfig?: Partial<PasswordPolicyConfig>;
   /** When false, hides strength feedback (e.g. current-password or confirm-only fields). */
   showStrength?: boolean;
   /** Override global password strength/validation feedback placement. */
@@ -44,31 +44,7 @@ export function PasswordStrengthField({
 }: PasswordStrengthFieldProps) {
   const position = usePasswordStrengthPosition(passwordStrengthPositionProp);
   const feedbackId = `${id}-password-feedback`;
-  const effectivePolicy = useUiPasswordPolicy(policyConfig);
-
-  const [fetchedPolicy, setFetchedPolicy] = useState<PasswordPolicyConfig | null>(null);
-
-  useEffect(() => {
-    if (effectivePolicy) {
-      return;
-    }
-
-    let cancelled = false;
-    fetch("/api/auth/password-policy")
-      .then((response) => (response.ok ? response.json() : DEFAULT_PASSWORD_POLICY))
-      .then((config: PasswordPolicyConfig) => {
-        if (!cancelled) setFetchedPolicy(config);
-      })
-      .catch(() => {
-        if (!cancelled) setFetchedPolicy(DEFAULT_PASSWORD_POLICY);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [effectivePolicy]);
-
-  const config = effectivePolicy ?? fetchedPolicy ?? DEFAULT_PASSWORD_POLICY;
+  const { policy: config, isLoading } = useResolvedPasswordPolicy(policyConfig);
   const assessment = useMemo(() => assessPassword(value, config), [value, config]);
   const strengthLabel = getPasswordStrengthDisplay(assessment.label);
   const showStrengthFeedback = showStrength && shouldShowPasswordStrengthUi(config);
@@ -82,7 +58,7 @@ export function PasswordStrengthField({
   }, [assessment.messages, confirmValue, showStrengthFeedback, value]);
 
   const guidanceText =
-    hint ?? (showStrengthFeedback ? getPasswordPolicyHint(config) : undefined);
+    !isLoading && (hint ?? (showStrengthFeedback ? getPasswordPolicyHint(config) : undefined));
 
   const feedbackSlotEnabled = showStrengthFeedback || confirmValue !== undefined;
 
@@ -92,6 +68,9 @@ export function PasswordStrengthField({
     undefined,
     feedbackSlotEnabled
   );
+
+  const minLength =
+    isLoading || config.enforcement === "off" ? undefined : config.minLength;
 
   const feedbackContent = (
     <>
@@ -119,7 +98,7 @@ export function PasswordStrengthField({
             autoComplete={autoComplete}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            minLength={config.enforcement === "off" ? undefined : config.minLength}
+            minLength={minLength}
             required
             aria-describedby={describedBy}
           />

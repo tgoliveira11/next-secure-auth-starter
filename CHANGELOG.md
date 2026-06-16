@@ -6,6 +6,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.13-internal] - 2026-06-16
+
+### Fixed
+
+- **Password policy override** — `passwordPolicy.minLength` (and other partial overrides) now propagate consistently through `mergePasswordPolicy()`, `createSecureAuth().passwordPolicy`, `secureAuth.uiConfig`, `SecureAuthUIProvider`, register/reset/change-password UI, `PasswordStrengthField`, client validation, server validation, and `GET /api/auth/password-policy`. Consumer apps mapping `AUTH_PASSWORD_MIN_LENGTH=5` into `createSecureAuth(config)` no longer see default `12` on package password screens.
+
+### Added
+
+- **`mergePasswordPolicy()`** — canonical resolver merging partial overrides with `DEFAULT_PASSWORD_POLICY`.
+- **`useEffectivePasswordPolicy()`** — UI hook that always returns a full resolved policy (prop → provider → defaults).
+- **`useResolvedPasswordPolicy()`** — fetches `/api/auth/password-policy` only when neither prop nor provider policy is set; defers `minLength` / guidance until loaded to avoid flashing default `12`.
+- **Tests** — config merge, `createSecureAuth` uiConfig, register/reset/change-password UI, password-policy API route, and hardcoded copy guard.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.13-internal`.
+
 ## [0.1.12-internal] - 2026-06-16
 
 ### Added
@@ -242,6 +259,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.13-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.13-internal
 [0.1.12-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.12-internal
 [0.1.11-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.11-internal
 [0.1.10-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.10-internal

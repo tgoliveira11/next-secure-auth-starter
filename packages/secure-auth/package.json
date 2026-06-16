@@ -1,6 +1,6 @@
 {
   "name": "@tgoliveira/secure-auth",
-  "version": "0.1.12-internal",
+  "version": "0.1.13-internal",
   "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (experimental internal release)",
   "type": "module",
   "repository": {

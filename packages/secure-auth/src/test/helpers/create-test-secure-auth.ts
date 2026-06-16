@@ -42,6 +42,7 @@ export function buildTestSecureAuthConfig(
     app: { ...baseTestConfig.app, ...overrides.app },
     auth: { ...baseTestConfig.auth, ...overrides.auth },
     accountPolicy: { ...baseTestConfig.accountPolicy, ...overrides.accountPolicy },
+    passwordPolicy: { ...overrides.passwordPolicy },
     email: { ...baseTestConfig.email, ...overrides.email },
     webauthn: { ...baseTestConfig.webauthn, ...overrides.webauthn },
   };

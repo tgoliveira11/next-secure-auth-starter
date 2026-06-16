@@ -1,5 +1,5 @@
 import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
-import { DEFAULT_PASSWORD_POLICY } from "../modules/security/password-policy/index.js";
+import { mergePasswordPolicy } from "../modules/security/password-policy/index.js";
 import type { AccountPolicyConfig } from "../modules/account/lib/account-policy-config.js";
 import { DEFAULT_ACCOUNT_POLICY } from "../modules/account/lib/account-policy-config.js";
 import type { SecureAuthConfig } from "./types.js";
@@ -33,7 +33,7 @@ export function requireTwoFactorEncryptionKey(config: SecureAuthConfig): string 
 }
 
 export function resolvePasswordPolicyConfig(config: SecureAuthConfig): PasswordPolicyConfig {
-  return { ...DEFAULT_PASSWORD_POLICY, ...config.passwordPolicy };
+  return mergePasswordPolicy(config.passwordPolicy);
 }
 
 export function resolveAccountPolicyConfig(config: SecureAuthConfig): AccountPolicyConfig {

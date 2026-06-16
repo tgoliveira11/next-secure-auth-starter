@@ -205,6 +205,8 @@ Legacy `PASSWORD_*` names are supported for policy fields (not strength position
 
 The package does **not** read `process.env` for password policy. Your app maps `AUTH_PASSWORD_MIN_LENGTH` (and related vars) into `createSecureAuth({ passwordPolicy: { minLength } })`. The resolved value drives UI copy, browser `minLength`, client validation, server validation, and `GET /api/auth/password-policy`.
 
+When using package pages (`RegisterPage`, `ResetPasswordPage`, …), wrap your root layout with `SecureAuthUIProvider config={secureAuth.uiConfig}` so password screens inherit the configured policy. Without the provider, password fields fall back to `GET /api/auth/password-policy` (then package defaults).
+
 **Example — shorter minimum length for local development:**
 
 ```bash

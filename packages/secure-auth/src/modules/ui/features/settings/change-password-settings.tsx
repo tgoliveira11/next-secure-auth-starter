@@ -10,7 +10,7 @@ import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-
 import { validatePasswordForSubmission } from "@tgoliveira/secure-auth/client/password-policy";
 
 import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
-import { useUiPasswordPolicy } from "../../pages/use-page-ui.js";
+import { useEffectivePasswordPolicy } from "../../pages/use-page-ui.js";
 
 export type ChangePasswordSettingsProps = {
   canChangePassword: boolean;
@@ -30,7 +30,7 @@ export function ChangePasswordSettings({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const passwordPolicy = useUiPasswordPolicy();
+  const passwordPolicy = useEffectivePasswordPolicy();
 
   if (!canChangePassword) {
     return (
@@ -52,7 +52,7 @@ export function ChangePasswordSettings({
       return;
     }
 
-    if (passwordPolicy?.enforcement === "enforce") {
+    if (passwordPolicy.enforcement === "enforce") {
       const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
       if (!policyResult.valid) {
         setError(

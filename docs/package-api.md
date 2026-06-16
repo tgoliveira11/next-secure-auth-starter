@@ -281,6 +281,7 @@ Returns:
 | --- | --- |
 | `routes` | All API route handlers |
 | `uiConfig` | Serializable UI defaults for `SecureAuthUIProvider` |
+| `passwordPolicy` | Resolved effective password policy (same as `uiConfig.passwordPolicy`) |
 | `getPublicUIConfig()` | Same as `uiConfig` |
 | `getServices()` | Advanced; prefer `routes.*` |
 | `config` | Original `SecureAuthConfig` |

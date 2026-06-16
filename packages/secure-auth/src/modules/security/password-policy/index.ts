@@ -61,16 +61,22 @@ export const DEFAULT_PASSWORD_POLICY: PasswordPolicyConfig = {
   minScore: 2,
 };
 
-import { resolvePasswordPolicyConfig } from "@/core/config-accessors.js";
+/** Merges consumer overrides with package defaults — single source of truth for effective policy. */
+export function mergePasswordPolicy(
+  override?: Partial<PasswordPolicyConfig> | null
+): PasswordPolicyConfig {
+  return { ...DEFAULT_PASSWORD_POLICY, ...override };
+}
+
 import type { SecureAuthConfig } from "@/core/types.js";
 
 export function getPasswordPolicyConfig(
   config?: SecureAuthConfig,
   override?: Partial<PasswordPolicyConfig>
 ): PasswordPolicyConfig {
-  const base = config ? resolvePasswordPolicyConfig(config) : DEFAULT_PASSWORD_POLICY;
+  const base = config ? mergePasswordPolicy(config.passwordPolicy) : DEFAULT_PASSWORD_POLICY;
   if (!override) return base;
-  return { ...base, ...override };
+  return mergePasswordPolicy({ ...base, ...override });
 }
 
 export function assessPassword(

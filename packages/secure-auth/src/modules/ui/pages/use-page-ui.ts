@@ -1,6 +1,7 @@
 "use client";
 
 import type { PasswordPolicyConfig } from "../../../modules/security/password-policy/index.js";
+import { mergePasswordPolicy } from "../../../modules/security/password-policy/index.js";
 import type { PasswordStrengthFeedbackPosition } from "../../../core/ui-config.js";
 import { useSecureAuthUi } from "../secure-auth-ui-provider.js";
 import { resolveAuthPaths, type AuthPaths } from "./types.js";
@@ -44,9 +45,22 @@ export function useUiAppName(prop?: string): string {
   return prop ?? ui?.appName ?? "App";
 }
 
-export function useUiPasswordPolicy(prop?: PasswordPolicyConfig): PasswordPolicyConfig | undefined {
+/**
+ * Resolves effective password policy: explicit prop → provider config → package defaults.
+ * Always returns a full `PasswordPolicyConfig` (never `undefined`).
+ */
+export function useEffectivePasswordPolicy(
+  prop?: Partial<PasswordPolicyConfig>
+): PasswordPolicyConfig {
   const ui = useSecureAuthUi();
-  return prop ?? ui?.passwordPolicy;
+  return mergePasswordPolicy(prop ?? ui?.passwordPolicy);
+}
+
+/** @deprecated Use `useEffectivePasswordPolicy` — kept as alias for existing imports. */
+export function useUiPasswordPolicy(
+  prop?: Partial<PasswordPolicyConfig>
+): PasswordPolicyConfig {
+  return useEffectivePasswordPolicy(prop);
 }
 
 /** Resolves password feedback placement: explicit prop → provider config → package default (`above`). */

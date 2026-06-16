@@ -1,7 +1,9 @@
 import type { SecureAuthConfig } from "../core/types.js";
+import { resolvePasswordPolicyConfig } from "../core/config-accessors.js";
 import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
 import { createAuthServices } from "../core/create-auth-services.js";
 import { createRoutes } from "../server/routes/create-routes.js";
+import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
 
 export type SecureAuth = ReturnType<typeof createSecureAuth>;
 
@@ -10,6 +12,7 @@ export type SecureAuth = ReturnType<typeof createSecureAuth>;
  * Heavy service modules load lazily on first route invocation to keep Next.js builds lean.
  */
 export function createSecureAuth(config: SecureAuthConfig) {
+  const passwordPolicy: PasswordPolicyConfig = resolvePasswordPolicyConfig(config);
   const uiConfig = buildPublicUIConfig(config);
 
   let services: ReturnType<typeof createAuthServices> | undefined;
@@ -25,6 +28,7 @@ export function createSecureAuth(config: SecureAuthConfig) {
 
   return {
     config,
+    passwordPolicy,
     uiConfig,
     get ui() {
       return uiConfig;

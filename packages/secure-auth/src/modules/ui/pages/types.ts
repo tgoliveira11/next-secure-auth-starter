@@ -87,7 +87,7 @@ export type LoginPageProps = SecureAuthPageProps & {
 export type RegisterPageProps = SecureAuthPageProps & {
   submitLabel?: string;
   loginLinkLabel?: string;
-  passwordPolicy?: PasswordPolicyConfig;
+  passwordPolicy?: Partial<PasswordPolicyConfig>;
   afterLoginPath?: string;
 };
 
