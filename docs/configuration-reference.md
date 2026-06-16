@@ -236,6 +236,8 @@ Invalid position values fall back to `above`.
 
 Legacy: `RATE_LIMIT_STORE`.
 
+When `AUTH_RATE_LIMIT_STORE=postgres`, the app must apply package migrations so the `rate_limit_buckets` table exists. Use `memory` for single-instance local development.
+
 **Not supported via env or config today** (fixed in package): `AUTH_RATE_LIMIT_ENABLED`, window duration, max requests per window. Do not set these expecting behavior change.
 
 ### Cookies

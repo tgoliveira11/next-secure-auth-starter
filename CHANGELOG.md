@@ -6,6 +6,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.14-internal] - 2026-06-16
+
+### Fixed
+
+- **Postgres rate limiting** — `PostgresRateLimitAdapter` no longer passes raw `Date` objects into Drizzle `sql` fragments (postgres-js rejects them). Upserts now use ISO timestamp parameters, fixing passkey login and other rate-limited endpoints when `AUTH_RATE_LIMIT_STORE=postgres`.
+
+### Added
+
+- **Integration test** — `PostgresRateLimitAdapter` against live PostgreSQL (opt-in via `INTEGRATION_DATABASE_URL`).
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.14-internal`.
+- **Docs** — `AUTH_RATE_LIMIT_STORE=postgres` requires `rate_limit_buckets` migration.
+
 ## [0.1.13-internal] - 2026-06-16
 
 ### Fixed
@@ -259,6 +274,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.14-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.14-internal
 [0.1.13-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.13-internal
 [0.1.12-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.12-internal
 [0.1.11-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.11-internal

@@ -6,7 +6,7 @@
 
 **`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
-**Maturity:** `0.1.13-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.1.14-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
