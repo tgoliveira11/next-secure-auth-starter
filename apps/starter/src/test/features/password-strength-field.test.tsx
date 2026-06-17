@@ -31,8 +31,8 @@ describe("PasswordStrengthField", () => {
       />
     );
 
-    expect(await screen.findByText(/Strength:/)).toBeTruthy();
-    expect(screen.getByText("Strong")).toBeTruthy();
+    const strengthLine = await screen.findByText(/Strength:/);
+    expect(strengthLine.textContent?.toLowerCase()).to.include("strong");
   });
 
   it("hides strength feedback when policy enforcement is off", async () => {
