@@ -6,6 +6,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.19-internal] - 2026-06-11
+
+### Fixed
+
+- **Starter tests** — `PasswordStrengthField` strength assertion updated for split strength UI (`Strength: strong (Strong)`).
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.19-internal`.
+
 ## [0.1.18-internal] - 2026-06-11
 
 ### Added
@@ -337,6 +347,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.19-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.19-internal
 [0.1.18-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.18-internal
 [0.1.17-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.17-internal
 [0.1.16-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.16-internal
