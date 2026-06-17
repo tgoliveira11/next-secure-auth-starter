@@ -8,10 +8,13 @@ import {
 } from "@/modules/security/policies/auth-password-input";
 import { credentialsLoginStartSchema } from "@/lib/validation/two-factor";
 import { InvalidCredentialsError } from "@/modules/auth/services/auth-login-service";
+import { CaptchaVerificationError } from "@/modules/captcha/index";
+import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
+import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
 import type { SecureAuthServices } from "@/core/types";
 
 async function loginStartPost(request: Request, services: SecureAuthServices) {
-  const { ctx, authLoginService } = services;
+  const { config, ctx, authLoginService } = services;
 
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
@@ -22,6 +25,16 @@ async function loginStartPost(request: Request, services: SecureAuthServices) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
+
+    await verifyCaptcha({
+      config,
+      token:
+        typeof body === "object" && body !== null && CAPTCHA_TOKEN_FIELD in body
+          ? String((body as Record<string, unknown>)[CAPTCHA_TOKEN_FIELD] ?? "")
+          : "",
+      remoteIp: getClientIp(request),
+      action: "login",
+    });
 
     const result = await authLoginService.startCredentialsLogin(
       parsed.data.email,
@@ -43,6 +56,9 @@ async function loginStartPost(request: Request, services: SecureAuthServices) {
   } catch (error) {
     if (error instanceof AuthPasswordTransportError) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+    if (error instanceof CaptchaVerificationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     if (error instanceof InvalidCredentialsError) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });

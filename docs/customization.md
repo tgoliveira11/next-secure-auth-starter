@@ -132,6 +132,29 @@ export const secureAuth = createSecureAuth({
 
 When enabled, each **fully successful** login keeps the current session and revokes all other active sessions for that user. Applies to email/password (including post-2FA), passkey, and OAuth sign-in. The current device stays signed in; other devices are **signed out automatically** — by default within about **10 seconds** via `SingleActiveSessionMonitor` (server session poll + `signOut` + redirect), or immediately when you focus a revoked tab.
 
+## CAPTCHA (Cloudflare Turnstile)
+
+Optional bot protection for registration and credentials login. Disabled by default.
+
+```typescript
+createSecureAuth({
+  captcha: {
+    enabled: true,
+    provider: "turnstile",
+    siteKey: process.env.AUTH_CAPTCHA_TURNSTILE_SITE_KEY!,
+    secretKey: process.env.AUTH_CAPTCHA_TURNSTILE_SECRET_KEY!,
+    pages: {
+      register: true,
+      login: false,
+    },
+  },
+});
+```
+
+`RegisterPage` and `CredentialsLoginForm` render `TurnstileCaptcha` when the matching page flag is enabled. Token field name: `captchaToken`. Server handlers validate before account creation or password verification.
+
+Export: `TurnstileCaptcha` from `@tgoliveira/secure-auth/react/client`.
+
 Set `AUTH_SINGLE_ACTIVE_SESSION=true` in the app `.env.local` (see [configuration-reference.md](./configuration-reference.md)).
 
 Default (when omitted): `singleActiveSession: false`.

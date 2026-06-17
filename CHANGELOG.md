@@ -6,6 +6,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.17-internal] - 2026-06-11
+
+### Added
+
+- **Cloudflare Turnstile CAPTCHA** — optional `captcha` config in `createSecureAuth(config)`; disabled by default; per-flow toggles for registration and credentials login (`captcha.pages.register`, `captcha.pages.login`).
+- **`TurnstileCaptcha`** — client component exported from `@tgoliveira/secure-auth/react/client`; package `RegisterPage` and `CredentialsLoginForm` render it when configured.
+- **Server-side Siteverify** — mandatory token validation before register and credentials login when enabled; fails closed on missing/invalid tokens or network errors.
+- **Public UI config** — `secureAuth.uiConfig.captcha` exposes `siteKey` and page flags only (never `secretKey`).
+- **Env mapping** — `AUTH_CAPTCHA_*` variables in starter and consumer-demo `.env.example` and `buildSecureAuthConfigFromEnv`.
+- **Tests** — config defaults, Siteverify service, register/login enforcement, uiConfig secret safety.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.17-internal`.
+- **Docs** — CAPTCHA configuration in README, security.md, configuration-reference.md, customization.md, consumer-quick-start.md, package-api.md.
+
 ## [0.1.16-internal] - 2026-06-11
 
 ### Fixed
@@ -306,6 +322,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.17-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.17-internal
 [0.1.16-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.16-internal
 [0.1.15-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.15-internal
 [0.1.14-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.14-internal

@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.16-internal` (experimental — not production-ready)
+**Version:** `0.1.17-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -179,6 +179,24 @@ When `singleActiveSession` is enabled, other sessions are revoked only after **f
 ## Passkeys and two-factor authentication
 
 Passkey sign-in is a primary authentication method. When TOTP 2FA is enabled on the account, passkey verification creates a pending login challenge (same httpOnly cookie and `/login/2fa` flow as email/password). The session is finalized only after valid TOTP verification — passkeys do not bypass app-level 2FA.
+
+## CAPTCHA (Cloudflare Turnstile)
+
+Optional bot protection for credentials registration and login. Disabled by default.
+
+```typescript
+createSecureAuth({
+  captcha: {
+    enabled: true,
+    provider: "turnstile",
+    siteKey: "...",
+    secretKey: "...",
+    pages: { register: true, login: true },
+  },
+});
+```
+
+Server-side Siteverify validation is mandatory when enabled. Only `siteKey` and page flags are exposed via `uiConfig`; `secretKey` stays server-only. OAuth and passkey flows are not CAPTCHA-protected in this release.
 
 ## OAuth providers
 

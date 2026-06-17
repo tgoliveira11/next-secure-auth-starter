@@ -313,6 +313,39 @@ When TOTP 2FA is enabled, passkey verify returns `requiresTwoFactor: true` and s
 
 ---
 
+## 9b. Configure CAPTCHA (optional)
+
+Cloudflare Turnstile bot protection for registration and/or credentials login. **Disabled by default.**
+
+```env
+AUTH_CAPTCHA_ENABLED=false
+AUTH_CAPTCHA_TURNSTILE_SITE_KEY=
+AUTH_CAPTCHA_TURNSTILE_SECRET_KEY=
+AUTH_CAPTCHA_REGISTER_ENABLED=false
+AUTH_CAPTCHA_LOGIN_ENABLED=false
+```
+
+Map in your app bootstrap (starter/consumer-demo use `buildSecureAuthConfigFromEnv`):
+
+```typescript
+captcha: {
+  enabled: readBooleanEnv("AUTH_CAPTCHA_ENABLED", false),
+  provider: "turnstile",
+  siteKey: process.env.AUTH_CAPTCHA_TURNSTILE_SITE_KEY,
+  secretKey: process.env.AUTH_CAPTCHA_TURNSTILE_SECRET_KEY,
+  pages: {
+    register: readBooleanEnv("AUTH_CAPTCHA_REGISTER_ENABLED", false),
+    login: readBooleanEnv("AUTH_CAPTCHA_LOGIN_ENABLED", false),
+  },
+},
+```
+
+When enabled, package pages render Turnstile automatically. Server handlers validate tokens via Cloudflare Siteverify before account creation or credentials login. OAuth and passkey flows are unaffected.
+
+Obtain keys from the [Cloudflare Turnstile dashboard](https://developers.cloudflare.com/turnstile/). Add your site hostname in Cloudflare before production use.
+
+---
+
 ## 10. Configure 2FA
 
 TOTP 2FA requires the encryption key in `createSecureAuth` config (not a separate env read by the package):

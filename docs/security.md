@@ -1,6 +1,6 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.16-internal` is experimental — **not production-ready**.
+**Maturity:** `@tgoliveira/secure-auth@0.1.17-internal` is experimental — **not production-ready**.
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
@@ -133,6 +133,21 @@ Passkeys are account authentication only:
 - Passkey sign-in is a strong primary factor but **does not bypass TOTP** when app-level 2FA is enabled. Users must complete the same TOTP step as credentials/OAuth logins.
 
 Configure via `webauthn` in `createSecureAuth(config)`. The configured `webauthn.origin` must match how users reach the app; the package also accepts the paired **apex ↔ www** origin automatically (e.g. `https://example.com` and `https://www.example.com`). Use optional `webauthn.origins` for additional hostnames (e.g. subdomains).
+
+---
+
+## CAPTCHA (Cloudflare Turnstile)
+
+Optional bot protection for **credentials registration** and **credentials login** only.
+
+- Disabled by default (`captcha.enabled: false`).
+- Enable per flow via `captcha.pages.register` and `captcha.pages.login`.
+- The package validates Turnstile tokens server-side via Cloudflare Siteverify before processing auth actions.
+- `captcha.secretKey` is server-only; `secureAuth.uiConfig.captcha` exposes only `siteKey` and enabled pages.
+- OAuth, passkey, 2FA, and password reset flows are **not** CAPTCHA-protected in this release.
+- Missing or invalid tokens fail closed with a generic user message.
+
+Obtain keys from the [Cloudflare Turnstile dashboard](https://developers.cloudflare.com/turnstile/) and map env vars in your app (see [configuration-reference.md](./configuration-reference.md)).
 
 ---
 

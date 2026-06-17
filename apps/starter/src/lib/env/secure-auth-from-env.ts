@@ -33,6 +33,7 @@ export type SecureAuthEnvSlice = Pick<
   | "debug"
   | "oauth"
   | "webauthn"
+  | "captcha"
   | "ui"
 >;
 
@@ -209,6 +210,16 @@ export function buildSecureAuthConfigFromEnv(
       rpId: readEnv(env, "WEBAUTHN_RP_ID") ?? "localhost",
       rpName: readEnv(env, "WEBAUTHN_RP_NAME") ?? appName,
       origin: readFirstEnv(env, ["WEBAUTHN_ORIGIN", "APP_BASE_URL", "NEXTAUTH_URL"]) ?? baseUrl,
+    },
+    captcha: {
+      enabled: readBooleanEnv(env, ["AUTH_CAPTCHA_ENABLED"], false),
+      provider: "turnstile",
+      siteKey: readEnv(env, "AUTH_CAPTCHA_TURNSTILE_SITE_KEY"),
+      secretKey: readEnv(env, "AUTH_CAPTCHA_TURNSTILE_SECRET_KEY"),
+      pages: {
+        register: readBooleanEnv(env, ["AUTH_CAPTCHA_REGISTER_ENABLED"], false),
+        login: readBooleanEnv(env, ["AUTH_CAPTCHA_LOGIN_ENABLED"], false),
+      },
     },
     ui: {
       brand: { name: appName },

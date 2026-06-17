@@ -7,6 +7,7 @@ const LOGIN_ERROR_MESSAGES: Record<string, string> = {
   invalid_request: "Could not sign in. Please check your details and try again.",
   unavailable: "Could not sign in right now. Please try again.",
   expired_challenge: "Your sign-in session expired. Please sign in again.",
+  captcha_failed: "Please complete the verification challenge and try again.",
 };
 
 export function LoginCredentialsError({ message }: { message?: string }) {

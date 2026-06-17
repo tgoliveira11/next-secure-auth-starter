@@ -6,13 +6,16 @@ import {
 } from "@/modules/security/policies/auth-password-input";
 import { credentialsLoginStartSchema } from "@/lib/validation/two-factor";
 import { InvalidCredentialsError } from "@/modules/auth/services/auth-login-service";
+import { CaptchaVerificationError } from "@/modules/captcha/index";
+import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
+import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
 import type { SecureAuthServices } from "@/core/types";
 
 export async function handleCredentialsLoginFormPost(
   request: Request,
   services: SecureAuthServices
 ) {
-  const { ctx, authLoginService } = services;
+  const { config, ctx, authLoginService } = services;
 
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
@@ -30,6 +33,13 @@ export async function handleCredentialsLoginFormPost(
         "login_form_invalid_payload"
       );
     }
+
+    await verifyCaptcha({
+      config,
+      token: String(formData.get(CAPTCHA_TOKEN_FIELD) ?? ""),
+      remoteIp: getClientIp(request),
+      action: "login",
+    });
 
     const result = await authLoginService.startCredentialsLogin(
       parsed.data.email,
@@ -69,6 +79,13 @@ export async function handleCredentialsLoginFormPost(
         request,
         "/login?error=invalid_request",
         "login_form_transport_error"
+      );
+    }
+    if (error instanceof CaptchaVerificationError) {
+      return ctx.authTrace.authTraceRedirect(
+        request,
+        "/login?error=captcha_failed",
+        "login_form_captcha_failed"
       );
     }
     if (error instanceof InvalidCredentialsError) {

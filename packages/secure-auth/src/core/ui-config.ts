@@ -8,6 +8,7 @@ import {
   resolvePasswordPolicyConfig,
   resolveRevocationPollIntervalSeconds,
 } from "./config-accessors.js";
+import { buildPublicCaptchaConfig, type PublicCaptchaConfig } from "../modules/captcha/index.js";
 
 export type PasswordStrengthFeedbackPosition = "above" | "below";
 
@@ -34,6 +35,8 @@ export type SecureAuthUIPublicConfig = {
     /** Seconds between session refetches while authenticated; `0` when policy is off. */
     revocationPollIntervalSeconds: number;
   };
+  /** Public Turnstile config (site key only — never includes secret). */
+  captcha?: PublicCaptchaConfig;
 };
 
 const DEFAULT_UI_MESSAGES: Record<string, string> = {
@@ -117,5 +120,6 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
       singleActiveSession: config.sessions?.singleActiveSession === true,
       revocationPollIntervalSeconds: resolveRevocationPollIntervalSeconds(config),
     },
+    captcha: buildPublicCaptchaConfig(config),
   };
 }

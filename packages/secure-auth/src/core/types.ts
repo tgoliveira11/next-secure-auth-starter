@@ -100,6 +100,16 @@ export type SecureAuthConfig = {
     /** Additional allowed WebAuthn origins (optional). Apex/www variants of `origin` are accepted automatically. */
     origins?: string[];
   };
+  captcha?: {
+    provider?: "turnstile";
+    siteKey?: string;
+    secretKey?: string;
+    enabled?: boolean;
+    pages?: {
+      register?: boolean;
+      login?: boolean;
+    };
+  };
   ui?: {
     brand?: {
       name?: string;

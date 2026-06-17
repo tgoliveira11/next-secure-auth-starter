@@ -1,6 +1,6 @@
 {
   "name": "secure-auth",
-  "version": "0.1.16-internal",
+  "version": "0.1.17-internal",
   "private": true,
   "description": "Opinionated Next.js authentication monorepo — @tgoliveira/secure-auth package + starter app (experimental)",
   "repository": {

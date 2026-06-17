@@ -11,11 +11,15 @@ import { safeLogger } from "@/modules/security/logger/index";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { apiError } from "@/lib/api-helpers";
 import { ValidationError } from "@/modules/account/services/account-service";
+import { CaptchaVerificationError } from "@/modules/captcha/index";
+import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
+import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
 import type { SecureAuthServices } from "@/core/types";
 
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1).max(128),
+  [CAPTCHA_TOKEN_FIELD]: z.string().optional(),
 });
 
 function registrationErrorMessage(error: unknown): string {
@@ -40,24 +44,32 @@ function registrationErrorMessage(error: unknown): string {
 }
 
 async function registerPost(request: Request, services: SecureAuthServices) {
-  const { ctx, repos, rateLimit, accountAuthService } = services;
+  const { config, ctx, repos, rateLimit, accountAuthService } = services;
 
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
     assertPasswordNotInUrl(request.url);
 
     const ip = getClientIp(request);
-    await rateLimit.enforceRateLimit({
-      operation: "auth.register",
-      ip,
-      endpoint: "/api/auth/register",
-    });
 
     const body = await request.json().catch(() => ({}));
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
+
+    await verifyCaptcha({
+      config,
+      token: parsed.data[CAPTCHA_TOKEN_FIELD],
+      remoteIp: ip,
+      action: "register",
+    });
+
+    await rateLimit.enforceRateLimit({
+      operation: "auth.register",
+      ip,
+      endpoint: "/api/auth/register",
+    });
 
     const existing = await repos.userRepository.findByEmail(parsed.data.email);
     if (existing) {
@@ -98,6 +110,9 @@ async function registerPost(request: Request, services: SecureAuthServices) {
   } catch (error) {
     if (error instanceof AuthPasswordTransportError) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+    if (error instanceof CaptchaVerificationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     if (error instanceof RateLimitError) {
       return apiError(error, "/api/auth/register");

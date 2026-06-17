@@ -12,6 +12,7 @@ import { FormField } from "../primitives/form-field.js";
 import { PageHeader } from "../primitives/page-header.js";
 import { SocialSignIn } from "../features/auth/social-sign-in.js";
 import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
+import { TurnstileCaptcha } from "../features/auth/turnstile-captcha.js";
 import {
   ApiError,
   authLoginApi,
@@ -27,6 +28,7 @@ import {
   useUiMessage,
   useEffectivePasswordPolicy,
   useUiPaths,
+  useCaptchaForPage,
 } from "./use-page-ui.js";
 
 type RegisterResponse = {
@@ -55,6 +57,7 @@ export function RegisterPage({
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
   const passwordPolicy = useEffectivePasswordPolicy(passwordPolicyProp);
+  const captcha = useCaptchaForPage("register");
   const title = usePageTitle(
     { title: titleProp, subtitle },
     "registerTitle",
@@ -71,11 +74,19 @@ export function RegisterPage({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaResetSignal, setCaptchaResetSignal] = useState(0);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (captcha.required && !captchaToken) {
+      setError("Please complete the verification challenge and try again.");
+      setLoading(false);
+      return;
+    }
 
     if (passwordPolicy.enforcement === "enforce") {
       const policyResult = validatePasswordForSubmission(password, passwordPolicy);
@@ -91,11 +102,16 @@ export function RegisterPage({
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+        ...(captcha.required ? { captchaToken } : {}),
+      }),
     });
 
     if (!res.ok) {
       setError(await getErrorMessage(res, "Registration failed"));
+      setCaptchaResetSignal((value) => value + 1);
       setLoading(false);
       return;
     }
@@ -168,6 +184,13 @@ export function RegisterPage({
             hint={getPasswordPolicyHint(passwordPolicy)}
             passwordStrengthPosition={passwordStrengthPosition}
           />
+          {captcha.required && (
+            <TurnstileCaptcha
+              siteKey={captcha.siteKey}
+              onTokenChange={setCaptchaToken}
+              resetSignal={captchaResetSignal}
+            />
+          )}
           {error && (
             <p className="text-sm text-[var(--danger)]" role="alert">
               {error}

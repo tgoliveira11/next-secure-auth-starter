@@ -68,6 +68,26 @@ describe("buildPublicUIConfig", () => {
     expect(ui.passwordPolicy.minLength).toBe(12);
   });
 
+  it("exposes public captcha config without secret key", () => {
+    const ui = buildPublicUIConfig(
+      buildTestSecureAuthConfig({
+        captcha: {
+          enabled: true,
+          siteKey: "site-key",
+          secretKey: "secret-key",
+          pages: { register: true, login: true },
+        },
+      })
+    );
+
+    expect(ui.captcha).toEqual({
+      provider: "turnstile",
+      siteKey: "site-key",
+      pages: { register: true, login: true },
+    });
+    expect(JSON.stringify(ui)).not.toContain("secret-key");
+  });
+
   it("does not expose server-only config such as secrets or email provider", () => {
     const config = buildTestSecureAuthConfig({
       auth: {

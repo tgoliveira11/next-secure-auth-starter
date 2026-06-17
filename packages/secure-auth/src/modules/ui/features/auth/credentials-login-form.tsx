@@ -6,6 +6,8 @@ import { FormField } from "../../primitives/form-field.js";
 import { Input } from "../../primitives/input.js";
 import { OAuthSignInError } from "./oauth-sign-in-error.js";
 import { LoginCredentialsError } from "./login-credentials-error.js";
+import { TurnstileCaptcha } from "./turnstile-captcha.js";
+import { useCaptchaForPage } from "../../pages/use-page-ui.js";
 import { cn } from "@tgoliveira/secure-auth/client";
 
 const submitButtonClassName = cn(
@@ -25,6 +27,8 @@ export function CredentialsLoginForm({
   forgotPasswordPath = "/forgot-password",
   submitLabel = "Sign in with email",
 }: CredentialsLoginFormProps) {
+  const captcha = useCaptchaForPage("login");
+
   return (
     <form
       id="login-credentials-form"
@@ -60,6 +64,7 @@ export function CredentialsLoginForm({
         <OAuthSignInError />
         <LoginCredentialsError />
       </Suspense>
+      {captcha.required && <TurnstileCaptcha siteKey={captcha.siteKey} />}
       <button type="submit" className={submitButtonClassName}>
         {submitLabel}
       </button>

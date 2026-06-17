@@ -71,3 +71,23 @@ export function usePasswordStrengthPosition(
   if (prop !== undefined) return prop;
   return ui?.passwordStrength.position ?? "above";
 }
+
+/** Returns Turnstile site key when CAPTCHA is enabled for the given page flow. */
+export function useCaptchaForPage(page: "register" | "login") {
+  const ui = useSecureAuthUi();
+  const captcha = ui?.captcha;
+  if (!captcha) {
+    return { required: false as const };
+  }
+
+  const required = page === "register" ? captcha.pages.register : captcha.pages.login;
+  if (!required) {
+    return { required: false as const };
+  }
+
+  return {
+    required: true as const,
+    siteKey: captcha.siteKey,
+    provider: captcha.provider,
+  };
+}

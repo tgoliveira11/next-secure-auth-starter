@@ -34,6 +34,8 @@ The starter passes `secureAuth.uiConfig` from the composition root into the clie
 
 UI defaults (`paths`, `messages`, `passwordPolicy`, `passwordStrength`) are defined in `createSecureAuth({ ui: { ... } })` in `src/lib/secure-auth.ts`. Password feedback renders above fields by default.
 
+Optional Cloudflare Turnstile CAPTCHA is mapped from `AUTH_CAPTCHA_*` env vars via `buildSecureAuthConfigFromEnv` (disabled by default). See [configuration-reference.md](../../docs/configuration-reference.md).
+
 ---
 
 ## Local development (monorepo)

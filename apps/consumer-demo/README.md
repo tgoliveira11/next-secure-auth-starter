@@ -12,7 +12,7 @@ This app proves a **brand-new Next.js consumer** can adopt the package using **p
 - `SecureAuthUIProvider` + `SessionProvider` (`src/components/providers.tsx`)
 - Thin page wrappers (`src/app/**/page.tsx`)
 - Thin API route wrappers (`src/app/api/**/route.ts`)
-- Environment variables ([`.env.example`](./.env.example) — see [docs/configuration-reference.md](../../docs/configuration-reference.md))
+- Environment variables ([`.env.example`](./.env.example) — see [docs/configuration-reference.md](../../docs/configuration-reference.md); includes optional `AUTH_CAPTCHA_*` Turnstile settings, disabled by default)
 
 ## What the package owns
 

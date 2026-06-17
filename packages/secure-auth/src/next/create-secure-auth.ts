@@ -1,5 +1,6 @@
 import type { SecureAuthConfig } from "../core/types.js";
 import { resolvePasswordPolicyConfig } from "../core/config-accessors.js";
+import { validateCaptchaConfig } from "../modules/captcha/index.js";
 import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
 import { createAuthServices } from "../core/create-auth-services.js";
 import { createRoutes } from "../server/routes/create-routes.js";
@@ -12,6 +13,7 @@ export type SecureAuth = ReturnType<typeof createSecureAuth>;
  * Heavy service modules load lazily on first route invocation to keep Next.js builds lean.
  */
 export function createSecureAuth(config: SecureAuthConfig) {
+  validateCaptchaConfig(config);
   const passwordPolicy: PasswordPolicyConfig = resolvePasswordPolicyConfig(config);
   const uiConfig = buildPublicUIConfig(config);
 

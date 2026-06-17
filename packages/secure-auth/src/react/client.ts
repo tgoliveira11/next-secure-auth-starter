@@ -12,3 +12,4 @@ export {
   type PasskeyLoginOutcome,
   type SignInWithPasskeyOptions,
 } from "../lib/passkey/sign-in-with-passkey.js";
+export { TurnstileCaptcha, type TurnstileCaptchaProps } from "../modules/ui/features/auth/turnstile-captcha";

@@ -51,6 +51,12 @@ Required top-level fields when calling `createSecureAuth`:
 | `webauthn.rpName` | `string` | WebAuthn RP display name |
 | `webauthn.origin` | `string` | WebAuthn origin (primary) |
 | `webauthn.origins` | `string[]` | optional | Additional allowed origins (e.g. subdomains). Apex ↔ www of `origin` is accepted automatically. |
+| `captcha.enabled` | `boolean` | `false` | Master switch for Turnstile CAPTCHA |
+| `captcha.provider` | `"turnstile"` | `turnstile` | CAPTCHA provider (Turnstile only in this release) |
+| `captcha.siteKey` | `string` | — | Turnstile site key (public; exposed via `uiConfig` when enabled) |
+| `captcha.secretKey` | `string` | — | Turnstile secret key (server-only; required when `enabled`) |
+| `captcha.pages.register` | `boolean` | `false` | Require CAPTCHA on registration |
+| `captcha.pages.login` | `boolean` | `false` | Require CAPTCHA on credentials login |
 
 Optional nested config (defaults applied when omitted):
 
@@ -168,6 +174,17 @@ Provider id in NextAuth and account records: `github`. UI label: **GitHub**. The
 | `WEBAUTHN_RP_ID` | string | `localhost` | `webauthn.rpId` | Relying party ID |
 | `WEBAUTHN_RP_NAME` | string | `APP_NAME` | `webauthn.rpName` | RP display name |
 | `WEBAUTHN_ORIGIN` | string | `APP_BASE_URL` | `webauthn.origin` | Primary expected origin; paired apex/www is accepted automatically |
+
+### CAPTCHA (Cloudflare Turnstile)
+
+| Variable | Type | Default | Maps to | Description |
+| --- | --- | --- | --- | --- |
+| `AUTH_CAPTCHA_ENABLED` | boolean | `false` | `captcha.enabled` | Master switch |
+| `AUTH_CAPTCHA_PROVIDER` | string | `turnstile` | `captcha.provider` | Provider id (Turnstile only) |
+| `AUTH_CAPTCHA_TURNSTILE_SITE_KEY` | string | — | `captcha.siteKey` | Public site key |
+| `AUTH_CAPTCHA_TURNSTILE_SECRET_KEY` | string | — | `captcha.secretKey` | Secret key (server-only) |
+| `AUTH_CAPTCHA_REGISTER_ENABLED` | boolean | `false` | `captcha.pages.register` | CAPTCHA on registration |
+| `AUTH_CAPTCHA_LOGIN_ENABLED` | boolean | `false` | `captcha.pages.login` | CAPTCHA on credentials login |
 
 ### Sessions
 
