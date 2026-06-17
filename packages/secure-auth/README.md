@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.17-internal` (experimental — not production-ready)
+**Version:** `0.1.18-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -197,6 +197,21 @@ createSecureAuth({
 ```
 
 Server-side Siteverify validation is mandatory when enabled. Only `siteKey` and page flags are exposed via `uiConfig`; `secretKey` stays server-only. OAuth and passkey flows are not CAPTCHA-protected in this release.
+
+## Generic password components
+
+Reusable password policy UI for **non-auth** flows (vault password, encryption password, etc.).
+
+```tsx
+import {
+  PasswordStrengthField,
+  PasswordSetupFields,
+} from "@tgoliveira/secure-auth/react/client";
+```
+
+Validation helpers live in `@tgoliveira/secure-auth/client/password-policy`. The package never reads env — map consumer env to a `policy` object and pass it as props.
+
+See [generic-password-components.md](../../docs/generic-password-components.md).
 
 ## OAuth providers
 

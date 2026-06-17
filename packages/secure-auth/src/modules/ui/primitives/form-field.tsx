@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import { cn } from "../lib/cn";
 
 interface FormFieldProps {
   id: string;
-  label: string;
+  label: ReactNode;
   hint?: string;
   error?: string;
   children: React.ReactNode;

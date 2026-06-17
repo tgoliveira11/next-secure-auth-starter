@@ -526,6 +526,8 @@ Available pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswo
 
 Customize via props (`title`, `paths`, `afterLoginPath`, `passwordStrengthPosition`, `onSignOut`, …) or via `uiConfig` provider defaults (including `passwordStrength.position`). See [package-api.md](./package-api.md) and [customization.md](./customization.md).
 
+For **non-auth** password setup (vault password, encryption password, etc.), use `PasswordStrengthField` and `PasswordSetupFields` from `@tgoliveira/secure-auth/react/client` with an app-defined `policy` prop. See [generic-password-components.md](./generic-password-components.md).
+
 ---
 
 ## 15. Start the application

@@ -158,7 +158,7 @@ export default function Page() {
 | --- | --- |
 | **Purpose** | Client-only UI (`ConfirmDialog`, hooks, passkey sign-in helper, default sign-out) |
 | **Audience** | Client components (`"use client"`) |
-| **Example** | `import { ConfirmDialog, defaultSignOutAccount, signInWithPasskey, TurnstileCaptcha } from "@tgoliveira/secure-auth/react/client"` |
+| **Example** | `import { ConfirmDialog, PasswordStrengthField, PasswordSetupFields, signInWithPasskey } from "@tgoliveira/secure-auth/react/client"` |
 
 ---
 

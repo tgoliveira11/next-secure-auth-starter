@@ -155,6 +155,17 @@ createSecureAuth({
 
 Export: `TurnstileCaptcha` from `@tgoliveira/secure-auth/react/client`.
 
+## Generic password components
+
+For vault passwords, encryption passwords, and other **non-auth** setup flows:
+
+| Export | Entry |
+| --- | --- |
+| `PasswordStrengthField`, `PasswordSetupFields` | `@tgoliveira/secure-auth/react/client` |
+| `validatePasswordSetup`, `validatePasswordAgainstPolicy`, … | `@tgoliveira/secure-auth/client/password-policy` |
+
+See [generic-password-components.md](./generic-password-components.md).
+
 Set `AUTH_SINGLE_ACTIVE_SESSION=true` in the app `.env.local` (see [configuration-reference.md](./configuration-reference.md)).
 
 Default (when omitted): `singleActiveSession: false`.

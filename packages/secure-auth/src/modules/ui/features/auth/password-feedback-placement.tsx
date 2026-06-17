@@ -28,6 +28,7 @@ export type PasswordFieldFeedbackPlacementProps = {
   input: ReactNode;
   feedback: ReactNode;
   feedbackId?: string;
+  feedbackClassName?: string;
   /** When true, keeps feedback slot(s) in the tree so the password input is never remounted. */
   enabled: boolean;
 };
@@ -41,6 +42,7 @@ export function PasswordFieldFeedbackPlacement({
   input,
   feedback,
   feedbackId,
+  feedbackClassName,
   enabled,
 }: PasswordFieldFeedbackPlacementProps) {
   if (!enabled) {
@@ -52,13 +54,13 @@ export function PasswordFieldFeedbackPlacement({
   return (
     <div className="password-field-stack">
       {position === "above" && (
-        <PasswordFeedbackSlot id={feedbackId} className={slotSpacing}>
+        <PasswordFeedbackSlot id={feedbackId} className={cn(slotSpacing, feedbackClassName)}>
           {feedback}
         </PasswordFeedbackSlot>
       )}
       {input}
       {position === "below" && (
-        <PasswordFeedbackSlot id={feedbackId} className={slotSpacing}>
+        <PasswordFeedbackSlot id={feedbackId} className={cn(slotSpacing, feedbackClassName)}>
           {feedback}
         </PasswordFeedbackSlot>
       )}

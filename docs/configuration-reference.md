@@ -239,6 +239,20 @@ AUTH_PASSWORD_STRENGTH_POSITION=below
 
 Invalid position values fall back to `above`.
 
+### Product-specific passwords (vault, encryption, etc.)
+
+The package does **not** define env vars for non-auth passwords. Define your own in the consumer app and map them to a `policy` object passed to `PasswordStrengthField` / `PasswordSetupFields` or to `validatePasswordSetup` before submit.
+
+```env
+VAULT_PASSWORD_MIN_LENGTH=16
+VAULT_PASSWORD_REQUIRE_UPPERCASE=true
+VAULT_PASSWORD_REQUIRE_LOWERCASE=true
+VAULT_PASSWORD_REQUIRE_NUMBER=true
+VAULT_PASSWORD_REQUIRE_SYMBOL=true
+```
+
+See [generic-password-components.md](./generic-password-components.md).
+
 ### Account / email verification
 
 | Variable | Type | Default | Maps to |

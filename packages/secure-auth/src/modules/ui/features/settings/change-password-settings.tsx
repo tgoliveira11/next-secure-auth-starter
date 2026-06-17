@@ -5,9 +5,9 @@ import { Button } from "../../primitives/button.js";
 import { Alert } from "../../primitives/alert.js";
 import { FormField } from "../../primitives/form-field.js";
 import { Input } from "../../primitives/input.js";
-import { PasswordStrengthField } from "../auth/password-strength-field.js";
+import { PasswordSetupFields } from "../password/password-setup-fields.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
-import { validatePasswordForSubmission } from "@tgoliveira/secure-auth/client/password-policy";
+import { validatePasswordSetup } from "@tgoliveira/secure-auth/client/password-policy";
 
 import type { PasswordStrengthFeedbackPosition } from "../../../../core/ui-config.js";
 import { useEffectivePasswordPolicy } from "../../pages/use-page-ui.js";
@@ -47,19 +47,23 @@ export function ChangePasswordSettings({
     setError(null);
     setSuccess(null);
 
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
     if (passwordPolicy.enforcement === "enforce") {
-      const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
-      if (!policyResult.valid) {
+      const setup = validatePasswordSetup({
+        password: newPassword,
+        confirmation: confirmPassword,
+        policy: passwordPolicy,
+      });
+      if (!setup.valid) {
         setError(
-          policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
+          setup.password.messages[0] ??
+            setup.confirmation.message ??
+            "Password does not meet the configured policy."
         );
         return;
       }
+    } else if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
     }
 
     setLoading(true);
@@ -89,26 +93,17 @@ export function ChangePasswordSettings({
           required
         />
       </FormField>
-      <PasswordStrengthField
-        id="new-password"
-        label="New password"
+      <PasswordSetupFields
+        passwordId="new-password"
+        confirmId="confirm-new-password"
+        passwordLabel="New password"
+        confirmLabel="Confirm new password"
         value={newPassword}
-        onChange={setNewPassword}
-        autoComplete="new-password"
         confirmValue={confirmPassword}
-        policyConfig={passwordPolicy}
-        passwordStrengthPosition={passwordStrengthPosition}
-      />
-      <PasswordStrengthField
-        id="confirm-new-password"
-        label="Confirm new password"
-        value={confirmPassword}
-        onChange={setConfirmPassword}
-        autoComplete="new-password"
-        confirmValue={newPassword}
-        showStrength={false}
-        policyConfig={passwordPolicy}
-        passwordStrengthPosition={passwordStrengthPosition}
+        onChange={setNewPassword}
+        onConfirmChange={setConfirmPassword}
+        policy={passwordPolicy}
+        feedbackPosition={passwordStrengthPosition}
       />
       {error && (
         <p className="text-sm text-[var(--danger)]" role="alert">

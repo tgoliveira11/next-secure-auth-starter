@@ -6,6 +6,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.18-internal] - 2026-06-11
+
+### Added
+
+- **Generic password UI** — `PasswordStrengthField` and `PasswordSetupFields` exported from `@tgoliveira/secure-auth/react/client` for non-auth sensitive password flows (vault, encryption, recovery, etc.).
+- **Password validation helpers** — `resolvePasswordPolicy`, `validatePasswordAgainstPolicy`, `validatePasswordConfirmation`, `validatePasswordSetup`, `getPasswordPolicyRequirements`, `calculatePasswordStrength`, and related types in `@tgoliveira/secure-auth/client/password-policy`.
+- **Docs** — [generic-password-components.md](docs/generic-password-components.md) with vault password examples.
+
+### Changed
+
+- **Auth password screens** — reset-password and change-password settings use `PasswordSetupFields` and shared setup validation helpers.
+- **`PasswordStrengthField`** — generalized props (`policy`, `feedbackPosition`, `onValidityChange`, `name`, uncontrolled mode); backward-compatible with `policyConfig` / `passwordStrengthPosition`.
+- **`@tgoliveira/secure-auth/react` barrel** — `"use client"` directive so App Router re-exports build under Next.js 16.
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.18-internal`.
+
 ## [0.1.17-internal] - 2026-06-11
 
 ### Added
@@ -322,6 +337,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.18-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.18-internal
 [0.1.17-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.17-internal
 [0.1.16-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.16-internal
 [0.1.15-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.15-internal

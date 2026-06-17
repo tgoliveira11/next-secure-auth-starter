@@ -9,12 +9,9 @@ import { PageHeader } from "../primitives/page-header.js";
 import { Alert } from "../primitives/alert.js";
 import { Button } from "../primitives/button.js";
 import { LoadingState } from "../primitives/loading-state.js";
-import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
+import { PasswordSetupFields } from "../features/password/password-setup-fields.js";
 import { ACCOUNT_PASSWORD_RESET_NOTE, accountAuthApi } from "@tgoliveira/secure-auth/client";
-import {
-  assessPassword,
-  validatePasswordForSubmission,
-} from "@tgoliveira/secure-auth/client/password-policy";
+import { validatePasswordSetup } from "@tgoliveira/secure-auth/client/password-policy";
 import { type ResetPasswordPageProps } from "./types.js";
 import { usePageTitle, useUiPaths, useEffectivePasswordPolicy } from "./use-page-ui.js";
 
@@ -73,17 +70,31 @@ function ResetPasswordContent({
       return;
     }
     if (passwordPolicy.enforcement === "enforce") {
-      const policyResult = validatePasswordForSubmission(newPassword, passwordPolicy);
-      if (!policyResult.valid) {
+      const setup = validatePasswordSetup({
+        password: newPassword,
+        confirmation: confirmPassword,
+        policy: passwordPolicy,
+      });
+      if (!setup.valid) {
         setError(
-          policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
+          setup.password.messages[0] ??
+            setup.confirmation.message ??
+            "Password does not meet the configured policy."
         );
         return;
       }
     } else {
-      const assessment = assessPassword(newPassword, passwordPolicy);
-      if (!assessment.meetsPolicy && assessment.label === "too_short") {
-        setError(assessment.messages[0] ?? "Password is too short.");
+      const setup = validatePasswordSetup({
+        password: newPassword,
+        confirmation: confirmPassword,
+        policy: passwordPolicy,
+      });
+      if (!setup.password.valid && setup.password.strength === "weak") {
+        setError(setup.password.messages[0] ?? "Password is too short.");
+        return;
+      }
+      if (!setup.confirmation.valid) {
+        setError(setup.confirmation.message ?? "Passwords do not match.");
         return;
       }
     }
@@ -145,26 +156,17 @@ function ResetPasswordContent({
       <PageHeader title={resetTitle} description={ACCOUNT_PASSWORD_RESET_NOTE} />
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <PasswordStrengthField
-            id="reset-new-password"
-            label="New password"
+          <PasswordSetupFields
+            passwordId="reset-new-password"
+            confirmId="reset-confirm-password"
+            passwordLabel="New password"
+            confirmLabel="Confirm new password"
             value={newPassword}
-            onChange={setNewPassword}
-            autoComplete="new-password"
             confirmValue={confirmPassword}
-            policyConfig={passwordPolicy}
-            passwordStrengthPosition={passwordStrengthPosition}
-          />
-          <PasswordStrengthField
-            id="reset-confirm-password"
-            label="Confirm new password"
-            value={confirmPassword}
-            onChange={setConfirmPassword}
-            autoComplete="new-password"
-            confirmValue={newPassword}
-            showStrength={false}
-            policyConfig={passwordPolicy}
-            passwordStrengthPosition={passwordStrengthPosition}
+            onChange={setNewPassword}
+            onConfirmChange={setConfirmPassword}
+            policy={passwordPolicy}
+            feedbackPosition={passwordStrengthPosition}
           />
           {error && (
             <p className="text-sm text-[var(--danger)]" role="alert">
