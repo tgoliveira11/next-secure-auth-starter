@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { totpCodeSchema } from "@/lib/validation/two-factor";
@@ -12,7 +12,7 @@ const verifySetupSchema = z.object({
 
 async function twoFactorSetupVerifyPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = verifySetupSchema.safeParse(body);
     if (!parsed.success) {

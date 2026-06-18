@@ -6,6 +6,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.21-internal] - 2026-06-18
+
+### Security
+
+- **API auth tiers** — `requireVerifiedFullyAuthenticatedUser()` for sensitive account/security/session routes; passkey management no longer accepts pending 2FA sessions.
+- **Email verification** — `accountPolicy.requireEmailVerificationForAccountApis` (default `true`) blocks sensitive APIs when session requires verification.
+- **Enumeration hardening** — register and passkey login options return generic public errors; internal audit remains specific.
+- **Same-origin protection** — `requireSameOriginRequest()` on authenticated mutating routes (`security.sameOriginProtection`, default enabled).
+- **Login trace** — requires `debug.authTrace` **and** `debug.exposeTraceRoute`; trace output redacts sensitive fields.
+
+### Changed
+
+- **Starter / consumer-demo** — env mapping for `EMAIL_VERIFICATION_REQUIRE_FOR_ACCOUNT_APIS`, `AUTH_SAME_ORIGIN_PROTECTION_ENABLED`, `AUTH_ALLOWED_ORIGINS`, `AUTH_DEBUG_EXPOSE_TRACE_ROUTE`.
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.21-internal`.
+
 ## [0.1.20-internal] - 2026-06-18
 
 ### Added

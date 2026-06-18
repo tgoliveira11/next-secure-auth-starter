@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireSessionUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import type { SecureAuthServices } from "@/core/types";
@@ -13,7 +13,7 @@ const bodySchema = z.object({
 
 async function passkeysRegisterPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireSessionUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = bodySchema.safeParse(body);
 

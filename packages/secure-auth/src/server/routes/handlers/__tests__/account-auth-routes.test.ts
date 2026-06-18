@@ -12,15 +12,18 @@ const mocks = vi.hoisted(() => ({
   sendVerificationEmailForUser: vi.fn(),
   getAccountAuthStatus: vi.fn(),
   requireSessionUser: vi.fn(),
-  requireFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
 }));
 
 vi.mock("@/modules/auth/lib/session", () => ({
   requireSessionUser: mocks.requireSessionUser,
-  requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
   UnauthorizedError: class UnauthorizedError extends Error {
     name = "UnauthorizedError";
   },
+}));
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
 }));
 
 let services: SecureAuthServices;
@@ -45,7 +48,7 @@ describe("account auth API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireSessionUser.mockResolvedValue({ id: "550e8400-e29b-41d4-a716-446655440000" });
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: "550e8400-e29b-41d4-a716-446655440000",
     });
     services = await buildServices();
@@ -230,8 +233,9 @@ describe("account auth API routes", () => {
   it("POST /api/account/change-password rejects invalid body", async () => {
     const { changePasswordPost: POST } = await import("@/test/helpers/handlers");
     const res = await POST(
-      new Request("http://localhost", {
+      new Request("http://localhost:3001/api/account/change-password", {
         method: "POST",
+        headers: { Origin: "http://localhost:3001" },
         body: JSON.stringify({ currentPassword: "x" }),
       }),
       services

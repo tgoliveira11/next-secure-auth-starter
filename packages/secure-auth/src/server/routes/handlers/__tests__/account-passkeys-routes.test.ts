@@ -9,7 +9,8 @@ import { USER_ID } from "@/test/helpers/fixtures";
 import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
-  requireSessionUser: vi.fn(),
+  requireVerifiedFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
   listPasskeys: vi.fn(),
   getRegistrationOptions: vi.fn(),
   verifyRegistration: vi.fn(),
@@ -20,11 +21,25 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
-    requireSessionUser: mocks.requireSessionUser,
+    requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
   };
 });
 
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
+}));
+
 let services: SecureAuthServices;
+
+function sameOriginRequest(url: string, init?: RequestInit) {
+  return new Request(url, {
+    ...init,
+    headers: {
+      Origin: "http://localhost:3001",
+      ...(init?.headers ?? {}),
+    },
+  });
+}
 
 async function buildServices() {
   return getTestServices({}, (base) => ({
@@ -41,7 +56,14 @@ async function buildServices() {
 describe("account passkeys API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    mocks.requireSessionUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+    });
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+    });
     services = await buildServices();
   });
 
@@ -55,25 +77,26 @@ describe("account passkeys API routes", () => {
     ]);
     const res = await listGet(services);
     expect(res.status).toBe(200);
+    expect(mocks.requireVerifiedFullyAuthenticatedUser).toHaveBeenCalled();
   });
 
-  it("requires session for registration options", async () => {
+  it("requires verified auth for registration options", async () => {
     mocks.getRegistrationOptions.mockResolvedValue({ challenge: "abc" });
     const res = await registerPost(
-      new Request("http://localhost", {
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
         method: "POST",
         body: JSON.stringify({ action: "options" }),
       }),
       services
     );
     expect(res.status).toBe(200);
-    expect(mocks.requireSessionUser).toHaveBeenCalled();
+    expect(mocks.requireVerifiedMutatingAccountUser).toHaveBeenCalled();
   });
 
   it("verifies passkey registration and rejects invalid payloads", async () => {
     mocks.verifyRegistration.mockResolvedValue({ id: "pk-2" });
     const ok = await registerPost(
-      new Request("http://localhost", {
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
         method: "POST",
         body: JSON.stringify({ action: "verify", response: { id: "cred" }, friendlyName: "Laptop" }),
       }),
@@ -82,7 +105,7 @@ describe("account passkeys API routes", () => {
     expect(ok.status).toBe(200);
 
     const missingResponse = await registerPost(
-      new Request("http://localhost", {
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
         method: "POST",
         body: JSON.stringify({ action: "verify" }),
       }),
@@ -91,7 +114,7 @@ describe("account passkeys API routes", () => {
     expect(missingResponse.status).toBe(400);
 
     const invalid = await registerPost(
-      new Request("http://localhost", {
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
         method: "POST",
         body: JSON.stringify({ action: "unknown" }),
       }),
@@ -103,7 +126,7 @@ describe("account passkeys API routes", () => {
   it("maps registration service failures", async () => {
     mocks.verifyRegistration.mockRejectedValue(new Error("verification failed"));
     const res = await registerPost(
-      new Request("http://localhost", {
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
         method: "POST",
         body: JSON.stringify({ action: "verify", response: { id: "cred" } }),
       }),
@@ -115,7 +138,7 @@ describe("account passkeys API routes", () => {
   it("deletes a passkey by id", async () => {
     mocks.removePasskey.mockResolvedValue({ success: true });
     const res = await deletePasskey(
-      new Request("http://localhost"),
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-1"),
       { params: Promise.resolve({ id: "pk-1" }) },
       services
     );

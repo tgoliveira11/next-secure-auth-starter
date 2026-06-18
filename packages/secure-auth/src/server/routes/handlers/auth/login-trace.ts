@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
+import { isAuthTraceRouteExposed } from "@/modules/auth/lib/auth-trace";
 import type { SecureAuthServices } from "@/core/types";
 
 async function loginTraceGet(services: SecureAuthServices) {
   const { authTrace } = services.ctx;
 
-  if (!authTrace.isAuthTraceEnabled()) {
+  if (!isAuthTraceRouteExposed(services.config)) {
     return NextResponse.json({ error: "Auth trace disabled" }, { status: 404 });
   }
 

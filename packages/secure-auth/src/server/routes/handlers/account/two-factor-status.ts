@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedFullyAuthenticatedUser } from "@/modules/auth/lib/session";
 import { apiError } from "@/lib/api-helpers";
 import type { SecureAuthServices } from "@/core/types";
 
 async function twoFactorStatusGet(services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser(services);
+    const user = await requireVerifiedFullyAuthenticatedUser(services);
     const status = await services.twoFactorService.getStatus(user.id);
     return NextResponse.json(status);
   } catch (error) {

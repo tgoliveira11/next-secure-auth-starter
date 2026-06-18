@@ -149,7 +149,10 @@ export async function sessionsPingPost(request: Request, services?: SecureAuthSe
 export async function sessionsRevokeCurrentPost(services?: SecureAuthServices) {
   return invokePost(
     "../../server/routes/handlers/account/sessions-revoke-current.js",
-    new Request("http://localhost"),
+    new Request("http://localhost:3001/api/account/sessions/revoke-current", {
+      method: "POST",
+      headers: { Origin: "http://localhost:3001" },
+    }),
     undefined,
     services
   );

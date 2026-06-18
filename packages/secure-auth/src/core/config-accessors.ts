@@ -45,7 +45,29 @@ export function resolveAccountPolicyConfig(config: SecureAuthConfig): AccountPol
       policy?.requireEmailVerificationBeforeSignIn ??
       config.auth.requireEmailVerificationBeforeSignIn ??
       DEFAULT_ACCOUNT_POLICY.requireEmailVerificationBeforeSignIn,
+    requireEmailVerificationForAccountApis:
+      policy?.requireEmailVerificationForAccountApis ??
+      DEFAULT_ACCOUNT_POLICY.requireEmailVerificationForAccountApis,
   };
+}
+
+export type SameOriginProtectionConfig = {
+  enabled: boolean;
+  allowedOrigins: string[];
+};
+
+export function resolveSameOriginProtectionConfig(
+  config: SecureAuthConfig
+): SameOriginProtectionConfig {
+  const security = config.security?.sameOriginProtection;
+  return {
+    enabled: security?.enabled ?? true,
+    allowedOrigins: security?.allowedOrigins ?? [],
+  };
+}
+
+export function resolveAuthTraceExposeRoute(config: SecureAuthConfig): boolean {
+  return config.debug?.authTrace === true && config.debug?.exposeTraceRoute === true;
 }
 
 export function resolveSessionMaxAgeMs(config: SecureAuthConfig): number {

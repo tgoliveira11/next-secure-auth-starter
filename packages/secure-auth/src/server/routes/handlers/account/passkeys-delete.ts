@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { requireSessionUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import { apiError } from "@/lib/api-helpers";
 import type { SecureAuthServices } from "@/core/types";
 import type { RouteContext } from "../../create-routes.js";
 
 async function passkeysDelete(
-  _request: Request,
+  request: Request,
   context: RouteContext | undefined,
   services: SecureAuthServices
 ) {
   try {
-    const user = await requireSessionUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     if (!context) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }

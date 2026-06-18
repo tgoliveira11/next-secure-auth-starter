@@ -31,6 +31,7 @@ export type SecureAuthEnvSlice = Pick<
   | "rateLimit"
   | "server"
   | "debug"
+  | "security"
   | "oauth"
   | "webauthn"
   | "captcha"
@@ -116,6 +117,11 @@ export function buildSecureAuthConfigFromEnv(
         true
       ),
       requireEmailVerificationBeforeSignIn: requireEmailVerification,
+      requireEmailVerificationForAccountApis: readBooleanEnv(
+        env,
+        ["EMAIL_VERIFICATION_REQUIRE_FOR_ACCOUNT_APIS"],
+        true
+      ),
     },
     passwordPolicy: {
       enforcement: passwordEnforcement,
@@ -183,6 +189,16 @@ export function buildSecureAuthConfigFromEnv(
     },
     debug: {
       authTrace: readBooleanEnv(env, ["AUTH_TRACE", "AUTH_DEBUG_TRACE"], false),
+      exposeTraceRoute: readBooleanEnv(env, ["AUTH_DEBUG_EXPOSE_TRACE_ROUTE"], false),
+    },
+    security: {
+      sameOriginProtection: {
+        enabled: readBooleanEnv(env, ["AUTH_SAME_ORIGIN_PROTECTION_ENABLED"], true),
+        allowedOrigins: readEnv(env, "AUTH_ALLOWED_ORIGINS")
+          ?.split(",")
+          .map((value) => value.trim())
+          .filter(Boolean),
+      },
     },
     oauth: {
       google: readOAuthPair(

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import {
@@ -18,7 +19,7 @@ const deleteSchema = z.object({
 
 async function accountGet(services: SecureAuthServices) {
   try {
-    const session = await requireFullyAuthenticatedUser(services);
+    const session = await requireVerifiedFullyAuthenticatedUser(services);
     const requirements = await services.accountService.getDeletionRequirements(session.id);
     return NextResponse.json(requirements);
   } catch (error) {
@@ -31,7 +32,7 @@ async function accountDelete(request: Request, services: SecureAuthServices) {
     assertAuthPasswordRequestMethod(request.method, new Set(["DELETE"]));
     assertPasswordNotInUrl(request.url);
 
-    const session = await requireFullyAuthenticatedUser(services);
+    const session = await requireVerifiedMutatingAccountUser(request, services);
     const ip = getClientIp(request);
     const body = await parseJsonBody(request);
     const parsed = deleteSchema.safeParse(body);

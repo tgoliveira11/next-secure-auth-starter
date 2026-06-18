@@ -12,14 +12,20 @@ const mocks = vi.hoisted(() => ({
   revokeAllSessions: vi.fn(),
   revokeCurrentSession: vi.fn(),
   enrichFromRequest: vi.fn(),
-  requireFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
 }));
 
-vi.mock("@/modules/auth/lib/session", () => ({
-  requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
-  UnauthorizedError: class UnauthorizedError extends Error {
-    name = "UnauthorizedError";
-  },
+vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
+  return {
+    ...actual,
+    requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
+  };
+});
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
 }));
 
 let services: SecureAuthServices;
@@ -41,7 +47,12 @@ async function buildServices() {
 describe("account sessions API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+      accountSessionId: SESSION_ID,
+    });
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
       accountSessionId: SESSION_ID,
@@ -51,7 +62,7 @@ describe("account sessions API routes", () => {
 
   it("GET /api/account/sessions requires authentication", async () => {
     const { UnauthorizedError } = await import("@/modules/auth/lib/session");
-    mocks.requireFullyAuthenticatedUser.mockRejectedValue(
+    mocks.requireVerifiedFullyAuthenticatedUser.mockRejectedValue(
       new UnauthorizedError("Authentication required")
     );
     const { sessionsListGet: GET } = await import("@/test/helpers/handlers");
@@ -132,7 +143,7 @@ describe("account sessions API routes", () => {
 
   it("POST /api/account/sessions/revoke-others requires current session id", async () => {
     const { UnauthorizedError } = await import("@/modules/auth/lib/session");
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
       accountSessionId: undefined,
@@ -168,7 +179,7 @@ describe("account sessions API routes", () => {
   });
 
   it("POST /api/account/sessions/ping skips enrich without session id", async () => {
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
       accountSessionId: undefined,

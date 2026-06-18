@@ -112,3 +112,87 @@ Starter and consumer-demo use env-derived middleware config — see their `src/m
 - Do **not** import package internals (`packages/secure-auth/src/...`).
 - Do **not** duplicate auth-page redirect logic unless intentionally overriding package behavior.
 - Use public exports: `@tgoliveira/secure-auth/react`, `@tgoliveira/secure-auth/next`, `@tgoliveira/secure-auth/next/middleware`.
+
+---
+
+## API security hardening notes for consumer agents
+
+Starting in **`0.1.21-internal`**, package API handlers enforce their own auth tiers. Consumer middleware is **defense-in-depth only** — not the primary security layer.
+
+### 1. Package version requirement
+
+Upgrade `@tgoliveira/secure-auth` to **`>= 0.1.21-internal`**.
+
+### 2. Route wrappers
+
+Use `secureAuth.routes.*` for all auth/account APIs. Do not reimplement passkey, 2FA, session, password, or account deletion logic.
+
+### 3. Middleware is defense-in-depth only
+
+Package handlers enforce auth tiers. Keep middleware for UX and early redirects, but do not rely on it as the only protection.
+
+### 4. Passkey management
+
+Passkey list/register/delete require **fully authenticated and verified** users. Pending 2FA users should be routed to `/login/2fa`, not passkey settings.
+
+### 5. Email verification
+
+Handle **403** responses with `Email verification is required before continuing.` Ensure `/check-email` and verify-email flows remain wired.
+
+Config:
+
+```env
+EMAIL_VERIFICATION_REQUIRE_FOR_ACCOUNT_APIS=true
+```
+
+### 6. Generic public errors
+
+Register and passkey login options may return generic errors. Do not depend on exact strings like “email already registered” or “no passkey found”.
+
+### 7. Same-origin protection
+
+Configure correct origins:
+
+```env
+APP_BASE_URL=https://app.example.com
+NEXTAUTH_URL=https://app.example.com
+AUTH_SAME_ORIGIN_PROTECTION_ENABLED=true
+# AUTH_ALLOWED_ORIGINS=https://preview.example.com
+```
+
+Mutating account APIs reject cross-origin requests when protection is enabled.
+
+### 8. Debug trace
+
+Never enable in production:
+
+```env
+AUTH_TRACE=false
+AUTH_DEBUG_EXPOSE_TRACE_ROUTE=false
+```
+
+Both flags must be true for `GET /api/auth/login/trace` to return data.
+
+### 9. Reference implementations
+
+Compare your app with `apps/starter` and `apps/consumer-demo` (updated in `0.1.21-internal`).
+
+### 10. API security validation checklist
+
+- [ ] Package version `>= 0.1.21-internal`
+- [ ] `.env` has correct `APP_BASE_URL` / `NEXTAUTH_URL`
+- [ ] Route wrappers delegate to `secureAuth.routes.*`
+- [ ] `SecureAuthUIProvider` uses `secureAuth.uiConfig`
+- [ ] Pending 2FA users cannot access passkey settings APIs
+- [ ] Verified users can manage passkeys
+- [ ] Register UI handles generic duplicate response
+- [ ] Passkey login handles generic errors
+- [ ] Mutating account APIs work from same origin
+- [ ] Cross-origin mutating calls are rejected (when protection enabled)
+- [ ] Debug trace disabled in production
+
+### 11. Migration risk note
+
+This is a security hardening release. Expect changes to error messages, passkey accessibility during pending 2FA, email verification requirements on account APIs, and cross-origin behavior for mutating routes.
+
+See [api-authentication-security-audit.md](api-authentication-security-audit.md) for the full audit and remediation details.

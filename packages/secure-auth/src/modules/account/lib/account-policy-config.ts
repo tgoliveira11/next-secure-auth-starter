@@ -4,12 +4,20 @@ import type { SecureAuthConfig } from "@/core/types.js";
 export type AccountPolicyConfig = {
   sendVerificationOnRegister: boolean;
   requireEmailVerificationBeforeSignIn: boolean;
+  /** When true, sensitive account/security/session APIs reject unverified sessions. Default: true. */
+  requireEmailVerificationForAccountApis: boolean;
 };
 
 export const DEFAULT_ACCOUNT_POLICY: AccountPolicyConfig = {
   sendVerificationOnRegister: true,
   requireEmailVerificationBeforeSignIn: false,
+  requireEmailVerificationForAccountApis: true,
 };
+
+export function accountApisRequireEmailVerification(config: SecureAuthConfig): boolean {
+  const policy = getAccountPolicyConfig(config);
+  return policy.requireEmailVerificationForAccountApis;
+}
 
 export function getAccountPolicyConfig(config: SecureAuthConfig): AccountPolicyConfig {
   return resolveAccountPolicyConfig(config);

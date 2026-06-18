@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   findByEmail: vi.fn(),
   create: vi.fn(),
   sendVerificationEmailForUser: vi.fn(),
+  auditRecord: vi.fn(),
 }));
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
@@ -26,6 +27,10 @@ async function buildServices(configOverrides: Parameters<typeof getTestServices>
         ...base.repos.userRepository,
         findByEmail: mocks.findByEmail,
         create: mocks.create,
+      },
+      auditRepository: {
+        ...base.repos.auditRepository,
+        record: mocks.auditRecord,
       },
     },
     accountAuthService: {
@@ -87,7 +92,10 @@ describe("register API route", () => {
       }),
       services
     );
-    expect(res.status).toBe(409);
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toMatchObject({
+      error: expect.stringMatching(/Unable to complete registration/i),
+    });
   });
 
   it("skips verification email when disabled by account policy", async () => {

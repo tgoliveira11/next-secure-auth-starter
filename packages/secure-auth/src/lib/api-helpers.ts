@@ -12,6 +12,12 @@ export function apiError(error: unknown, endpoint: string) {
   }
   if (error && typeof error === "object" && "name" in error) {
     const named = error as { name: string; message: string };
+    if (named.name === "SameOriginError") {
+      return NextResponse.json({ error: named.message }, { status: 403 });
+    }
+    if (named.name === "AccountEmailVerificationRequiredError") {
+      return NextResponse.json({ error: named.message }, { status: 403 });
+    }
     if (named.name === "NotFoundError") {
       return NextResponse.json({ error: named.message }, { status: 404 });
     }

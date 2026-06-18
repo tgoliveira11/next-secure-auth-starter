@@ -66,6 +66,11 @@ Optional nested config (defaults applied when omitted):
 | --- | --- | --- |
 | `accountPolicy.sendVerificationOnRegister` | `boolean` | `true` |
 | `accountPolicy.requireEmailVerificationBeforeSignIn` | `boolean` | `false` |
+| `accountPolicy.requireEmailVerificationForAccountApis` | `boolean` | `true` | Block sensitive account APIs when session email is unverified |
+| `security.sameOriginProtection.enabled` | `boolean` | `true` | Require allowed Origin/Referer on authenticated mutating API routes |
+| `security.sameOriginProtection.allowedOrigins` | `string[]` | `[]` | Extra allowed origins (plus `app.baseUrl` and WebAuthn origins) |
+| `debug.authTrace` | `boolean` | `false` | Enable in-memory auth trace logging |
+| `debug.exposeTraceRoute` | `boolean` | `false` | Allow `GET /api/auth/login/trace` (requires `authTrace`) |
 | `passwordPolicy.*` | see [Password policy](#password-policy) | package defaults |
 | `sessions.maxAgeSeconds` | `number` | `2592000` (30 days) |
 | `sessions.lastUsedUpdateIntervalSeconds` | `number` | `300` |

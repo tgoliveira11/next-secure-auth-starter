@@ -19,6 +19,7 @@ const baseTestConfig = {
   accountPolicy: {
     sendVerificationOnRegister: true,
     requireEmailVerificationBeforeSignIn: false,
+    requireEmailVerificationForAccountApis: true,
   },
   email: {
     from: "Test <noreply@test>",

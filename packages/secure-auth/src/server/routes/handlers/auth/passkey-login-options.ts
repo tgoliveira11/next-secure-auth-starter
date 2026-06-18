@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
+import { GENERIC_PASSKEY_LOGIN_OPTIONS_ERROR } from "@/modules/auth/lib/public-auth-messages";
+import { NotFoundError } from "@/modules/passkeys/services/passkey-service";
+import { ValidationError } from "@/modules/account/lib/account-errors";
 import type { SecureAuthServices } from "@/core/types";
 
 const bodySchema = z.object({
@@ -26,6 +29,9 @@ async function passkeyLoginOptionsPost(request: Request, services: SecureAuthSer
     });
     return NextResponse.json(result);
   } catch (error) {
+    if (error instanceof NotFoundError || error instanceof ValidationError) {
+      return NextResponse.json({ error: GENERIC_PASSKEY_LOGIN_OPTIONS_ERROR }, { status: 400 });
+    }
     return apiError(error, "POST /api/auth/passkey/login/options");
   }
 }

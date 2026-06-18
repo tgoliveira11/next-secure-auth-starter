@@ -9,7 +9,7 @@ import type { SecureAuthServices } from "@/core/types";
 const mocks = vi.hoisted(() => ({
   findByEmail: vi.fn(),
   create: vi.fn(),
-  requireFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedFullyAuthenticatedUser: vi.fn(),
   getDeletionRequirements: vi.fn(),
   sendVerificationEmailForUser: vi.fn(),
 }));
@@ -21,7 +21,7 @@ vi.mock("@/modules/security/policies/password-hashing", () => ({
 }));
 
 vi.mock("@/modules/auth/lib/session", () => ({
-  requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
+  requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
 }));
 
 let services: SecureAuthServices;
@@ -95,7 +95,7 @@ describe("auth password API boundaries", () => {
   });
 
   it("does not expose password_hash from account deletion requirements", async () => {
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
       id: "user-1",
       email: "user@example.com",
       accountSessionId: "sess-1",

@@ -18,7 +18,8 @@ import { USER_ID } from "@/test/helpers/fixtures";
 import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
-  requireFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
   requireSessionUser: vi.fn(),
   getStatus: vi.fn(),
   startSetup: vi.fn(),
@@ -36,10 +37,14 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
-    requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
+    requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
     requireSessionUser: mocks.requireSessionUser,
   };
 });
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
+}));
 
 let services: SecureAuthServices;
 
@@ -73,7 +78,11 @@ async function buildServices() {
 describe("API route error branches", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+    });
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
     });
@@ -118,16 +127,36 @@ describe("API route error branches", () => {
   });
 
   it("maps unexpected session and passkey route failures", async () => {
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
       accountSessionId: "session-id",
     });
     mocks.pingSession.mockRejectedValue(new Error("db down"));
-    expect((await sessionsPingPost(new Request("http://localhost"), services)).status).toBe(500);
+    expect(
+      (
+        await sessionsPingPost(
+          new Request("http://localhost:3001/api/account/sessions/ping", {
+            method: "POST",
+            headers: { Origin: "http://localhost:3001" },
+          }),
+          services
+        )
+      ).status
+    ).toBe(500);
 
     mocks.revokeAllSessions.mockRejectedValue(new Error("db down"));
-    expect((await revokeAllPost(new Request("http://localhost"), services)).status).toBe(500);
+    expect(
+      (
+        await revokeAllPost(
+          new Request("http://localhost:3001/api/account/sessions/revoke-all", {
+            method: "POST",
+            headers: { Origin: "http://localhost:3001" },
+          }),
+          services
+        )
+      ).status
+    ).toBe(500);
 
     mocks.revokeCurrentSession.mockRejectedValue(new Error("db down"));
     expect((await revokeCurrentPost(services)).status).toBe(500);
@@ -139,7 +168,9 @@ describe("API route error branches", () => {
     expect(
       (
         await passkeyDelete(
-          new Request("http://localhost"),
+          new Request("http://localhost:3001/api/account/passkeys/pk-1", {
+            headers: { Origin: "http://localhost:3001" },
+          }),
           { params: Promise.resolve({ id: "pk-1" }) },
           services
         )

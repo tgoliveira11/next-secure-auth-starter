@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import type { SecureAuthServices } from "@/core/types";
 import type { RouteContext } from "../../create-routes.js";
 
@@ -11,7 +11,7 @@ async function sessionsDelete(
   services: SecureAuthServices
 ) {
   try {
-    const user = await requireFullyAuthenticatedUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     if (!context) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }

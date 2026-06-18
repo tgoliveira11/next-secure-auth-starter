@@ -7,7 +7,7 @@ import {
   AuthPasswordTransportError,
 } from "@/modules/security/policies/auth-password-input";
 import { getClientIp } from "@/modules/security/ip/request-ip";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import type { SecureAuthServices } from "@/core/types";
 
 const bodySchema = z.object({
@@ -20,7 +20,7 @@ async function changePasswordPost(request: Request, services: SecureAuthServices
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
     assertPasswordNotInUrl(request.url);
 
-    const session = await requireFullyAuthenticatedUser(services);
+    const session = await requireVerifiedMutatingAccountUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = bodySchema.safeParse(body);
     if (!parsed.success) {

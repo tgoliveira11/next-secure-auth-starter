@@ -62,6 +62,16 @@ export type SecureAuthConfig = {
   accountPolicy?: {
     sendVerificationOnRegister: boolean;
     requireEmailVerificationBeforeSignIn: boolean;
+    /** Reject sensitive account APIs when session email is unverified. Default: true. */
+    requireEmailVerificationForAccountApis?: boolean;
+  };
+  security?: {
+    sameOriginProtection?: {
+      /** Default: true for authenticated mutating package routes. */
+      enabled?: boolean;
+      /** Extra allowed origins in addition to app.baseUrl and webauthn.origin. */
+      allowedOrigins?: string[];
+    };
   };
   passwordPolicy?: Partial<PasswordPolicyConfig>;
   sessions?: {
@@ -81,6 +91,8 @@ export type SecureAuthConfig = {
   };
   debug?: {
     authTrace?: boolean;
+    /** When true with authTrace, exposes GET /api/auth/login/trace. Default: false. */
+    exposeTraceRoute?: boolean;
   };
   oauth?: {
     google?: { clientId: string; clientSecret: string };

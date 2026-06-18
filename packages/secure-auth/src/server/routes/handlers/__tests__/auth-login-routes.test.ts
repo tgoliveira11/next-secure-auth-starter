@@ -9,10 +9,14 @@ import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   getSessionUser: vi.fn(),
-  requireFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
   isEnabledForUser: vi.fn(),
   verifyOAuthTwoFactor: vi.fn(),
   regenerateBackupCodes: vi.fn(),
+}));
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
 }));
 
 vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
@@ -20,7 +24,6 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   return {
     ...actual,
     getSessionUser: mocks.getSessionUser,
-    requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
   };
 });
 
@@ -44,7 +47,7 @@ describe("auth login and backup code API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mocks.getSessionUser.mockResolvedValue({ id: USER_ID, email: "user@example.com" });
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
     });

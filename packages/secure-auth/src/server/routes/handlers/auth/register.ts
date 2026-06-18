@@ -14,6 +14,7 @@ import { ValidationError } from "@/modules/account/services/account-service";
 import { CaptchaVerificationError } from "@/modules/captcha/index";
 import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
 import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
+import { GENERIC_REGISTRATION_ERROR } from "@/modules/auth/lib/public-auth-messages";
 import type { SecureAuthServices } from "@/core/types";
 
 const registerSchema = z.object({
@@ -73,7 +74,11 @@ async function registerPost(request: Request, services: SecureAuthServices) {
 
     const existing = await repos.userRepository.findByEmail(parsed.data.email);
     if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      await repos.auditRepository.record("registration_rejected", existing.id, {
+        endpoint: "/api/auth/register",
+        errorCode: "email_already_registered",
+      });
+      return NextResponse.json({ error: GENERIC_REGISTRATION_ERROR }, { status: 400 });
     }
 
     const { email, password } = parsed.data;

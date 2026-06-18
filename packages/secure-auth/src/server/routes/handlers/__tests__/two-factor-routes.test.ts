@@ -11,7 +11,8 @@ import { USER_ID } from "@/test/helpers/fixtures";
 import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
-  requireFullyAuthenticatedUser: vi.fn(),
+    requireVerifiedFullyAuthenticatedUser: vi.fn(),
+    requireVerifiedMutatingAccountUser: vi.fn(),
   getStatus: vi.fn(),
   startSetup: vi.fn(),
   verifySetup: vi.fn(),
@@ -31,9 +32,13 @@ vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
-    requireFullyAuthenticatedUser: mocks.requireFullyAuthenticatedUser,
+    requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
   };
 });
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
+}));
 
 let services: SecureAuthServices;
 
@@ -57,7 +62,11 @@ async function buildServices() {
 describe("two-factor API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    mocks.requireFullyAuthenticatedUser.mockResolvedValue({
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+    });
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
     });

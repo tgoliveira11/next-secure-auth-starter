@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { twoFactorVerifySchema } from "@/lib/validation/two-factor";
@@ -7,7 +7,7 @@ import type { SecureAuthServices } from "@/core/types";
 
 async function twoFactorDisablePost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = twoFactorVerifySchema.safeParse(body);
     if (!parsed.success) {

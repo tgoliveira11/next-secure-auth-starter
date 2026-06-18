@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-helpers";
-import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
 import type { SecureAuthServices } from "@/core/types";
 
-async function sessionsRevokeCurrentPost(services: SecureAuthServices) {
+async function sessionsRevokeCurrentPost(request: Request, services: SecureAuthServices) {
   try {
-    const user = await requireFullyAuthenticatedUser(services);
+    const user = await requireVerifiedMutatingAccountUser(request, services);
     const result = await services.accountSessionService.revokeCurrentSession(
       user.id,
       user.accountSessionId
@@ -17,5 +17,5 @@ async function sessionsRevokeCurrentPost(services: SecureAuthServices) {
 }
 
 export function createPostHandler(services: SecureAuthServices) {
-  return () => sessionsRevokeCurrentPost(services);
+  return (request: Request) => sessionsRevokeCurrentPost(request, services);
 }

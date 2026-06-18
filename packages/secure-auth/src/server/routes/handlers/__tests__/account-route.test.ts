@@ -8,19 +8,21 @@ import type { SecureAuthServices } from "@/core/types";
 const mocks = vi.hoisted(() => ({
   getDeletionRequirements: vi.fn(),
   deleteAccount: vi.fn(),
+  requireVerifiedFullyAuthenticatedUser: vi.fn(),
+  requireVerifiedMutatingAccountUser: vi.fn(),
 }));
 
 vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth/lib/session")>();
   return {
     ...actual,
-    requireFullyAuthenticatedUser: vi.fn(async () => ({
-      id: USER_ID,
-      email: "user@test.local",
-      accountSessionId: "sess-current",
-    })),
+    requireVerifiedFullyAuthenticatedUser: mocks.requireVerifiedFullyAuthenticatedUser,
   };
 });
+
+vi.mock("@/modules/auth/lib/route-auth", () => ({
+  requireVerifiedMutatingAccountUser: mocks.requireVerifiedMutatingAccountUser,
+}));
 
 let services: SecureAuthServices;
 
@@ -34,9 +36,31 @@ async function buildServices() {
   }));
 }
 
+function deleteRequest(url: string, body: unknown) {
+  return new Request(url, {
+    method: "DELETE",
+    headers: {
+      "content-type": "application/json",
+      Origin: "http://localhost:3001",
+      "x-forwarded-for": "127.0.0.1",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
 describe("/api/account", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    mocks.requireVerifiedFullyAuthenticatedUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@test.local",
+      accountSessionId: "sess-current",
+    });
+    mocks.requireVerifiedMutatingAccountUser.mockResolvedValue({
+      id: USER_ID,
+      email: "user@test.local",
+      accountSessionId: "sess-current",
+    });
     mocks.getDeletionRequirements.mockResolvedValue({
       requiresPassword: true,
       authProvider: "credentials",
@@ -61,16 +85,9 @@ describe("/api/account", () => {
 
   it("deletes the authenticated account with confirmation payload", async () => {
     const res = await DELETE(
-      new Request("http://localhost/api/account", {
-        method: "DELETE",
-        headers: {
-          "content-type": "application/json",
-          "x-forwarded-for": "127.0.0.1",
-        },
-        body: JSON.stringify({
-          confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
-          password: "secret",
-        }),
+      deleteRequest("http://localhost:3001/api/account", {
+        confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
+        password: "secret",
       }),
       services
     );
@@ -87,11 +104,7 @@ describe("/api/account", () => {
 
   it("rejects invalid delete payloads", async () => {
     const res = await DELETE(
-      new Request("http://localhost/api/account", {
-        method: "DELETE",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ password: "secret" }),
-      }),
+      deleteRequest("http://localhost:3001/api/account", { password: "secret" }),
       services
     );
     expect(res.status).toBe(400);
@@ -99,9 +112,12 @@ describe("/api/account", () => {
 
   it("rejects password values in the delete URL", async () => {
     const res = await DELETE(
-      new Request("http://localhost/api/account?password=secret", {
+      new Request("http://localhost:3001/api/account?password=secret", {
         method: "DELETE",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          Origin: "http://localhost:3001",
+        },
         body: JSON.stringify({ confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE }),
       }),
       services
