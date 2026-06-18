@@ -4,15 +4,13 @@ import {
   buildPublicUIConfig,
   createSecureAuthMiddleware,
 } from "@tgoliveira/secure-auth/next/middleware";
-import { APP_NAME, APP_SLUG } from "@/lib/brand";
-import { traceAuth } from "@/lib/auth-trace";
 import { buildSecureAuthConfigFromEnv } from "@/lib/env/secure-auth-from-env";
 
-function buildStarterMiddlewareConfig() {
+function buildConsumerDemoMiddlewareConfig() {
   const slice = buildSecureAuthConfigFromEnv({
-    appName: APP_NAME,
-    appSlug: APP_SLUG,
-    baseUrl: process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3001",
+    appName: "Consumer Demo",
+    appSlug: "consumer-demo",
+    baseUrl: process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3002",
   });
 
   const configForUi: SecureAuthConfig = {
@@ -24,8 +22,8 @@ function buildStarterMiddlewareConfig() {
     },
     webauthn: {
       rpId: process.env.WEBAUTHN_RP_ID ?? "localhost",
-      rpName: APP_NAME,
-      origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3001",
+      rpName: "Consumer Demo",
+      origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3002",
     },
     ui: {
       ...slice.ui,
@@ -47,10 +45,7 @@ function buildStarterMiddlewareConfig() {
   return buildMiddlewareConfigFromUi(uiConfig, slice.auth.nextAuthSecret);
 }
 
-export const middleware = createSecureAuthMiddleware({
-  ...buildStarterMiddlewareConfig(),
-  onTrace: traceAuth,
-});
+export const middleware = createSecureAuthMiddleware(buildConsumerDemoMiddlewareConfig());
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],

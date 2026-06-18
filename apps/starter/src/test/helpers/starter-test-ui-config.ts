@@ -44,4 +44,8 @@ export const starterTestUiConfig: SecureAuthUIPublicConfig = {
     singleActiveSession: false,
     revocationPollIntervalSeconds: 0,
   },
+  auth: {
+    redirectAuthenticatedFromGuestPages: true,
+    authenticatedRedirectPath: "/dashboard",
+  },
 };

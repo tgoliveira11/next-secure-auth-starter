@@ -524,13 +524,40 @@ export default function Page() {
 
 Available pages: `LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `ResetPasswordPage`, `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, `LoginCompletePage`, `AccountSettingsPage`, `SecuritySettingsPage`, `SessionsSettingsPage`, `AccountDeletedPage`, optional `DashboardPlaceholderPage`.
 
-Customize via props (`title`, `paths`, `afterLoginPath`, `passwordStrengthPosition`, `onSignOut`, …) or via `uiConfig` provider defaults (including `passwordStrength.position`). See [package-api.md](./package-api.md) and [customization.md](./customization.md).
+**Authenticated-user redirects (default since `0.1.20-internal`):** signed-in users are redirected away from login/register/forgot-password. Configure via `auth.redirectAuthenticatedFromGuestPages` and `auth.authenticatedRedirectPath` in `createSecureAuth`, or opt out per page with `redirectIfAuthenticated={false}`. See [consumer-authenticated-redirect-migration.md](./consumer-authenticated-redirect-migration.md).
+
+Customize via props (`title`, `paths`, `afterLoginPath`, `redirectIfAuthenticated`, `passwordStrengthPosition`, `onSignOut`, …) or via `uiConfig` provider defaults (including `passwordStrength.position`). See [package-api.md](./package-api.md) and [customization.md](./customization.md).
 
 For **non-auth** password setup (vault password, encryption password, etc.), use `PasswordStrengthField` and `PasswordSetupFields` from `@tgoliveira/secure-auth/react/client` with an app-defined `policy` prop. See [generic-password-components.md](./generic-password-components.md).
 
 ---
 
-## 15. Start the application
+## 15. Optional middleware (guest redirects + incomplete auth)
+
+Client guards on package pages are sufficient for correctness. For defense in depth (fewer flashes), use `createSecureAuthMiddleware` from **`@tgoliveira/secure-auth/next/middleware`** — not the main `/next` entry (Edge-incompatible server bundle).
+
+```typescript
+// src/middleware.ts
+import {
+  createSecureAuthMiddleware,
+  buildMiddlewareConfigFromUi,
+} from "@tgoliveira/secure-auth/next/middleware";
+import { secureAuth } from "@/lib/secure-auth";
+
+export const middleware = createSecureAuthMiddleware({
+  ...buildMiddlewareConfigFromUi(secureAuth.uiConfig, process.env.NEXTAUTH_SECRET!),
+});
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+See `apps/starter/src/middleware.ts` for password-manager form rewrites layered on top.
+
+---
+
+## 16. Start the application
 
 Required environment variables (minimum) — full list in [configuration-reference.md](./configuration-reference.md):
 
@@ -561,7 +588,7 @@ export default nextConfig;
 
 ---
 
-## 16. Verify installation
+## 17. Verify installation
 
 1. `GET /api/auth/package-health` returns `{ ok: true, version: "0.1.9-internal" }`.
 2. Register a user at `/register`.

@@ -86,6 +86,9 @@ export function buildSecureAuthConfigFromEnv(
     ["AUTH_MICROSOFT_CLIENT_SECRET", "AUTH_MICROSOFT_SECRET", "AUTH_AZURE_AD_SECRET"]
   );
 
+  const afterLoginPath =
+    readEnv(env, "AUTH_AFTER_LOGIN_PATH") ?? defaults.afterLoginPath ?? "/dashboard";
+
   return {
     app: {
       name: appName,
@@ -93,11 +96,18 @@ export function buildSecureAuthConfigFromEnv(
       baseUrl,
     },
     auth: {
-      afterLoginPath: readEnv(env, "AUTH_AFTER_LOGIN_PATH") ?? defaults.afterLoginPath ?? "/dashboard",
+      afterLoginPath,
       afterLogoutPath: readEnv(env, "AUTH_AFTER_LOGOUT_PATH") ?? defaults.afterLogoutPath ?? "/login",
       requireEmailVerificationBeforeSignIn: requireEmailVerification,
       nextAuthSecret: readEnv(env, "NEXTAUTH_SECRET") ?? "",
       twoFactorEncryptionKey: readEnv(env, "TWO_FACTOR_SECRET_ENCRYPTION_KEY") ?? "",
+      redirectAuthenticatedFromGuestPages: readBooleanEnv(
+        env,
+        ["AUTH_REDIRECT_AUTHENTICATED_FROM_GUEST_PAGES"],
+        true
+      ),
+      authenticatedRedirectPath:
+        readEnv(env, "AUTH_AUTHENTICATED_REDIRECT_PATH") ?? afterLoginPath,
     },
     accountPolicy: {
       sendVerificationOnRegister: readBooleanEnv(

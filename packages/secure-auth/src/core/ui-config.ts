@@ -9,6 +9,10 @@ import {
   resolveRevocationPollIntervalSeconds,
 } from "./config-accessors.js";
 import { buildPublicCaptchaConfig, type PublicCaptchaConfig } from "../modules/captcha/index.js";
+import {
+  buildPublicAuthRedirectConfig,
+  type PublicAuthRedirectConfig,
+} from "./auth-redirect-config.js";
 
 export type PasswordStrengthFeedbackPosition = "above" | "below";
 
@@ -37,6 +41,8 @@ export type SecureAuthUIPublicConfig = {
   };
   /** Public Turnstile config (site key only — never includes secret). */
   captcha?: PublicCaptchaConfig;
+  /** Authenticated-user redirect behavior for guest auth pages. */
+  auth: PublicAuthRedirectConfig;
 };
 
 const DEFAULT_UI_MESSAGES: Record<string, string> = {
@@ -95,6 +101,8 @@ function mapConfigPathsToAuthPaths(config: SecureAuthConfig): AuthPaths {
   };
 }
 
+export type { PublicAuthRedirectConfig } from "./auth-redirect-config.js";
+
 /** Builds a JSON-serializable UI config for `SecureAuthUIProvider`. */
 export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPublicConfig {
   const paths = {
@@ -121,5 +129,6 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
       revocationPollIntervalSeconds: resolveRevocationPollIntervalSeconds(config),
     },
     captcha: buildPublicCaptchaConfig(config),
+    auth: buildPublicAuthRedirectConfig(config, paths.afterLogin),
   };
 }

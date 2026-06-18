@@ -42,6 +42,8 @@ Required top-level fields when calling `createSecureAuth`:
 | `app.baseUrl` | `string` | Public base URL |
 | `auth.afterLoginPath` | `string` | Redirect after successful login |
 | `auth.afterLogoutPath` | `string` | Redirect after logout |
+| `auth.redirectAuthenticatedFromGuestPages` | `boolean` | `true` | Redirect signed-in users away from login/register/forgot-password |
+| `auth.authenticatedRedirectPath` | `string` | `auth.afterLoginPath` | Landing path for authenticated-user guest redirects |
 | `auth.requireEmailVerificationBeforeSignIn` | `boolean` | Block sign-in until email verified |
 | `auth.nextAuthSecret` | `string` | NextAuth session signing secret |
 | `auth.twoFactorEncryptionKey` | `string` | Key for TOTP secrets at rest |
@@ -114,6 +116,8 @@ Not passed to `createSecureAuth`; the app constructs the Drizzle client and pass
 | `NEXTAUTH_URL` | string | — | recommended | `app.baseUrl` fallback | Canonical URL (alias for base URL) |
 | `NEXTAUTH_SECRET` | string | `""` | **yes** in production | `auth.nextAuthSecret` | Session signing secret |
 | `AUTH_AFTER_LOGIN_PATH` | string | `/dashboard` | optional | `auth.afterLoginPath` | Post-login redirect |
+| `AUTH_REDIRECT_AUTHENTICATED_FROM_GUEST_PAGES` | boolean | `true` | optional | `auth.redirectAuthenticatedFromGuestPages` | Guest-page redirect for signed-in users |
+| `AUTH_AUTHENTICATED_REDIRECT_PATH` | string | `AUTH_AFTER_LOGIN_PATH` | optional | `auth.authenticatedRedirectPath` | Landing path for guest-page redirect |
 | `AUTH_AFTER_LOGOUT_PATH` | string | `/login` | optional | `auth.afterLogoutPath` | Post-logout redirect |
 | `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | string | `""` | **yes** in production | `auth.twoFactorEncryptionKey` | 32-byte base64 key for TOTP at rest |
 

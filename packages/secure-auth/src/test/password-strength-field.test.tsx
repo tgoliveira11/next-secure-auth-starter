@@ -11,6 +11,7 @@ import {
   type SecureAuthUIPublicConfig,
 } from "@tgoliveira/secure-auth/react";
 import type { PasswordPolicyConfig } from "@tgoliveira/secure-auth/client/password-policy";
+import { DEFAULT_TEST_PUBLIC_AUTH } from "./helpers/default-public-auth.js";
 
 const warnPolicy: PasswordPolicyConfig = {
   enforcement: "warn",
@@ -30,6 +31,7 @@ const baseUiConfig: SecureAuthUIPublicConfig = {
   messages: {},
   passwordPolicy: warnPolicy,
   passwordStrength: { position: "above" },
+  auth: DEFAULT_TEST_PUBLIC_AUTH,
   sessionPolicy: {
     singleActiveSession: false,
     revocationPollIntervalSeconds: 0,

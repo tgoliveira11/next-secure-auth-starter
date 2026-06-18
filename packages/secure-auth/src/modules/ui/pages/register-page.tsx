@@ -30,6 +30,7 @@ import {
   useUiPaths,
   useCaptchaForPage,
 } from "./use-page-ui.js";
+import { GuestOnlyPageGuard } from "../auth-redirect/guest-only-page-guard.js";
 
 type RegisterResponse = {
   id: string;
@@ -53,6 +54,8 @@ export function RegisterPage({
   subtitle,
   description: descriptionProp,
   passwordStrengthPosition,
+  redirectIfAuthenticated,
+  authenticatedRedirectPath,
 }: RegisterPageProps) {
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
@@ -157,7 +160,12 @@ export function RegisterPage({
   }
 
   return (
-    <PageShell width={width} className={className}>
+    <GuestOnlyPageGuard
+      redirectIfAuthenticated={redirectIfAuthenticated}
+      authenticatedRedirectPath={authenticatedRedirectPath ?? destination}
+      loadingLabel="Loading registration"
+    >
+      <PageShell width={width} className={className}>
       {brand}
       {header}
       <PageHeader title={title} description={description} />
@@ -218,5 +226,6 @@ export function RegisterPage({
         </p>
       )}
     </PageShell>
+    </GuestOnlyPageGuard>
   );
 }

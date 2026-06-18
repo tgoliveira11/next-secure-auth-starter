@@ -65,6 +65,10 @@ export type BasePageProps = {
   header?: ReactNode;
   /** Override default route paths for links and redirects. */
   paths?: AuthPaths;
+  /** When false, fully authenticated users can view guest auth pages. Default: true (from config). */
+  redirectIfAuthenticated?: boolean;
+  /** Redirect target for fully authenticated users on guest auth pages. */
+  authenticatedRedirectPath?: string;
   /** Override global password strength/validation feedback placement for this page. */
   passwordStrengthPosition?: PasswordStrengthFeedbackPosition;
 };

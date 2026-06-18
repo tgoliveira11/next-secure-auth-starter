@@ -28,6 +28,10 @@ describe("buildPublicUIConfig", () => {
       singleActiveSession: false,
       revocationPollIntervalSeconds: 0,
     });
+    expect(ui.auth).toEqual({
+      redirectAuthenticatedFromGuestPages: true,
+      authenticatedRedirectPath: "/dashboard",
+    });
   });
 
   it("enables session revocation polling when singleActiveSession is true", () => {

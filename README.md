@@ -6,7 +6,7 @@
 
 **`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
 
-**Maturity:** `0.1.19-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.1.20-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
@@ -185,6 +185,8 @@ See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 | [docs/consumer-validation-checklist.md](docs/consumer-validation-checklist.md) | Integration sign-off checklist |
 | [docs/package-api.md](docs/package-api.md) | Supported public exports, `uiConfig`, routes |
 | [docs/customization.md](docs/customization.md) | UI, email, and auth flow customization |
+| [docs/authenticated-user-auth-pages-audit.md](docs/authenticated-user-auth-pages-audit.md) | Authenticated users visiting login/register (audit) |
+| [docs/consumer-authenticated-redirect-migration.md](docs/consumer-authenticated-redirect-migration.md) | Migrating client apps to guest-page redirects |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package overview |
 | [apps/starter/README.md](apps/starter/README.md) | Reference consumer |
 | [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, boundaries |

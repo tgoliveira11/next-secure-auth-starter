@@ -1,6 +1,6 @@
 # @tgoliveira/secure-auth
 
-**Version:** `0.1.19-internal` (experimental — not production-ready)
+**Version:** `0.1.20-internal` (experimental — not production-ready)
 
 Opinionated authentication package for **Next.js App Router**, **TypeScript**, **Drizzle ORM**, and **PostgreSQL**.
 
@@ -104,6 +104,8 @@ export const secureAuth = createSecureAuth({
   app: { name: "My App", slug: "my-app", baseUrl: process.env.APP_BASE_URL! },
   auth: {
     afterLoginPath: "/dashboard",
+    redirectAuthenticatedFromGuestPages: true,
+    authenticatedRedirectPath: "/dashboard",
     afterLogoutPath: "/login",
     requireEmailVerificationBeforeSignIn: false,
     nextAuthSecret: process.env.NEXTAUTH_SECRET!,

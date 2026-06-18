@@ -12,6 +12,7 @@ import { Button } from "../primitives/button.js";
 import { accountAuthApi } from "@tgoliveira/secure-auth/client";
 import { type VerifyEmailPageProps } from "./types.js";
 import { useUiMessage, useUiPaths } from "./use-page-ui.js";
+import { useVerifyEmailPageGuard } from "../auth-redirect/use-flow-page-guards.js";
 
 type VerifyState = "loading" | "success" | "invalid";
 
@@ -24,10 +25,17 @@ function VerifyEmailContent({
   header,
   title: titleProp,
   description: descriptionProp,
+  authenticatedRedirectPath,
+  redirectIfAuthenticated,
 }: VerifyEmailPageProps) {
   const searchParams = useSearchParams();
   const resolved = useUiPaths(paths);
   const token = tokenProp ?? searchParams.get("token") ?? "";
+  const guard = useVerifyEmailPageGuard({
+    hasToken: token.length > 0,
+    redirectIfAuthenticated,
+    authenticatedRedirectPath: authenticatedRedirectPath ?? resolved.afterLogin,
+  });
   const [state, setState] = useState<VerifyState>("loading");
   const [email, setEmail] = useState<string | null>(null);
   const successTitle = useUiMessage(
@@ -63,6 +71,18 @@ function VerifyEmailContent({
       cancelled = true;
     };
   }, [token]);
+
+  if (guard.isLoading) {
+    return (
+      <PageShell width={width} className={className}>
+        <LoadingState label="Verifying your email" />
+      </PageShell>
+    );
+  }
+
+  if (!guard.shouldRender) {
+    return null;
+  }
 
   if (state === "loading") {
     return (

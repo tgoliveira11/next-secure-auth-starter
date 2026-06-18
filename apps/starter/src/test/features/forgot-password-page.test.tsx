@@ -2,6 +2,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ForgotPasswordPage from "@/app/(auth)/forgot-password/page";
+import { renderWithStarterUi } from "@/test/helpers/render-with-starter-ui";
+
+vi.mock("next-auth/react", () => ({
+  useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() })),
+  usePathname: vi.fn(() => "/"),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
 
 vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tgoliveira/secure-auth/client")>();
@@ -20,7 +33,7 @@ describe("forgot password page", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("shows generic success after submit", async () => {
-    render(<ForgotPasswordPage />);
+    renderWithStarterUi(<ForgotPasswordPage />);
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "user@example.com" },
     });

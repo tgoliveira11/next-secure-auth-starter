@@ -36,6 +36,14 @@ describe("middleware two-factor gating", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
+  it("redirects fully authenticated sessions away from login", async () => {
+    getToken.mockResolvedValue({ sub: "user-1", twoFactorPending: false, twoFactorVerified: true });
+    const { middleware } = await import("@/middleware");
+    const response = await middleware(new NextRequest("http://localhost:3001/login"));
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toContain("/dashboard");
+  });
+
   it("redirects unverified sessions when email verification is required", async () => {
     getToken.mockResolvedValue({
       emailVerificationRequired: true,

@@ -98,7 +98,32 @@ When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.
 | --- | --- |
 | `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
 | `useSecureAuthUi()` | Read provider config in package pages or custom components |
-| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position` |
+| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position` and `auth.redirectAuthenticatedFromGuestPages` |
+
+Guest-only pages redirect fully authenticated users to `uiConfig.auth.authenticatedRedirectPath` by default. Opt out globally via `auth.redirectAuthenticatedFromGuestPages: false` or per page with `redirectIfAuthenticated={false}`. See [consumer-authenticated-redirect-migration.md](./consumer-authenticated-redirect-migration.md).
+
+#### Middleware (optional)
+
+| Export (`@tgoliveira/secure-auth/next/middleware`) | Purpose |
+| --- | --- |
+| `createSecureAuthMiddleware` | Next.js middleware for incomplete-auth routing and guest-page redirects |
+| `buildMiddlewareConfigFromUi` | Build middleware config from `uiConfig` + `NEXTAUTH_SECRET` |
+| `defaultSecureAuthMiddlewareMatcher` | Suggested `config.matcher` |
+
+Use the **`/next/middleware`** entry in `middleware.ts` — not `@tgoliveira/secure-auth/next` (server bundle).
+
+```tsx
+import {
+  createSecureAuthMiddleware,
+  buildMiddlewareConfigFromUi,
+  defaultSecureAuthMiddlewareMatcher,
+} from "@tgoliveira/secure-auth/next/middleware";
+
+export const middleware = createSecureAuthMiddleware({
+  ...buildMiddlewareConfigFromUi(secureAuth.uiConfig, process.env.NEXTAUTH_SECRET!),
+});
+export const config = defaultSecureAuthMiddlewareMatcher;
+```
 
 ```tsx
 // app/layout.tsx

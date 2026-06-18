@@ -5,6 +5,7 @@ import { SingleActiveSessionMonitor } from "../modules/ui/single-active-session-
 import { SecureAuthUIProvider } from "../modules/ui/secure-auth-ui-provider.js";
 import { DEFAULT_AUTH_PATHS } from "../modules/ui/pages/types.js";
 import type { SecureAuthUIPublicConfig } from "../core/ui-config.js";
+import { DEFAULT_TEST_PUBLIC_AUTH } from "./helpers/default-public-auth.js";
 
 const getSession = vi.fn();
 const signOut = vi.fn();
@@ -32,6 +33,7 @@ const uiConfig: SecureAuthUIPublicConfig = {
     minScore: 2,
   },
   passwordStrength: { position: "above" },
+  auth: DEFAULT_TEST_PUBLIC_AUTH,
   sessionPolicy: {
     singleActiveSession: true,
     revocationPollIntervalSeconds: 1,

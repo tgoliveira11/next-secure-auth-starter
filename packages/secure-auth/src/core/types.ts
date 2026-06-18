@@ -54,6 +54,10 @@ export type SecureAuthConfig = {
     requireEmailVerificationBeforeSignIn: boolean;
     nextAuthSecret: string;
     twoFactorEncryptionKey: string;
+    /** Redirect fully authenticated users away from guest auth pages. Default: true. */
+    redirectAuthenticatedFromGuestPages?: boolean;
+    /** Landing path when redirecting authenticated users from guest pages. Falls back to afterLoginPath. */
+    authenticatedRedirectPath?: string;
   };
   accountPolicy?: {
     sendVerificationOnRegister: boolean;

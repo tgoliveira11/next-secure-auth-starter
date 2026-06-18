@@ -8,6 +8,7 @@ import { CredentialsLoginForm } from "../features/auth/credentials-login-form.js
 import { LoginPasskeySection } from "../features/auth/login-passkey-section.js";
 import { type LoginPageProps } from "./types.js";
 import { usePageTitle, useUiAppSlug, useUiMessage, useUiPaths } from "./use-page-ui.js";
+import { GuestOnlyPageGuard } from "../auth-redirect/guest-only-page-guard.js";
 
 export function LoginPage({
   brand,
@@ -24,6 +25,8 @@ export function LoginPage({
   forgotPasswordLinkLabel,
   submitLabel,
   afterLoginPath,
+  redirectIfAuthenticated,
+  authenticatedRedirectPath,
 }: LoginPageProps) {
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
@@ -37,7 +40,12 @@ export function LoginPage({
   const registerLinkLabel = useUiMessage(registerLinkLabelProp, "registerLinkLabel", "Create one");
 
   return (
-    <AuthPageShell width={width} className={className}>
+    <GuestOnlyPageGuard
+      redirectIfAuthenticated={redirectIfAuthenticated}
+      authenticatedRedirectPath={authenticatedRedirectPath ?? destination}
+      loadingLabel="Loading sign in"
+    >
+      <AuthPageShell width={width} className={className}>
       {brand}
       {header}
       <PageHeader title={title} description={description} />
@@ -63,5 +71,6 @@ export function LoginPage({
         </p>
       )}
     </AuthPageShell>
+    </GuestOnlyPageGuard>
   );
 }

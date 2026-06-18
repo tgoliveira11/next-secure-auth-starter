@@ -12,6 +12,7 @@ import { FormField } from "../primitives/form-field.js";
 import { GENERIC_FORGOT_PASSWORD_MESSAGE, accountAuthApi } from "@tgoliveira/secure-auth/client";
 import { type ForgotPasswordPageProps } from "./types.js";
 import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
+import { GuestOnlyPageGuard } from "../auth-redirect/guest-only-page-guard.js";
 
 export function ForgotPasswordPage({
   brand,
@@ -25,6 +26,8 @@ export function ForgotPasswordPage({
   title: titleProp,
   subtitle,
   description: descriptionProp,
+  redirectIfAuthenticated,
+  authenticatedRedirectPath,
 }: ForgotPasswordPageProps) {
   const resolved = useUiPaths(paths);
   const title = usePageTitle(
@@ -58,7 +61,12 @@ export function ForgotPasswordPage({
   }
 
   return (
-    <PageShell width={width} className={className}>
+    <GuestOnlyPageGuard
+      redirectIfAuthenticated={redirectIfAuthenticated}
+      authenticatedRedirectPath={authenticatedRedirectPath ?? resolved.afterLogin}
+      loadingLabel="Loading"
+    >
+      <PageShell width={width} className={className}>
       {brand}
       {header}
       <PageHeader title={title} description={description} />
@@ -96,5 +104,6 @@ export function ForgotPasswordPage({
         )}
       </Card>
     </PageShell>
+    </GuestOnlyPageGuard>
   );
 }

@@ -10,6 +10,8 @@ import { CredentialsTwoFactorForm } from "../features/auth/credentials-two-facto
 import { OAuthTwoFactorForm } from "../features/auth/oauth-two-factor-form.js";
 import { type LoginTwoFactorPageProps } from "./types.js";
 import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
+import { useLoginTwoFactorPageGuard } from "../auth-redirect/use-flow-page-guards.js";
+import { LoadingState } from "../primitives/loading-state.js";
 
 function LoginTwoFactorContent({
   mode: modeProp,
@@ -23,6 +25,8 @@ function LoginTwoFactorContent({
   title: titleProp,
   subtitle,
   description: descriptionProp,
+  authenticatedRedirectPath,
+  redirectIfAuthenticated,
 }: LoginTwoFactorPageProps) {
   const searchParams = useSearchParams();
   const resolved = useUiPaths(paths);
@@ -39,6 +43,25 @@ function LoginTwoFactorContent({
     "loginTwoFactorDescription",
     "Enter the 6-digit code from your authenticator app to finish signing in."
   );
+
+  const guard = useLoginTwoFactorPageGuard({
+    mode,
+    loginPath: resolved.login,
+    redirectIfAuthenticated,
+    authenticatedRedirectPath: authenticatedRedirectPath ?? destination,
+  });
+
+  if (guard.isLoading) {
+    return (
+      <AuthPageShell width={width} className={className}>
+        <LoadingState label="Loading two-factor sign in" />
+      </AuthPageShell>
+    );
+  }
+
+  if (!guard.shouldRender) {
+    return null;
+  }
 
   return (
     <AuthPageShell width={width} className={className}>

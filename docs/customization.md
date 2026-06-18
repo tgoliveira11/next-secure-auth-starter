@@ -80,6 +80,36 @@ export default function Page() {
 }
 ```
 
+### Authenticated-user redirects (guest-only pages)
+
+By default (`0.1.20+`), fully authenticated users are redirected away from `/login`, `/register`, and `/forgot-password` to `authenticatedRedirectPath` (resolved from `auth.authenticatedRedirectPath` → `auth.afterLoginPath` → `ui.paths.afterLogin` → `"/dashboard"`).
+
+```typescript
+export const secureAuth = createSecureAuth({
+  auth: {
+    afterLoginPath: "/dashboard",
+    redirectAuthenticatedFromGuestPages: true, // default
+    authenticatedRedirectPath: "/dashboard",
+  },
+});
+```
+
+Disable globally:
+
+```typescript
+createSecureAuth({ auth: { redirectAuthenticatedFromGuestPages: false } });
+```
+
+Disable per page (e.g. account switching):
+
+```tsx
+<LoginPage redirectIfAuthenticated={false} />
+```
+
+Flow-specific pages (`/login/2fa`, `/login/complete`, `/check-email`, token-based verify/reset) use dedicated guards — see [consumer-authenticated-redirect-migration.md](./consumer-authenticated-redirect-migration.md).
+
+Optional middleware (`@tgoliveira/secure-auth/next/middleware`) adds server-side redirects; client guards remain required.
+
 Helpers: `DEFAULT_AUTH_PATHS`, `resolveAuthPaths()`, `useSecureAuthUi()`.
 
 ## Password strength feedback placement

@@ -319,6 +319,7 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
         session.twoFactorVerified = token.twoFactorVerified !== false;
         session.twoFactorPending =
           token.twoFactorPending === true && token.twoFactorVerified === false;
+        session.emailVerificationRequired = token.emailVerificationRequired === true;
         return session;
       },
     },

@@ -2,6 +2,10 @@ import type { SecureAuthConfig } from "../core/types.js";
 import { resolvePasswordPolicyConfig } from "../core/config-accessors.js";
 import { validateCaptchaConfig } from "../modules/captcha/index.js";
 import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
+import {
+  buildMiddlewareConfig,
+  type SecureAuthMiddlewareConfig,
+} from "./middleware/create-secure-auth-middleware.js";
 import { createAuthServices } from "../core/create-auth-services.js";
 import { createRoutes } from "../server/routes/create-routes.js";
 import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
@@ -16,6 +20,7 @@ export function createSecureAuth(config: SecureAuthConfig) {
   validateCaptchaConfig(config);
   const passwordPolicy: PasswordPolicyConfig = resolvePasswordPolicyConfig(config);
   const uiConfig = buildPublicUIConfig(config);
+  const middlewareConfig: SecureAuthMiddlewareConfig = buildMiddlewareConfig(config, uiConfig);
 
   let services: ReturnType<typeof createAuthServices> | undefined;
 
@@ -32,6 +37,7 @@ export function createSecureAuth(config: SecureAuthConfig) {
     config,
     passwordPolicy,
     uiConfig,
+    middlewareConfig,
     get ui() {
       return uiConfig;
     },

@@ -34,6 +34,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "next/index": "src/next/index.ts",
+    "next/middleware": "src/next/middleware-entry.ts",
     "drizzle/schema": "src/drizzle/schema.ts",
     "email/index": "src/email/index.ts",
     "client/index": "src/client/index.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@tgoliveira/secure-auth",
-  "version": "0.1.19-internal",
+  "version": "0.1.20-internal",
   "description": "Opinionated Next.js + Drizzle + PostgreSQL authentication package (experimental internal release)",
   "type": "module",
   "repository": {
@@ -34,6 +34,11 @@
       "types": "./dist/next/index.d.ts",
       "import": "./dist/next/index.js",
       "require": "./dist/next/index.cjs"
+    },
+    "./next/middleware": {
+      "types": "./dist/next/middleware.d.ts",
+      "import": "./dist/next/middleware.js",
+      "require": "./dist/next/middleware.cjs"
     },
     "./react": {
       "types": "./dist/react/index.d.ts",

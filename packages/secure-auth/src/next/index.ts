@@ -1,3 +1,12 @@
-export { createSecureAuth } from "./create-secure-auth.js";
+import { createSecureAuth } from "./create-secure-auth.js";
+export { createSecureAuth };
 export type { SecureAuth } from "./create-secure-auth.js";
 export { createNextAuthRouteHandlers } from "../server/routes/handlers/auth/create-nextauth-route-handlers.js";
+export {
+  createSecureAuthMiddleware,
+  buildMiddlewareConfig,
+  buildMiddlewareConfigFromUi,
+  defaultSecureAuthMiddlewareMatcher,
+  type SecureAuthMiddlewareConfig,
+} from "./middleware/create-secure-auth-middleware.js";
+export { buildPublicUIConfig, type SecureAuthUIPublicConfig, type PublicAuthRedirectConfig } from "../core/ui-config.js";

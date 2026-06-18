@@ -8,6 +8,7 @@ import type { SecureAuthUIPublicConfig } from "@/core/ui-config";
 import { SecureAuthUIProvider } from "@/modules/ui/secure-auth-ui-provider";
 import { ChangePasswordSettings } from "@/modules/ui/features/settings/change-password-settings";
 import type { PasswordPolicyConfig } from "@tgoliveira/secure-auth/client/password-policy";
+import { DEFAULT_TEST_PUBLIC_AUTH } from "./helpers/default-public-auth.js";
 
 vi.mock("next-auth/react", () => ({
   useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),
@@ -54,6 +55,7 @@ function uiConfigWithMinLength(minLength: number): SecureAuthUIPublicConfig {
     messages: {},
     passwordPolicy,
     passwordStrength: { position: "above" },
+    auth: DEFAULT_TEST_PUBLIC_AUTH,
     sessionPolicy: {
       singleActiveSession: false,
       revocationPollIntervalSeconds: 0,

@@ -6,6 +6,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.20-internal] - 2026-06-18
+
+### Added
+
+- **Authenticated-user redirects** — guest-only auth pages (`LoginPage`, `RegisterPage`, `ForgotPasswordPage`) redirect fully authenticated users to `authenticatedRedirectPath` by default.
+- **Flow-specific guards** — safer behavior for `CheckEmailPage`, `VerifyEmailPage`, `LoginTwoFactorPage`, and `LoginCompletePage`.
+- **Middleware helper** — `createSecureAuthMiddleware`, `buildMiddlewareConfigFromUi`, and `defaultSecureAuthMiddlewareMatcher` exported from `@tgoliveira/secure-auth/next`.
+- **Config** — `auth.redirectAuthenticatedFromGuestPages` (default `true`) and `auth.authenticatedRedirectPath` on `createSecureAuth(config)`; exposed via `secureAuth.uiConfig.auth`.
+- **Docs** — [consumer-authenticated-redirect-migration.md](docs/consumer-authenticated-redirect-migration.md), [authenticated-user-auth-pages-audit.md](docs/authenticated-user-auth-pages-audit.md).
+
+### Changed
+
+- **Session** — `emailVerificationRequired` exposed on NextAuth session for client redirect decisions.
+- **Starter / consumer-demo** — middleware uses package helper; env mapping for `AUTH_REDIRECT_AUTHENTICATED_FROM_GUEST_PAGES` and `AUTH_AUTHENTICATED_REDIRECT_PATH`.
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.20-internal`.
+
 ## [0.1.19-internal] - 2026-06-11
 
 ### Fixed
@@ -347,6 +363,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **npm audit** — 11 transitive vulnerabilities (documented in [docs/security.md](docs/security.md)).
 - **OAuth E2E** — policy unit tests; manual provider validation required for CI gaps.
 
+[0.1.20-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.20-internal
 [0.1.19-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.19-internal
 [0.1.18-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.18-internal
 [0.1.17-internal]: https://github.com/tgoliveira11/next-secure-auth-starter/releases/tag/secure-auth-v0.1.17-internal

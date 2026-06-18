@@ -11,6 +11,8 @@ import { Button } from "../primitives/button.js";
 import { getCheckEmailMessage, accountAuthApi } from "@tgoliveira/secure-auth/client";
 import { type CheckEmailPageProps } from "./types.js";
 import { usePageTitle, useUiPaths } from "./use-page-ui.js";
+import { useCheckEmailPageGuard } from "../auth-redirect/use-flow-page-guards.js";
+import { LoadingState } from "../primitives/loading-state.js";
 
 function CheckEmailContent({
   email: emailProp,
@@ -22,6 +24,8 @@ function CheckEmailContent({
   width = "narrow",
   brand,
   header,
+  authenticatedRedirectPath,
+  redirectIfAuthenticated,
 }: CheckEmailPageProps) {
   const searchParams = useSearchParams();
   const resolved = useUiPaths(paths);
@@ -30,6 +34,11 @@ function CheckEmailContent({
   const verificationRequired =
     verificationRequiredProp ?? searchParams.get("required") === "1";
   const checkEmailMessage = getCheckEmailMessage(verificationRequired);
+  const guard = useCheckEmailPageGuard({
+    verificationRequired,
+    redirectIfAuthenticated,
+    authenticatedRedirectPath: authenticatedRedirectPath ?? resolved.afterLogin,
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +59,18 @@ function CheckEmailContent({
     } finally {
       setLoading(false);
     }
+  }
+
+  if (guard.isLoading) {
+    return (
+      <PageShell width={width} className={className}>
+        <LoadingState label="Loading" />
+      </PageShell>
+    );
+  }
+
+  if (!guard.shouldRender) {
+    return null;
   }
 
   return (

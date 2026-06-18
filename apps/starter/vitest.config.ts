@@ -78,6 +78,7 @@ export default defineConfig({
       },
       { find: "@tgoliveira/secure-auth/drizzle/schema", replacement: path.join(packageSrc, "drizzle/schema.ts") },
       { find: "@tgoliveira/secure-auth/react", replacement: path.join(packageSrc, "react/index.ts") },
+      { find: "@tgoliveira/secure-auth/next/middleware", replacement: path.join(packageSrc, "next/middleware-entry.ts") },
       { find: "@tgoliveira/secure-auth/next", replacement: path.join(packageSrc, "next/index.ts") },
       { find: "@tgoliveira/secure-auth/client", replacement: path.join(packageSrc, "client/index.ts") },
       { find: "@tgoliveira/secure-auth/email", replacement: path.join(packageSrc, "email/index.ts") },

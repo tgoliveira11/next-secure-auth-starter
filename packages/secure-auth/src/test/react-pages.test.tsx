@@ -20,6 +20,7 @@ import {
   resolveAuthPaths,
   type SecureAuthUIPublicConfig,
 } from "@tgoliveira/secure-auth/react";
+import { DEFAULT_TEST_PUBLIC_AUTH } from "./helpers/default-public-auth.js";
 
 vi.mock("next-auth/react", () => ({
   useSession: vi.fn(() => ({ data: null, status: "unauthenticated" })),
@@ -87,6 +88,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      auth: DEFAULT_TEST_PUBLIC_AUTH,
       sessionPolicy: {
         singleActiveSession: false,
         revocationPollIntervalSeconds: 0,
@@ -131,6 +133,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      auth: DEFAULT_TEST_PUBLIC_AUTH,
       sessionPolicy: {
         singleActiveSession: false,
         revocationPollIntervalSeconds: 0,
@@ -163,6 +166,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      auth: DEFAULT_TEST_PUBLIC_AUTH,
       sessionPolicy: {
         singleActiveSession: false,
         revocationPollIntervalSeconds: 0,
@@ -239,6 +243,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
         minScore: 2,
       },
       passwordStrength: { position: "above" },
+      auth: DEFAULT_TEST_PUBLIC_AUTH,
       sessionPolicy: {
         singleActiveSession: false,
         revocationPollIntervalSeconds: 0,
