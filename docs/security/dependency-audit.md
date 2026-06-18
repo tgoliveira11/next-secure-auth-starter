@@ -51,7 +51,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 | `drizzle-kit` | high | B | apps dev | Direct upgrade | `0.31.10` | No |
 | `vitest` / `vite` | high | B | apps + package dev | Direct upgrade + esbuild override | vitest `3.2.6` | No |
 | `tsup` | high | B | package dev | Direct upgrade + esbuild override | `8.5.1` | No |
-| `nodemailer` | moderate | B | starter direct; `next-auth` optional peer | Direct upgrade + override | `8.0.11` | No (app-only; not in published package) |
+| `nodemailer` | high | B | starter direct; `next-auth` optional peer | Direct upgrade + override | `9.0.1` | No (app-only; not in published package) |
 | `uuid` | moderate | A/C | `next-auth` nested | `next-auth@4.24.14` + root override | `11.1.1` | Indirect — override replaces nested `uuid@8` used by NextAuth v4 |
 | `postcss` | moderate | C | `next` bundled | Root override `next > postcss` | `8.5.15` | Indirect — Next still declares `8.4.31`; override supplies patched PostCSS at install time |
 | `@esbuild-kit/*` | high | B | `drizzle-kit` transitive | esbuild override dedupes to safe build | `0.28.1` | No |
@@ -98,7 +98,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 - **Type:** direct in starter; optional transitive via `next-auth`  
 - **Production:** starter app only  
 - **Dependency path:** `apps/starter` → `nodemailer`; `next-auth` optional email provider  
-- **Strategy:** Upgrade to `^8.0.11` (fixes require `>8.0.8`); root override + `next-auth > nodemailer`  
+- **Strategy:** Upgrade to `9.0.1` (fixes GHSA-p6gq-j5cr-w38f); root override + `next-auth > nodemailer`  
 - **Consumer impact:** none in published package (consumers supply their own `EmailProvider`)  
 - **Residual risk:** none at audit time  
 
@@ -132,11 +132,11 @@ Applied when upstream manifests block safe transitive versions:
 "overrides": {
   "esbuild": "0.28.1",
   "postcss": "8.5.15",
-  "nodemailer": "8.0.11",
+  "nodemailer": "9.0.1",
   "uuid": "11.1.1",
   "happy-dom": "20.10.3",
   "next": { "postcss": "8.5.15" },
-  "next-auth": { "uuid": "11.1.1", "nodemailer": "8.0.11" }
+  "next-auth": { "uuid": "11.1.1", "nodemailer": "9.0.1" }
 }
 ```
 

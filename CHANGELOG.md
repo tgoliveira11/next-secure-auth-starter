@@ -6,6 +6,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.22-internal] - 2026-06-18
+
+### Security
+
+- **nodemailer** — upgraded to `9.0.1` (fixes GHSA-p6gq-j5cr-w38f: raw option bypasses file/URL access restrictions). Root override includes `next-auth > nodemailer`.
+
+### Changed
+
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.22-internal`.
+
 ## [0.1.21-internal] - 2026-06-18
 
 ### Security

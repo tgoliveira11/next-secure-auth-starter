@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/starter",
-  "version": "0.1.21-internal",
+  "version": "0.1.22-internal",
   "private": true,
   "description": "Integration harness for @tgoliveira/secure-auth",
   "scripts": {
@@ -22,14 +22,14 @@
     "postinstall": "node scripts/copy-swagger-ui.mjs"
   },
   "dependencies": {
-    "@tgoliveira/secure-auth": "file:../../packages/secure-auth",
     "@simplewebauthn/browser": "^13.1.0",
     "@simplewebauthn/server": "^13.1.1",
+    "@tgoliveira/secure-auth": "file:../../packages/secure-auth",
     "bcryptjs": "^3.0.2",
     "drizzle-orm": "^0.45.2",
     "next": "^16.2.9",
     "next-auth": "^4.24.14",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.0.1",
     "otplib": "^13.4.1",
     "postgres": "^3.4.7",
     "qrcode": "^1.5.4",
