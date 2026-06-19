@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.23] - 2026-06-19
+
 ### Changed
 
 - **npm release convention** — Git tags use `secure-auth-v0.x.y` (normal semver, no `-internal` suffix). The publish workflow publishes with dist-tag `latest`. Install with `@tgoliveira/secure-auth@latest` or `@tgoliveira/secure-auth`.
