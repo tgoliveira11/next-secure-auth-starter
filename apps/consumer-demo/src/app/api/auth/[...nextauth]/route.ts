@@ -1,4 +1,6 @@
 import { secureAuth } from "@/lib/secure-auth";
+import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
+import NextAuth from "next-auth";
 
-export const GET = secureAuth.routes.nextAuth.GET;
-export const POST = secureAuth.routes.nextAuth.POST;
+const handler = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);
+export const { GET, POST } = handler;

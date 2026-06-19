@@ -6,10 +6,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Consumer-demo route sync automation** — when `create-routes.ts` or `scripts/consumer-demo-route-registry.mjs` changes, a sync script generates matching `route.ts` files in `apps/consumer-demo`. Includes `npm run sync:consumer-demo` / `sync:consumer-demo:check`, a GitHub Action (`.github/workflows/sync-consumer-demo.yml`) that commits generated routes on push, and a CI fallback test (`route-sync.test.ts`).
+
 ### Changed
 
 - **Renamed `apps/starter` to `apps/dev-harness`** (`@secure-auth/dev-harness`) — internal package development harness, not a consumer reference.
 - **`apps/consumer-demo`** is now the documented canonical consumer integration reference; README headers, docs, and roadmap checklist updated accordingly.
+- **`apps/consumer-demo` NextAuth route** — uses `createNextAuthRouteHandlers` via the sync script template.
 
 ## [0.2.0] - 2026-06-11
 

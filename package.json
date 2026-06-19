@@ -31,7 +31,9 @@
     "db:migrate": "npm run db:migrate -w @secure-auth/dev-harness",
     "db:migrate:consumer": "npm run db:migrate -w @secure-auth/consumer-demo",
     "db:push": "npm run db:push -w @secure-auth/dev-harness",
-    "db:studio": "npm run db:studio -w @secure-auth/dev-harness"
+    "db:studio": "npm run db:studio -w @secure-auth/dev-harness",
+    "sync:consumer-demo": "node scripts/sync-consumer-demo-routes.mjs",
+    "sync:consumer-demo:check": "node scripts/sync-consumer-demo-routes.mjs --check"
   },
   "overrides": {
     "esbuild": "0.28.1",
