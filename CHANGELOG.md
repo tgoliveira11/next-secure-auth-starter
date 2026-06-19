@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.25] - 2026-06-19
+
 ### Fixed
 
 - Account passkey registration now excludes only credentials enabled for account sign-in from WebAuthn `excludeCredentials`.
