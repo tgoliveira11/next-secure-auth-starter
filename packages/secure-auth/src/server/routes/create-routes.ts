@@ -105,7 +105,11 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
 
     magicLinkRequest: route(() => import("./handlers/auth/magic-link-request.js"), "POST"),
     magicLinkVerify: {
-      ...route(() => import("./handlers/auth/magic-link-verify.js"), "POST"),
+      POST: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/auth/magic-link-verify.js"),
+        "POST"
+      ),
       GET: lazyServiceRoute(
         getServices,
         () => import("./handlers/auth/magic-link-verify.js"),
@@ -119,8 +123,12 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     nextAuth: lazyNextAuth(getServices),
 
     account: {
-      ...route(() => import("./handlers/account/account.js"), "GET"),
-      ...route(() => import("./handlers/account/account.js"), "DELETE"),
+      GET: lazyServiceRoute(getServices, () => import("./handlers/account/account.js"), "GET"),
+      DELETE: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/account.js"),
+        "DELETE"
+      ),
     },
     accountAuthStatus: route(() => import("./handlers/account/auth-status.js"), "GET"),
     changePassword: route(() => import("./handlers/account/change-password.js"), "POST"),
