@@ -154,7 +154,7 @@ The publish workflow runs `npm run audit:security` before `npm publish`.
 
 ### npm publish (automated)
 
-Releases are published to [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth) when tags matching `secure-auth-v0.1.*-internal` are pushed. Uses GitHub Actions + npm Trusted Publishing (OIDC) — no `NPM_TOKEN` secret.
+Releases are published to [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth) when tags matching `secure-auth-v*.*.*` are pushed (for example `secure-auth-v0.1.22`). Publishes with dist-tag `latest`. Uses GitHub Actions + npm Trusted Publishing (OIDC) — no `NPM_TOKEN` secret.
 
 See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 

@@ -3,7 +3,7 @@ name: Publish secure-auth to npm
 on:
   push:
     tags:
-      - "secure-auth-v0.*.*-internal"
+      - "secure-auth-v*.*.*"
 
 permissions:
   contents: read
@@ -60,6 +60,4 @@ jobs:
         run: npm --version
 
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish -w @tgoliveira/secure-auth --access public --tag latest

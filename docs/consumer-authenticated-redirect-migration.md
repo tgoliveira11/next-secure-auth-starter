@@ -27,7 +27,7 @@ Optional middleware helper: `createSecureAuthMiddleware` from `@tgoliveira/secur
 
 ## What client repos should do
 
-1. **Upgrade** `@tgoliveira/secure-auth` to `>= 0.1.20-internal`.
+1. **Upgrade** `@tgoliveira/secure-auth` to `>= 0.1.20` (or `@latest`).
 2. **Ensure** root layout wraps pages with `SecureAuthUIProvider config={secureAuth.uiConfig}`.
 3. **Map env** into `createSecureAuth(config)` at the app boundary (package never reads env).
 4. **Remove duplicate** custom guest-route redirects if the package now handles them.
@@ -121,7 +121,7 @@ Starting in **`0.1.21-internal`**, package API handlers enforce their own auth t
 
 ### 1. Package version requirement
 
-Upgrade `@tgoliveira/secure-auth` to **`>= 0.1.21-internal`**.
+Upgrade `@tgoliveira/secure-auth` to **`>= 0.1.21`** (or `@latest`).
 
 ### 2. Route wrappers
 
@@ -179,7 +179,7 @@ Compare your app with `apps/starter` and `apps/consumer-demo` (updated in `0.1.2
 
 ### 10. API security validation checklist
 
-- [ ] Package version `>= 0.1.21-internal`
+- [ ] Package version `>= 0.1.21`
 - [ ] `.env` has correct `APP_BASE_URL` / `NEXTAUTH_URL`
 - [ ] Route wrappers delegate to `secureAuth.routes.*`
 - [ ] `SecureAuthUIProvider` uses `secureAuth.uiConfig`
