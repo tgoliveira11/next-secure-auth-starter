@@ -28,7 +28,7 @@
 | `AGENTS.md` | AI agent instructions (package-first phase) |
 | `CHANGELOG.md` | Release history |
 | `packages/secure-auth/README.md` | Package overview |
-| `apps/starter/README.md` | Reference consumer |
+| `apps/dev-harness/README.md` | Reference consumer |
 | `apps/consumer-demo/README.md` | Canonical minimal consumer validation app |
 | `docs/consumer-demo-validation.md` | Consumer demo validation report |
 | `docs/architecture.md` | Package-first model, composition root, UI provider, boundaries |
@@ -53,7 +53,7 @@
 | `AGENTS.md` | Package-first phase; removed Phase 0 no-code rule; updated doc map |
 | `CHANGELOG.md` | Unreleased entry for UI provider, DI, documentation cleanup |
 | `packages/secure-auth/README.md` | `uiConfig`, `SecureAuthUIProvider`; no global runtime |
-| `apps/starter/README.md` | UI provider wiring; email/OAuth tables |
+| `apps/dev-harness/README.md` | UI provider wiring; email/OAuth tables |
 | `docs/architecture.md` | Full rewrite: package-first, UI config flow, constructor DI, merged boundaries |
 | `docs/security.md` | **New** — merged security principles and readiness |
 | `docs/package-api.md` | `uiConfig`, `SecureAuthUIProvider`; removed scoped-runtime section |
@@ -99,7 +99,7 @@
 | `docs/MODULE_BOUNDARIES.md` | Merged into `docs/architecture.md` |
 | `docs/TESTING_STRATEGY.md` | Requirements inlined in `docs/security.md` and `.cursor/rules/testing.md` |
 | `docs/git-release-strategy.md` | Transitional release planning doc |
-| `apps/starter/src/modules/README.md` | Referenced deleted MODULE_BOUNDARIES |
+| `apps/dev-harness/src/modules/README.md` | Referenced deleted MODULE_BOUNDARIES |
 | `packages/secure-auth/src/modules/README.md` | Internal readme referenced obsolete docs |
 
 ---
@@ -119,7 +119,7 @@
 | Install from GitHub Packages | [publishing-private-package.md](./publishing-private-package.md) |
 | Monorepo local dev | [README.md](../README.md) |
 | Package-specific overview | [packages/secure-auth/README.md](../packages/secure-auth/README.md) |
-| Reference consumer | [apps/starter/README.md](../apps/starter/README.md) |
+| Reference consumer | [apps/dev-harness/README.md](../apps/dev-harness/README.md) |
 | Release history | [CHANGELOG.md](../CHANGELOG.md) |
 | AI agent rules | [AGENTS.md](../AGENTS.md) |
 

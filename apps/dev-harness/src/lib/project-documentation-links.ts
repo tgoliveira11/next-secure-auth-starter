@@ -26,7 +26,7 @@ export const PROJECT_DOCUMENTATION_LINKS: ProjectDocumentationLink[] = [
   {
     title: "Starter app README",
     description: "How this reference app wires routes, providers, and configuration.",
-    href: githubDoc("apps/starter/README.md"),
+    href: githubDoc("apps/dev-harness/README.md"),
   },
   {
     title: "Consumer demo README",

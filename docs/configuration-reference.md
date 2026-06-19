@@ -1,6 +1,6 @@
 # Configuration reference
 
-Canonical reference for **`createSecureAuth(config)`** options and the environment variables mapped by **`apps/starter`** and **`apps/consumer-demo`**.
+Canonical reference for **`createSecureAuth(config)`** options and the environment variables mapped by **`apps/dev-harness`** and **`apps/consumer-demo`**.
 
 ## Architecture
 
@@ -24,7 +24,7 @@ Some variables (for example `DATABASE_URL`, `EMAIL_PROVIDER`, SMTP settings) are
 
 | App | Env template |
 | --- | --- |
-| Starter | [apps/starter/.env.example](../apps/starter/.env.example) |
+| Starter | [apps/dev-harness/.env.example](../apps/dev-harness/.env.example) |
 | Consumer demo | [apps/consumer-demo/.env.example](../apps/consumer-demo/.env.example) |
 | Monorepo root (starter copy source) | [.env.example](../.env.example) |
 

@@ -7,7 +7,7 @@ const LEGACY_INTERNAL_VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d
 const MANIFEST_PATHS = [
   "package.json",
   "packages/secure-auth/package.json",
-  "apps/starter/package.json",
+  "apps/dev-harness/package.json",
   "apps/consumer-demo/package.json",
 ];
 
@@ -134,7 +134,7 @@ export function prepareRelease({ root, releaseSpec = "", date = new Date().toISO
   });
 
   packageLock.version = version;
-  for (const packagePath of ["", "packages/secure-auth", "apps/starter", "apps/consumer-demo"]) {
+  for (const packagePath of ["", "packages/secure-auth", "apps/dev-harness", "apps/consumer-demo"]) {
     if (!packageLock.packages?.[packagePath]) {
       throw new Error(`package-lock.json is missing package entry '${packagePath}'`);
     }

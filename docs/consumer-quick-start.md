@@ -164,7 +164,7 @@ See [migrations.md](./migrations.md) for monorepo vs downstream details.
 
 **`createSecureAuth(config)` is the only supported composition root.** Create one instance in `src/lib/secure-auth.ts`.
 
-In-repo apps use `buildSecureAuthConfigFromEnv()` (`apps/starter/src/lib/env/`, `apps/consumer-demo/src/lib/env/`) to map `.env` values into config — see [configuration-reference.md](./configuration-reference.md). You may inline `process.env` reads in your app or use a similar helper; the package must receive typed config only.
+In-repo apps use `buildSecureAuthConfigFromEnv()` (`apps/dev-harness/src/lib/env/`, `apps/consumer-demo/src/lib/env/`) to map `.env` values into config — see [configuration-reference.md](./configuration-reference.md). You may inline `process.env` reads in your app or use a similar helper; the package must receive typed config only.
 
 ```typescript
 import "server-only";
@@ -227,7 +227,7 @@ export const emailProvider: EmailProvider = {
 
 Wire it in `createSecureAuth({ email: { from, provider: emailProvider } })`.
 
-For local development, log links to the console or use Mailpit SMTP. Reference: `apps/starter/src/modules/email/core/` in this monorepo.
+For local development, log links to the console or use Mailpit SMTP. The consumer demo uses a console `EmailProvider` in `apps/consumer-demo/src/lib/email-provider.ts`. The internal dev harness adds SMTP modules under `apps/dev-harness/src/modules/email/core/` — do not copy those into a consumer app.
 
 ---
 
@@ -326,7 +326,7 @@ AUTH_CAPTCHA_REGISTER_ENABLED=false
 AUTH_CAPTCHA_LOGIN_ENABLED=false
 ```
 
-Map in your app bootstrap (starter/consumer-demo use `buildSecureAuthConfigFromEnv`):
+Map in your app bootstrap (`apps/consumer-demo` uses `buildSecureAuthConfigFromEnv`; see also `apps/dev-harness` for internal-only examples):
 
 ```typescript
 captcha: {
@@ -439,7 +439,7 @@ In `src/app/globals.css`:
 @import "@tgoliveira/secure-auth/styles.css";
 ```
 
-Define theme CSS variables (copy from `apps/starter/src/app/globals.css` or define your own):
+Define theme CSS variables (copy from `apps/dev-harness/src/app/globals.css` or define your own):
 
 ```css
 :root {
@@ -464,7 +464,7 @@ Password minimum length defaults to **12**. Override in app env (the package doe
 AUTH_PASSWORD_MIN_LENGTH=5
 ```
 
-Map env into config via `buildSecureAuthConfigFromEnv()` (see `apps/starter` / `apps/consumer-demo`) or set `passwordPolicy: { minLength: 5 }` directly in `createSecureAuth(config)`. The effective value controls UI hints, browser validation, client checks, and server registration/reset/change-password validation.
+Map env into config via `buildSecureAuthConfigFromEnv()` (see `apps/consumer-demo` — canonical reference — or `apps/dev-harness` for internal tooling) or set `passwordPolicy: { minLength: 5 }` directly in `createSecureAuth(config)`. The effective value controls UI hints, browser validation, client checks, and server registration/reset/change-password validation.
 
 ### Configure UI in createSecureAuth
 
@@ -502,7 +502,7 @@ export default function RootLayout({ children }) {
 }
 ```
 
-With NextAuth, wrap both providers (see `apps/starter/src/components/providers.tsx`).
+With NextAuth, wrap both providers (see `apps/consumer-demo/src/components/providers.tsx`).
 
 Package pages call `useSecureAuthUi()` internally. Per-page props still override provider defaults.
 
@@ -554,7 +554,7 @@ export const config = {
 };
 ```
 
-See `apps/starter/src/middleware.ts` for password-manager form rewrites layered on top.
+Optional: see `apps/dev-harness/src/middleware.ts` for password-manager form rewrites layered on top of package middleware (internal harness only).
 
 ---
 
@@ -641,7 +641,7 @@ even features you plan to enable later.
 5. Enable 2FA and register a passkey under settings.
 6. Run [consumer-validation-checklist.md](./consumer-validation-checklist.md).
 
-Reference implementation: `apps/starter/` in this monorepo.
+Reference implementation: [`apps/consumer-demo/`](../apps/consumer-demo) in this monorepo. Use **`apps/dev-harness`** only when developing the package itself — it includes internal tooling not meant for downstream apps.
 
 ---
 
@@ -649,7 +649,7 @@ Reference implementation: `apps/starter/` in this monorepo.
 
 Before production deployment:
 
-- [ ] Configure real SMTP provider (see email providers table in [apps/starter/README.md](../apps/starter/README.md))
+- [ ] Configure real SMTP provider (see [configuration-reference.md](./configuration-reference.md) and `apps/consumer-demo/src/lib/email-provider.ts` for a minimal console provider)
 - [ ] Configure OAuth redirect URIs for production domain
 - [ ] Rotate all secrets (Auth.js, OAuth, TOTP encryption, SMTP)
 - [ ] Verify logging redaction in production log sink

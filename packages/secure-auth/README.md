@@ -150,7 +150,7 @@ Define `:root` CSS variables for theme tokens (see starter `globals.css`).
 
 Account email flows through your injected provider only. Transport lives in the app; templates use `config.app.name` and `config.app.baseUrl`.
 
-Reference: `apps/starter/src/modules/email/core/` + `apps/starter/src/lib/secure-auth.ts`.
+Reference: `apps/dev-harness/src/modules/email/core/` + `apps/dev-harness/src/lib/secure-auth.ts`.
 
 ## Configuration
 

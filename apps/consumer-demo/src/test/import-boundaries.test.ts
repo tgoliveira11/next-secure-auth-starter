@@ -9,7 +9,7 @@ const scanRoots = [
 ];
 
 const forbiddenPatterns = [
-  "apps/starter",
+  "apps/dev-harness",
   "packages/secure-auth/src",
   "@tgoliveira/secure-auth/server",
   "createRoutes",

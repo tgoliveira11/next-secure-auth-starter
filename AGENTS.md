@@ -4,7 +4,10 @@ This file defines instructions for AI coding agents working on `next-secure-auth
 
 ## Core mission
 
-Build and maintain **`@tgoliveira/secure-auth`** — a secure Next.js account/authentication package — with **`apps/starter`** as the reference integration app.
+Build and maintain **`@tgoliveira/secure-auth`** — a secure Next.js account/authentication package.
+
+- **`apps/dev-harness`** — internal development harness for the package (not a consumer reference).
+- **`apps/consumer-demo`** — canonical consumer integration reference; keep it updated with new routes and config.
 
 This is a reusable auth starter/template, not a product-specific application.
 
@@ -13,7 +16,7 @@ This is a reusable auth starter/template, not a product-specific application.
 Current phase: **Package-first architecture**
 
 - **`packages/secure-auth`** is the product; changes here affect all consumers.
-- **`apps/starter`** demonstrates integration only — keep it thin.
+- **`apps/consumer-demo`** demonstrates integration — keep it updated as the canonical consumer reference.
 - **`createSecureAuth(config)`** is the sole composition root.
 - **`SecureAuthUIProvider` + `secureAuth.uiConfig`** drive page defaults.
 - No global runtime state — config and `db` are injected through factories.
@@ -60,7 +63,7 @@ At minimum review:
 - docs/package-api.md
 - docs/consumer-quick-start.md
 - packages/secure-auth/README.md
-- apps/starter/README.md
+- apps/dev-harness/README.md
 - docs/*
 - .cursor/rules/*
 

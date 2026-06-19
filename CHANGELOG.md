@@ -6,6 +6,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Renamed `apps/starter` to `apps/dev-harness`** (`@secure-auth/dev-harness`) — internal package development harness, not a consumer reference.
+- **`apps/consumer-demo`** is now the documented canonical consumer integration reference; README headers, docs, and roadmap checklist updated accordingly.
+
 ## [0.2.0] - 2026-06-11
 
 ### Added
@@ -250,7 +255,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Starter test suite** — Vitest now resolves `@tgoliveira/secure-auth` from monorepo **source** (not a nested registry `dist/` copy), with Next.js ESM aliases (`next/link.js`, `next/server.js`, `next/navigation.js`) so tests pass on Node 22+.
 - **Node 22+ `localStorage`** — test setup strips Node’s broken experimental `localStorage` global so happy-dom passkey and client tests work.
-- **Monorepo package resolution** — `apps/starter` and `apps/consumer-demo` depend on `file:../../packages/secure-auth` so `npm install` does not shadow the workspace package with a published tarball.
+- **Monorepo package resolution** — `apps/dev-harness` and `apps/consumer-demo` depend on `file:../../packages/secure-auth` so `npm install` does not shadow the workspace package with a published tarball.
 
 ### Changed
 
@@ -310,9 +315,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **`sessions.revocationPollIntervalSeconds`** — client poll interval (default **10s**, range 5–300) used when single active session is enabled so revoked browsers detect invalidation and sign out.
 - **`SingleActiveSessionMonitor`** — client component (mounted by `SecureAuthUIProvider` when the policy is on) that polls `getSession()`, calls `signOut`, and hard-redirects to login when the server session no longer has a user; also checks on tab focus.
 - **`SecureAuthUIPublicConfig.sessionPolicy`** — serializable `{ singleActiveSession, revocationPollIntervalSeconds }` for `SessionProvider refetchInterval` and the monitor.
-- **App-level env → config mapping** — `buildSecureAuthConfigFromEnv()` and parsing helpers (`readBooleanEnv`, `readNumberEnv`, `readEnumEnv`, …) in `apps/starter` and `apps/consumer-demo`; maps `AUTH_*` variables into `createSecureAuth(config)` without package `process.env` reads.
+- **App-level env → config mapping** — `buildSecureAuthConfigFromEnv()` and parsing helpers (`readBooleanEnv`, `readNumberEnv`, `readEnumEnv`, …) in `apps/dev-harness` and `apps/consumer-demo`; maps `AUTH_*` variables into `createSecureAuth(config)` without package `process.env` reads.
 - **[docs/configuration-reference.md](docs/configuration-reference.md)** — canonical env variable and TypeScript config reference (defaults, allowed values, unsupported options).
-- **Env templates** — root [`.env.example`](.env.example), [`apps/starter/.env.example`](apps/starter/.env.example), and updated [`apps/consumer-demo/.env.example`](apps/consumer-demo/.env.example) with grouped sections and comments.
+- **Env templates** — root [`.env.example`](.env.example), [`apps/dev-harness/.env.example`](apps/dev-harness/.env.example), and updated [`apps/consumer-demo/.env.example`](apps/consumer-demo/.env.example) with grouped sections and comments.
 - **Env variables** (app boundary): `AUTH_SINGLE_ACTIVE_SESSION`, `AUTH_SESSION_REVOCATION_POLL_SECONDS`, `AUTH_PASSWORD_STRENGTH_POSITION`, `AUTH_PASSWORD_*`, `AUTH_SESSION_*`, `AUTH_COOKIE_SECURE`, `AUTH_TRACE`, OAuth `AUTH_*` names (with legacy aliases), and related app/base URL vars — see configuration reference.
 - **Tests** — env parsing and mapping (`secure-auth-from-env`, `env-parse`), single active session service/auth-options, `SingleActiveSessionMonitor`, and `sessionPolicy` in `buildPublicUIConfig`.
 - **Audit event** — `sessions_revoked_on_login` when other sessions are revoked on login.
@@ -324,7 +329,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **`apps/starter` and `apps/consumer-demo`** — `secure-auth.ts` uses `buildSecureAuthConfigFromEnv()`; `SessionProvider` sets `refetchInterval` from `uiConfig.sessionPolicy` when single active session is enabled.
+- **`apps/dev-harness` and `apps/consumer-demo`** — `secure-auth.ts` uses `buildSecureAuthConfigFromEnv()`; `SessionProvider` sets `refetchInterval` from `uiConfig.sessionPolicy` when single active session is enabled.
 - **Documentation** — README, starter/consumer READMEs, package README, `customization`, `package-api`, `security`, and `consumer-quick-start` link to [configuration-reference.md](docs/configuration-reference.md) instead of duplicating large config tables.
 - Password strength / validation feedback now renders **above** the relevant password field by default everywhere it appears in package UI.
 - Password feedback uses a **stable reserved region** — neutral requirements show before typing; strength updates in place without remounting the input or stealing focus.
@@ -348,7 +353,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **`apps/starter`** — auth/account/security routes are thin wrappers; layout passes `secureAuth.uiConfig` to `SecureAuthUIProvider`.
+- **`apps/dev-harness`** — auth/account/security routes are thin wrappers; layout passes `secureAuth.uiConfig` to `SecureAuthUIProvider`.
 - **Documentation** — package-first architecture cleanup; obsolete phase logs and starter-first docs removed; consolidated security and architecture docs under `docs/`.
 - **`@tgoliveira/secure-auth/react`** — documents `SecureAuthUIProvider`, `uiConfig`, and path helpers.
 
@@ -409,7 +414,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Monorepo layout** — `packages/secure-auth` (`@tgoliveira/secure-auth`) + `apps/starter` integration harness.
+- **Monorepo layout** — `packages/secure-auth` (`@tgoliveira/secure-auth`) + `apps/dev-harness` integration harness.
 - **`createSecureAuth(config)`** — single factory for auth domain wiring (db, email, OAuth, WebAuthn, UI).
 - **Public package exports** — `/next`, `/react`, `/react/client`, `/client`, `/drizzle/schema`, `/email` (historical; `/server` was removed in `0.1.1-internal`).
 - **Route handler migration** — auth/account API handlers in package; starter exposes thin App Router wrappers.
@@ -426,7 +431,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Removed
 
-- Pre-monorepo root `src/` application tree (replaced by `apps/starter`).
+- Pre-monorepo root `src/` application tree (replaced by `apps/dev-harness`).
 - Root `drizzle/` (replaced by package migrations).
 - `STARTER_CONTEXT_PROMPT.md` (obsolete bootstrap prompt).
 - Package SMTP/nodemailer delivery code (moved to starter adapter).

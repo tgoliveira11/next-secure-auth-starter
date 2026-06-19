@@ -40,7 +40,7 @@ AUTH_REDIRECT_AUTHENTICATED_FROM_GUEST_PAGES=true
 AUTH_AUTHENTICATED_REDIRECT_PATH=/dashboard
 ```
 
-Map in `buildSecureAuthConfigFromEnv()` (see `apps/starter` / `apps/consumer-demo`).
+Map in `buildSecureAuthConfigFromEnv()` (see `apps/dev-harness` / `apps/consumer-demo`).
 
 ## Example config
 
@@ -175,7 +175,7 @@ Both flags must be true for `GET /api/auth/login/trace` to return data.
 
 ### 9. Reference implementations
 
-Compare your app with `apps/starter` and `apps/consumer-demo` (updated in `0.1.21-internal`).
+Compare your app with `apps/dev-harness` and `apps/consumer-demo` (updated in `0.1.21-internal`).
 
 ### 10. API security validation checklist
 

@@ -6,7 +6,7 @@
 
 ## Summary
 
-The consumer demo validates that a **new Next.js application** can integrate `@tgoliveira/secure-auth` using **public exports only**, without `apps/starter`, package `src/`, runtime helpers, or copied auth UI.
+The consumer demo validates that a **new Next.js application** can integrate `@tgoliveira/secure-auth` using **public exports only**, without `apps/dev-harness`, package `src/`, runtime helpers, or copied auth UI.
 
 ## App created
 
@@ -36,7 +36,7 @@ The consumer demo validates that a **new Next.js application** can integrate `@t
 
 Automated scan (`src/test/import-boundaries.test.ts`) over `src/app`, `src/lib`, `src/components`:
 
-- No `apps/starter` imports
+- No `apps/dev-harness` imports
 - No `packages/secure-auth/src` imports
 - No `@tgoliveira/secure-auth/server`
 - No `createRoutes`, `createAuthServices`, runtime helpers

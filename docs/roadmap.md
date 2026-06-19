@@ -942,6 +942,11 @@ Add `## [1.0.0]` entry:
 
 ## Implementation checklist (use before marking each version done)
 
+> **Note:** `apps/dev-harness` does not need to be updated as part of a version
+> release. It is a development tool and may lag behind intentionally. Only
+> `apps/consumer-demo` is the consumer reference and must always reflect the
+> current public API.
+
 Before bumping the version and updating the changelog, verify:
 
 - [ ] All new tests pass (`npm run test` from `packages/secure-auth`)
@@ -954,3 +959,5 @@ Before bumping the version and updating the changelog, verify:
 - [ ] No new plaintext storage of tokens, passwords, or secrets
 - [ ] Rate limiting applied to all unauthenticated mutation endpoints
 - [ ] All new endpoints that mutate state verify session ownership before acting
+- [ ] `apps/consumer-demo` updated with all new routes wired (one file per route)
+- [ ] `apps/consumer-demo` updated with any new config options used in `src/lib/secure-auth.ts`

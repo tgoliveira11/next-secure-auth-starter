@@ -1,6 +1,6 @@
 # API authentication and authorization security audit
 
-**Scope:** `@tgoliveira/secure-auth` package routes, `apps/starter` and `apps/consumer-demo` API wrappers, middleware, NextAuth/JWT configuration, session services, rate limiting, audit logging, and CSRF posture.
+**Scope:** `@tgoliveira/secure-auth` package routes, `apps/dev-harness` and `apps/consumer-demo` API wrappers, middleware, NextAuth/JWT configuration, session services, rate limiting, audit logging, and CSRF posture.
 
 **Date:** 2026-06-11  
 **Package version reviewed:** `0.1.20-internal`  
@@ -71,7 +71,7 @@ Client request
     │           Optional: login-pending, 2FA-challenge cookies (httpOnly, package-managed)
     │
     ▼
-Next.js route handler (apps/starter or consumer-demo)
+Next.js route handler (apps/dev-harness or consumer-demo)
     │
     └─ secureAuth.routes.<name>.<METHOD>  →  package handler
             │
@@ -248,7 +248,7 @@ Pending login/challenge cookies cannot be forged without knowing the opaque toke
 | `/api/account/sessions/revoke-current` | POST | `account/sessions-revoke-current.ts` | Protected | fully-authenticated | Session | Session | No | SameSite | session.id | Yes | **Safe** | — |
 | `/api/account/sessions/revoke-others` | POST | `account/sessions-revoke-others.ts` | Protected | fully-authenticated | Session | Session | Yes | SameSite | session.id | Yes | **Safe** | Requires sid |
 | `/api/account/sessions/revoke-all` | POST | `account/sessions-revoke-all.ts` | Protected | fully-authenticated | Session | Session | Yes | SameSite | session.id | Yes | **Safe** | — |
-| `/api/openapi` | GET | `apps/starter` only | Public | public | None | None | No | N/A | N/A | No | **Needs review** | Starter-only; schema exposure |
+| `/api/openapi` | GET | `apps/dev-harness` only | Public | public | None | None | No | N/A | N/A | No | **Needs review** | Starter-only; schema exposure |
 
 \* Passkey delete rate limit enforced in service layer on register; delete path has no explicit route-level rate limit.
 
@@ -511,7 +511,7 @@ Do **not** implement until instructed; listed for prioritization:
 
 ## 21. Consumer app review
 
-### Starter (`apps/starter`)
+### Starter (`apps/dev-harness`)
 
 - All auth/account routes: **thin wrappers** → `secureAuth.routes.*` ✅  
 - **Extra route:** `GET /api/openapi` — public, not from package  
@@ -562,7 +562,7 @@ For consumer applications integrating `@tgoliveira/secure-auth`:
 | `packages/secure-auth/src/server/routes/handlers/__tests__/*` | Per-route happy/error paths, mocked session helpers |
 | `packages/secure-auth/src/modules/auth/lib/__tests__/auth-options*.test.ts` | JWT callback, single active session |
 | `packages/secure-auth/src/test/secure-auth-middleware.test.ts` | Middleware redirects |
-| `apps/starter/src/test/unit/middleware.test.ts` | Starter middleware integration |
+| `apps/dev-harness/src/test/unit/middleware.test.ts` | Starter middleware integration |
 | `apps/consumer-demo/src/test/import-boundaries.test.ts` | Public entry imports only |
 
 ---

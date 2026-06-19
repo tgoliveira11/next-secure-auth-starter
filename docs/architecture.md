@@ -2,7 +2,7 @@
 
 ## Package-first model
 
-**`@tgoliveira/secure-auth`** is the product. **`apps/starter`** is a reference consumer that demonstrates integration through public exports only.
+**`@tgoliveira/secure-auth`** is the product. **`apps/consumer-demo`** is the canonical consumer reference. **`apps/dev-harness`** is the internal development harness (Swagger UI, API docs, extra tooling — not for downstream apps).
 
 Consumers install the package, call `createSecureAuth(config)` once, wire `secureAuth.routes.*`, and optionally mount package UI pages. They do not copy auth modules into their app.
 
@@ -11,7 +11,8 @@ Consumers install the package, call `createSecureAuth(config)` once, wire `secur
 ```text
 secure-auth/                    # npm workspaces root
 ├── packages/secure-auth/       # @tgoliveira/secure-auth (reusable package)
-├── apps/starter/               # Integration harness / reference consumer
+├── apps/dev-harness/           # Internal package development harness
+├── apps/consumer-demo/         # Canonical consumer reference app
 └── docs/                       # Monorepo + package documentation
 ```
 
@@ -99,7 +100,7 @@ export default function RootLayout({ children }) {
 
 Package pages (`LoginPage`, `RegisterPage`, …) call `useSecureAuthUi()` internally. When wrapped, they inherit paths, messages, `appSlug`, `appName`, and `passwordPolicy` from config. Props on individual pages still override provider defaults.
 
-Reference: `apps/starter/src/app/layout.tsx`, `apps/starter/src/components/providers.tsx`.
+Reference: `apps/consumer-demo/src/app/layout.tsx`, `apps/consumer-demo/src/components/providers.tsx` (canonical consumer). Internal harness: `apps/dev-harness/src/app/layout.tsx`.
 
 ## Dependency injection
 
@@ -131,7 +132,7 @@ type EmailProvider = {
 
 Account emails: `account-auth-service` → `deliverAccountEmail()` → `config.email.provider.send()`.
 
-**No SMTP or console logic in the package.** The starter implements transport in `apps/starter/src/modules/email/core/`.
+**No SMTP or console logic in the package.** Apps implement transport in their own `EmailProvider` (see `apps/consumer-demo/src/lib/email-provider.ts`). The dev harness adds SMTP modules in `apps/dev-harness/src/modules/email/core/` for internal testing only.
 
 ## Internal modules
 
@@ -185,16 +186,18 @@ ui  ←  (no imports from domain modules)
 
 Route files in consumer apps stay **thin**: parse request → delegate to `secureAuth.routes.*` → return response.
 
-## Starter as integration harness
+## Consumer reference vs dev harness
 
-`apps/starter` demonstrates the recommended integration pattern:
+**`apps/consumer-demo`** demonstrates the recommended integration pattern for downstream apps:
 
 | Concern | Location |
 | --- | --- |
 | Composition root | `src/lib/secure-auth.ts` |
 | UI provider wiring | `src/app/layout.tsx` + `src/components/providers.tsx` |
-| Email transport | `src/modules/email/core/` |
+| Email transport | `src/lib/email-provider.ts` |
 | API routes | Thin wrappers around `secureAuth.routes.*` |
 | Auth pages | Thin wrappers around package page components |
 
-See [apps/starter/README.md](../apps/starter/README.md).
+See [apps/consumer-demo/README.md](../apps/consumer-demo/README.md).
+
+**`apps/dev-harness`** is the internal package development harness (Swagger UI, OpenAPI, extra routes). See [apps/dev-harness/README.md](../apps/dev-harness/README.md). Do not copy from it when integrating the package.

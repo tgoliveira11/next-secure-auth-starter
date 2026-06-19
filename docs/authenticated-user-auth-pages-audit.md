@@ -26,7 +26,7 @@ This document reflects **observed implementation**, not desired product behavior
 ## Investigation method
 
 1. **Source audit** — all package auth pages, `SecureAuthUIProvider`, NextAuth options, login/register/2FA handlers, starter middleware, consumer-demo app wiring.
-2. **Automated tests** — `apps/starter/src/test/unit/middleware.test.ts` (middleware gating for pending 2FA and email verification only).
+2. **Automated tests** — `apps/dev-harness/src/test/unit/middleware.test.ts` (middleware gating for pending 2FA and email verification only).
 3. **Manual browser verification** — attempted against `http://localhost:3001` during this audit; the page did not render in the automation environment (empty document). **Live manual confirmation per auth method was not completed in this session.** Findings below are code-derived unless noted.
 
 ---
@@ -205,18 +205,18 @@ This document reflects **observed implementation**, not desired product behavior
 
 ### Starter consumer app
 
-**Middleware:** `apps/starter/src/middleware.ts`
+**Middleware:** `apps/dev-harness/src/middleware.ts`
 
 - Rewrites POST `/login` and `/login/2fa` to API handlers.
 - Redirects **incomplete** sessions (pending 2FA, email verification).
 - Does **not** redirect complete sessions away from `/login`, `/register`, or `/forgot-password`.
 
-**Nav:** `apps/starter/src/components/layout/nav.tsx`
+**Nav:** `apps/dev-harness/src/components/layout/nav.tsx`
 
 - Hides “Sign in” when `status === "authenticated"` — reduces link clicks but **does not block URL navigation**.
-- Homepage (`apps/starter/src/app/page.tsx`) still shows Create account / Sign in links regardless of session.
+- Homepage (`apps/dev-harness/src/app/page.tsx`) still shows Create account / Sign in links regardless of session.
 
-**Auth route pages:** Thin re-exports of package pages (e.g. `apps/starter/src/app/(auth)/login/page.tsx`) — no extra guards.
+**Auth route pages:** Thin re-exports of package pages (e.g. `apps/dev-harness/src/app/(auth)/login/page.tsx`) — no extra guards.
 
 ### Consumer-demo app
 
@@ -376,9 +376,9 @@ Aligned with stated expectation:
 | NextAuth options | `packages/secure-auth/src/modules/auth/lib/auth-options.ts` |
 | Credentials login POST | `packages/secure-auth/src/modules/auth/lib/credentials-login-start-handler.ts` |
 | Login complete API | `packages/secure-auth/src/server/routes/handlers/auth/login-complete.ts` |
-| Starter middleware | `apps/starter/src/middleware.ts` |
-| Middleware tests | `apps/starter/src/test/unit/middleware.test.ts` |
-| Starter nav (hides sign-in only) | `apps/starter/src/components/layout/nav.tsx` |
+| Starter middleware | `apps/dev-harness/src/middleware.ts` |
+| Middleware tests | `apps/dev-harness/src/test/unit/middleware.test.ts` |
+| Starter nav (hides sign-in only) | `apps/dev-harness/src/components/layout/nav.tsx` |
 
 ---
 

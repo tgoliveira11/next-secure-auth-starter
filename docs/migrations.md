@@ -13,7 +13,7 @@ The **package owns** the authentication schema and versioned SQL migrations. The
 
 ## Starter app (local monorepo)
 
-`apps/starter/drizzle.config.ts`:
+`apps/dev-harness/drizzle.config.ts`:
 
 ```typescript
 schema: "../../packages/secure-auth/src/drizzle/schema.ts",

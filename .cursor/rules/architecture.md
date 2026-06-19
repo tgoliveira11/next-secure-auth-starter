@@ -5,14 +5,15 @@ Apply these rules when adding or modifying code in this monorepo.
 ## Package-first model
 
 - **`packages/secure-auth`** (`@tgoliveira/secure-auth`) is the product.
-- **`apps/starter`** is the reference consumer — keep integration thin.
+- **`apps/dev-harness`** is the internal development harness — not a consumer reference.
+- **`apps/consumer-demo`** is the canonical consumer reference — keep integration thin.
 - Consumers integrate via **`createSecureAuth(config)`** only.
 - Page defaults flow through **`secureAuth.uiConfig`** → **`SecureAuthUIProvider`**.
 - Do not add product-specific vault, letter, or encryption-key lifecycle code.
 
 ## Routes vs modules
 
-- Consumer route files under `apps/starter/src/app` stay **thin**: delegate to `secureAuth.routes.*`.
+- Consumer route files under `apps/dev-harness/src/app` stay **thin**: delegate to `secureAuth.routes.*`.
 - Package business logic lives in `packages/secure-auth/src/modules/*`, not in consumer route files or client components.
 
 ## Module boundaries

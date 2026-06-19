@@ -2,18 +2,18 @@
 
 **`@tgoliveira/secure-auth`** is the product — opinionated **Next.js + TypeScript + Drizzle + PostgreSQL** account authentication.
 
-**`apps/starter`** is a reference consumer that demonstrates integration through public exports only.
+**`apps/dev-harness`** is the internal development harness (Swagger UI, API docs, extra tooling — not for consumers).
 
-**`apps/consumer-demo`** is the canonical validation app — a minimal downstream consumer with no starter dependencies.
+**`apps/consumer-demo`** is the canonical consumer reference — minimal integration using public exports only.
 
-**Maturity:** `0.1.20-internal` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** `0.2.0` experimental — not production-ready. See [docs/security.md](docs/security.md).
 
 ## Structure
 
 ```text
-packages/secure-auth/   @tgoliveira/secure-auth — reusable auth package (private)
-apps/starter/           @secure-auth/starter — reference integration app (feature-rich)
-apps/consumer-demo/     @secure-auth/consumer-demo — minimal consumer validation app
+packages/secure-auth/   @tgoliveira/secure-auth — reusable auth package
+apps/dev-harness/       @secure-auth/dev-harness — internal package development harness
+apps/consumer-demo/     @secure-auth/consumer-demo — canonical consumer reference app
 docs/                   Architecture, security, consumer guides
 ```
 
@@ -52,25 +52,25 @@ npm run build -w @tgoliveira/secure-auth
 ### Environment
 
 ```bash
-cp .env.example apps/starter/.env.local
+cp .env.example apps/dev-harness/.env.local
 ```
 
 **Full variable reference:** [docs/configuration-reference.md](docs/configuration-reference.md)
 
-Edit `apps/starter/.env.local`. Minimum required values:
+Edit `apps/dev-harness/.env.local`. Minimum required values:
 
 | Variable | Purpose |
 | --- | --- |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `NEXTAUTH_SECRET` | Session signing secret (long random string) |
-| `NEXTAUTH_URL` / `APP_BASE_URL` | App URL (default `http://localhost:3003` for starter, `3002` for consumer-demo) |
+| `NEXTAUTH_URL` / `APP_BASE_URL` | App URL (default `http://localhost:3003` for dev-harness, `3002` for consumer-demo) |
 | `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | 32-byte base64 key for TOTP secrets at rest |
 | `WEBAUTHN_RP_ID` | Passkey RP ID (`localhost` for dev) |
 | `WEBAUTHN_ORIGIN` | Passkey origin (match app URL) |
 | `EMAIL_PROVIDER` | `console` (dev) or `smtp` (Mailpit) |
 | `EMAIL_FROM` | Sender address when not using console |
 
-OAuth (optional for local dev) — prefer `AUTH_*` names; legacy aliases still work in starter:
+OAuth (optional for local dev) — prefer `AUTH_*` names; legacy aliases still work in dev-harness:
 
 | Variable | Provider |
 | --- | --- |
@@ -122,7 +122,7 @@ npm run test
 ```
 
 Package only: `npm run test -w @tgoliveira/secure-auth`  
-Starter only: `npm run test -w @secure-auth/starter`  
+Dev harness only: `npm run test -w @secure-auth/dev-harness`  
 Consumer demo: `npm run test -w @secure-auth/consumer-demo`
 
 Optional live DB integration:
@@ -188,7 +188,8 @@ See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 | [docs/authenticated-user-auth-pages-audit.md](docs/authenticated-user-auth-pages-audit.md) | Authenticated users visiting login/register (audit) |
 | [docs/consumer-authenticated-redirect-migration.md](docs/consumer-authenticated-redirect-migration.md) | Migrating client apps to guest-page redirects |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package overview |
-| [apps/starter/README.md](apps/starter/README.md) | Reference consumer |
+| [apps/consumer-demo/README.md](apps/consumer-demo/README.md) | Canonical consumer reference |
+| [apps/dev-harness/README.md](apps/dev-harness/README.md) | Internal package development harness |
 | [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, boundaries |
 | [docs/security.md](docs/security.md) | Security requirements and readiness |
 | [docs/migrations.md](docs/migrations.md) | Database migrations and upgrade notes |

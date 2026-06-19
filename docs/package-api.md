@@ -36,7 +36,7 @@ Consumers must **not**:
 
 ## Route map
 
-Wire each handler in your App Router under the consumer URL path shown below. Canonical wiring in this monorepo: [`apps/starter/src/app/api`](../apps/starter/src/app/api).
+Wire each handler in your App Router under the consumer URL path shown below. Canonical consumer wiring in this monorepo: [`apps/consumer-demo/src/app/api`](../apps/consumer-demo/src/app/api). See also [`apps/dev-harness/src/app/api`](../apps/dev-harness/src/app/api) for the internal development harness (extra routes not required for consumers).
 
 | Handler key | Method | Consumer URL path | Auth required |
 | --- | --- | --- | --- |

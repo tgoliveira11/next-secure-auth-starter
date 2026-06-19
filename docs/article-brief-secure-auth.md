@@ -60,7 +60,7 @@ Centralize that repeated work into one package so that:
 
 ### Motivation (from project architecture and changelog)
 
-1. **A starter app was not enough.** An integration harness (`apps/starter`) proved the flows, but copying starter code into each new project still duplicated maintenance.
+1. **A starter app was not enough.** An integration harness (`apps/dev-harness`) proved the flows, but copying starter code into each new project still duplicated maintenance.
 2. **Package-first architecture (0.1.x).** Auth logic moved into `@tgoliveira/secure-auth`; apps became thin consumers (`0.1.4-internal` removed legacy `@tgoliveira/secure-auth/server` and deep server imports).
 3. **Centralize security improvements.** Dependency audits, password policy fixes, and session policy changes ship once in the package.
 4. **Explicit boundaries.** The package does not read `process.env`; consumers map environment at the app boundary. That keeps secrets and deployment concerns in application code.
@@ -237,7 +237,7 @@ import { secureAuth } from "@/lib/secure-auth";
 
 | App | Role |
 | --- | --- |
-| **`apps/starter`** | Feature-rich reference: SMTP email module, OpenAPI/Swagger, route groups, broader tests |
+| **`apps/dev-harness`** | Feature-rich reference: SMTP email module, OpenAPI/Swagger, route groups, broader tests |
 | **`apps/consumer-demo`** | Minimal validation: console email, public exports only, intentional UI prop override demos |
 
 Both follow the same contract; consumer-demo proves the minimum viable integration.
@@ -275,7 +275,7 @@ Both follow the same contract; consumer-demo proves the minimum viable integrati
 
 ```text
 packages/secure-auth/     ← product
-apps/starter/             ← reference consumer (feature-rich)
+apps/dev-harness/             ← reference consumer (feature-rich)
 apps/consumer-demo/       ← minimal validation consumer
 docs/                     ← architecture, security, consumer guides
 ```
@@ -448,7 +448,7 @@ Avoid:
 
 1. **The real cost of rebuilding authentication** — repeated schema, OAuth, 2FA, passkeys, sessions, UI in every Next.js app.
 2. **Why a starter app was not enough** — integration harness vs reusable package; maintenance across repos.
-3. **Turning auth into a package** — from `apps/starter` to `@tgoliveira/secure-auth`; what moved, what stayed in apps.
+3. **Turning auth into a package** — from `apps/dev-harness` to `@tgoliveira/secure-auth`; what moved, what stayed in apps.
 4. **The package-first architecture** — `createSecureAuth(config)` as sole composition root; public export map.
 5. **What the consumer app still owns** — DB, secrets, email, env mapping, route/page wrappers.
 6. **What the package provides** — routes, pages, schema, policies, security controls.

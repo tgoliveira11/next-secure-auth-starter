@@ -97,7 +97,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 - **Severity:** moderate  
 - **Type:** direct in starter; optional transitive via `next-auth`  
 - **Production:** starter app only  
-- **Dependency path:** `apps/starter` → `nodemailer`; `next-auth` optional email provider  
+- **Dependency path:** `apps/dev-harness` → `nodemailer`; `next-auth` optional email provider  
 - **Strategy:** Upgrade to `9.0.1` (fixes GHSA-p6gq-j5cr-w38f); root override + `next-auth > nodemailer`  
 - **Consumer impact:** none in published package (consumers supply their own `EmailProvider`)  
 - **Residual risk:** none at audit time  

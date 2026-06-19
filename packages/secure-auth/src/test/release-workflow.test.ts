@@ -51,7 +51,7 @@ describe("release preparation", () => {
     const manifestPaths = [
       "package.json",
       "packages/secure-auth/package.json",
-      "apps/starter/package.json",
+      "apps/dev-harness/package.json",
       "apps/consumer-demo/package.json",
     ];
     try {
@@ -67,7 +67,7 @@ describe("release preparation", () => {
         `${JSON.stringify({
           version: "0.1.22-internal",
           packages: Object.fromEntries(
-            ["", "packages/secure-auth", "apps/starter", "apps/consumer-demo"].map((key) => [
+            ["", "packages/secure-auth", "apps/dev-harness", "apps/consumer-demo"].map((key) => [
               key,
               { version: "0.1.22-internal" },
             ]),
