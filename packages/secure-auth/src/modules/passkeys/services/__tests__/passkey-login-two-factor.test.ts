@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPasskeyLoginService } from "../passkey-login-service";
 import { USER_ID } from "@/test/helpers/fixtures";
+import { generateAuthenticationOptions } from "@simplewebauthn/server";
 
 const mocks = vi.hoisted(() => ({
   consumeValidChallenge: vi.fn(),
   findByCredentialId: vi.fn(),
+  findByUserId: vi.fn(),
+  storeChallenge: vi.fn(),
   updateCounter: vi.fn(),
   updateLastUsedAt: vi.fn(),
   findById: vi.fn(),
@@ -36,7 +39,7 @@ function buildVerifyResponse() {
 }
 
 vi.mock("@simplewebauthn/server", () => ({
-  generateAuthenticationOptions: vi.fn(),
+  generateAuthenticationOptions: vi.fn().mockResolvedValue({ challenge: "login-challenge" }),
   verifyAuthenticationResponse: vi.fn().mockResolvedValue({
     verified: true,
     authenticationInfo: { newCounter: 1 },
@@ -59,6 +62,8 @@ function buildService() {
       passkeyRepository: {
         consumeValidChallenge: mocks.consumeValidChallenge,
         findByCredentialId: mocks.findByCredentialId,
+        findByUserId: mocks.findByUserId,
+        storeChallenge: mocks.storeChallenge,
         updateCounter: mocks.updateCounter,
         updateLastUsedAt: mocks.updateLastUsedAt,
       },
@@ -172,5 +177,42 @@ describe("passkey login service verifyLogin", () => {
       /not registered for sign-in/
     );
     expect(mocks.issueLoginToken).not.toHaveBeenCalled();
+  });
+});
+
+describe("passkey login getLoginOptions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.storeChallenge.mockResolvedValue(undefined);
+    mocks.findById.mockResolvedValue({
+      id: USER_ID,
+      email: "user@example.com",
+    });
+  });
+
+  it("includes only sign-in credentials in allowCredentials", async () => {
+    mocks.findByUserId.mockResolvedValue([
+      {
+        credentialId: "auth-1",
+        signInEnabled: true,
+        vaultUnlockEnabled: false,
+        transports: null,
+      },
+      {
+        credentialId: "vault-1",
+        signInEnabled: false,
+        vaultUnlockEnabled: true,
+        transports: null,
+      },
+    ]);
+
+    const service = buildService();
+    await service.getLoginOptions({ userId: USER_ID });
+
+    expect(generateAuthenticationOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowCredentials: [{ id: "auth-1", transports: undefined }],
+      })
+    );
   });
 });

@@ -15,6 +15,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "../../primitives/c
 import { Button } from "../../primitives/button.js";
 import { Alert } from "../../primitives/alert.js";
 import { Badge } from "../../primitives/badge.js";
+import { getPasskeyRegistrationErrorMessage } from "../../../passkeys/lib/passkey-registration-errors.js";
 import { ConfirmDialog } from "../../primitives/confirm-dialog.js";
 import { LoadingState } from "../../primitives/loading-state.js";
 import { SuccessState } from "../../primitives/success-state.js";
@@ -31,10 +32,6 @@ function formatDate(value: string | null): string {
     month: "short",
     day: "numeric",
   });
-}
-
-function isUserCancellation(error: unknown): boolean {
-  return error instanceof Error && error.name === "NotAllowedError";
 }
 
 export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
@@ -84,11 +81,7 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
         await loadPasskeys();
       }
     } catch (e) {
-      if (isUserCancellation(e)) {
-        setError("Passkey registration was cancelled.");
-      } else {
-        setError(e instanceof Error ? e.message : "Passkey registration failed");
-      }
+      setError(getPasskeyRegistrationErrorMessage(e));
     } finally {
       setActionLoading(false);
     }

@@ -36,6 +36,24 @@ export class PasskeyAccountBoundaryError extends Error {
   }
 }
 
+export type PasskeyExcludeCredentialInput = {
+  credentialId: string;
+  signInEnabled: boolean;
+  transports?: unknown;
+};
+
+/** WebAuthn exclude list for account sign-in registration — sign-in credentials only. */
+export function toSignInExcludeCredentials(
+  credentials: PasskeyExcludeCredentialInput[]
+): { id: string; transports?: AuthenticatorTransport[] }[] {
+  return credentials
+    .filter((c) => c.signInEnabled)
+    .map((c) => ({
+      id: c.credentialId,
+      transports: (c.transports as AuthenticatorTransport[]) ?? undefined,
+    }));
+}
+
 export function resolvePasskeyCapabilities(
   flags: Pick<PasskeyCredentialCapabilityFlags, "signInEnabled" | "vaultUnlockEnabled">
 ): PasskeyCapabilities {

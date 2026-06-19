@@ -281,9 +281,12 @@ Security-sensitive flows that require tests: authentication (password, OAuth, pa
 
 Account authentication and other WebAuthn uses (for example vault unlock in downstream apps) may share `passkey_credentials`.
 
-- **`sign_in_enabled`** — credential may be used for account login (passkey login filters on this flag).
-- **`vault_unlock_enabled`** — credential is used by another security feature; account settings must not revoke it.
+- **`sign_in_enabled`** — credential may be used for account login (passkey login filters on this flag). Account passkey registration `excludeCredentials` includes only credentials with this flag set.
+- **`vault_unlock_enabled`** — credential is used by another security feature; account settings must not revoke it. Vault-only credentials are omitted from account registration `excludeCredentials`.
 - Account **`GET /api/account/passkeys`** exposes safe capability metadata; **`DELETE /api/account/passkeys/:id`** rejects non-removable credentials (409).
+- Account **`POST /api/account/passkeys/register`** creates new credentials with `sign_in_enabled: true` and `vault_unlock_enabled: false` only — it does not upgrade vault-only rows.
 - Dual-capability credentials (`sign_in_enabled` + `vault_unlock_enabled`) are not removable from account settings until the owning app disables vault unlock.
 
-See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+**Platform limitation:** Even with correct exclude lists, some authenticators may not allow multiple passkeys per RP on one device. A future explicit capability-upgrade flow may be needed to enable account sign-in on an existing vault-only passkey.
+
+See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md) and [passkey-registration-capability-boundary-audit.md](./passkey-registration-capability-boundary-audit.md).

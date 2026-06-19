@@ -386,7 +386,11 @@ All routes are real implementations — no 501 stubs.
 
 `DELETE /api/account/passkeys/:id` removes **account sign-in-only** credentials. Returns **409** when the credential is vault-only, dual-capability, or otherwise not managed from account settings.
 
+`POST /api/account/passkeys/register` with `action: "options"` returns WebAuthn registration options whose `excludeCredentials` list includes **only** existing credentials with `signInEnabled: true`. Vault-only credentials are omitted so they do not block account passkey registration. Verification always inserts `signInEnabled: true`, `vaultUnlockEnabled: false` — it does not upgrade vault-only rows.
+
 Passkey login continues to use only `signInEnabled: true` credentials.
+
+Some authenticators may still prevent registering a second passkey for the same site on the same device (platform limitation). A future capability-upgrade flow may be required to enable account sign-in on an existing vault-only passkey.
 
 See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
 

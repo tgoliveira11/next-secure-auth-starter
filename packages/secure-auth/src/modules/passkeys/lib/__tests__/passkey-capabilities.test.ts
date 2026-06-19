@@ -6,6 +6,7 @@ import {
   getPasskeyAccountLabel,
   isRemovableFromAccountSettings,
   toAccountPasskeyListItem,
+  toSignInExcludeCredentials,
 } from "../passkey-capabilities";
 import { PasskeyAccountBoundaryError } from "../../services/passkey-service";
 
@@ -81,5 +82,36 @@ describe("passkey capabilities", () => {
         "Passkey"
       )
     ).toBe("Vault passkey");
+  });
+
+  describe("toSignInExcludeCredentials", () => {
+    it("includes sign-in-only credentials", () => {
+      const result = toSignInExcludeCredentials([
+        { credentialId: "auth-1", signInEnabled: true, transports: ["internal"] },
+      ]);
+      expect(result).toEqual([{ id: "auth-1", transports: ["internal"] }]);
+    });
+
+    it("excludes vault-only credentials", () => {
+      const result = toSignInExcludeCredentials([
+        { credentialId: "vault-1", signInEnabled: false, transports: ["internal"] },
+      ]);
+      expect(result).toEqual([]);
+    });
+
+    it("includes only sign-in credentials from a mixed list", () => {
+      const result = toSignInExcludeCredentials([
+        { credentialId: "auth-1", signInEnabled: true },
+        { credentialId: "vault-1", signInEnabled: false },
+      ]);
+      expect(result.map((c) => c.id)).toEqual(["auth-1"]);
+    });
+
+    it("includes dual-capability credentials", () => {
+      const result = toSignInExcludeCredentials([
+        { credentialId: "dual-1", signInEnabled: true },
+      ]);
+      expect(result).toEqual([{ id: "dual-1", transports: undefined }]);
+    });
   });
 });

@@ -4,7 +4,11 @@ import {
 } from "@simplewebauthn/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
-import { toAccountPasskeyListItem, assertRemovableFromAccountSettings } from "@/modules/passkeys/lib/passkey-capabilities";
+import {
+  toAccountPasskeyListItem,
+  assertRemovableFromAccountSettings,
+  toSignInExcludeCredentials,
+} from "@/modules/passkeys/lib/passkey-capabilities";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -62,10 +66,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
         userName,
         userID: new TextEncoder().encode(userId),
         attestationType: "none",
-        excludeCredentials: existing.map((c) => ({
-          id: c.credentialId,
-          transports: (c.transports as AuthenticatorTransport[]) ?? undefined,
-        })),
+        excludeCredentials: toSignInExcludeCredentials(existing),
         authenticatorSelection: {
           residentKey: "preferred",
           userVerification: "preferred",
