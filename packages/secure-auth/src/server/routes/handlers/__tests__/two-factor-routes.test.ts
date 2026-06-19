@@ -221,6 +221,47 @@ describe("two-factor API routes", () => {
     expect(res.status).toBe(500);
   });
 
+  it("verify-2fa rejects body-only challenge token without cookie", async () => {
+    mocks.cookiesGet.mockReturnValue(undefined);
+    const res = await verify2faPost(
+      new Request("http://localhost", {
+        method: "POST",
+        body: JSON.stringify({
+          challengeToken: "challenge-token-1234567890",
+          code: "123456",
+        }),
+      }),
+      services
+    );
+    expect(res.status).toBe(400);
+    expect(mocks.verifyTwoFactorLogin).not.toHaveBeenCalled();
+  });
+
+  it("verify-2fa uses challenge token from cookie only", async () => {
+    mocks.verifyTwoFactorLogin.mockResolvedValue({ loginToken: "login-token" });
+    mocks.cookiesGet.mockImplementation((name: string) =>
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
+        ? { value: "cookie-challenge-token123" }
+        : undefined
+    );
+    const res = await verify2faPost(
+      new Request("http://localhost", {
+        method: "POST",
+        body: JSON.stringify({
+          challengeToken: "different-body-token123",
+          code: "123456",
+        }),
+      }),
+      services
+    );
+    expect(res.status).toBe(200);
+    expect(mocks.verifyTwoFactorLogin).toHaveBeenCalledWith(
+      "cookie-challenge-token123",
+      { code: "123456", backupCode: undefined },
+      expect.any(String)
+    );
+  });
+
   it("verify-2fa returns login token on success", async () => {
     mocks.verifyTwoFactorLogin.mockResolvedValue({ loginToken: "login-token" });
     mocks.cookiesGet.mockImplementation((name: string) =>
@@ -247,7 +288,7 @@ describe("two-factor API routes", () => {
     const res = await verify2faPost(
       new Request("http://localhost", {
         method: "POST",
-        body: JSON.stringify({ challengeToken: "short", code: "12" }),
+        body: JSON.stringify({ code: "12" }),
       }),
       services
     );

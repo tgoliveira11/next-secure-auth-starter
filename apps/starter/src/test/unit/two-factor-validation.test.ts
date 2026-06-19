@@ -10,18 +10,13 @@ describe("two-factor validation schemas", () => {
     expect(twoFactorVerifySchema.safeParse({ backupCode: "AAAA-BBBB-CCCC" }).success).toBe(true);
     expect(
       twoFactorLoginVerifySchema.safeParse({
-        challengeToken: "challenge-token-1234567890",
         backupCode: "AAAA-BBBB-CCCC",
       }).success
     ).toBe(true);
   });
 
   it("rejects login payloads missing both code and backup code", () => {
-    expect(
-      twoFactorLoginVerifySchema.safeParse({
-        challengeToken: "challenge-token-1234567890",
-      }).success
-    ).toBe(false);
+    expect(twoFactorLoginVerifySchema.safeParse({}).success).toBe(false);
   });
 
   it("validates credential login start payloads", () => {

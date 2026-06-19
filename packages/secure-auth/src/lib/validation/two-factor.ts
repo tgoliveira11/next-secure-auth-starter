@@ -13,7 +13,6 @@ export const twoFactorVerifySchema = z
 
 export const twoFactorLoginVerifySchema = z
   .object({
-    challengeToken: z.string().min(16).optional(),
     code: totpCodeSchema.optional(),
     backupCode: z.string().min(8).max(32).optional(),
   })

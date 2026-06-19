@@ -1,6 +1,6 @@
 # Package API
 
-Package: `@tgoliveira/secure-auth` @ `0.1.9-internal`
+Package: `@tgoliveira/secure-auth` @ `0.1.25`
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
@@ -31,6 +31,108 @@ Consumers must **not**:
 - import `@tgoliveira/secure-auth/server` (removed);
 - call `createRoutes`, `createAuthServices`, or `createRouteHandlers`;
 - call internal runtime helpers (`getSecureAuthConfig`, `getSecureAuthDb`, etc.).
+
+---
+
+## Route map
+
+Wire each handler in your App Router under the consumer URL path shown below. Canonical wiring in this monorepo: [`apps/starter/src/app/api`](../apps/starter/src/app/api).
+
+| Handler key | Method | Consumer URL path | Auth required |
+| --- | --- | --- | --- |
+| `health` | GET | `/api/auth/package-health` | No |
+| `register` | POST | `/api/auth/register` | No |
+| `forgotPassword` | POST | `/api/auth/forgot-password` | No |
+| `resetPassword` | POST | `/api/auth/reset-password` | No |
+| `verifyEmailConfirm` | POST | `/api/auth/verify-email/confirm` | No |
+| `verifyEmailResend` | POST | `/api/auth/verify-email/resend` | Yes |
+| `loginStart` | POST | `/api/auth/login/start` | No |
+| `loginStartForm` | POST | `/api/auth/login/start-form` | No |
+| `loginComplete` | POST | `/api/auth/login/complete` | No |
+| `loginVerify2fa` | POST | `/api/auth/login/verify-2fa` | No |
+| `loginVerify2faForm` | POST | `/api/auth/login/verify-2fa-form` | No |
+| `loginVerify2faOauth` | POST | `/api/auth/login/verify-2fa-oauth` | No |
+| `loginChallengeStatus` | GET | `/api/auth/login/challenge-status` | No |
+| `loginTrace` | GET | `/api/auth/login/trace` | No |
+| `passkeyLoginOptions` | POST | `/api/auth/passkey/login/options` | No |
+| `passkeyLoginVerify` | POST | `/api/auth/passkey/login/verify` | No |
+| `passwordPolicy` | GET | `/api/auth/password-policy` | No |
+| `nextAuth` | GET, POST | `/api/auth/[...nextauth]` | No |
+| `account` | GET | `/api/account` | Yes |
+| `account` | DELETE | `/api/account` | Yes |
+| `accountAuthStatus` | GET | `/api/account/auth-status` | Yes |
+| `changePassword` | POST | `/api/account/change-password` | Yes |
+| `passkeysList` | GET | `/api/account/passkeys` | Yes |
+| `passkeyRegister` | POST | `/api/account/passkeys/register` | Yes |
+| `passkeyById` | DELETE | `/api/account/passkeys/[id]` | Yes |
+| `twoFactorStatus` | GET | `/api/account/2fa/status` | Yes |
+| `twoFactorSetupStart` | POST | `/api/account/2fa/setup/start` | Yes |
+| `twoFactorSetupVerify` | POST | `/api/account/2fa/setup/verify` | Yes |
+| `twoFactorDisable` | POST | `/api/account/2fa/disable` | Yes |
+| `twoFactorBackupCodesRegenerate` | POST | `/api/account/2fa/backup-codes/regenerate` | Yes |
+| `sessionsList` | GET | `/api/account/sessions` | Yes |
+| `sessionById` | DELETE | `/api/account/sessions/[id]` | Yes |
+| `sessionsPing` | POST | `/api/account/sessions/ping` | Yes |
+| `sessionsRevokeCurrent` | POST | `/api/account/sessions/revoke-current` | Yes |
+| `sessionsRevokeOthers` | POST | `/api/account/sessions/revoke-others` | Yes |
+| `sessionsRevokeAll` | POST | `/api/account/sessions/revoke-all` | Yes |
+
+**Auth required** means the handler expects a valid NextAuth session cookie (`getServerSession`). Handlers that call `requireSessionUser`, `requireVerifiedFullyAuthenticatedUser`, or `requireVerifiedMutatingAccountUser` return **401** when no session is present.
+
+Example wrapper:
+
+```typescript
+// src/app/api/auth/register/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+
+export const POST = secureAuth.routes.register.POST;
+```
+
+---
+
+## API error responses
+
+On failure, JSON routes return a body shaped like:
+
+```json
+{ "error": "<message string>" }
+```
+
+with an appropriate HTTP status code. Success responses use route-specific shapes (for example `{ "loginToken": "..." }`).
+
+Form-based auth routes (`loginStartForm`, `loginVerify2faForm`) respond with **303 redirects** and `?error=` query parameters instead of JSON bodies.
+
+| Route | Status | Condition | Error message |
+| --- | --- | --- | --- |
+| `POST /api/auth/login/start-form` | 303 | Invalid payload | Redirect to `/login?error=invalid_request` |
+| `POST /api/auth/login/start-form` | 303 | Password in URL or invalid HTTP method | Redirect to `/login?error=invalid_request` |
+| `POST /api/auth/login/start-form` | 303 | CAPTCHA verification failed | Redirect to `/login?error=captcha_failed` |
+| `POST /api/auth/login/start-form` | 303 | Invalid email or password | Redirect to `/login?error=invalid_credentials` |
+| `POST /api/auth/login/start-form` | 303 | Unexpected service failure | Redirect to `/login?error=unavailable` |
+| `POST /api/auth/login/verify-2fa` | 400 | Invalid JSON body or missing TOTP/backup code | `"Invalid request"` |
+| `POST /api/auth/login/verify-2fa` | 400 | Missing HttpOnly challenge cookie | `"Invalid request"` |
+| `POST /api/auth/login/verify-2fa` | 401 | Expired or invalid login challenge | `"Login challenge expired or invalid"` |
+| `POST /api/auth/login/verify-2fa` | 401 | Invalid TOTP or backup code | `"Invalid authenticator or backup code"` |
+| `POST /api/auth/register` | 400 | Schema validation failed | `"Invalid input"` |
+| `POST /api/auth/register` | 400 | Email already registered | `"Unable to complete registration with the provided information."` |
+| `POST /api/auth/register` | 400 | Password in URL or invalid HTTP method | `"Invalid request"` |
+| `POST /api/auth/register` | 400 | Password policy rejected | Policy message from `ValidationError` (for example `"Password does not meet the configured policy."`) |
+| `POST /api/auth/forgot-password` | 400 | Invalid email in body | `"Invalid email address"` |
+| `POST /api/auth/reset-password` | 400 | Invalid body or unknown action | `"Invalid request"` |
+| `POST /api/auth/reset-password` | 400 | Password in URL or invalid HTTP method | `"Invalid request"` |
+| `POST /api/auth/reset-password` | 400 | Invalid or expired reset token on `action: "reset"` | `"This reset link is invalid or expired."` |
+| `POST /api/auth/reset-password` | 400 | New password fails policy on `action: "reset"` | Policy message from `ValidationError` |
+| `POST /api/account/change-password` | 400 | Invalid body | `"Invalid request"` |
+| `POST /api/account/change-password` | 400 | Password in URL or invalid HTTP method | `"Invalid request"` |
+| `POST /api/account/change-password` | 400 | OAuth-only account (no password) | `"This account signs in with Google, Apple, GitHub, or Microsoft. Password change is not available unless you add an email/password sign-in method."` |
+| `POST /api/account/change-password` | 401 | Incorrect current password | `"Current password is incorrect."` |
+| `POST /api/account/change-password` | 400 | New password fails policy | Policy message from `ValidationError` |
+| `DELETE /api/account/passkeys/[id]` | 400 | Missing route param | `"Invalid request"` |
+| `DELETE /api/account/passkeys/[id]` | 409 | Vault-only or dual-capability passkey | `"This passkey is not managed from account security settings."` or `"This passkey is used by another security feature. Manage it from the relevant settings page."` |
+| `POST /api/account/2fa/disable` | 400 | Invalid body | `"Invalid request"` |
+| `POST /api/account/2fa/disable` | 400 | Invalid TOTP or backup code | `"Invalid authenticator or backup code"` |
+
+Routes return **401** with `{ "error": "Authentication required" }` when the route requires a session and no valid session cookie is present. Pending two-factor login returns **401** with `{ "error": "Two-factor verification required" }`.
 
 ---
 
@@ -326,43 +428,18 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 `secureAuth.routes.health.GET` returns:
 
 ```json
-{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.9-internal" }
+{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.25" }
 ```
 
 Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route string.
 
 ---
 
-## `secureAuth.routes` (0.1.4-internal)
+## Account passkeys
 
-All routes are real implementations — no 501 stubs.
+See [Route map](#route-map) for handler keys and paths.
 
-| Route key | Methods |
-| --- | --- |
-| `health` | GET |
-| `register` | POST |
-| `forgotPassword` | POST |
-| `resetPassword` | POST |
-| `verifyEmailConfirm` | POST |
-| `verifyEmailResend` | POST |
-| `loginStart` | POST |
-| `loginComplete` | POST |
-| `loginVerify2fa` | POST |
-| `loginVerify2faOauth` | POST |
-| `loginStartForm` | POST |
-| `loginVerify2faForm` | POST |
-| `loginChallengeStatus` | GET |
-| `passkeyLoginOptions` | POST |
-| `passkeyLoginVerify` | POST | Returns `loginToken` or `requiresTwoFactor` + sets challenge cookie |
-| `passwordPolicy` | GET |
-| `account` | GET, DELETE |
-| `accountAuthStatus` | GET |
-| `changePassword` | POST |
-| `passkeysList` | GET |
-| `passkeyRegister` | POST |
-| `passkeyDelete` | DELETE |
-
-### Account passkeys (`passkeysList` / `passkeyDelete`)
+### Account passkeys (`passkeysList` / `passkeyById`)
 
 `GET /api/account/passkeys` returns capability-aware items:
 
@@ -393,18 +470,6 @@ Passkey login continues to use only `signInEnabled: true` credentials.
 Some authenticators may still prevent registering a second passkey for the same site on the same device (platform limitation). A future capability-upgrade flow may be required to enable account sign-in on an existing vault-only passkey.
 
 See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
-
-| `sessionsList` | GET |
-| `sessionDelete` | DELETE |
-| `sessionsPing` | POST |
-| `sessionsRevokeCurrent` | POST |
-| `sessionsRevokeOthers` | POST |
-| `sessionsRevokeAll` | POST |
-| `twoFactorStatus` | GET |
-| `twoFactorSetupStart` | POST |
-| `twoFactorSetupVerify` | POST |
-| `twoFactorDisable` | POST |
-| `twoFactorBackupCodes` | POST |
 
 ---
 

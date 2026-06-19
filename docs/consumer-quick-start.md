@@ -589,6 +589,49 @@ export default nextConfig;
 
 ---
 
+## Common integration mistakes
+
+**1. Wrong middleware import path**
+In `middleware.ts`, import from `@tgoliveira/secure-auth/next/middleware` — not
+from `@tgoliveira/secure-auth/next`. The `/next` entry bundles server-only code
+that is incompatible with the Edge runtime used by Next.js middleware.
+
+**2. `NEXTAUTH_URL` vs `APP_BASE_URL` — both are required and must match**
+`NEXTAUTH_URL` is consumed by NextAuth.js internally (callbacks, redirects).
+`APP_BASE_URL` is passed into `createSecureAuth` and used for email links and
+WebAuthn origin derivation. They must point to the same origin. A mismatch causes
+OAuth callbacks to redirect to the wrong URL or WebAuthn challenges to fail origin
+validation.
+
+**3. Omitting `SecureAuthUIProvider` causes silent fallback**
+If `SecureAuthUIProvider` is not mounted in `app/layout.tsx`, package pages still
+render but fall back to hardcoded defaults for `appName`, `paths`, and
+`passwordPolicy`. No error is thrown. Always mount the provider with
+`config={secureAuth.uiConfig}` at the root layout.
+
+**4. WebAuthn: use `localhost`, not `127.0.0.1`**
+`WEBAUTHN_RP_ID` must be `localhost` during local development. Browsers treat
+`127.0.0.1` as a different origin and WebAuthn credential creation will fail with
+a security error.
+
+**5. Forgetting to import the composition root before `createNextAuthRouteHandlers`**
+In the NextAuth route file, `secureAuth` must be imported (even if not used
+directly) before calling `createNextAuthRouteHandlers`, because the handler needs
+the singleton to be initialized. Pattern:
+```typescript
+import { secureAuth } from "@/lib/secure-auth"; // ensures init
+import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
+const handler = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);
+```
+
+**6. Missing 2FA and passkey routes**
+The minimal example intentionally omits 2FA and passkey routes. If you enable
+passkeys or 2FA in config without wiring their routes, the UI will render the
+controls but API calls will return 404. Wire all routes from the [route map](./package-api.md#route-map) —
+even features you plan to enable later.
+
+---
+
 ## 17. Verify installation
 
 1. `GET /api/auth/package-health` returns `{ ok: true, version: "<installed-version>" }`.

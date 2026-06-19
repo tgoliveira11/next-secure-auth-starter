@@ -54,16 +54,11 @@ export function createAccountTokenRepository(db: DbClient) {
       return row ?? null;
     },
 
-    async deleteExpiredAndConsumed(client: DbClient = db) {
+    async deleteExpiredTokens(client: DbClient = db) {
       const now = new Date();
       await client
         .delete(accountTokens)
-        .where(
-          and(
-            lt(accountTokens.expiresAt, now),
-            isNull(accountTokens.consumedAt)
-          )
-        );
+        .where(lt(accountTokens.expiresAt, now));
     },
 
     async revokeActiveTokensForUser(

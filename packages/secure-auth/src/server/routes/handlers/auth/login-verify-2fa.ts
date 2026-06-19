@@ -9,6 +9,12 @@ import {
 } from "@/modules/auth/services/auth-login-service";
 import type { SecureAuthServices } from "@/core/types";
 
+/**
+ * JSON 2FA verification must read the pending login challenge only from the HttpOnly
+ * cookie set at login start. Accepting `challengeToken` from the request body would
+ * let a cross-site attacker supply a stolen token without the browser-bound cookie,
+ * weakening CSRF and session-binding guarantees.
+ */
 async function loginVerify2faPost(request: Request, services: SecureAuthServices) {
   const { ctx, authLoginService } = services;
 
@@ -20,8 +26,7 @@ async function loginVerify2faPost(request: Request, services: SecureAuthServices
     }
 
     const cookieStore = await cookies();
-    const challengeToken =
-      parsed.data.challengeToken ?? cookieStore.get(ctx.getTwoFactorLoginChallengeCookieName())?.value;
+    const challengeToken = cookieStore.get(ctx.getTwoFactorLoginChallengeCookieName())?.value;
     if (!challengeToken) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }

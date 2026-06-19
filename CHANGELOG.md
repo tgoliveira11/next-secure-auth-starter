@@ -6,6 +6,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- fix(auth): remove 2FA challenge token acceptance from request body to enforce HttpOnly cookie binding (medium severity)
+- fix(auth): purge consumed tokens on expiry cleanup to prevent unbounded token table growth (low severity)
+
+### Changed
+
+- **Documentation** — complete route map, API error response reference, `nextAuthSecret` generation guidance, common integration mistakes, and full wired-routes example in consumer docs.
+
 ## [0.1.25] - 2026-06-19
 
 ### Fixed

@@ -45,7 +45,7 @@ Required top-level fields when calling `createSecureAuth`:
 | `auth.redirectAuthenticatedFromGuestPages` | `boolean` | `true` | Redirect signed-in users away from login/register/forgot-password |
 | `auth.authenticatedRedirectPath` | `string` | `auth.afterLoginPath` | Landing path for authenticated-user guest redirects |
 | `auth.requireEmailVerificationBeforeSignIn` | `boolean` | Block sign-in until email verified |
-| `auth.nextAuthSecret` | `string` | NextAuth session signing secret |
+| `auth.nextAuthSecret` | `string` | NextAuth.js session encryption secret. **Minimum 32 characters; use 64+ hex chars for production.** Generate with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` Setting a short or predictable value weakens session security. |
 | `auth.twoFactorEncryptionKey` | `string` | Key for TOTP secrets at rest |
 | `email.from` | `string` | Sender address |
 | `email.provider` | `EmailProvider` | App-implemented send function |

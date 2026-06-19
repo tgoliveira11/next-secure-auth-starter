@@ -1,6 +1,6 @@
 # Minimal consumer example
 
-Smallest working integration of `@tgoliveira/secure-auth@0.1.9-internal` in a new Next.js App Router app.
+Smallest working integration of `@tgoliveira/secure-auth@0.1.25` in a new Next.js App Router app.
 
 Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-start.md) for the full guide.
 
@@ -11,7 +11,7 @@ Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-sta
 ## Install
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.9-internal \
+npm install @tgoliveira/secure-auth@0.1.25 \
   next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
 npm install -D drizzle-kit
 ```
@@ -126,28 +126,225 @@ export default function RootLayout({ children }) {
 
 ---
 
-## Example route
+## API routes
 
-`src/app/api/auth/register/route.ts`:
+Wire every handler from the [route map](./package-api.md#route-map). Each file is a thin wrapper around `secureAuth.routes.*`.
+
+### Auth routes
 
 ```typescript
+// src/app/api/auth/package-health/route.ts
 import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.health.GET;
+```
 
+```typescript
+// src/app/api/auth/register/route.ts
+import { secureAuth } from "@/lib/secure-auth";
 export const POST = secureAuth.routes.register.POST;
 ```
 
----
-
-## NextAuth (OAuth)
-
-`src/app/api/auth/[...nextauth]/route.ts`:
+```typescript
+// src/app/api/auth/forgot-password/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.forgotPassword.POST;
+```
 
 ```typescript
-import "@/lib/secure-auth";
-import NextAuth from "next-auth";
-import { createNextAuthRouteHandlers } from "@tgoliveira/secure-auth/next";
+// src/app/api/auth/reset-password/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.resetPassword.POST;
+```
 
-export const { GET, POST } = createNextAuthRouteHandlers(NextAuth, secureAuth.getServices);
+```typescript
+// src/app/api/auth/verify-email/confirm/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.verifyEmailConfirm.POST;
+```
+
+```typescript
+// src/app/api/auth/verify-email/resend/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.verifyEmailResend.POST;
+```
+
+```typescript
+// src/app/api/auth/login/start/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginStart.POST;
+```
+
+```typescript
+// src/app/api/auth/login/start-form/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginStartForm.POST;
+```
+
+```typescript
+// src/app/api/auth/login/complete/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginComplete.POST;
+```
+
+```typescript
+// src/app/api/auth/login/verify-2fa/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginVerify2fa.POST;
+```
+
+```typescript
+// src/app/api/auth/login/verify-2fa-form/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginVerify2faForm.POST;
+```
+
+```typescript
+// src/app/api/auth/login/verify-2fa-oauth/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.loginVerify2faOauth.POST;
+```
+
+```typescript
+// src/app/api/auth/login/challenge-status/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.loginChallengeStatus.GET;
+```
+
+```typescript
+// src/app/api/auth/login/trace/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.loginTrace.GET;
+```
+
+```typescript
+// src/app/api/auth/passkey/login/options/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.passkeyLoginOptions.POST;
+```
+
+```typescript
+// src/app/api/auth/passkey/login/verify/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.passkeyLoginVerify.POST;
+```
+
+```typescript
+// src/app/api/auth/password-policy/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.passwordPolicy.GET;
+```
+
+### Account routes
+
+```typescript
+// src/app/api/account/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.account.GET;
+export const DELETE = secureAuth.routes.account.DELETE;
+```
+
+```typescript
+// src/app/api/account/auth-status/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.accountAuthStatus.GET;
+```
+
+```typescript
+// src/app/api/account/change-password/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.changePassword.POST;
+```
+
+```typescript
+// src/app/api/account/passkeys/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.passkeysList.GET;
+```
+
+```typescript
+// src/app/api/account/passkeys/register/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.passkeyRegister.POST;
+```
+
+```typescript
+// src/app/api/account/passkeys/[id]/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const DELETE = secureAuth.routes.passkeyById.DELETE;
+```
+
+```typescript
+// src/app/api/account/2fa/status/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.twoFactorStatus.GET;
+```
+
+```typescript
+// src/app/api/account/2fa/setup/start/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.twoFactorSetupStart.POST;
+```
+
+```typescript
+// src/app/api/account/2fa/setup/verify/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.twoFactorSetupVerify.POST;
+```
+
+```typescript
+// src/app/api/account/2fa/disable/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.twoFactorDisable.POST;
+```
+
+```typescript
+// src/app/api/account/2fa/backup-codes/regenerate/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.twoFactorBackupCodesRegenerate.POST;
+```
+
+```typescript
+// src/app/api/account/sessions/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const GET = secureAuth.routes.sessionsList.GET;
+```
+
+```typescript
+// src/app/api/account/sessions/[id]/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const DELETE = secureAuth.routes.sessionById.DELETE;
+```
+
+```typescript
+// src/app/api/account/sessions/ping/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.sessionsPing.POST;
+```
+
+```typescript
+// src/app/api/account/sessions/revoke-current/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.sessionsRevokeCurrent.POST;
+```
+
+```typescript
+// src/app/api/account/sessions/revoke-others/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.sessionsRevokeOthers.POST;
+```
+
+```typescript
+// src/app/api/account/sessions/revoke-all/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.sessionsRevokeAll.POST;
+```
+
+### NextAuth
+
+```typescript
+// src/app/api/auth/[...nextauth]/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const { GET, POST } = secureAuth.routes.nextAuth;
 ```
 
 ---
@@ -230,5 +427,5 @@ Account/security routes: `AccountSettingsPage`, `SecuritySettingsPage`, `Session
 
 ```bash
 curl http://localhost:3000/api/auth/package-health
-# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.9-internal"}
+# {"ok":true,"package":"@tgoliveira/secure-auth","version":"0.1.25"}
 ```
