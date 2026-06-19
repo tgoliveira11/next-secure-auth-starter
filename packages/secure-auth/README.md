@@ -202,6 +202,22 @@ createSecureAuth({
 
 Server-side Siteverify validation is mandatory when enabled. Only `siteKey` and page flags are exposed via `uiConfig`; `secretKey` stays server-only. OAuth and passkey flows are not CAPTCHA-protected in this release.
 
+## Magic link
+
+Optional passwordless email login. Disabled by default.
+
+```typescript
+createSecureAuth({
+  auth: {
+    magicLink: { enabled: true },
+  },
+});
+```
+
+When enabled, the login page shows a **Sign in with email link** option. The user receives a single-use link valid for 15 minutes. If the account has 2FA enabled, magic link verification creates a pending 2FA challenge (same flow as credentials login). Rate limit: 3 requests per email per 10 minutes. Request responses are anti-enumeration safe.
+
+Wire routes: `magicLinkRequest.POST` → `/api/auth/magic-link/request`, `magicLinkVerify.POST` → `/api/auth/magic-link/verify`. Email links use `GET` on the verify route for browser redirects.
+
 ## Generic password components
 
 Reusable password policy UI for **non-auth** flows (vault password, encryption password, etc.).
@@ -252,7 +268,7 @@ See [migrations.md](../../docs/migrations.md) and [consumer-quick-start.md](../.
 
 ## Security
 
-See [security.md](../../docs/security.md). Not production-ready at `0.1.x`.
+See [security.md](../../docs/security.md) for passwords, tokens, HIBP breach detection, and [security notifications](../../docs/security.md#security-notifications). Not production-ready at `0.2.x`.
 
 Before releases: `npm run audit:security` from the monorepo root. Details: [dependency-audit.md](../../docs/security/dependency-audit.md).
 

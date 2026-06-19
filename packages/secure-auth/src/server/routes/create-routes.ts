@@ -103,6 +103,16 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     verifyEmailConfirm: route(() => import("./handlers/auth/verify-email-confirm.js"), "POST"),
     verifyEmailResend: route(() => import("./handlers/auth/verify-email-resend.js"), "POST"),
 
+    magicLinkRequest: route(() => import("./handlers/auth/magic-link-request.js"), "POST"),
+    magicLinkVerify: {
+      ...route(() => import("./handlers/auth/magic-link-verify.js"), "POST"),
+      GET: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/auth/magic-link-verify.js"),
+        "GET"
+      ),
+    },
+
     passkeyLoginOptions: route(() => import("./handlers/auth/passkey-login-options.js"), "POST"),
     passkeyLoginVerify: route(() => import("./handlers/auth/passkey-login-verify.js"), "POST"),
 

@@ -194,6 +194,14 @@ export async function passwordPolicyGet(services?: SecureAuthServices) {
   return invokeGet("../../server/routes/handlers/auth/password-policy.js", undefined, undefined, services);
 }
 
+export async function magicLinkRequestPost(request: Request, services?: SecureAuthServices) {
+  return invokePost("../../server/routes/handlers/auth/magic-link-request.js", request, undefined, services);
+}
+
+export async function magicLinkVerifyPost(request: Request, services?: SecureAuthServices) {
+  return invokePost("../../server/routes/handlers/auth/magic-link-verify.js", request, undefined, services);
+}
+
 export async function loginCompletePost(services?: SecureAuthServices) {
   return invokePost(
     "../../server/routes/handlers/auth/login-complete.js",

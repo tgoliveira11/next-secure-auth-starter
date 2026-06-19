@@ -43,6 +43,8 @@ Wire each handler in your App Router under the consumer URL path shown below. Ca
 | `health` | GET | `/api/auth/package-health` | No |
 | `register` | POST | `/api/auth/register` | No |
 | `forgotPassword` | POST | `/api/auth/forgot-password` | No |
+| `magicLinkRequest` | POST | `/api/auth/magic-link/request` | No |
+| `magicLinkVerify` | POST | `/api/auth/magic-link/verify` | No |
 | `resetPassword` | POST | `/api/auth/reset-password` | No |
 | `verifyEmailConfirm` | POST | `/api/auth/verify-email/confirm` | No |
 | `verifyEmailResend` | POST | `/api/auth/verify-email/resend` | Yes |

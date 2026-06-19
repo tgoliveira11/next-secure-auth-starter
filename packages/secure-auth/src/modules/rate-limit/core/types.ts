@@ -13,6 +13,7 @@ export type RateLimitOperation =
   | "auth.verify_email_confirm"
   | "auth.forgot_password"
   | "auth.reset_password"
+  | "auth.magic_link_request"
   | "account.password_change"
   | "account.session_revoke"
   | "account.session_revoke_others"
@@ -59,6 +60,7 @@ export const RATE_LIMIT_POLICIES: Record<RateLimitOperation, RateLimitPolicy> = 
   "auth.verify_email_confirm": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },
   "auth.forgot_password": { maxAttempts: 5, windowMs: 60 * 60 * 1000 },
   "auth.reset_password": { maxAttempts: 10, windowMs: 15 * 60 * 1000 },
+  "auth.magic_link_request": { maxAttempts: 3, windowMs: 10 * 60 * 1000 },
   "account.password_change": { maxAttempts: 10, windowMs: 15 * 60 * 1000 },
   "account.session_revoke": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },
   "account.session_revoke_others": { maxAttempts: 5, windowMs: 15 * 60 * 1000 },

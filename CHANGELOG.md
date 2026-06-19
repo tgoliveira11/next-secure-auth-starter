@@ -6,6 +6,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-11
+
+### Added
+
+- **Magic link login** — passwordless email sign-in with single-use 15-minute tokens (`auth.magicLink.enabled`, default `false`). Routes: `POST /api/auth/magic-link/request`, `POST /api/auth/magic-link/verify`. Login page shows sign-in option when enabled. Respects 2FA challenge flow.
+- **Security notification emails** — automatic emails for new device login, password change, 2FA disable, and magic link sign-in (`auth.securityNotifications.enabled`, default `true`).
+- **Compromised password detection** — Have I Been Pwned k-anonymity check on registration and password change (`passwordPolicy.checkBreachedPasswords`, default `true`).
+
+### Security
+
+- HIBP breach check is fail-open by design: network errors or API timeouts do not block registration or password change.
+
 ## [0.1.26] - 2026-06-19
 
 ### Security

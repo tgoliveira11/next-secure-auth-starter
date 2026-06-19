@@ -8,6 +8,10 @@ import {
 } from "@/modules/security/policies/auth-password-input";
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import { requireVerifiedMutatingAccountUser } from "@/modules/auth/lib/route-auth";
+import {
+  BREACHED_PASSWORD_ERROR,
+  checkPasswordBreached,
+} from "@/modules/security/password-policy/hibp-checker";
 import type { SecureAuthServices } from "@/core/types";
 
 const bodySchema = z.object({
@@ -25,6 +29,22 @@ async function changePasswordPost(request: Request, services: SecureAuthServices
     const parsed = bodySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    const policyResult = services.ctx.validatePasswordForSubmission(parsed.data.newPassword);
+    if (!policyResult.valid) {
+      return NextResponse.json(
+        {
+          error:
+            policyResult.assessment.messages[0] ??
+            "Password does not meet the configured policy.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (await checkPasswordBreached(parsed.data.newPassword, services.config)) {
+      return NextResponse.json({ error: BREACHED_PASSWORD_ERROR }, { status: 400 });
     }
 
     const result = await services.accountAuthService.changePassword(

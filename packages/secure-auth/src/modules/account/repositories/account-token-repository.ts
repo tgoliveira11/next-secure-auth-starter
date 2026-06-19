@@ -2,7 +2,7 @@ import { and, eq, isNull, lt, gt } from "drizzle-orm";
 import type { DbClient } from "@/lib/db/types";
 import { accountTokens } from "@/lib/db/schema";
 
-export type AccountTokenType = "email_verification" | "password_reset";
+export type AccountTokenType = "email_verification" | "password_reset" | "magic_link";
 
 export function createAccountTokenRepository(db: DbClient) {
   return {

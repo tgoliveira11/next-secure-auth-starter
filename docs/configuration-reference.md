@@ -47,6 +47,8 @@ Required top-level fields when calling `createSecureAuth`:
 | `auth.requireEmailVerificationBeforeSignIn` | `boolean` | Block sign-in until email verified |
 | `auth.nextAuthSecret` | `string` | NextAuth.js session encryption secret. **Minimum 32 characters; use 64+ hex chars for production.** Generate with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` Setting a short or predictable value weakens session security. |
 | `auth.twoFactorEncryptionKey` | `string` | Key for TOTP secrets at rest |
+| `auth.magicLink.enabled` | `boolean` | `false` | Passwordless email magic link login |
+| `auth.securityNotifications.enabled` | `boolean` | `true` | Security notification emails for high-risk account events |
 | `email.from` | `string` | Sender address |
 | `email.provider` | `EmailProvider` | App-implemented send function |
 | `webauthn.rpId` | `string` | WebAuthn RP ID |
@@ -226,6 +228,7 @@ Other browsers/devices are revoked in the database on login. The starter and con
 | `AUTH_PASSWORD_REQUIRE_SYMBOL` | boolean | `false` | | `passwordPolicy.requireSymbol` |
 | `AUTH_PASSWORD_BLOCK_COMMON_PASSWORDS` | boolean | `true` | | `passwordPolicy.blockCommonPasswords` |
 | `AUTH_PASSWORD_MIN_SCORE` | number | `2` | 0–4 | `passwordPolicy.minScore` |
+| `AUTH_PASSWORD_CHECK_BREACHED` | boolean | `true` | | `passwordPolicy.checkBreachedPasswords` |
 | `AUTH_PASSWORD_STRENGTH_POSITION` | enum | `above` | `above`, `below` | `ui.passwordStrength.position` |
 
 Legacy `PASSWORD_*` names are supported for policy fields (not strength position).

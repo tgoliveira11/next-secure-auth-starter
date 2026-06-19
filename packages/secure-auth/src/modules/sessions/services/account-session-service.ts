@@ -6,6 +6,7 @@ import { isSingleActiveSessionEnabled } from "@/modules/sessions/lib/session-con
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
+import type { SecurityNotificationService } from "@/modules/security/notifications/security-notification-service";
 
 const lastTouchBySession = new Map<string, number>();
 
@@ -75,10 +76,11 @@ type AccountSessionServiceDeps = {
   ctx: SecureAuthContext;
   repos: SecureAuthRepositories;
   rateLimit: RateLimitApi;
+  securityNotificationService?: SecurityNotificationService;
 };
 
 export function createAccountSessionService(deps: AccountSessionServiceDeps) {
-  const { config, ctx, repos, rateLimit } = deps;
+  const { config, ctx, repos, rateLimit, securityNotificationService } = deps;
 
   function requestMetadata(request: Request) {
     const userAgent = request.headers.get("user-agent") ?? "";
@@ -120,6 +122,21 @@ export function createAccountSessionService(deps: AccountSessionServiceDeps) {
         endpoint: "/api/auth/callback",
         provider: input.authMethod,
       });
+
+      const user = await repos.userRepository.findById(input.userId);
+      if (user) {
+        void securityNotificationService?.notifySecurityEvent({
+          type: "new_login",
+          userId: input.userId,
+          userEmail: user.email,
+          userAgentHash: metadata?.userAgentHash,
+          browser: metadata?.browser,
+          platform: metadata?.platform,
+          deviceType: metadata?.deviceType,
+          ipMasked: metadata?.ipMasked,
+        });
+      }
+
       return row;
     },
 

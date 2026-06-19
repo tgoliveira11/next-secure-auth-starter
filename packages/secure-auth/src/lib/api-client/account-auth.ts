@@ -34,4 +34,6 @@ export const accountAuthApi = {
       currentPassword,
       newPassword,
     }),
+  requestMagicLink: (email: string) =>
+    apiClient.post<{ message: string }>("/api/auth/magic-link/request", { email }),
 };

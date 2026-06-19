@@ -11,6 +11,7 @@ import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { AccountTokenType } from "@/modules/account/repositories/account-token-repository";
+import type { SecurityNotificationService } from "@/modules/security/notifications/security-notification-service";
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
@@ -20,10 +21,11 @@ type AccountAuthServiceDeps = {
   repos: SecureAuthRepositories;
   rateLimit: RateLimitApi;
   runInTransaction: RunInTransaction;
+  securityNotificationService?: SecurityNotificationService;
 };
 
 export function createAccountAuthService(deps: AccountAuthServiceDeps) {
-  const { ctx, repos, rateLimit, runInTransaction } = deps;
+  const { ctx, repos, rateLimit, runInTransaction, securityNotificationService } = deps;
 
   async function issueAccountToken(
     userId: string,
@@ -215,6 +217,14 @@ export function createAccountAuthService(deps: AccountAuthServiceDeps) {
       await repos.auditRepository.record("password_reset_completed", row.userId, {
         endpoint: "/api/auth/reset-password",
       });
+      const resetUser = await repos.userRepository.findById(row.userId);
+      if (resetUser) {
+        void securityNotificationService?.notifySecurityEvent({
+          type: "password_changed",
+          userId: resetUser.id,
+          userEmail: resetUser.email,
+        });
+      }
       return { success: true };
     },
 
@@ -262,6 +272,11 @@ export function createAccountAuthService(deps: AccountAuthServiceDeps) {
       await repos.userRepository.updatePassword(userId, passwordHash);
       await repos.auditRepository.record("password_changed", userId, {
         endpoint: "/api/account/change-password",
+      });
+      void securityNotificationService?.notifySecurityEvent({
+        type: "password_changed",
+        userId: user.id,
+        userEmail: user.email,
       });
       return { success: true };
     },

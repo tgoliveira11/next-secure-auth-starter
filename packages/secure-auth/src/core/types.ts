@@ -15,6 +15,8 @@ import type { createAccountSessionService } from "../modules/sessions/services/a
 import type { createTwoFactorService } from "../modules/two-factor/services/two-factor-service.js";
 import type { createPasskeyLoginService } from "../modules/passkeys/services/passkey-login-service.js";
 import type { createPasskeyAccountService } from "../modules/passkeys/services/passkey-account-service.js";
+import type { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
+import type { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -58,6 +60,14 @@ export type SecureAuthConfig = {
     redirectAuthenticatedFromGuestPages?: boolean;
     /** Landing path when redirecting authenticated users from guest pages. Falls back to afterLoginPath. */
     authenticatedRedirectPath?: string;
+    magicLink?: {
+      /** When true, passwordless email magic link login is enabled. Default: false. */
+      enabled?: boolean;
+    };
+    securityNotifications?: {
+      /** When false, security notification emails are suppressed. Default: true. */
+      enabled?: boolean;
+    };
   };
   accountPolicy?: {
     sendVerificationOnRegister: boolean;
@@ -172,5 +182,7 @@ export type SecureAuthServices = {
   readonly twoFactorService: ReturnType<typeof createTwoFactorService>;
   readonly passkeyLoginService: ReturnType<typeof createPasskeyLoginService>;
   readonly passkeyAccountService: ReturnType<typeof createPasskeyAccountService>;
+  readonly magicLinkService: ReturnType<typeof createMagicLinkService>;
+  readonly securityNotificationService: ReturnType<typeof createSecurityNotificationService>;
   readonly getAuthOptions: () => NextAuthOptions;
 };

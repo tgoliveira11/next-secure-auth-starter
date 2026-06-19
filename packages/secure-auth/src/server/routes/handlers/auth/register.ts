@@ -15,6 +15,10 @@ import { CaptchaVerificationError } from "@/modules/captcha/index";
 import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
 import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
 import { GENERIC_REGISTRATION_ERROR } from "@/modules/auth/lib/public-auth-messages";
+import {
+  BREACHED_PASSWORD_ERROR,
+  checkPasswordBreached,
+} from "@/modules/security/password-policy/hibp-checker";
 import type { SecureAuthServices } from "@/core/types";
 
 const registerSchema = z.object({
@@ -88,6 +92,10 @@ async function registerPost(request: Request, services: SecureAuthServices) {
       throw new ValidationError(
         policyResult.assessment.messages[0] ?? "Password does not meet the configured policy."
       );
+    }
+
+    if (await checkPasswordBreached(password, config)) {
+      return NextResponse.json({ error: BREACHED_PASSWORD_ERROR }, { status: 400 });
     }
 
     const passwordHash = await hashPassword(password);

@@ -6,6 +6,7 @@ import { Card } from "../primitives/card.js";
 import { PageHeader } from "../primitives/page-header.js";
 import { CredentialsLoginForm } from "../features/auth/credentials-login-form.js";
 import { LoginPasskeySection } from "../features/auth/login-passkey-section.js";
+import { MagicLinkSignInSection } from "../features/auth/magic-link-sign-in-section.js";
 import { type LoginPageProps } from "./types.js";
 import { usePageTitle, useUiAppSlug, useUiMessage, useUiPaths } from "./use-page-ui.js";
 import { GuestOnlyPageGuard } from "../auth-redirect/guest-only-page-guard.js";
@@ -55,6 +56,7 @@ export function LoginPage({
           forgotPasswordPath={resolved.forgotPassword}
           submitLabel={submitLabel}
         />
+        <MagicLinkSignInSection />
         <LoginPasskeySection
           appSlug={appSlug}
           afterLoginPath={destination}

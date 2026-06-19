@@ -23,6 +23,8 @@ export type PasswordPolicyConfig = {
   requireSymbol: boolean;
   blockCommonPasswords: boolean;
   minScore: number;
+  /** When true, reject passwords found in Have I Been Pwned. Default: true. */
+  checkBreachedPasswords?: boolean;
 };
 
 const COMMON_PASSWORDS = new Set(
@@ -59,6 +61,7 @@ export const DEFAULT_PASSWORD_POLICY: PasswordPolicyConfig = {
   requireSymbol: false,
   blockCommonPasswords: true,
   minScore: 2,
+  checkBreachedPasswords: true,
 };
 
 /** Merges consumer overrides with package defaults — single source of truth for effective policy. */

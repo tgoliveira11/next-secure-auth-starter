@@ -19,16 +19,18 @@ import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { RunInTransaction } from "@/lib/db/transaction";
+import type { SecurityNotificationService } from "@/modules/security/notifications/security-notification-service";
 
 type TwoFactorServiceDeps = {
   ctx: SecureAuthContext;
   repos: SecureAuthRepositories;
   rateLimit: RateLimitApi;
   runInTransaction: RunInTransaction;
+  securityNotificationService?: SecurityNotificationService;
 };
 
 export function createTwoFactorService(deps: TwoFactorServiceDeps) {
-  const { ctx, repos, rateLimit, runInTransaction } = deps;
+  const { ctx, repos, rateLimit, runInTransaction, securityNotificationService } = deps;
 
   const service = {
     async getStatus(userId: string) {
@@ -169,6 +171,15 @@ export function createTwoFactorService(deps: TwoFactorServiceDeps) {
       await repos.auditRepository.record("two_factor_disabled", userId, {
         endpoint: "/api/account/2fa/disable",
       });
+
+      const user = await repos.userRepository.findById(userId);
+      if (user) {
+        void securityNotificationService?.notifySecurityEvent({
+          type: "two_factor_disabled",
+          userId: user.id,
+          userEmail: user.email,
+        });
+      }
 
       return { success: true };
     },

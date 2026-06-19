@@ -57,6 +57,28 @@ PASSWORD_POLICY_ENFORCEMENT=off | warn | enforce
 
 Default recommendation: `warn`.
 
+### Compromised password detection
+
+During registration and password change, the package can check passwords against the [Have I Been Pwned](https://haveibeenpwned.com/) k-anonymity API (`passwordPolicy.checkBreachedPasswords`, default `true`).
+
+Only the first five characters of the SHA-1 hash of the password are sent to HIBP; the full password never leaves your server. If the HIBP request fails or times out (3 seconds), registration or password change proceeds without blocking (fail-open by design). Set `checkBreachedPasswords: false` for air-gapped or offline environments.
+
+---
+
+## Security notifications
+
+The package sends security notification emails for high-risk account events:
+
+- new sign-in from an unrecognized device
+- password changed
+- two-factor authentication disabled
+- email address changed (when supported by the consumer app)
+- magic link sign-in completed
+
+These are security notifications, not marketing — end users cannot disable them from account settings. Consumers may opt out entirely with `auth.securityNotifications.enabled: false` (for example in local development).
+
+New-device detection compares the current session `userAgentHash` against the five most recent active sessions; matching hashes skip the notification.
+
 ---
 
 ## Email verification policy
