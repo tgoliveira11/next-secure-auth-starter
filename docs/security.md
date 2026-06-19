@@ -275,4 +275,15 @@ Branches   >= 95%
 
 Coverage thresholds must not be lowered without explicit architectural review.
 
-Security-sensitive flows that require tests: authentication (password, OAuth, passkey), token reuse/expiry, TOTP, passkey challenges, session revocation, account deletion, logging redaction, and module boundary violations.
+Security-sensitive flows that require tests: authentication (password, OAuth, passkey), token reuse/expiry, TOTP, passkey challenges, **passkey capability boundaries** (account list/delete vs vault-only credentials), session revocation, account deletion, logging redaction, and module boundary violations.
+
+### Passkey capability boundaries
+
+Account authentication and other WebAuthn uses (for example vault unlock in downstream apps) may share `passkey_credentials`.
+
+- **`sign_in_enabled`** — credential may be used for account login (passkey login filters on this flag).
+- **`vault_unlock_enabled`** — credential is used by another security feature; account settings must not revoke it.
+- Account **`GET /api/account/passkeys`** exposes safe capability metadata; **`DELETE /api/account/passkeys/:id`** rejects non-removable credentials (409).
+- Dual-capability credentials (`sign_in_enabled` + `vault_unlock_enabled`) are not removable from account settings until the owning app disables vault unlock.
+
+See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).

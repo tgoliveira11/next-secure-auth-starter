@@ -12,4 +12,6 @@ export class ChallengeError extends Error {
   }
 }
 
+export { PasskeyAccountBoundaryError } from "../lib/passkey-capabilities.js";
+
 export { RateLimitError } from "@/modules/rate-limit/index";

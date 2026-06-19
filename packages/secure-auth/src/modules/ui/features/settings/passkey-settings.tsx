@@ -14,6 +14,7 @@ import {
 import { Card, CardDescription, CardHeader, CardTitle } from "../../primitives/card.js";
 import { Button } from "../../primitives/button.js";
 import { Alert } from "../../primitives/alert.js";
+import { Badge } from "../../primitives/badge.js";
 import { ConfirmDialog } from "../../primitives/confirm-dialog.js";
 import { LoadingState } from "../../primitives/loading-state.js";
 import { SuccessState } from "../../primitives/success-state.js";
@@ -120,7 +121,8 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
       <CardHeader>
         <CardTitle>Passkeys</CardTitle>
         <CardDescription>
-          Sign in without a password using a passkey stored on this device or synced account.
+          Manage account sign-in passkeys. Other credentials (such as vault unlock) may appear for
+          transparency but are managed from their own settings.
         </CardDescription>
       </CardHeader>
 
@@ -134,16 +136,27 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
                 key={passkey.id}
                 className="flex flex-col gap-3 rounded-[var(--radius)] border border-[var(--border)] p-4 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
-                  <p className="font-medium">{passkey.friendlyName}</p>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">{passkey.label}</p>
+                    {passkey.badge && <Badge variant="muted">{passkey.badge}</Badge>}
+                  </div>
+                  <p className="text-sm text-[var(--muted)]">{passkey.description}</p>
                   <p className="text-sm text-[var(--muted)]">
                     Added {formatDate(passkey.createdAt)} · Last used{" "}
                     {formatDate(passkey.lastUsedAt)}
                   </p>
+                  {!passkey.removableFromAccountSettings && (
+                    <p className="text-xs text-[var(--muted)]">
+                      Remove this credential from the settings page for the feature that uses it.
+                    </p>
+                  )}
                 </div>
-                <Button variant="secondary" onClick={() => setRemoveTarget(passkey)}>
-                  Remove
-                </Button>
+                {passkey.removableFromAccountSettings ? (
+                  <Button variant="secondary" onClick={() => setRemoveTarget(passkey)}>
+                    Remove
+                  </Button>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -166,7 +179,7 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
         title="Remove passkey?"
         description={
           removeTarget
-            ? `Remove "${removeTarget.friendlyName}" from your account? You can add it again later.`
+            ? `Remove "${removeTarget.label}" from your account? You can add it again later.`
             : ""
         }
         confirmLabel="Remove passkey"

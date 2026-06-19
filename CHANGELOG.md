@@ -6,6 +6,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.24] - 2026-06-19
+
+### Security
+
+- **Passkey capability boundaries** — account passkey list and delete are capability-aware. Credentials with `signInEnabled: false` or `vaultUnlockEnabled: true` cannot be removed from account security settings (API returns 409; UI hides remove). Dual-capability credentials are blocked from account removal until vault unlock is disabled in the owning app flow.
+
+### Added
+
+- **`vault_unlock_enabled`** column on `passkey_credentials` (migration `0001_passkey_vault_unlock_enabled`).
+- **Account passkey list metadata** — `capabilities`, `removableFromAccountSettings`, `label`, `description`, `badge`.
+- **Consumer guide** — [docs/consumer-passkey-capability-boundaries.md](docs/consumer-passkey-capability-boundaries.md).
+
+### Changed
+
+- **`PasskeySettings`** — capability-aware labels and remove button visibility.
+- **`SECURE_AUTH_PACKAGE_VERSION`** — `0.1.24`.
+
 ## [0.1.23] - 2026-06-19
 
 ### Changed

@@ -308,6 +308,8 @@ export const POST = secureAuth.routes.passkeyLoginOptions.POST;
 
 Use `@tgoliveira/secure-auth/client` helpers in login UI (`passkeyLoginApi`, `prepareAuthenticationOptions`).
 
+Account passkey settings (`PasskeySettings` / `GET /api/account/passkeys`) are capability-aware: vault-only credentials may be listed but are not removable from account security. See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+
 When TOTP 2FA is enabled, passkey verify returns `requiresTwoFactor: true` and sets the same httpOnly challenge cookie as credentials login. The client redirects to `ui.paths.loginTwoFactor` (default `/login/2fa?mode=credentials`); the session is finalized only after TOTP verification.
 
 ---

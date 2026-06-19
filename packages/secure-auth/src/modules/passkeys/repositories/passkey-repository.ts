@@ -21,6 +21,7 @@ export function createPasskeyRepository(db: DbClient) {
         transports?: string[] | null;
         friendlyName?: string | null;
         signInEnabled?: boolean;
+        vaultUnlockEnabled?: boolean;
       },
       client: DbClient = db
     ) {
@@ -34,6 +35,7 @@ export function createPasskeyRepository(db: DbClient) {
           transports: data.transports ?? null,
           friendlyName: data.friendlyName ?? null,
           signInEnabled: data.signInEnabled ?? true,
+          vaultUnlockEnabled: data.vaultUnlockEnabled ?? false,
         })
         .returning();
       return cred;

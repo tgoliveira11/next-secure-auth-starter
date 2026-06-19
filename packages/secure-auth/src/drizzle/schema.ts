@@ -75,6 +75,7 @@ export const passkeyCredentials = pgTable("passkey_credentials", {
   transports: jsonb("transports"),
   friendlyName: text("friendly_name"),
   signInEnabled: boolean("sign_in_enabled").notNull().default(true),
+  vaultUnlockEnabled: boolean("vault_unlock_enabled").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),

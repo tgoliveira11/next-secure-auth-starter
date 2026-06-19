@@ -182,6 +182,8 @@ When `singleActiveSession` is enabled, other sessions are revoked only after **f
 
 Passkey sign-in is a primary authentication method. When TOTP 2FA is enabled on the account, passkey verification creates a pending login challenge (same httpOnly cookie and `/login/2fa` flow as email/password). The session is finalized only after valid TOTP verification — passkeys do not bypass app-level 2FA.
 
+**Capability boundaries:** account security settings list passkeys with `signInEnabled` / `vaultUnlockEnabled` metadata. Only pure account sign-in passkeys are removable from account settings; vault-only and dual-capability credentials are protected at the API and UI. See [docs/consumer-passkey-capability-boundaries.md](../../docs/consumer-passkey-capability-boundaries.md).
+
 ## CAPTCHA (Cloudflare Turnstile)
 
 Optional bot protection for credentials registration and login. Disabled by default.

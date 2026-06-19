@@ -155,4 +155,22 @@ describe("passkey login service verifyLogin", () => {
       expect.objectContaining({ provider: "passkey" })
     );
   });
+
+  it("rejects credentials that are not enabled for sign-in", async () => {
+    mocks.findByCredentialId.mockResolvedValue({
+      userId: USER_ID,
+      credentialId: "cred-id",
+      signInEnabled: false,
+      vaultUnlockEnabled: true,
+      publicKey: Buffer.from("key").toString("base64url"),
+      counter: "0",
+      transports: null,
+    });
+    const service = buildService();
+
+    await expect(service.verifyLogin(buildVerifyResponse())).rejects.toThrow(
+      /not registered for sign-in/
+    );
+    expect(mocks.issueLoginToken).not.toHaveBeenCalled();
+  });
 });

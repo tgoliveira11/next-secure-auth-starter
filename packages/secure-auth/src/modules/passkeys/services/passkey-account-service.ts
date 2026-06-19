@@ -4,6 +4,7 @@ import {
 } from "@simplewebauthn/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
+import { toAccountPasskeyListItem, assertRemovableFromAccountSettings } from "@/modules/passkeys/lib/passkey-capabilities";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -31,13 +32,19 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
   return {
     async listPasskeys(userId: string) {
       const credentials = await repos.passkeyRepository.findByUserId(userId);
-      return credentials.map((cred) => ({
-        id: cred.id,
-        friendlyName: cred.friendlyName ?? defaultFriendlyName(),
-        createdAt: cred.createdAt.toISOString(),
-        lastUsedAt: cred.lastUsedAt?.toISOString() ?? null,
-        signInEnabled: cred.signInEnabled,
-      }));
+      return credentials.map((cred) =>
+        toAccountPasskeyListItem(
+          {
+            id: cred.id,
+            friendlyName: cred.friendlyName,
+            createdAt: cred.createdAt,
+            lastUsedAt: cred.lastUsedAt,
+            signInEnabled: cred.signInEnabled,
+            vaultUnlockEnabled: cred.vaultUnlockEnabled,
+          },
+          defaultFriendlyName()
+        )
+      );
     },
 
     async getRegistrationOptions(userId: string, userName: string, ip?: string) {
@@ -118,6 +125,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
             transports: credential.transports,
             friendlyName: options?.friendlyName ?? defaultFriendlyName(credentialDeviceType),
             signInEnabled: true,
+            vaultUnlockEnabled: false,
           },
           tx
         );
@@ -136,6 +144,11 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
       if (!credential) {
         throw new NotFoundError("Passkey not found");
       }
+
+      assertRemovableFromAccountSettings({
+        signInEnabled: credential.signInEnabled,
+        vaultUnlockEnabled: credential.vaultUnlockEnabled,
+      });
 
       await runInTransaction(async (tx) => {
         await repos.passkeyRepository.revoke(credential.id, userId, tx);

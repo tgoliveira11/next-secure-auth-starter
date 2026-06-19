@@ -1,6 +1,6 @@
 {
   "name": "@secure-auth/starter",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "private": true,
   "description": "Integration harness for @tgoliveira/secure-auth",
   "scripts": {

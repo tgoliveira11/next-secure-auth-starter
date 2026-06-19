@@ -72,12 +72,22 @@ describe("account passkeys API routes", () => {
       {
         id: "pk-1",
         friendlyName: "Passkey",
-        capabilityLabel: "Sign-in only",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        lastUsedAt: null,
+        signInEnabled: true,
+        vaultUnlockEnabled: false,
+        capabilities: { signIn: true, vaultUnlock: false },
+        removableFromAccountSettings: true,
+        label: "Passkey",
+        description: "Sign in without a password using this passkey.",
+        badge: "Sign-in",
       },
     ]);
     const res = await listGet(services);
     expect(res.status).toBe(200);
     expect(mocks.requireVerifiedFullyAuthenticatedUser).toHaveBeenCalled();
+    const body = await res.json();
+    expect(body.passkeys[0].removableFromAccountSettings).toBe(true);
   });
 
   it("requires verified auth for registration options", async () => {
@@ -143,5 +153,20 @@ describe("account passkeys API routes", () => {
       services
     );
     expect(res.status).toBe(200);
+  });
+
+  it("maps passkey boundary errors to 409", async () => {
+    const { PasskeyAccountBoundaryError } = await import("@/modules/passkeys/services/passkey-service");
+    mocks.removePasskey.mockRejectedValue(
+      new PasskeyAccountBoundaryError(
+        "This passkey is not managed from account security settings."
+      )
+    );
+    const res = await deletePasskey(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-vault"),
+      { params: Promise.resolve({ id: "pk-vault" }) },
+      services
+    );
+    expect(res.status).toBe(409);
   });
 });

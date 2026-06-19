@@ -1,12 +1,23 @@
 import { apiClient } from "./client";
 import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser";
 
+export type AccountPasskeyCapabilities = {
+  signIn: boolean;
+  vaultUnlock: boolean;
+};
+
 export type AccountPasskey = {
   id: string;
   friendlyName: string;
   createdAt: string;
   lastUsedAt: string | null;
   signInEnabled: boolean;
+  vaultUnlockEnabled: boolean;
+  capabilities: AccountPasskeyCapabilities;
+  removableFromAccountSettings: boolean;
+  label: string;
+  description: string;
+  badge: string | null;
 };
 
 export const passkeyAccountApi = {

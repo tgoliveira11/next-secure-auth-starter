@@ -361,6 +361,35 @@ All routes are real implementations — no 501 stubs.
 | `passkeysList` | GET |
 | `passkeyRegister` | POST |
 | `passkeyDelete` | DELETE |
+
+### Account passkeys (`passkeysList` / `passkeyDelete`)
+
+`GET /api/account/passkeys` returns capability-aware items:
+
+```typescript
+{
+  passkeys: Array<{
+    id: string;
+    friendlyName: string;
+    signInEnabled: boolean;
+    vaultUnlockEnabled: boolean;
+    capabilities: { signIn: boolean; vaultUnlock: boolean };
+    removableFromAccountSettings: boolean;
+    label: string;
+    description: string;
+    badge: string | null;
+    createdAt: string;
+    lastUsedAt: string | null;
+  }>;
+}
+```
+
+`DELETE /api/account/passkeys/:id` removes **account sign-in-only** credentials. Returns **409** when the credential is vault-only, dual-capability, or otherwise not managed from account settings.
+
+Passkey login continues to use only `signInEnabled: true` credentials.
+
+See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+
 | `sessionsList` | GET |
 | `sessionDelete` | DELETE |
 | `sessionsPing` | POST |
