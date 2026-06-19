@@ -4,9 +4,9 @@
   "private": true,
   "description": "Integration harness for @tgoliveira/secure-auth",
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3003",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3003",
     "lint": "eslint .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

@@ -4,7 +4,7 @@ import { buildSecureAuthConfigFromEnv } from "@/lib/env/secure-auth-from-env";
 const defaults = {
   appName: "Test App",
   appSlug: "test-app",
-  baseUrl: "http://localhost:3001",
+  baseUrl: "http://localhost:3003",
 };
 
 describe("buildSecureAuthConfigFromEnv", () => {

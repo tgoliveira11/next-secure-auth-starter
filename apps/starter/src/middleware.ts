@@ -12,7 +12,7 @@ function buildStarterMiddlewareConfig() {
   const slice = buildSecureAuthConfigFromEnv({
     appName: APP_NAME,
     appSlug: APP_SLUG,
-    baseUrl: process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3001",
+    baseUrl: process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3003",
   });
 
   const configForUi: SecureAuthConfig = {
@@ -25,7 +25,7 @@ function buildStarterMiddlewareConfig() {
     webauthn: {
       rpId: process.env.WEBAUTHN_RP_ID ?? "localhost",
       rpName: APP_NAME,
-      origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3001",
+      origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3003",
     },
     ui: {
       ...slice.ui,

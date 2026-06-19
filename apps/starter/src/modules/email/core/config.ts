@@ -18,7 +18,7 @@ export function getEmailConfig() {
   const provider = (process.env.EMAIL_PROVIDER ?? "console") as EmailProvider;
   const from = process.env.EMAIL_FROM ?? DEFAULT_EMAIL_FROM;
   const appBaseUrl =
-    process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3001";
+    process.env.APP_BASE_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3003";
 
   return { provider, from, appBaseUrl };
 }

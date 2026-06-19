@@ -21,7 +21,7 @@ const emailProvider: EmailProvider = {
 const envConfig = buildSecureAuthConfigFromEnv({
   appName: APP_NAME,
   appSlug: APP_SLUG,
-  baseUrl: "http://localhost:3001",
+  baseUrl: "http://localhost:3003",
 });
 
 export const secureAuth = createSecureAuth({

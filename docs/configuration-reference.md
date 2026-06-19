@@ -104,7 +104,7 @@ Parsing helpers live in `apps/*/src/lib/env/parse.ts`:
 | `APP_SLUG` | string | brand slug in code | optional | `app.slug` | URL-safe identifier |
 | `NODE_ENV` | string | — | optional | `server.cookieSecure` fallback | When `AUTH_COOKIE_SECURE` is unset, production enables secure cookies |
 
-**Example:** `APP_BASE_URL=http://localhost:3001`
+**Example:** `APP_BASE_URL=http://localhost:3003` (starter) or `http://localhost:3002` (consumer-demo)
 
 ### Database
 
@@ -151,7 +151,7 @@ Starter also documents `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` for 
 
    | Environment | Callback URL |
    | --- | --- |
-   | Local starter | `http://localhost:3001/api/auth/callback/github` |
+   | Local starter | `http://localhost:3003/api/auth/callback/github` |
    | Local consumer-demo | `http://localhost:3002/api/auth/callback/github` |
    | Production | `https://your-domain.com/api/auth/callback/github` |
 

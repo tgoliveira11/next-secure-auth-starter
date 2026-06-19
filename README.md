@@ -63,7 +63,7 @@ Edit `apps/starter/.env.local`. Minimum required values:
 | --- | --- |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `NEXTAUTH_SECRET` | Session signing secret (long random string) |
-| `NEXTAUTH_URL` / `APP_BASE_URL` | App URL (default `http://localhost:3001` or `3002` per `.env.example`) |
+| `NEXTAUTH_URL` / `APP_BASE_URL` | App URL (default `http://localhost:3003` for starter, `3002` for consumer-demo) |
 | `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | 32-byte base64 key for TOTP secrets at rest |
 | `WEBAUTHN_RP_ID` | Passkey RP ID (`localhost` for dev) |
 | `WEBAUTHN_ORIGIN` | Passkey origin (match app URL) |
@@ -100,7 +100,7 @@ npm run db:migrate
 npm run dev
 ```
 
-Open the URL from `NEXTAUTH_URL` (e.g. http://localhost:3001).
+Open the URL from `NEXTAUTH_URL` (e.g. http://localhost:3003).
 
 ### Consumer demo (minimal validation app)
 

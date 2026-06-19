@@ -36,7 +36,7 @@ describe("sendEmail", () => {
   it("delegates to SMTP when configured", async () => {
     vi.stubEnv("EMAIL_PROVIDER", "smtp");
     vi.stubEnv("EMAIL_FROM", "Starter <noreply@localhost>");
-    vi.stubEnv("APP_BASE_URL", "http://localhost:3001");
+    vi.stubEnv("APP_BASE_URL", "http://localhost:3003");
     vi.stubEnv("SMTP_HOST", "localhost");
     vi.stubEnv("SMTP_PORT", "1025");
     await sendEmail({
