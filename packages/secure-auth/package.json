@@ -86,7 +86,8 @@
     "build": "tsup --config tsup.core.config.ts && tsup --config tsup.react-client.config.ts && tsup --config tsup.ui.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "echo 'Package lint: configure eslint in 0.2.x'",
-    "test": "vitest run --config vitest.config.ts"
+    "test": "vitest run --config vitest.config.ts",
+    "prepublishOnly": "npm run validate --prefix ../.."
   },
   "peerDependencies": {
     "drizzle-orm": "^0.45.2",

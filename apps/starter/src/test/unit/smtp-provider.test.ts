@@ -21,7 +21,7 @@ vi.mock("@tgoliveira/secure-auth", () => ({
   },
 }));
 
-import { resetSmtpTransportCache, sendSmtpEmail } from "@/modules/email/core/smtp-provider";
+import { resetSmtpTransportCache, sendSmtpEmail, createSmtpTransport } from "@/modules/email/core/smtp-provider";
 
 describe("smtp provider", () => {
   beforeEach(() => {
@@ -58,5 +58,41 @@ describe("smtp provider", () => {
       })
     );
     expect(safeLogger.info).toHaveBeenCalled();
+  });
+
+  it("creates authenticated SMTP transport when credentials are configured", () => {
+    const transport = createSmtpTransport({
+      host: "smtp.example.com",
+      port: 587,
+      secure: true,
+      user: "smtp-user",
+      password: "smtp-pass",
+    });
+    expect(createTransport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auth: { user: "smtp-user", pass: "smtp-pass" },
+      })
+    );
+    expect(transport).toBeTruthy();
+  });
+
+  it("uses an explicit transport when provided", async () => {
+    const customTransport = { sendMail: vi.fn().mockResolvedValue({ messageId: "custom" }) };
+    await sendSmtpEmail(
+      "Test <test@example.com>",
+      {
+        to: "invalid-recipient",
+        subject: "Hello",
+        html: "<p>Hi</p>",
+        text: "Hi",
+      },
+      customTransport as never
+    );
+    expect(customTransport.sendMail).toHaveBeenCalled();
+    expect(createTransport).not.toHaveBeenCalled();
+    expect(safeLogger.info).toHaveBeenCalledWith(
+      "Email sent via SMTP",
+      expect.objectContaining({ toDomain: "unknown" })
+    );
   });
 });

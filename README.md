@@ -150,11 +150,11 @@ npm run audit:security:all    # full report
 
 Policy, remediation history, and override rationale: [docs/security/dependency-audit.md](docs/security/dependency-audit.md).
 
-The publish workflow runs `npm run audit:security` before `npm publish`.
+The release workflow runs the security audit before `npm run validate` and the publication gates.
 
 ### npm publish (automated)
 
-Releases are published to [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth) when tags matching `secure-auth-v*.*.*` are pushed (for example `secure-auth-v0.1.22`). Publishes with dist-tag `latest`. Uses GitHub Actions + npm Trusted Publishing (OIDC) — no `NPM_TOKEN` secret.
+Start **Publish package to npmjs** manually on `main`. The workflow derives or accepts the next stable SemVer, validates the monorepo and exact tarball, publishes with npm Trusted Publishing/provenance, then creates the release commit, `secure-auth-vx.y.z` tag, and GitHub release. Do not bump versions or create release tags manually.
 
 See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 

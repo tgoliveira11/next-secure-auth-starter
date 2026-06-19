@@ -25,6 +25,17 @@ const packageOwnedRoutes = collectRouteFiles(API_ROOT).filter((path) => {
   return !appOwnedRoutePrefixes.some((prefix) => rel.startsWith(prefix));
 });
 
+/** Routes included in the coverage gate (auth wrappers are excluded in vitest.config). */
+const coverageIncludedRoutes = packageOwnedRoutes.filter((filePath) => {
+  const rel = relative(API_ROOT, filePath);
+  return rel.startsWith("account/") || rel.startsWith("openapi/");
+});
+
+function toModuleId(filePath: string): string {
+  const rel = relative(join(process.cwd(), "src"), filePath).replace(/\.ts$/, "");
+  return `@/${rel}`;
+}
+
 describe("starter API route wrappers", () => {
   it.each(
     packageOwnedRoutes.map((file) => [relative(API_ROOT, file), file] as const)
@@ -53,6 +64,17 @@ describe("starter API route wrappers", () => {
     const nextAuthRoute = readFileSync(join(process.cwd(), "src/lib/nextauth-route.ts"), "utf8");
     expect(nextAuthRoute).toContain('from "next-auth"');
     expect(nextAuthRoute).toContain("createNextAuthRouteHandlers");
+  });
+
+  it.each(
+    coverageIncludedRoutes.map((file) => [relative(API_ROOT, file), file] as const)
+  )("%s exports route handler functions", async (_label, filePath) => {
+    const mod = await import(toModuleId(filePath));
+    const exports = Object.values(mod);
+    expect(exports.length).toBeGreaterThan(0);
+    for (const handler of exports) {
+      expect(handler).toBeTypeOf("function");
+    }
   });
 });
 

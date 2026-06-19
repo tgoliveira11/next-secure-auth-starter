@@ -43,4 +43,11 @@ describe("loadEnvFiles", () => {
     loadEnvFiles();
     expect(process.env.TEST_LOAD_ENV_KEY).toBe("existing");
   });
+
+  it("skips malformed lines without an equals sign", async () => {
+    writeFileSync(join(cwd, ".env.local"), "INVALID_LINE\nTEST_LOAD_ENV_KEY=ok\n", "utf-8");
+    const { loadEnvFiles } = await import("@/lib/load-env");
+    loadEnvFiles();
+    expect(process.env.TEST_LOAD_ENV_KEY).toBe("ok");
+  });
 });

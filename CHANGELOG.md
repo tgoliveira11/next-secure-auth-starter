@@ -9,6 +9,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - **npm release convention** — Git tags use `secure-auth-v0.x.y` (normal semver, no `-internal` suffix). The publish workflow publishes with dist-tag `latest`. Install with `@tgoliveira/secure-auth@latest` or `@tgoliveira/secure-auth`.
+- **npm release automation** — Pull requests and `main` are continuously validated; releases are now initiated through a manual GitHub Actions workflow that calculates the version from `Unreleased`, updates all monorepo version metadata, validates one publication tarball, publishes with provenance, and creates the Git tag and GitHub release. Interrupted releases can be safely resumed.
+
 ## [0.1.22-internal] - 2026-06-18
 
 ### Security

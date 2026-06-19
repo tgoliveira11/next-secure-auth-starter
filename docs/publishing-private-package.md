@@ -1,6 +1,6 @@
 # Publishing `@tgoliveira/secure-auth`
 
-**Status:** Published publicly on [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth). Automated releases use GitHub Actions + npm Trusted Publishing (OIDC).
+**Status:** Published publicly on [npm](https://www.npmjs.com/package/@tgoliveira/secure-auth). Releases are initiated manually through GitHub Actions and completed automatically with npm Trusted Publishing (OIDC).
 
 ## Package identity
 
@@ -13,12 +13,12 @@
 
 ## Automated publishing (recommended)
 
-Push a tag matching `secure-auth-v*.*.*` after bumping the package version on `main`.
+Run the **Publish package to npmjs** workflow on `main`. Do not bump versions or create tags manually.
 
 Full instructions: **[publishing-npm-automation.md](./publishing-npm-automation.md)**
 
 - Workflow: `.github/workflows/publish-secure-auth.yml`
-- **Trusted Publisher** must be configured on npm (no `NPM_TOKEN` secret)
+- A protected `npmjs` GitHub environment and npm **Trusted Publisher** must be configured
 - GitHub repo: `tgoliveira11/next-secure-auth-starter`
 
 ## Install (consumer)
@@ -46,14 +46,8 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding
 
 **Required peer dependencies:** `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`.
 
-## Manual publish (emergency only)
-
-Prefer the automated workflow. If you must publish locally, use an npm account with publish access and **do not** commit tokens:
-
-```bash
-npm run build -w @tgoliveira/secure-auth
-npm publish -w @tgoliveira/secure-auth --access public --tag latest
-```
+The workflow owns validation, version metadata, publication provenance, release tags, and GitHub
+releases. If it is interrupted, rerun it with a blank version to enter recovery mode.
 
 ## Versioning rules
 
@@ -66,7 +60,8 @@ npm publish -w @tgoliveira/secure-auth --access public --tag latest
 
 Bump patch for fixes, minor for additive API, major (post-1.0) for breaking changes.
 
-Release tags use normal semver: `secure-auth-v0.1.22` (no `-internal` suffix).
+Release tags use normal semver, such as `secure-auth-v0.1.23` (no `-internal` suffix), and are created
+by the workflow only after npm publication succeeds.
 
 ## Legacy: GitHub Packages and `internal` dist-tag
 

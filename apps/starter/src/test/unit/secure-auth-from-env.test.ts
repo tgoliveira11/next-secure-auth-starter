@@ -96,4 +96,25 @@ describe("buildSecureAuthConfigFromEnv", () => {
   it("defaults AUTH_PASSWORD_MIN_LENGTH to 12 when omitted", () => {
     expect(buildSecureAuthConfigFromEnv(defaults, {}).passwordPolicy?.minLength).toBe(12);
   });
+
+  it("maps Microsoft OAuth and defaults tenant id to common", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_MICROSOFT_CLIENT_ID: "ms-id",
+      AUTH_MICROSOFT_CLIENT_SECRET: "ms-secret",
+    });
+    expect(config.oauth?.microsoft).toEqual({
+      clientId: "ms-id",
+      clientSecret: "ms-secret",
+      tenantId: "common",
+    });
+  });
+
+  it("maps explicit Microsoft tenant id", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_MICROSOFT_CLIENT_ID: "ms-id",
+      AUTH_MICROSOFT_CLIENT_SECRET: "ms-secret",
+      AUTH_MICROSOFT_TENANT_ID: "tenant-guid",
+    });
+    expect(config.oauth?.microsoft?.tenantId).toBe("tenant-guid");
+  });
 });

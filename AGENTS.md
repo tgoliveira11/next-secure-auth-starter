@@ -66,6 +66,11 @@ At minimum review:
 
 See [.cursor/rules/documentation.md](.cursor/rules/documentation.md) for the full update checklist.
 
+For every consumer-visible change, add an entry under the appropriate `CHANGELOG.md` `Unreleased`
+heading. Do not bump versions, create release tags, or publish manually. Start the
+`Publish package to npmjs` workflow on `main`; it owns version selection, release metadata, npm
+publication, tag creation, and GitHub release creation.
+
 ## Module boundaries
 
 Follow [docs/architecture.md](docs/architecture.md#module-boundaries).

@@ -1,135 +1,92 @@
-# npm automated publishing (GitHub Actions + Trusted Publishing)
+# npm release process
 
-**Package:** `@tgoliveira/secure-auth`  
-**Registry:** [npm public registry](https://www.npmjs.com/package/@tgoliveira/secure-auth)  
-**npm dist-tag:** `latest` (install with `@tgoliveira/secure-auth@latest` or `@tgoliveira/secure-auth`)  
-**License:** MIT — see [LICENSE](../LICENSE) in the repository and the published package tarball.
+Releases of `@tgoliveira/secure-auth` are initiated manually, while version calculation, validation,
+npm publication, the release commit, Git tag, and GitHub release are automated. Do not bump package
+versions or create release tags manually.
 
-This monorepo publishes `@tgoliveira/secure-auth` automatically when a release tag is pushed. **No long-lived npm token** and **no `NPM_TOKEN` GitHub secret** are used — authentication uses **npm Trusted Publishing (OIDC)**.
+## Version policy
 
----
+The package follows Semantic Versioning. While the major version is `0`:
 
-## Release tag pattern
+- Fixes and documentation-only changes select a patch release.
+- Additive features select a minor release.
+- Breaking public API changes also select a minor release.
 
-Push an annotated tag matching:
+Every consumer-visible change belongs under `CHANGELOG.md` → `Unreleased`, using `Added`, `Changed`,
+`Deprecated`, `Removed`, `Fixed`, or `Security`. Mark breaking changes with `**Breaking:**` and include
+a migration path.
 
-```text
-secure-auth-v*.*.*
-```
+Pull requests and pushes to `main` run `.github/workflows/validate.yml`, which executes the same
+monorepo validation command and a package dry-run before release.
 
-Examples:
+The first release through this workflow migrates the legacy `0.1.22-internal` version to stable
+SemVer. An automatic patch becomes `0.1.23`; an explicit version must be greater than `0.1.22`.
 
-- `secure-auth-v0.1.21`
-- `secure-auth-v0.1.22`
-- `secure-auth-v0.2.0`
+## One-time GitHub and npm setup
 
-The tag suffix (after `secure-auth-v`) must match `packages/secure-auth/package.json` `version` exactly.
+1. Create a protected GitHub environment named `npmjs` and add required reviewers if desired.
+2. Allow GitHub Actions to push release commits and `secure-auth-v*` tags to `main`, or provide an
+   equivalently scoped GitHub App token if branch protection blocks `GITHUB_TOKEN` pushes.
+3. Configure an npm GitHub Actions trusted publisher for `@tgoliveira/secure-auth`:
+   - Repository owner: `tgoliveira11`
+   - Repository: `next-secure-auth-starter`
+   - Workflow filename: `publish-secure-auth.yml`
+   - Environment: `npmjs`
+   - Allowed action: `npm publish`
+4. After one successful OIDC publication, remove the legacy `NPM_TOKEN` secret and disallow token
+   publishing in npm settings. The workflow retains token fallback only during migration.
 
-| Field | Example |
-| --- | --- |
-| Package version | `0.1.22` |
-| Git tag | `secure-auth-v0.1.22` |
-| npm dist-tag | `latest` |
+Trusted publishing requires a GitHub-hosted runner, Node 22.14 or newer, npm 11.5.1 or newer, and
+`id-token: write`. The workflow uses Node 24 and verifies the npm version before continuing.
 
-**Note:** Releases before this convention used `-internal` suffixes (for example `secure-auth-v0.1.22-internal`). New releases use normal semver only.
+## Start a release
 
----
+Use GitHub Actions:
 
-## Workflow
+1. Open **Actions** → **Publish package to npmjs**.
+2. Select **Run workflow** on `main`.
+3. Leave `version` blank for automatic versioning, or enter an exact stable version, `patch`,
+   `minor`, or `major`.
 
-| Item | Value |
-| --- | --- |
-| File | [`.github/workflows/publish-secure-auth.yml`](../.github/workflows/publish-secure-auth.yml) |
-| Trigger | `push` of tags `secure-auth-v*.*.*` |
-| GitHub repo owner | `tgoliveira11` |
-| GitHub repo name | `next-secure-auth-starter` |
-| Node.js | 22 LTS (stable on `ubuntu-latest` runners) |
-| npm publish tag | `latest` |
-
-### What the workflow does
-
-1. Checks out the repository
-2. Sets up Node.js with `registry-url: https://registry.npmjs.org/` (OIDC for Trusted Publishing)
-3. Runs `npm ci`
-4. Runs `npm run audit:security`
-5. Verifies package version matches the git tag
-6. Builds `@tgoliveira/secure-auth`
-7. Runs `typecheck`, `lint`, and `test`
-8. Runs `npm pack --dry-run`
-9. Publishes with `npm publish -w @tgoliveira/secure-auth --access public --tag latest`
-
-### Permissions
-
-```yaml
-permissions:
-  contents: read
-  id-token: write
-```
-
-`id-token: write` is required so GitHub Actions can mint an OIDC token for npm Trusted Publishing.
-
----
-
-## npm Trusted Publisher setup (required once)
-
-Configure this in the **npm** website for `@tgoliveira/secure-auth`:
-
-1. Open [npm package settings](https://www.npmjs.com/package/@tgoliveira/secure-auth) → **Publishing access** → **Trusted publishers** (or **Provenance** / **Trusted Publishing**).
-2. Add a **GitHub Actions** trusted publisher:
-
-| Field | Value |
-| --- | --- |
-| Provider | GitHub Actions |
-| Repository owner | `tgoliveira11` |
-| Repository name | `next-secure-auth-starter` |
-| Workflow filename | `publish-secure-auth.yml` |
-| Environment | *(leave empty unless you add a GitHub Environment)* |
-
-3. Save.
-
-If Trusted Publisher is **not** configured, the workflow will fail at **Publish to npm** with an authentication or provenance error.
-
-**Do not:**
-
-- Create or commit npm auth tokens
-- Add an `NPM_TOKEN` repository secret for this workflow
-- Store `NPM_TOKEN` in `.npmrc` in the repo
-
----
-
-## Maintainer release checklist
-
-1. Bump `packages/secure-auth/package.json` version (and aligned monorepo references — see [CHANGELOG.md](../CHANGELOG.md)).
-2. Update `CHANGELOG.md` with a new `[x.y.z]` section.
-3. Commit and push to `main`.
-4. Create and push an annotated tag:
+Equivalent GitHub CLI commands:
 
 ```bash
-git tag -a secure-auth-v0.1.22 -m "Release secure-auth v0.1.22"
-git push origin secure-auth-v0.1.22
+gh workflow run publish-secure-auth.yml --ref main
+gh workflow run publish-secure-auth.yml --ref main -f version=0.2.0
+gh workflow run publish-secure-auth.yml --ref main -f version=patch
 ```
 
-5. Watch the workflow: [GitHub Actions](https://github.com/tgoliveira11/next-secure-auth-starter/actions)
-6. Verify on npm: [@tgoliveira/secure-auth](https://www.npmjs.com/package/@tgoliveira/secure-auth)
+When `version` is blank or `auto`, `scripts/prepare-release.mjs` uses the `Unreleased` changelog:
 
----
+1. A `**Breaking:**` entry selects major, or minor while the current major is `0`.
+2. Otherwise, an entry under `Added` selects minor.
+3. Otherwise, the release selects patch.
 
-## Consumer install
+If `Unreleased` is empty, the workflow enters recovery mode for the current version. It can finish
+missing npm, tag, or GitHub release state without publishing a duplicate.
 
-```bash
-npm install @tgoliveira/secure-auth@latest
-# or:
-npm install @tgoliveira/secure-auth
-# or pin a version:
-npm install @tgoliveira/secure-auth@0.1.22
-```
+## Publication gates and ordering
 
-Peer dependencies (`next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`) must be installed in the consumer app. See [consumer-quick-start.md](./consumer-quick-start.md).
+The workflow serializes releases and then:
 
----
+1. Checks out `main` with full tag history and installs the exact lockfile.
+2. Audits dependencies at the high threshold, which also blocks critical vulnerabilities.
+3. Calculates the version and moves `Unreleased` into a dated release section.
+4. Runs types, lint, tests, the 95% coverage gate, and all builds.
+5. Builds one package tarball and uses that exact artifact for publication.
+6. Rejects npm version collisions and inconsistent pre-existing tags.
+7. Commits all package manifests, `package-lock.json`, and `CHANGELOG.md` as `Release x.y.z`.
+8. Publishes the tarball with OIDC/provenance.
+9. Creates `secure-auth-vx.y.z` only after npm succeeds.
+10. Creates GitHub release notes and a workflow summary.
 
-## Related documentation
+The npm registry is immutable. If publication succeeds but later metadata creation fails, rerun the
+workflow with a blank version; recovery mode completes the missing state.
 
-- [publishing-private-package.md](./publishing-private-package.md) — registry install summary
-- [consumer-quick-start.md](./consumer-quick-start.md) — integration walkthrough
-- [configuration-reference.md](./configuration-reference.md) — env and config mapping
+## Post-release verification
+
+- Confirm npm shows the expected version and provenance badge.
+- Confirm every documented package entry point resolves.
+- Confirm README, license, migrations, and styles are present in the npm tarball.
+- Confirm the Git tag and GitHub release point to the release commit.
+- Confirm `CHANGELOG.md` contains a new empty `Unreleased` section.
