@@ -1,4 +1,4 @@
-import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
+import type { PasswordPolicyConfig } from "../modules/security/password-policy/password-policy-core.js";
 import {
   DEFAULT_AUTH_PATHS,
   type AuthPaths,
@@ -8,7 +8,10 @@ import {
   resolvePasswordPolicyConfig,
   resolveRevocationPollIntervalSeconds,
 } from "./config-accessors.js";
-import { buildPublicCaptchaConfig, type PublicCaptchaConfig } from "../modules/captcha/index.js";
+import {
+  buildPublicCaptchaConfig,
+  type PublicCaptchaConfig,
+} from "../modules/captcha/lib/captcha-config.js";
 import {
   buildPublicAuthRedirectConfig,
   type PublicAuthRedirectConfig,

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { PasswordStrengthFeedbackPosition } from "../../../core/ui-config.js";
-import type { PasswordPolicyConfig } from "../../security/password-policy/index.js";
+import type { PasswordPolicyConfig } from "../../security/password-policy/password-policy-core.js";
 
 export type { PasswordStrengthFeedbackPosition };
 

@@ -1,4 +1,5 @@
 export * from "./types.js";
+export { useUiPaths, useUiAppName, useUiAppSlug } from "./use-page-ui.js";
 export { LoginPage } from "./login-page.js";
 export { RegisterPage } from "./register-page.js";
 export { ForgotPasswordPage } from "./forgot-password-page.js";

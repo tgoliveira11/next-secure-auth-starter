@@ -1,5 +1,5 @@
-import type { PasswordPolicyConfig } from "../modules/security/password-policy/index.js";
-import { mergePasswordPolicy } from "../modules/security/password-policy/index.js";
+import type { PasswordPolicyConfig } from "../modules/security/password-policy/password-policy-core.js";
+import { mergePasswordPolicy } from "../modules/security/password-policy/password-policy-core.js";
 import type { AccountPolicyConfig } from "../modules/account/lib/account-policy-config.js";
 import { DEFAULT_ACCOUNT_POLICY } from "../modules/account/lib/account-policy-config.js";
 import type { SecureAuthConfig } from "./types.js";
