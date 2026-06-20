@@ -61,7 +61,7 @@ export const DEFAULT_PASSWORD_POLICY: PasswordPolicyConfig = {
   requireSymbol: false,
   blockCommonPasswords: true,
   minScore: 2,
-  checkBreachedPasswords: true,
+  checkBreachedPasswords: false,
 };
 
 /** Merges consumer overrides with package defaults — single source of truth for effective policy. */

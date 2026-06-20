@@ -109,6 +109,12 @@ export function buildSecureAuthConfigFromEnv(
       ),
       authenticatedRedirectPath:
         readEnv(env, "AUTH_AUTHENTICATED_REDIRECT_PATH") ?? afterLoginPath,
+      magicLink: {
+        enabled: readBooleanEnv(env, ["AUTH_MAGIC_LINK_ENABLED"], false),
+      },
+      securityNotifications: {
+        enabled: readBooleanEnv(env, ["AUTH_SECURITY_NOTIFICATIONS_ENABLED"], false),
+      },
     },
     accountPolicy: {
       sendVerificationOnRegister: readBooleanEnv(
@@ -153,6 +159,11 @@ export function buildSecureAuthConfigFromEnv(
         env,
         ["AUTH_PASSWORD_BLOCK_COMMON_PASSWORDS", "PASSWORD_BLOCK_COMMON_PASSWORDS"],
         true
+      ),
+      checkBreachedPasswords: readBooleanEnv(
+        env,
+        ["AUTH_PASSWORD_HIBP_ENABLED", "AUTH_PASSWORD_CHECK_BREACHED"],
+        false
       ),
       minScore: readNumberEnv(env, ["AUTH_PASSWORD_MIN_SCORE", "PASSWORD_MIN_SCORE"], 2, {
         min: 0,

@@ -19,6 +19,15 @@ describe("hibp checker", () => {
     vi.unstubAllGlobals();
   });
 
+  const enabledConfig = buildTestSecureAuthConfig({
+    passwordPolicy: { checkBreachedPasswords: true },
+  });
+
+  it("returns false without calling fetch when checkBreachedPasswords is not set (default off)", async () => {
+    await expect(checkPasswordBreached("AnyPassword123!")).resolves.toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("returns true when password hash suffix is in mocked response", async () => {
     const password = "PwnedPassword123!";
     const hash = sha1(password);
@@ -27,7 +36,7 @@ describe("hibp checker", () => {
       text: async () => `${hash.slice(5)}:123`,
     });
 
-    await expect(checkPasswordBreached(password)).resolves.toBe(true);
+    await expect(checkPasswordBreached(password, enabledConfig)).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       `https://api.pwnedpasswords.com/range/${hash.slice(0, 5)}`,
       expect.objectContaining({ signal: expect.any(AbortSignal) })
@@ -42,12 +51,12 @@ describe("hibp checker", () => {
       text: async () => "000000000000000000000000000000000:1",
     });
 
-    await expect(checkPasswordBreached(password)).resolves.toBe(false);
+    await expect(checkPasswordBreached(password, enabledConfig)).resolves.toBe(false);
   });
 
   it("returns false when fetch throws network error", async () => {
     fetchMock.mockRejectedValue(new Error("network down"));
-    await expect(checkPasswordBreached("AnyPassword123!")).resolves.toBe(false);
+    await expect(checkPasswordBreached("AnyPassword123!", enabledConfig)).resolves.toBe(false);
   });
 
   it("returns false when fetch times out", async () => {
@@ -59,7 +68,7 @@ describe("hibp checker", () => {
       });
     });
 
-    await expect(checkPasswordBreached("AnyPassword123!")).resolves.toBe(false);
+    await expect(checkPasswordBreached("AnyPassword123!", enabledConfig)).resolves.toBe(false);
   }, 10000);
 
   it("returns false without calling fetch when checkBreachedPasswords is false", async () => {

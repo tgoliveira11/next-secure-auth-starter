@@ -60,7 +60,7 @@ type SecurityNotificationServiceDeps = {
 };
 
 function isSecurityNotificationsEnabled(config: SecureAuthContext["config"]): boolean {
-  return config.auth.securityNotifications?.enabled !== false;
+  return config.auth.securityNotifications?.enabled === true;
 }
 
 export function createSecurityNotificationService(deps: SecurityNotificationServiceDeps) {

@@ -7,6 +7,17 @@ const mocks = vi.hoisted(() => ({
   findActiveByUserId: vi.fn(),
 }));
 
+const NOTIFICATIONS_ENABLED = {
+  auth: {
+    afterLoginPath: "/dashboard",
+    afterLogoutPath: "/login",
+    requireEmailVerificationBeforeSignIn: false,
+    nextAuthSecret: "test-secret-for-vitest-only",
+    twoFactorEncryptionKey: "test-two-factor-secret-encryption-key",
+    securityNotifications: { enabled: true },
+  },
+} satisfies Parameters<typeof buildTestSecureAuthConfig>[0];
+
 function createService(configOverrides: Parameters<typeof buildTestSecureAuthConfig>[0] = {}) {
   const config = buildTestSecureAuthConfig(configOverrides);
   return createSecurityNotificationService({
@@ -29,8 +40,18 @@ describe("security notification service", () => {
     mocks.findActiveByUserId.mockResolvedValue([]);
   });
 
+  it("security notifications disabled by default — no email sent without opt-in", async () => {
+    const service = createService(); // no securityNotifications.enabled
+    await service.notifySecurityEvent({
+      type: "password_changed",
+      userId: "user-1",
+      userEmail: "user@example.com",
+    });
+    expect(mocks.deliverAccountEmail).not.toHaveBeenCalled();
+  });
+
   it("notifySecurityEvent password_changed sends email with correct subject", async () => {
-    const service = createService();
+    const service = createService(NOTIFICATIONS_ENABLED);
     await service.notifySecurityEvent({
       type: "password_changed",
       userId: "user-1",
@@ -46,7 +67,7 @@ describe("security notification service", () => {
   });
 
   it("notifySecurityEvent two_factor_disabled sends email", async () => {
-    const service = createService();
+    const service = createService(NOTIFICATIONS_ENABLED);
     await service.notifySecurityEvent({
       type: "two_factor_disabled",
       userId: "user-1",
@@ -66,7 +87,7 @@ describe("security notification service", () => {
       { userAgentHash: "other-hash" },
     ]);
 
-    const service = createService();
+    const service = createService(NOTIFICATIONS_ENABLED);
     await service.notifySecurityEvent({
       type: "new_login",
       userId: "user-1",
@@ -80,7 +101,7 @@ describe("security notification service", () => {
   it("notifySecurityEvent new_login on new device sends email", async () => {
     mocks.findActiveByUserId.mockResolvedValue([{ userAgentHash: "known-hash" }]);
 
-    const service = createService();
+    const service = createService(NOTIFICATIONS_ENABLED);
     await service.notifySecurityEvent({
       type: "new_login",
       userId: "user-1",
@@ -99,7 +120,7 @@ describe("security notification service", () => {
 
   it("email provider throws and function resolves without throwing", async () => {
     mocks.deliverAccountEmail.mockRejectedValue(new Error("smtp down"));
-    const service = createService();
+    const service = createService(NOTIFICATIONS_ENABLED);
 
     await expect(
       service.notifySecurityEvent({
