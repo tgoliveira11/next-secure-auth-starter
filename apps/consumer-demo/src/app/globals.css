@@ -9,7 +9,18 @@
   --muted: #64748b;
   --border: #e2e8f0;
   --card: #ffffff;
+  --card-muted: #f1f5f9;
   --danger: #dc2626;
+  --danger-muted: #fef2f2;
+  --success: #16a34a;
+  --success-muted: #f0fdf4;
+  --warning: #92400e;
+  --warning-muted: #fffbeb;
+  --info: #1e40af;
+  --info-muted: #eff6ff;
+  --radius: 0.5rem;
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
+  --ring: rgb(37 99 235 / 0.35);
 }
 
 body {
