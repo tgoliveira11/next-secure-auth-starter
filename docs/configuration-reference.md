@@ -47,8 +47,8 @@ Required top-level fields when calling `createSecureAuth`:
 | `auth.requireEmailVerificationBeforeSignIn` | `boolean` | Block sign-in until email verified |
 | `auth.nextAuthSecret` | `string` | NextAuth.js session encryption secret. **Minimum 32 characters; use 64+ hex chars for production.** Generate with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` Setting a short or predictable value weakens session security. |
 | `auth.twoFactorEncryptionKey` | `string` | Key for TOTP secrets at rest |
-| `auth.magicLink.enabled` | `boolean` | `false` | Passwordless email magic link login |
-| `auth.securityNotifications.enabled` | `boolean` | `true` | Security notification emails for high-risk account events |
+| `auth.magicLink.enabled` | `boolean` | `false` | Passwordless email magic link login (opt-in) |
+| `auth.securityNotifications.enabled` | `boolean` | `false` | Security notification emails on login from new device, password change, 2FA disable, email change, magic link use (opt-in) |
 | `email.from` | `string` | Sender address |
 | `email.provider` | `EmailProvider` | App-implemented send function |
 | `webauthn.rpId` | `string` | WebAuthn RP ID |
@@ -127,6 +127,8 @@ Not passed to `createSecureAuth`; the app constructs the Drizzle client and pass
 | `AUTH_AUTHENTICATED_REDIRECT_PATH` | string | `AUTH_AFTER_LOGIN_PATH` | optional | `auth.authenticatedRedirectPath` | Landing path for guest-page redirect |
 | `AUTH_AFTER_LOGOUT_PATH` | string | `/login` | optional | `auth.afterLogoutPath` | Post-logout redirect |
 | `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | string | `""` | **yes** in production | `auth.twoFactorEncryptionKey` | 32-byte base64 key for TOTP at rest |
+| `AUTH_MAGIC_LINK_ENABLED` | boolean | `false` | optional | `auth.magicLink.enabled` | Passwordless email magic link login (opt-in) |
+| `AUTH_SECURITY_NOTIFICATIONS_ENABLED` | boolean | `false` | optional | `auth.securityNotifications.enabled` | Email alerts on security events (opt-in) |
 
 ### OAuth
 
@@ -228,10 +230,10 @@ Other browsers/devices are revoked in the database on login. The starter and con
 | `AUTH_PASSWORD_REQUIRE_SYMBOL` | boolean | `false` | | `passwordPolicy.requireSymbol` |
 | `AUTH_PASSWORD_BLOCK_COMMON_PASSWORDS` | boolean | `true` | | `passwordPolicy.blockCommonPasswords` |
 | `AUTH_PASSWORD_MIN_SCORE` | number | `2` | 0–4 | `passwordPolicy.minScore` |
-| `AUTH_PASSWORD_CHECK_BREACHED` | boolean | `true` | | `passwordPolicy.checkBreachedPasswords` |
+| `AUTH_PASSWORD_HIBP_ENABLED` | boolean | `false` | | `passwordPolicy.checkBreachedPasswords` |
 | `AUTH_PASSWORD_STRENGTH_POSITION` | enum | `above` | `above`, `below` | `ui.passwordStrength.position` |
 
-Legacy `PASSWORD_*` names are supported for policy fields (not strength position).
+Legacy `PASSWORD_*` names are supported for policy fields (not strength position). `AUTH_PASSWORD_CHECK_BREACHED` is accepted as an alias for `AUTH_PASSWORD_HIBP_ENABLED`.
 
 The package does **not** read `process.env` for password policy. Your app maps `AUTH_PASSWORD_MIN_LENGTH` (and related vars) into `createSecureAuth({ passwordPolicy: { minLength } })`. The resolved value drives UI copy, browser `minLength`, client validation, server validation, and `GET /api/auth/password-policy`.
 

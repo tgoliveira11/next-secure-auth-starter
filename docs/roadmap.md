@@ -12,6 +12,30 @@ one has passing tests and an updated CHANGELOG entry.
 
 ---
 
+## Feature flag policy
+
+All roadmap features are **opt-in via environment variable**. They default to `false` (disabled)
+so that upgrading the package never activates new behaviour in existing applications.
+
+Consuming applications enable features in their `.env.local` (or environment):
+
+| Feature | Env var | Default |
+|---|---|---|
+| Magic link login | `AUTH_MAGIC_LINK_ENABLED=true` | `false` |
+| Security notification emails | `AUTH_SECURITY_NOTIFICATIONS_ENABLED=true` | `false` |
+| HIBP breach detection | `AUTH_PASSWORD_HIBP_ENABLED=true` | `false` |
+| Account lockout _(v0.3)_ | `AUTH_ACCOUNT_LOCKOUT_ENABLED=true` | `false` |
+| RBAC / role-based access _(v0.3)_ | `AUTH_RBAC_ENABLED=true` | `false` |
+| Organizations _(v1.0)_ | `AUTH_ORGANIZATIONS_ENABLED=true` | `false` |
+| API keys _(v1.0)_ | `AUTH_API_KEYS_ENABLED=true` | `false` |
+
+`buildSecureAuthConfigFromEnv` in consumer applications maps each env var to the corresponding
+`createSecureAuth(config)` field. Route handlers check the feature flag before processing a
+request and return `404` when the feature is disabled — this keeps the API surface predictable
+without requiring the consumer to manage extra route files.
+
+---
+
 ## Table of contents
 
 - [v0.2 — Passwordless & Proactive Security](#v02--passwordless--proactive-security)
