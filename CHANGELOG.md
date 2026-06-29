@@ -6,8 +6,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-06-29
-
 ### Added
 
 - **Admin panel** — first-party authenticated admin area at a configurable path (default `/admin`). Requires `admin.enabled: true`. Sections: Users, Waitlist, Invites, Account Locks, API Keys, Config. Access is gated by `role = "admin"` on the user record. First admin is bootstrapped via `ADMIN_BOOTSTRAP_EMAIL` env var on first server start. New exports: `AdminUsersPage`, `AdminWaitlistPage`, `AdminInvitesPage`, `AdminLocksPage`, `AdminApiKeysPage`, `AdminConfigPage` from `@tgoliveira/secure-auth/react`.
@@ -18,7 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Runtime config overrides** — admins can override a curated set of config keys at runtime via the admin panel without redeploying. Overrides are stored in the database and applied with a configurable in-memory TTL (`admin.configCacheTtlSeconds`, default `60`). New table: `admin_config_overrides`.
 - **v0.3 integration guide** — step-by-step guide for adding v0.3 features to an existing consumer application ([docs/v0.3-integration-guide.md](docs/v0.3-integration-guide.md)).
 
-### Changed (carried from Unreleased)
+### Changed
 
 - **Consumer-demo route sync automation** — when `create-routes.ts` or `scripts/consumer-demo-route-registry.mjs` changes, a sync script generates matching `route.ts` files in `apps/consumer-demo`. Includes `npm run sync:consumer-demo` / `sync:consumer-demo:check`, a GitHub Action (`.github/workflows/sync-consumer-demo.yml`) that commits generated routes on push, and a CI fallback test (`route-sync.test.ts`).
 - **Renamed `apps/starter` to `apps/dev-harness`** (`@secure-auth/dev-harness`) — internal package development harness, not a consumer reference.
