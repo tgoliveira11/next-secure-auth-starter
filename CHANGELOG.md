@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-29
+
 ### Added
 
 - **Admin panel** — first-party authenticated admin area at a configurable path (default `/admin`). Requires `admin.enabled: true`. Sections: Users, Waitlist, Invites, Account Locks, API Keys, Config. Access is gated by `role = "admin"` on the user record. First admin is bootstrapped via `ADMIN_BOOTSTRAP_EMAIL` env var on first server start. New exports: `AdminUsersPage`, `AdminWaitlistPage`, `AdminInvitesPage`, `AdminLocksPage`, `AdminApiKeysPage`, `AdminConfigPage` from `@tgoliveira/secure-auth/react`.
