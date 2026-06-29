@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Outpost email adapter** (`@tgoliveira/secure-auth/outpost`) — opt-in `OutpostEmailProvider` that routes all secure-auth transactional emails through the `@tgoliveira/outpost` durable outbox. Provides persist-before-dispatch, at-most-once idempotency, suppression list, delivery lifecycle tracking (delivered/bounced/complained), and DLQ replay — without any changes to internal secure-auth code. `@tgoliveira/outpost` is an optional peer dependency; consumers who do not use the adapter pay no install cost.
+
 ## [0.3.0] - 2026-06-29
 
 ### Added
