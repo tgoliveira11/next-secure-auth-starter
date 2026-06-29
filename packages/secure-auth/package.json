@@ -70,6 +70,11 @@
       "import": "./dist/client/password-policy.js",
       "require": "./dist/client/password-policy.cjs"
     },
+    "./outpost": {
+      "types": "./dist/outpost/index.d.ts",
+      "import": "./dist/outpost/index.js",
+      "require": "./dist/outpost/index.cjs"
+    },
     "./styles.css": "./styles.css"
   },
   "files": [
@@ -90,11 +95,17 @@
     "prepublishOnly": "npm run validate --prefix ../.."
   },
   "peerDependencies": {
+    "@tgoliveira/outpost": "^1.0.0",
     "drizzle-orm": "^0.45.2",
     "next": "^16.0.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tgoliveira/outpost": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.1.0",
@@ -107,6 +118,7 @@
     "zod": "^3.25.56"
   },
   "devDependencies": {
+    "@tgoliveira/outpost": "^1.1.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.15.29",
     "@types/qrcode": "^1.5.6",

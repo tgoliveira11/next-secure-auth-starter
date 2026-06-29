@@ -25,6 +25,7 @@ const shared = {
     "bcryptjs",
     "@simplewebauthn/server",
     "server-only",
+    "@tgoliveira/outpost",
   ],
 };
 
@@ -39,6 +40,7 @@ export default defineConfig({
     "email/index": "src/email/index.ts",
     "client/index": "src/client/index.ts",
     "client/password-policy": "src/client/password-policy.ts",
+    "outpost/index": "src/outpost/index.ts",
   },
   outDir: "dist",
   clean: true,
