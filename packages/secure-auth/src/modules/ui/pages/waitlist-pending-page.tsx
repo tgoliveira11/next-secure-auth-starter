@@ -1,10 +1,10 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { PageShell } from "./layouts/page-shell.js";
-import { Button } from "./primitives/button.js";
-import { Card } from "./primitives/card.js";
-import { PageHeader } from "./primitives/page-header.js";
+import { PageShell } from "../layouts/page-shell.js";
+import { Button } from "../primitives/button.js";
+import { Card } from "../primitives/card.js";
+import { PageHeader } from "../primitives/page-header.js";
 import { useUiPaths } from "./use-page-ui.js";
 
 type WaitlistPendingPageProps = {

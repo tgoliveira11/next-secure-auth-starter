@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { PageShell } from "../layouts/page-shell.js";
-import { Button } from "../primitives/button.js";
-import { Alert } from "../primitives/alert.js";
-import { Card, CardHeader, CardTitle, CardDescription } from "../primitives/card.js";
-import { PageHeader } from "../primitives/page-header.js";
-import { LoadingState } from "../primitives/loading-state.js";
-import { EmptyState } from "../primitives/empty-state.js";
+import { PageShell } from "../../layouts/page-shell.js";
+import { Button } from "../../primitives/button.js";
+import { Alert } from "../../primitives/alert.js";
+import { Card, CardHeader, CardTitle, CardDescription } from "../../primitives/card.js";
+import { PageHeader } from "../../primitives/page-header.js";
+import { LoadingState } from "../../primitives/loading-state.js";
+import { EmptyState } from "../../primitives/empty-state.js";
 
 type PendingUser = {
   id: string;
