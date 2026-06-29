@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Missing v0.3 admin platform SQL migrations in npm tarball** — `0.4.0` shipped the Drizzle schema for admin panel, lockout, invites, API keys, and config overrides but omitted migration `0002_v0_3_admin_platform.sql`. Consumers upgrading from `0.2.x`/`0.3.x` must run `drizzle-kit migrate` after upgrading; if you already applied the tables manually, mark this migration as applied in your Drizzle journal instead of re-running it.
+
 ### Added
 
 - **Outpost email adapter** (`@tgoliveira/secure-auth/outpost`) — opt-in `OutpostEmailProvider` that routes all secure-auth transactional emails through the `@tgoliveira/outpost` durable outbox. Provides persist-before-dispatch, at-most-once idempotency, suppression list, delivery lifecycle tracking (delivered/bounced/complained), and DLQ replay — without any changes to internal secure-auth code. `@tgoliveira/outpost` is an optional peer dependency; consumers who do not use the adapter pay no install cost.

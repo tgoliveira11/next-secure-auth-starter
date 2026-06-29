@@ -15,6 +15,13 @@
       "when": 1781211790862,
       "tag": "0001_passkey_vault_unlock_enabled",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782762713988,
+      "tag": "0002_v0_3_admin_platform",
+      "breakpoints": true
     }
   ]
 }
