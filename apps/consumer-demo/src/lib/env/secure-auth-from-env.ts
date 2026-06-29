@@ -36,6 +36,11 @@ export type SecureAuthEnvSlice = Pick<
   | "webauthn"
   | "captcha"
   | "ui"
+  | "admin"
+  | "accountLockout"
+  | "invites"
+  | "apiKeys"
+  | "profile"
 >;
 
 /** Maps app-owned environment variables to `createSecureAuth(config)` fields. */
@@ -115,6 +120,28 @@ export function buildSecureAuthConfigFromEnv(
       securityNotifications: {
         enabled: readBooleanEnv(env, ["AUTH_SECURITY_NOTIFICATIONS_ENABLED"], false),
       },
+    },
+    admin: {
+      enabled: readBooleanEnv(env, ["AUTH_ADMIN_ENABLED"], false),
+      path: readEnv(env, "AUTH_ADMIN_PATH") ?? "/admin",
+      bootstrapEmail: readEnv(env, "ADMIN_BOOTSTRAP_EMAIL"),
+      configCacheTtlSeconds: readNumberEnv(env, ["AUTH_ADMIN_CONFIG_CACHE_TTL_SECONDS"], 60, { min: 0 }),
+    },
+    accountLockout: {
+      enabled: readBooleanEnv(env, ["AUTH_ACCOUNT_LOCKOUT_ENABLED"], false),
+    },
+    invites: {
+      enabled: readBooleanEnv(env, ["AUTH_INVITES_ENABLED"], false),
+      requireApproval: readBooleanEnv(env, ["AUTH_INVITES_REQUIRE_APPROVAL"], false),
+      requireInviteCode: readBooleanEnv(env, ["AUTH_INVITES_REQUIRE_CODE"], false),
+      defaultQuotaPerUser: readNumberEnv(env, ["AUTH_INVITES_DEFAULT_QUOTA"], 0, { min: 0 }),
+      codeExpiryDays: readNumberEnv(env, ["AUTH_INVITES_CODE_EXPIRY_DAYS"], 30, { min: 1 }),
+    },
+    apiKeys: {
+      enabled: readBooleanEnv(env, ["AUTH_API_KEYS_ENABLED"], false),
+    },
+    profile: {
+      enabled: readBooleanEnv(env, ["AUTH_PROFILE_ENABLED"], false),
     },
     accountPolicy: {
       sendVerificationOnRegister: readBooleanEnv(

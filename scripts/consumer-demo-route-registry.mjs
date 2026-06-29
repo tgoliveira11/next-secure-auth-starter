@@ -52,4 +52,7 @@ export const ROUTE_REGISTRY = [
     path: "account/2fa/backup-codes/regenerate",
     methods: ["POST"],
   },
+  // Admin panel
+  { key: "adminUsers", path: "auth/admin/users", methods: ["GET"] },
+  { key: "adminUserById", path: "auth/admin/users/[id]", methods: ["POST"] },
 ];

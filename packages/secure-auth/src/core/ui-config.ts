@@ -104,6 +104,8 @@ function mapConfigPathsToAuthPaths(config: SecureAuthConfig): AuthPaths {
     accountSettings: uiPaths?.account ?? uiPaths?.accountSettings,
     securitySettings: uiPaths?.security ?? uiPaths?.securitySettings,
     sessionsSettings: uiPaths?.sessions ?? uiPaths?.sessionsSettings,
+    waitlistPending: uiPaths?.waitlistPending,
+    adminPanel: uiPaths?.adminPanel ?? config.admin?.path,
   };
 }
 

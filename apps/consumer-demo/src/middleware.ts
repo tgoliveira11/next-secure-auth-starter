@@ -42,7 +42,12 @@ function buildConsumerDemoMiddlewareConfig() {
   };
 
   const uiConfig = buildPublicUIConfig(configForUi);
-  return buildMiddlewareConfigFromUi(uiConfig, slice.auth.nextAuthSecret);
+  const middlewareConfig = buildMiddlewareConfigFromUi(uiConfig, slice.auth.nextAuthSecret);
+
+  return {
+    ...middlewareConfig,
+    adminPath: slice.admin?.enabled ? (slice.admin.path ?? "/admin") : undefined,
+  };
 }
 
 export const middleware = createSecureAuthMiddleware(buildConsumerDemoMiddlewareConfig());

@@ -13,3 +13,5 @@ export { SecuritySettingsPage } from "./security-settings-page.js";
 export { SessionsSettingsPage } from "./sessions-settings-page.js";
 export { AccountDeletedPage } from "./account-deleted-page.js";
 export { DashboardPlaceholderPage } from "./dashboard-placeholder-page.js";
+export { AdminPanelPage } from "./admin/admin-panel-page.js";
+export { AdminUsersPage } from "./admin/admin-users-page.js";

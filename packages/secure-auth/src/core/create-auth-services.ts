@@ -14,6 +14,7 @@ import { createPasskeyAccountService } from "../modules/passkeys/services/passke
 import { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
 import { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 import { createAuthOptions } from "../modules/auth/lib/auth-options.js";
+import { createAdminService } from "../modules/admin/services/admin-service.js";
 
 /**
  * Creates the injected service registry for @tgoliveira/secure-auth.
@@ -85,6 +86,11 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     securityNotificationService,
   });
 
+  const adminService = createAdminService({
+    config,
+    adminUserRepository: repos.adminUserRepository,
+  });
+
   const getAuthOptions = () =>
     createAuthOptions({
       config,
@@ -112,6 +118,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     passkeyAccountService,
     magicLinkService,
     securityNotificationService,
+    adminService,
     getAuthOptions,
   };
 }

@@ -158,6 +158,12 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
       "POST"
     ),
     sessionsRevokeAll: route(() => import("./handlers/account/sessions-revoke-all.js"), "POST"),
+
+    // Admin panel routes (only active when admin.enabled = true)
+    adminUsers: route(() => import("./handlers/admin/admin-users.js"), "GET"),
+    adminUserById: {
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-users.js"), "POST"),
+    },
   };
 }
 

@@ -5,6 +5,7 @@ import { createAccountSessionRepository } from "../modules/sessions/repositories
 import { createTwoFactorRepository } from "../modules/two-factor/repositories/two-factor-repository.js";
 import { createPasskeyRepository } from "../modules/passkeys/repositories/passkey-repository.js";
 import { createAuditRepository } from "../modules/audit/repositories/audit-repository.js";
+import { createAdminUserRepository } from "../modules/admin/repositories/admin-user-repository.js";
 
 export function createRepositories({ db }: { db: SecureAuthDb }) {
   return {
@@ -14,6 +15,7 @@ export function createRepositories({ db }: { db: SecureAuthDb }) {
     twoFactorRepository: createTwoFactorRepository(db),
     passkeyRepository: createPasskeyRepository(db),
     auditRepository: createAuditRepository(db),
+    adminUserRepository: createAdminUserRepository(db),
   };
 }
 

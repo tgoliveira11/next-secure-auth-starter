@@ -7,6 +7,7 @@ import {
   jsonb,
   index,
   integer,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -16,6 +17,16 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   passwordUpdatedAt: timestamp("password_updated_at", { withTimezone: true }),
+  // v0.3 additions
+  /** "user" | "admin" */
+  role: text("role").notNull().default("user"),
+  /** "pending" | "active" | "suspended" */
+  status: text("status").notNull().default("active"),
+  /** Profile fields (enabled via profile.enabled) */
+  displayName: text("display_name"),
+  avatarUrl: text("avatar_url"),
+  bio: text("bio"),
+  profileUpdatedAt: timestamp("profile_updated_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -186,7 +197,84 @@ export const userTwoFactorSessionUpgrades = pgTable(
   (table) => [index("idx_user_two_factor_session_upgrades_user_id").on(table.userId)]
 );
 
+// ---------------------------------------------------------------------------
+// v0.3 tables
+// ---------------------------------------------------------------------------
+
+export const loginAttemptCounters = pgTable(
+  "login_attempt_counters",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    email: text("email"),
+    attempts: integer("attempts").notNull().default(0),
+    frozenUntil: timestamp("frozen_until", { withTimezone: true }),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    lastAttemptAt: timestamp("last_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+    unlockedAt: timestamp("unlocked_at", { withTimezone: true }),
+    unlockedBy: uuid("unlocked_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("udx_login_attempt_counters_user_id").on(table.userId),
+    uniqueIndex("udx_login_attempt_counters_email").on(table.email),
+  ]
+);
+
+export const inviteCodes = pgTable(
+  "invite_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: text("code").notNull().unique(),
+    createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+    maxUses: integer("max_uses"),
+    usedCount: integer("used_count").notNull().default(0),
+    emailHint: text("email_hint"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    revokedBy: uuid("revoked_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("idx_invite_codes_code").on(table.code)]
+);
+
+export const inviteUses = pgTable("invite_uses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  codeId: uuid("code_id")
+    .notNull()
+    .references(() => inviteCodes.id),
+  usedBy: uuid("used_by")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  usedAt: timestamp("used_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  keyPrefix: text("key_prefix").notNull(),
+  scopes: text("scopes").array().notNull().default([]),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  revokedBy: uuid("revoked_by").references(() => users.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const adminConfigOverrides = pgTable("admin_config_overrides", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  value: jsonb("value").notNull(),
+  updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
+export type InviteCode = typeof inviteCodes.$inferSelect;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type LoginAttemptCounter = typeof loginAttemptCounters.$inferSelect;
 
 export const authSchema = {
   users,
@@ -201,6 +289,11 @@ export const authSchema = {
   userTwoFactorLoginChallenges,
   userTwoFactorLoginTokens,
   userTwoFactorSessionUpgrades,
+  loginAttemptCounters,
+  inviteCodes,
+  inviteUses,
+  apiKeys,
+  adminConfigOverrides,
 };
 
 export type AuthSchema = typeof authSchema;
