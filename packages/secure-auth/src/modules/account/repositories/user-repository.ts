@@ -65,6 +65,19 @@ export function createUserRepository(db: DbClient) {
       const [user] = await client.delete(users).where(eq(users.id, id)).returning({ id: users.id });
       return user ?? null;
     },
+
+    async updateProfile(
+      id: string,
+      data: { displayName?: string; avatarUrl?: string; bio?: string; profileUpdatedAt?: Date }
+    ) {
+      const now = new Date();
+      const [user] = await db
+        .update(users)
+        .set({ ...data, updatedAt: now })
+        .where(eq(users.id, id))
+        .returning();
+      return user ?? null;
+    },
   };
 }
 

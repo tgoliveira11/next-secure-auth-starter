@@ -55,4 +55,11 @@ export const ROUTE_REGISTRY = [
   // Admin panel
   { key: "adminUsers", path: "auth/admin/users", methods: ["GET"] },
   { key: "adminUserById", path: "auth/admin/users/[id]", methods: ["POST"] },
+  { key: "adminLocks", path: "auth/admin/locks", methods: ["GET", "POST"] },
+  { key: "adminWaitlist", path: "auth/admin/waitlist", methods: ["GET", "POST"] },
+  { key: "adminInvites", path: "auth/admin/invites", methods: ["GET", "POST", "DELETE"] },
+  { key: "adminApiKeys", path: "auth/admin/api-keys", methods: ["GET", "POST", "DELETE"] },
+  { key: "adminConfig", path: "auth/admin/config", methods: ["GET", "POST", "DELETE"] },
+  // Account profile
+  { key: "accountProfile", path: "account/profile", methods: ["GET", "POST"] },
 ];

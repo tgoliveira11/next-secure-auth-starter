@@ -10,6 +10,8 @@ import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { AuthService } from "./auth-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import type { LockoutService } from "@/modules/admin/services/lockout-service";
+import { AccountFrozenError, AccountLockedError } from "@/modules/admin/services/lockout-service";
 
 function loginTokenAuthMethod(authProvider: string): "password" | "passkey" {
   return authProvider === "passkey" ? "passkey" : "password";
@@ -22,27 +24,45 @@ type AuthLoginServiceDeps = {
   rateLimit: RateLimitApi;
   authService: AuthService;
   twoFactorService: TwoFactorService;
+  lockoutService?: LockoutService;
 };
 
 export function createAuthLoginService(deps: AuthLoginServiceDeps) {
-  const { config, ctx, repos, rateLimit, authService, twoFactorService } = deps;
+  const { config, ctx, repos, rateLimit, authService, twoFactorService, lockoutService } = deps;
 
   const service = {
     async startCredentialsLogin(email: string, password: string, ip?: string) {
       const normalizedEmail = email.trim().toLowerCase();
+
+      // Check lockout state before attempting authentication
+      if (lockoutService) {
+        const state = await lockoutService.getState(normalizedEmail);
+        if (state.status === "frozen") throw new AccountFrozenError(state.retryAfterSeconds);
+        if (state.status === "locked") throw new AccountLockedError();
+      }
+
       await authService.assertLoginAllowed(normalizedEmail, ip);
 
       const user = await repos.userRepository.findByEmail(normalizedEmail);
       if (!user?.passwordHash) {
         await authService.recordLoginFailure(normalizedEmail);
+        if (lockoutService) await lockoutService.recordFailure(normalizedEmail);
         throw new InvalidCredentialsError();
       }
 
       const valid = await verifyPassword(password, user.passwordHash);
       if (!valid) {
         await authService.recordLoginFailure(normalizedEmail);
+        if (lockoutService) {
+          const newState = await lockoutService.recordFailure(normalizedEmail, user.id);
+          if (newState.status === "frozen") throw new AccountFrozenError(newState.retryAfterSeconds);
+          if (newState.status === "locked") throw new AccountLockedError();
+        }
         throw new InvalidCredentialsError();
       }
+
+      // Successful auth — reset lockout counter
+      if (lockoutService) await lockoutService.recordSuccess(normalizedEmail, user.id);
 
       assertCredentialsEmailVerifiedForSignIn(user, config);
 
@@ -192,3 +212,4 @@ export class InvalidTwoFactorCodeError extends Error {
 }
 
 export { RateLimitError };
+export { AccountFrozenError, AccountLockedError } from "@/modules/admin/services/lockout-service";

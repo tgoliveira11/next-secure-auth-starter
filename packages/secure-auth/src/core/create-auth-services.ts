@@ -15,6 +15,11 @@ import { createMagicLinkService } from "../modules/auth/services/magic-link-serv
 import { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 import { createAuthOptions } from "../modules/auth/lib/auth-options.js";
 import { createAdminService } from "../modules/admin/services/admin-service.js";
+import { createLockoutService } from "../modules/admin/services/lockout-service.js";
+import { createInviteService } from "../modules/admin/services/invite-service.js";
+import { createApiKeyService } from "../modules/admin/services/api-key-service.js";
+import { createConfigOverrideService } from "../modules/admin/services/config-override-service.js";
+import { createProfileService } from "../modules/account/services/profile-service.js";
 
 /**
  * Creates the injected service registry for @tgoliveira/secure-auth.
@@ -28,6 +33,12 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
   const runInTransaction = createRunInTransaction(db);
 
   const securityNotificationService = createSecurityNotificationService({ config, ctx, repos });
+
+  const lockoutService = createLockoutService({ config, lockoutRepository: repos.lockoutRepository });
+  const inviteService = createInviteService({ config, inviteRepository: repos.inviteRepository });
+  const apiKeyService = createApiKeyService({ config, apiKeyRepository: repos.apiKeyRepository });
+  const configOverrideService = createConfigOverrideService({ config, configOverrideRepository: repos.configOverrideRepository });
+  const profileService = createProfileService({ config, userRepository: repos.userRepository });
 
   const authService = createAuthService({ ctx, repos, rateLimit });
   const twoFactorService = createTwoFactorService({
@@ -44,6 +55,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     rateLimit,
     authService,
     twoFactorService,
+    lockoutService,
   });
   const accountAuthService = createAccountAuthService({
     ctx,
@@ -99,6 +111,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
       authLoginService,
       twoFactorService,
       accountSessionService,
+      profileService,
     });
 
   return {
@@ -119,6 +132,11 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     magicLinkService,
     securityNotificationService,
     adminService,
+    lockoutService,
+    inviteService,
+    apiKeyService,
+    configOverrideService,
+    profileService,
     getAuthOptions,
   };
 }

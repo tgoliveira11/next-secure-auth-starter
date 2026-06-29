@@ -10,3 +10,4 @@ export {
   type SecureAuthMiddlewareConfig,
 } from "./middleware/create-secure-auth-middleware.js";
 export { buildPublicUIConfig, type SecureAuthUIPublicConfig, type PublicAuthRedirectConfig } from "../core/ui-config.js";
+export { withApiKeyAuth, type ApiKeyPrincipal } from "./api-key-auth.js";

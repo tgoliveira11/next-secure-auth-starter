@@ -164,6 +164,35 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     adminUserById: {
       POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-users.js"), "POST"),
     },
+    adminLocks: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-locks.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-locks.js"), "POST"),
+    },
+    adminWaitlist: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-waitlist.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-waitlist.js"), "POST"),
+    },
+    adminInvites: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-invites.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-invites.js"), "POST"),
+      DELETE: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-invites.js"), "DELETE"),
+    },
+    adminApiKeys: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-api-keys.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-api-keys.js"), "POST"),
+      DELETE: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-api-keys.js"), "DELETE"),
+    },
+    adminConfig: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-config.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-config.js"), "POST"),
+      DELETE: lazyServiceRoute(getServices, () => import("./handlers/admin/admin-config.js"), "DELETE"),
+    },
+
+    // Account profile
+    accountProfile: {
+      GET: lazyServiceRoute(getServices, () => import("./handlers/account/profile.js"), "GET"),
+      POST: lazyServiceRoute(getServices, () => import("./handlers/account/profile.js"), "POST"),
+    },
   };
 }
 

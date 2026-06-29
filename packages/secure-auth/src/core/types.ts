@@ -18,6 +18,11 @@ import type { createPasskeyAccountService } from "../modules/passkeys/services/p
 import type { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
 import type { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 import type { createAdminService } from "../modules/admin/services/admin-service.js";
+import type { createLockoutService } from "../modules/admin/services/lockout-service.js";
+import type { createInviteService } from "../modules/admin/services/invite-service.js";
+import type { createApiKeyService } from "../modules/admin/services/api-key-service.js";
+import type { createConfigOverrideService } from "../modules/admin/services/config-override-service.js";
+import type { createProfileService } from "../modules/account/services/profile-service.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -238,5 +243,10 @@ export type SecureAuthServices = {
   readonly magicLinkService: ReturnType<typeof createMagicLinkService>;
   readonly securityNotificationService: ReturnType<typeof createSecurityNotificationService>;
   readonly adminService: ReturnType<typeof createAdminService>;
+  readonly lockoutService: ReturnType<typeof createLockoutService>;
+  readonly inviteService: ReturnType<typeof createInviteService>;
+  readonly apiKeyService: ReturnType<typeof createApiKeyService>;
+  readonly configOverrideService: ReturnType<typeof createConfigOverrideService>;
+  readonly profileService: ReturnType<typeof createProfileService>;
   readonly getAuthOptions: () => NextAuthOptions;
 };
