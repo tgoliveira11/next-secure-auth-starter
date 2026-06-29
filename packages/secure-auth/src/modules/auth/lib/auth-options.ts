@@ -18,6 +18,7 @@ import type { AuthService } from "@/modules/auth/services/auth-service";
 import type { AuthLoginService } from "@/modules/auth/services/auth-login-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 import type { AccountSessionService } from "@/modules/sessions/services/account-session-service";
+import type { ProfileService } from "@/modules/account/services/profile-service";
 
 export type AuthOptionsDeps = {
   config: SecureAuthConfig;
@@ -26,6 +27,7 @@ export type AuthOptionsDeps = {
   authLoginService: AuthLoginService;
   twoFactorService: TwoFactorService;
   accountSessionService: AccountSessionService;
+  profileService?: ProfileService;
 };
 
 function resolveMicrosoftProvider(config: SecureAuthConfig) {
@@ -57,6 +59,7 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
     authLoginService,
     twoFactorService,
     accountSessionService,
+    profileService,
   } = deps;
   const microsoftProviderEnv = resolveMicrosoftProvider(config);
   const signInPath = config.ui?.paths?.login ?? "/login";
@@ -161,6 +164,13 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
 
         if (dbUser && account?.provider) {
           await authService.recordLoginSuccess(dbUser.id, account.provider);
+          // Sync OAuth profile data if profile feature is enabled and user hasn't manually edited
+          if (profileService) {
+            await profileService.syncFromOAuth(dbUser.id, account.provider, {
+              name: user.name,
+              image: user.image,
+            }).catch(() => undefined);
+          }
         }
 
         return true;

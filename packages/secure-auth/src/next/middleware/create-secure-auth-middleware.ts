@@ -17,11 +17,13 @@ export function buildMiddlewareConfig(
   config: SecureAuthConfig,
   uiConfig: SecureAuthUIPublicConfig
 ): SecureAuthMiddlewareConfig {
+  const adminPath = config.admin?.enabled ? (config.admin.path ?? "/admin") : undefined;
   return {
     paths: uiConfig.paths,
     auth: uiConfig.auth,
     nextAuthSecret: config.auth.nextAuthSecret,
     redirectAuthenticatedFromGuestPages: uiConfig.auth.redirectAuthenticatedFromGuestPages,
+    adminPath,
   };
 }
 
@@ -48,6 +50,12 @@ export type SecureAuthMiddlewareConfig = {
   redirectAuthenticatedFromGuestPages?: boolean;
   /** Optional trace hook for consumer diagnostics. */
   onTrace?: (event: string, meta?: Record<string, string | boolean | number>) => void;
+  /**
+   * When set, requests to this path (and sub-paths) require authentication.
+   * Unauthenticated requests are redirected to `paths.login`.
+   * Role checking (admin vs user) is enforced by the route handlers.
+   */
+  adminPath?: string;
 };
 
 const TWO_FACTOR_ALLOWED_SUFFIXES = [
@@ -195,6 +203,17 @@ export function createSecureAuthMiddleware(config: SecureAuthMiddlewareConfig) {
         config.onTrace?.("middleware_redirect_authenticated_2fa", { from: pathname });
         const url = request.nextUrl.clone();
         url.pathname = authenticatedRedirectPath;
+        return NextResponse.redirect(url);
+      }
+    }
+
+    // Admin path — require any authenticated session (role checked in route handler)
+    if (config.adminPath && isAllowedPath(pathname, [config.adminPath])) {
+      if (!isFullyAuthenticatedJwt(token)) {
+        config.onTrace?.("middleware_redirect_admin_unauthenticated", { from: pathname });
+        const url = request.nextUrl.clone();
+        url.pathname = config.paths.login;
+        url.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(url);
       }
     }

@@ -6,12 +6,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-29
+
 ### Added
 
+- **Admin panel** — first-party authenticated admin area at a configurable path (default `/admin`). Requires `admin.enabled: true`. Sections: Users, Waitlist, Invites, Account Locks, API Keys, Config. Access is gated by `role = "admin"` on the user record. First admin is bootstrapped via `ADMIN_BOOTSTRAP_EMAIL` env var on first server start. New exports: `AdminUsersPage`, `AdminWaitlistPage`, `AdminInvitesPage`, `AdminLocksPage`, `AdminApiKeysPage`, `AdminConfigPage` from `@tgoliveira/secure-auth/react`.
+- **Progressive account lockout** — configurable thresholds freeze accounts temporarily, then lock permanently after repeated failed login attempts (`accountLockout.enabled`, default `false`). Default schedule: freeze for 5 min at 3 failures, 30 min at 6, 4 hours at 9, permanent lock at 12. Login returns `429` with `retryAfterSeconds` while frozen, `423` while locked. Admins can unlock via the admin panel. New table: `login_attempt_counters`.
+- **Invite system and waitlist** — opt-in invite codes and waitlist approval (`invites.enabled`, default `false`). `requireInviteCode: true` blocks registration without a valid code. `requireApproval: true` places new accounts in a `pending` state until an admin approves. Per-user quota (`defaultQuotaPerUser`) and expiry (`codeExpiryDays`) are configurable. New tables: `invite_codes`, `invite_uses`. New page: `WaitlistPendingPage`.
+- **Machine-to-machine API keys** — create, rotate, and revoke bearer keys with optional scopes and expiry (`apiKeys.enabled`, default `false`). Keys are bcrypt-hashed in storage and identified by an 8-char prefix for efficient lookup. New helper: `withApiKeyAuth(services, handler, { scopes? })` from `@tgoliveira/secure-auth`. New table: `api_keys`.
+- **User profile** — `displayName`, `avatarUrl`, and `bio` fields (`profile.enabled`, default `false`). OAuth logins automatically sync name and avatar on first sign-in; once the user saves their profile manually, OAuth sync is disabled for that account. New route: `accountProfile` (`GET`/`POST`). New columns: `display_name`, `avatar_url`, `bio`, `profile_updated_at` on `users`.
+- **Runtime config overrides** — admins can override a curated set of config keys at runtime via the admin panel without redeploying. Overrides are stored in the database and applied with a configurable in-memory TTL (`admin.configCacheTtlSeconds`, default `60`). New table: `admin_config_overrides`.
+- **v0.3 integration guide** — step-by-step guide for adding v0.3 features to an existing consumer application ([docs/v0.3-integration-guide.md](docs/v0.3-integration-guide.md)).
+
+### Changed (carried from Unreleased)
+
 - **Consumer-demo route sync automation** — when `create-routes.ts` or `scripts/consumer-demo-route-registry.mjs` changes, a sync script generates matching `route.ts` files in `apps/consumer-demo`. Includes `npm run sync:consumer-demo` / `sync:consumer-demo:check`, a GitHub Action (`.github/workflows/sync-consumer-demo.yml`) that commits generated routes on push, and a CI fallback test (`route-sync.test.ts`).
-
-### Changed
-
 - **Renamed `apps/starter` to `apps/dev-harness`** (`@secure-auth/dev-harness`) — internal package development harness, not a consumer reference.
 - **`apps/consumer-demo`** is now the documented canonical consumer integration reference; README headers, docs, and roadmap checklist updated accordingly.
 - **`apps/consumer-demo` NextAuth route** — uses `createNextAuthRouteHandlers` via the sync script template.

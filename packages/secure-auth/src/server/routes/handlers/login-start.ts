@@ -7,7 +7,11 @@ import {
   AuthPasswordTransportError,
 } from "@/modules/security/policies/auth-password-input";
 import { credentialsLoginStartSchema } from "@/lib/validation/two-factor";
-import { InvalidCredentialsError } from "@/modules/auth/services/auth-login-service";
+import {
+  InvalidCredentialsError,
+  AccountFrozenError,
+  AccountLockedError,
+} from "@/modules/auth/services/auth-login-service";
 import { CaptchaVerificationError } from "@/modules/captcha/index";
 import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
 import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
@@ -62,6 +66,15 @@ async function loginStartPost(request: Request, services: SecureAuthServices) {
     }
     if (error instanceof InvalidCredentialsError) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+    }
+    if (error instanceof AccountFrozenError) {
+      return NextResponse.json(
+        { error: "account_frozen", retryAfterSeconds: error.retryAfterSeconds },
+        { status: 429 }
+      );
+    }
+    if (error instanceof AccountLockedError) {
+      return NextResponse.json({ error: "account_locked" }, { status: 423 });
     }
     return apiError(error, "POST /api/auth/login/start");
   }

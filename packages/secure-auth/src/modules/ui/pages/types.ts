@@ -22,6 +22,8 @@ export type AuthPaths = {
   accountSettings?: string;
   securitySettings?: string;
   sessionsSettings?: string;
+  waitlistPending?: string;
+  adminPanel?: string;
 };
 
 export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
@@ -39,6 +41,8 @@ export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
   accountSettings: "/settings/account",
   securitySettings: "/settings/security",
   sessionsSettings: "/settings/sessions",
+  waitlistPending: "/waitlist",
+  adminPanel: "/admin",
 };
 
 export function resolveAuthPaths(overrides?: AuthPaths): Required<AuthPaths> {

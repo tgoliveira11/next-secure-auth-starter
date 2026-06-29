@@ -17,6 +17,12 @@ import type { createPasskeyLoginService } from "../modules/passkeys/services/pas
 import type { createPasskeyAccountService } from "../modules/passkeys/services/passkey-account-service.js";
 import type { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
 import type { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
+import type { createAdminService } from "../modules/admin/services/admin-service.js";
+import type { createLockoutService } from "../modules/admin/services/lockout-service.js";
+import type { createInviteService } from "../modules/admin/services/invite-service.js";
+import type { createApiKeyService } from "../modules/admin/services/api-key-service.js";
+import type { createConfigOverrideService } from "../modules/admin/services/config-override-service.js";
+import type { createProfileService } from "../modules/account/services/profile-service.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -92,6 +98,56 @@ export type SecureAuthConfig = {
     /** Client poll interval (seconds) to sign out browsers whose session was revoked elsewhere. Default: 10 when singleActiveSession is true. */
     revocationPollIntervalSeconds?: number;
   };
+  admin?: {
+    /** Enable the admin panel. Default: false. */
+    enabled?: boolean;
+    /** URL path for the admin panel. Default: "/admin". */
+    path?: string;
+    /**
+     * Bootstrap: promote this email to admin role on first server start when no
+     * admin exists yet. No-op once at least one admin is in the database.
+     */
+    bootstrapEmail?: string;
+    /** Seconds to cache admin config overrides in memory. Default: 60. 0 = no cache. */
+    configCacheTtlSeconds?: number;
+  };
+  accountLockout?: {
+    /** Enable progressive account lockout. Default: false. */
+    enabled?: boolean;
+    thresholds?: Array<{
+      /** Cumulative failed login attempts that trigger this threshold. */
+      attempts: number;
+      action: "freeze" | "lock";
+      /** Required when action = "freeze". Duration in seconds. */
+      freezeDurationSeconds?: number;
+    }>;
+  };
+  invites?: {
+    /** Enable the invite/waitlist system. Default: false. */
+    enabled?: boolean;
+    /** New accounts start as "pending" and require admin approval. Default: false. */
+    requireApproval?: boolean;
+    /** Registration requires a valid invite code. Default: false. */
+    requireInviteCode?: boolean;
+    /** How many invite codes each approved user gets. Default: 0. */
+    defaultQuotaPerUser?: number;
+    /** Invite code validity in days. Default: 30. */
+    codeExpiryDays?: number;
+  };
+  apiKeys?: {
+    /** Enable machine-to-machine API key auth. Default: false. */
+    enabled?: boolean;
+    /** Default key expiry in days. null = never. Default: 365. */
+    defaultExpiryDays?: number | null;
+  };
+  profile?: {
+    /** Enable user profile (display name, avatar, bio). Default: false. */
+    enabled?: boolean;
+    /** Allow avatar image uploads (requires uploadHandler). Default: false. */
+    allowAvatarUpload?: boolean;
+    /** Consumer-provided handler to store avatar files and return a URL. */
+    uploadHandler?: (file: Buffer, mimeType: string, userId: string) => Promise<string>;
+  };
   rateLimit?: {
     store: "memory" | "postgres";
   };
@@ -158,6 +214,8 @@ export type SecureAuthConfig = {
       securitySettings?: string;
       sessions?: string;
       sessionsSettings?: string;
+      waitlistPending?: string;
+      adminPanel?: string;
     };
     messages?: Record<string, string>;
     cssVariables?: Record<string, string>;
@@ -184,5 +242,11 @@ export type SecureAuthServices = {
   readonly passkeyAccountService: ReturnType<typeof createPasskeyAccountService>;
   readonly magicLinkService: ReturnType<typeof createMagicLinkService>;
   readonly securityNotificationService: ReturnType<typeof createSecurityNotificationService>;
+  readonly adminService: ReturnType<typeof createAdminService>;
+  readonly lockoutService: ReturnType<typeof createLockoutService>;
+  readonly inviteService: ReturnType<typeof createInviteService>;
+  readonly apiKeyService: ReturnType<typeof createApiKeyService>;
+  readonly configOverrideService: ReturnType<typeof createConfigOverrideService>;
+  readonly profileService: ReturnType<typeof createProfileService>;
   readonly getAuthOptions: () => NextAuthOptions;
 };
