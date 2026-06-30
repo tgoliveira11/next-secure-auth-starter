@@ -1,0 +1,47 @@
+---
+description: Branch, PR, changelog, and publish guardrails for humans and AI agents
+alwaysApply: true
+---
+
+# Branch, PR, and publish guardrails
+
+Read [docs/contributing.md](../../docs/contributing.md) and [docs/publishing.md](../../docs/publishing.md) before substantive work.
+
+## Branch-first
+
+- Base: `main` only (no `develop`).
+- Create `feature/`, `fix/`, `docs/`, or `chore/` branches before code changes.
+- **Never commit or push to `main`** unless the user explicitly requests it.
+- **Never merge PRs, approve PRs, or dispatch publish** unless the user explicitly requests it.
+- **Never run destructive git** (`push --force`, `reset --hard`, etc.) unless explicitly requested.
+
+## Commits and PRs
+
+- Use Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, …).
+- **Commit only when the user asks** — otherwise leave changes uncommitted.
+- **Open PRs only when the user asks** (`gh pr create` with summary + test plan).
+- Prefer squash merge when merging.
+
+## Pre-PR checklist (code changes)
+
+1. `npm run validate`
+2. Tests for changed behavior
+3. `CHANGELOG.md` → `## [Unreleased]` when consumer-visible
+4. `docs/CURRENT_PRODUCT_SURFACE.md` when exports/routes/artifacts change
+5. No secrets in staged files
+
+Trivial docs-only changes may skip validate.
+
+## Publishing — manual only
+
+- **Never** `npm publish`, bump release versions, create `secure-auth-v*` tags, or run `publish-secure-auth.yml` without explicit user approval.
+- Release invariant: `npm @tgoliveira/secure-auth@X.Y.Z` ⟺ tag `secure-auth-vX.Y.Z` ⟺ GitHub Release `secure-auth-vX.Y.Z`.
+- Empty `CHANGELOG` `Unreleased` → recovery-only publish (no version bump).
+
+## Bot exceptions (not for agents)
+
+`github-actions[bot]` may push release metadata via `publish-secure-auth.yml` and route sync via `sync-consumer-demo.yml`. Agents do not imitate these unless instructed.
+
+## Product scope (unchanged)
+
+Follow [AGENTS.md](../../AGENTS.md) for security, module boundaries, coverage ≥ 95%, and documentation requirements.

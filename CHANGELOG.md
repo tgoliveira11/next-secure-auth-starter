@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Contributor and agent workflow docs** — branch-first PR policy, manual-only publish invariant, `docs/CURRENT_PRODUCT_SURFACE.md`, Cursor rule `branch-pr-publish`, and CI `branch-name` check on pull requests.
+
 ### Fixed
 
 - **Missing v0.3 admin platform SQL migrations in npm tarball** — `0.4.0` shipped the Drizzle schema for admin panel, lockout, invites, API keys, and config overrides but omitted migration `0002_v0_3_admin_platform.sql`. Consumers upgrading from `0.2.x`/`0.3.x` must run `drizzle-kit migrate` after upgrading; if you already applied the tables manually, mark this migration as applied in your Drizzle journal instead of re-running it.

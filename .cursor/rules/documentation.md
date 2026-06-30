@@ -35,6 +35,7 @@ Update:
 
 - [docs/architecture.md](../../docs/architecture.md)
 - [docs/package-api.md](../../docs/package-api.md)
+- [docs/CURRENT_PRODUCT_SURFACE.md](../../docs/CURRENT_PRODUCT_SURFACE.md)
 - [docs/consumer-quick-start.md](../../docs/consumer-quick-start.md) if setup steps change
 - [docs/customization.md](../../docs/customization.md) if customization options change
 - [README.md](../../README.md) if getting-started steps change
