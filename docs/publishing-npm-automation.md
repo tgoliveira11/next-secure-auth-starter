@@ -41,7 +41,7 @@ Trusted publishing requires a GitHub-hosted runner, Node 22.14 or newer, npm 11.
 
 ## Start a release
 
-Use GitHub Actions:
+Use GitHub Actions — see [publishing.md](./publishing.md) for the release invariant and recovery mode.
 
 1. Open **Actions** → **Publish package to npmjs**.
 2. Select **Run workflow** on `main`.

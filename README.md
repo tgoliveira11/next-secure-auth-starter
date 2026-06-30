@@ -152,11 +152,15 @@ Policy, remediation history, and override rationale: [docs/security/dependency-a
 
 The release workflow runs the security audit before `npm run validate` and the publication gates.
 
-### npm publish (automated)
+### npm publish (manual only)
 
-Start **Publish package to npmjs** manually on `main`. The workflow derives or accepts the next stable SemVer, validates the monorepo and exact tarball, publishes with npm Trusted Publishing/provenance, then creates the release commit, `secure-auth-vx.y.z` tag, and GitHub release. Do not bump versions or create release tags manually.
+Start **Publish package to npmjs** manually on `main`. The workflow derives or accepts the next stable SemVer, validates the monorepo and exact tarball, publishes with npm Trusted Publishing/provenance, then creates the release commit, `secure-auth-vX.Y.Z` tag, and GitHub release. Do not bump versions or create release tags manually.
 
-See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
+See [docs/publishing.md](docs/publishing.md) (invariant + recovery) and [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md) (OIDC setup).
+
+### Contributing
+
+Branch-first workflow, PR checklist, and agent rules: [CONTRIBUTING.md](CONTRIBUTING.md) → [docs/contributing.md](docs/contributing.md).
 
 ---
 
@@ -193,7 +197,11 @@ See [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md).
 | [docs/architecture.md](docs/architecture.md) | Package-first model, composition root, boundaries |
 | [docs/security.md](docs/security.md) | Security requirements and readiness |
 | [docs/migrations.md](docs/migrations.md) | Database migrations and upgrade notes |
-| [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md) | Automated npm publish (Trusted Publishing) |
+| [docs/contributing.md](docs/contributing.md) | Branch, PR, changelog, validation |
+| [docs/publishing.md](docs/publishing.md) | Manual publish, release invariant, recovery |
+| [docs/repo-settings.md](docs/repo-settings.md) | GitHub branch protection and environments |
+| [docs/CURRENT_PRODUCT_SURFACE.md](docs/CURRENT_PRODUCT_SURFACE.md) | Live exports, routes, migrations inventory |
+| [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md) | npm Trusted Publishing setup |
 | [docs/publishing-private-package.md](docs/publishing-private-package.md) | Publishing overview (npm public registry) |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [AGENTS.md](AGENTS.md) | AI agent instructions |

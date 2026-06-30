@@ -10,6 +10,23 @@ permissions:
   contents: read
 
 jobs:
+  branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require feature/, fix/, docs/, or chore/ prefix
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          case "$BRANCH" in
+            feature/*|fix/*|docs/*|chore/*)
+              echo "Branch name OK: $BRANCH"
+              ;;
+            *)
+              echo "::error::Branch '$BRANCH' must use prefix feature/, fix/, docs/, or chore/"
+              exit 1
+              ;;
+          esac
+
   validate:
     runs-on: ubuntu-latest
 

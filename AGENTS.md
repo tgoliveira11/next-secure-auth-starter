@@ -62,6 +62,7 @@ At minimum review:
 - docs/security.md
 - docs/package-api.md
 - docs/consumer-quick-start.md
+- docs/CURRENT_PRODUCT_SURFACE.md (exports, routes, published artifacts)
 - packages/secure-auth/README.md
 - apps/dev-harness/README.md
 - docs/*
@@ -70,9 +71,21 @@ At minimum review:
 See [.cursor/rules/documentation.md](.cursor/rules/documentation.md) for the full update checklist.
 
 For every consumer-visible change, add an entry under the appropriate `CHANGELOG.md` `Unreleased`
-heading. Do not bump versions, create release tags, or publish manually. Start the
-`Publish package to npmjs` workflow on `main`; it owns version selection, release metadata, npm
-publication, tag creation, and GitHub release creation.
+heading.
+
+## Workflow (humans and agents)
+
+See [docs/contributing.md](docs/contributing.md) for branch naming, PR cycle, and pre-PR checklist.
+
+**Do not:**
+
+- commit or push to `main` unless explicitly requested;
+- open or merge PRs unless explicitly requested;
+- bump versions, create release tags, run `npm publish`, or dispatch the publish workflow unless explicitly requested.
+
+**Publishing** is manual-only. The owner dispatches [Publish package to npmjs](.github/workflows/publish-secure-auth.yml) on `main`. That workflow owns version bump (from `Unreleased`), release metadata commit, npm publication, `secure-auth-vX.Y.Z` tag, and GitHub Release. See [docs/publishing.md](docs/publishing.md) for the release invariant and recovery mode.
+
+Exception: `github-actions[bot]` may push release metadata and consumer-demo route sync commits — agents must not mimic this unless instructed.
 
 ## Module boundaries
 
@@ -108,6 +121,9 @@ This behavior affects account security and requires human review.
 | [docs/security.md](docs/security.md) | Before any auth/security change |
 | [docs/package-api.md](docs/package-api.md) | Public exports and route map |
 | [docs/consumer-quick-start.md](docs/consumer-quick-start.md) | Consumer integration |
+| [docs/contributing.md](docs/contributing.md) | Branch, PR, changelog, validation |
+| [docs/publishing.md](docs/publishing.md) | Manual publish, release invariant, recovery |
+| [docs/CURRENT_PRODUCT_SURFACE.md](docs/CURRENT_PRODUCT_SURFACE.md) | Live exports, routes, migrations inventory |
 | [docs/customization.md](docs/customization.md) | UI and config customization |
 | [docs/migrations.md](docs/migrations.md) | Database migrations and upgrades |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package-specific overview |
