@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- **nodemailer** — upgraded to `9.0.3` (latest 9.x; TLS validation by default, GHSA-p6gq-j5cr-w38f fix). Root override includes `next-auth > nodemailer`.
+
 ## [0.4.1] - 2026-06-30
 
 ### Added

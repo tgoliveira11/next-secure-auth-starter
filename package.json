@@ -38,7 +38,7 @@
   "overrides": {
     "esbuild": "0.28.1",
     "postcss": "8.5.15",
-    "nodemailer": "9.0.1",
+    "nodemailer": "9.0.3",
     "uuid": "11.1.1",
     "happy-dom": "20.10.3",
     "next": {
@@ -46,7 +46,7 @@
     },
     "next-auth": {
       "uuid": "11.1.1",
-      "nodemailer": "9.0.1"
+      "nodemailer": "9.0.3"
     }
   },
   "engines": {
