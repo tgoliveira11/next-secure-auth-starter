@@ -3,6 +3,7 @@ import {
   evaluateOAuthSignIn,
   getOAuthSignInErrorMessage,
   isOAuthOnlyProvider,
+  oauthSignInRedirectPath,
   OAUTH_SIGN_IN_ERROR_CODES,
 } from "../oauth-sign-in-policy";
 
@@ -60,11 +61,34 @@ describe("oauth sign-in policy", () => {
     expect(isOAuthOnlyProvider("credentials")).toBe(false);
   });
 
+  it("allows existing user flow for login-token provider", () => {
+    expect(
+      evaluateOAuthSignIn({
+        email: "user@example.com",
+        accountProvider: "login-token",
+        existingUser: { authProvider: "credentials", emailVerifiedAt: new Date() },
+      })
+    ).toEqual({ action: "allow_existing", markEmailVerified: false });
+    expect(
+      evaluateOAuthSignIn({
+        email: "user@example.com",
+        accountProvider: null,
+        existingUser: null,
+      })
+    ).toEqual({ action: "allow_existing", markEmailVerified: false });
+  });
+
   it("returns safe OAuth error messages", () => {
     expect(getOAuthSignInErrorMessage(OAUTH_SIGN_IN_ERROR_CODES.ACCOUNT_EXISTS)).toMatch(
       /already exists/i
     );
     expect(getOAuthSignInErrorMessage("OAuthCallback")).toMatch(/redirect/i);
+    expect(getOAuthSignInErrorMessage("OAuthSignin")).toMatch(/Microsoft/);
+    expect(getOAuthSignInErrorMessage(OAUTH_SIGN_IN_ERROR_CODES.EMAIL_REQUIRED)).toMatch(/email/i);
+    expect(oauthSignInRedirectPath(OAUTH_SIGN_IN_ERROR_CODES.EMAIL_REQUIRED)).toBe(
+      "/login?error=OAuthEmailRequired"
+    );
+    expect(getOAuthSignInErrorMessage("UnknownProviderError")).toMatch(/could not be completed/i);
     expect(getOAuthSignInErrorMessage(null)).toBeNull();
   });
 });
