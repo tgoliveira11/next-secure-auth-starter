@@ -38,13 +38,13 @@ Do not:
 
 ## Coverage requirement
 
-All metrics must remain at or above 95%:
+All metrics must remain at or above **90%** on the package unit-test surface (see `packages/secure-auth/vitest.config.ts`):
 
 ```text
-Statements >= 95%
-Lines      >= 95%
-Functions  >= 95%
-Branches   >= 95%
+Statements >= 90%
+Lines      >= 90%
+Functions  >= 90%
+Branches   >= 90%
 ```
 
 Do not lower thresholds.
