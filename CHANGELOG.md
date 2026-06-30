@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-06-30
+
 ### Added
 
 - **Contributor and agent workflow docs** — branch-first PR policy, manual-only publish invariant, `docs/CURRENT_PRODUCT_SURFACE.md`, Cursor rule `branch-pr-publish`, and CI `branch-name` check on pull requests.
