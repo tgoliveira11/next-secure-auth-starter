@@ -51,6 +51,7 @@ Keep app tables in a separate schema namespace or prefixed table names to avoid 
 | --- | --- |
 | `0.1.x` | Initial extraction; breaking DB changes allowed with minor bumps |
 | `0.2.x` | Document every breaking migration in package CHANGELOG |
+| `0.3.x` / `0.4.x` | Admin platform tables in `0002_v0_3_admin_platform.sql` (users profile/role columns + `login_attempt_counters`, `invite_codes`, `invite_uses`, `api_keys`, `admin_config_overrides`) |
 | `0.5.x+` | Semver for API; major bump for breaking DB |
 
 ## Breaking DB changes
