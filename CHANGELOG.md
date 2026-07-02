@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-02
+
 ### Changed
 
 - **CI validate** — Split into parallel jobs (`typecheck`, `lint`, `test`, `build`); ESLint and TypeScript incremental caches; Vitest `unit`/`ui` projects (`node` / `happy-dom`). See [docs/test-ci-performance-playbook.md](docs/test-ci-performance-playbook.md).
