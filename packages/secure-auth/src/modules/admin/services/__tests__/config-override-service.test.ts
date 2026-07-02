@@ -4,6 +4,7 @@ import { createConfigOverrideService } from "../config-override-service";
 describe("config override service", () => {
   const configOverrideRepository = {
     getAll: vi.fn().mockResolvedValue([]),
+    get: vi.fn().mockResolvedValue(null),
     set: vi.fn(),
     delete: vi.fn(),
   };

@@ -73,7 +73,11 @@ describe("requireMutatingAdminUser", () => {
     mocks.isEnabled.mockReturnValue(true);
     mocks.requireFullyAuthenticatedUser.mockResolvedValue({ id: "admin-1", email: "admin@example.com" });
     mocks.findById.mockResolvedValue({ id: "admin-1", role: "admin" });
-    services = await getTestServices({ app: { baseUrl: "http://localhost:3001" } }, (base) => ({
+    services = await getTestServices(
+      {
+        app: { name: "Test App", slug: "test-app", baseUrl: "http://localhost:3001" },
+      },
+      (base) => ({
       adminService: { ...base.adminService, isEnabled: mocks.isEnabled },
       repos: {
         ...base.repos,

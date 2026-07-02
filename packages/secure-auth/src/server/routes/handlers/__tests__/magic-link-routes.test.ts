@@ -149,8 +149,8 @@ describe("magic link API routes", () => {
   });
 
   it("GET /verify is no longer exposed on the API route", async () => {
-    const { createGetHandler } = await import("../auth/magic-link-verify.js");
-    expect(createGetHandler).toBeUndefined();
+    const mod = await import("../auth/magic-link-verify.js");
+    expect("createGetHandler" in mod).toBe(false);
   });
 
   it("POST /request when magicLink.enabled = false returns 404", async () => {
