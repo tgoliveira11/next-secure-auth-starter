@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-07-02
+
 ### Changed
 
 - **Post-logout redirect** — Package UI sign-out (`AuthNav`, waitlist, session revocation) now redirects to `auth.afterLogoutPath` / `paths.afterLogout` (env: `AUTH_AFTER_LOGOUT_PATH`). Default is `/` instead of `/login`. Export: `signOutWithRedirect` from `@tgoliveira/secure-auth/react`.
