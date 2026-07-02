@@ -8,6 +8,7 @@ import { Card } from "../primitives/card.js";
 import { Alert } from "../primitives/alert.js";
 import { CredentialsTwoFactorForm } from "../features/auth/credentials-two-factor-form.js";
 import { OAuthTwoFactorForm } from "../features/auth/oauth-two-factor-form.js";
+import { useTwoFactorUsernameEmail } from "../features/auth/use-two-factor-username-email.js";
 import { type LoginTwoFactorPageProps } from "./types.js";
 import { usePageTitle, useUiMessage, useUiPaths } from "./use-page-ui.js";
 import { useLoginTwoFactorPageGuard } from "../auth-redirect/use-flow-page-guards.js";
@@ -50,6 +51,7 @@ function LoginTwoFactorContent({
     redirectIfAuthenticated,
     authenticatedRedirectPath: authenticatedRedirectPath ?? destination,
   });
+  const usernameEmail = useTwoFactorUsernameEmail(mode);
 
   if (guard.isLoading) {
     return (
@@ -80,10 +82,16 @@ function LoginTwoFactorContent({
             errorCode={errorCode}
             formAction={resolved.loginTwoFactor}
             loginPath={resolved.login}
+            usernameEmail={usernameEmail}
           />
         ) : (
           <Suspense fallback={null}>
-            <OAuthTwoFactorForm afterLoginPath={destination} />
+            <OAuthTwoFactorForm
+              formAction={resolved.loginTwoFactor}
+              loginPath={resolved.login}
+              usernameEmail={usernameEmail}
+              errorCode={errorCode}
+            />
           </Suspense>
         )}
       </Card>

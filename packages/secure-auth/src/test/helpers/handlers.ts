@@ -90,6 +90,15 @@ export async function loginVerify2faFormPost(request: Request, services?: Secure
   return invokePost("../../server/routes/handlers/auth/login-verify-2fa-form.js", request, undefined, services);
 }
 
+export async function loginOauth2faCompletePost(services?: SecureAuthServices) {
+  return invokePost(
+    "../../server/routes/handlers/auth/login-oauth-2fa-complete.js",
+    new Request("http://localhost"),
+    undefined,
+    services
+  );
+}
+
 export async function passkeyLoginOptionsPost(request: Request, services?: SecureAuthServices) {
   return invokePost("../../server/routes/handlers/auth/passkey-login-options.js", request, undefined, services);
 }

@@ -130,6 +130,22 @@ export function createTwoFactorRepository(db: DbClient) {
       return row ?? null;
     },
 
+    async peekLoginChallenge(challengeTokenHash: string, client: DbClient = db) {
+      const now = new Date();
+      const [row] = await client
+        .select()
+        .from(userTwoFactorLoginChallenges)
+        .where(
+          and(
+            eq(userTwoFactorLoginChallenges.challengeTokenHash, challengeTokenHash),
+            isNull(userTwoFactorLoginChallenges.consumedAt),
+            gt(userTwoFactorLoginChallenges.expiresAt, now)
+          )
+        )
+        .limit(1);
+      return row ?? null;
+    },
+
     async createLoginToken(
       data: {
         userId: string;

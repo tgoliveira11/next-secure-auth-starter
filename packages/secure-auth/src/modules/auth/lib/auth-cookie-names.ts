@@ -7,6 +7,10 @@ export function buildTwoFactorLoginChallengeCookieName(appSlug: string): string 
   return `${appSlug}-2fa-challenge`;
 }
 
+export function buildTwoFactorOAuthUpgradeCookieName(appSlug: string): string {
+  return `${appSlug}-2fa-oauth-upgrade`;
+}
+
 export function buildPasskeyLoginUserIdKey(appSlug: string): string {
   return `${appSlug}-passkey-login-user-id`;
 }

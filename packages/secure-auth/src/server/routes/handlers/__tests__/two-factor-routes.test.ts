@@ -6,6 +6,7 @@ import { twoFactorDisablePost as disablePost } from "@/test/helpers/handlers";
 import { loginStartPost } from "@/test/helpers/handlers";
 import { loginChallengeStatusGet as challengeStatusGet } from "@/test/helpers/handlers";
 import { loginVerify2faPost as verify2faPost } from "@/test/helpers/handlers";
+import { loginOauth2faCompletePost as oauth2faCompletePost } from "@/test/helpers/handlers";
 import { getTestServices } from "@/test/helpers/mock-services";
 import { USER_ID } from "@/test/helpers/fixtures";
 import type { SecureAuthServices } from "@/core/types";
@@ -135,17 +136,62 @@ describe("two-factor API routes", () => {
   });
 
   it("challenge status reflects pending cookie state", async () => {
+    const peekLoginChallenge = vi.fn().mockResolvedValue({ userId: USER_ID });
+    const findById = vi.fn().mockResolvedValue({ email: "user@example.com" });
+    services = await getTestServices({}, (base) => ({
+      authLoginService: {
+        ...base.authLoginService,
+        startCredentialsLogin: mocks.startCredentialsLogin,
+        verifyTwoFactorLogin: mocks.verifyTwoFactorLogin,
+      },
+      twoFactorService: {
+        ...base.twoFactorService,
+        getStatus: mocks.getStatus,
+        startSetup: mocks.startSetup,
+        verifySetup: mocks.verifySetup,
+        disable: mocks.disable,
+      },
+      repos: {
+        ...base.repos,
+        twoFactorRepository: {
+          ...base.repos.twoFactorRepository,
+          peekLoginChallenge,
+        },
+        userRepository: {
+          ...base.repos.userRepository,
+          findById,
+        },
+      },
+    }));
+
     mocks.cookiesGet.mockImplementation((name: string) =>
       name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     const pending = await challengeStatusGet(services);
-    await expect(pending.json()).resolves.toEqual({ pending: true });
+    await expect(pending.json()).resolves.toEqual({
+      pending: true,
+      email: "user@example.com",
+    });
 
     mocks.cookiesGet.mockReturnValue(undefined);
     const missing = await challengeStatusGet(services);
     await expect(missing.json()).resolves.toEqual({ pending: false });
+
+    mocks.cookiesGet.mockImplementation((name: string) =>
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
+        ? { value: "challenge-token-1234567890" }
+        : undefined
+    );
+    peekLoginChallenge.mockResolvedValueOnce(null);
+    const expired = await challengeStatusGet(services);
+    await expect(expired.json()).resolves.toEqual({ pending: false });
+
+    peekLoginChallenge.mockResolvedValueOnce({ userId: USER_ID });
+    findById.mockResolvedValueOnce(null);
+    const pendingWithoutEmail = await challengeStatusGet(services);
+    await expect(pendingWithoutEmail.json()).resolves.toEqual({ pending: true });
   });
 
   it("login start rejects invalid payloads and invalid credentials", async () => {
@@ -351,6 +397,25 @@ describe("two-factor API routes", () => {
       services
     );
     expect(res.status).toBe(500);
+  });
+
+  it("oauth-2fa-complete rejects missing upgrade cookie", async () => {
+    mocks.cookiesGet.mockReturnValue(undefined);
+    const res = await oauth2faCompletePost(services);
+    expect(res.status).toBe(401);
+    await expect(res.json()).resolves.toEqual({ error: "Two-factor session expired" });
+  });
+
+  it("oauth-2fa-complete returns upgrade token and clears cookie", async () => {
+    mocks.cookiesGet.mockImplementation((name: string) =>
+      name === services.ctx.getTwoFactorOAuthUpgradeCookieName()
+        ? { value: "oauth-upgrade-token-1234567890" }
+        : undefined
+    );
+    const res = await oauth2faCompletePost(services);
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ upgradeToken: "oauth-upgrade-token-1234567890" });
+    expect(res.cookies.get(services.ctx.getTwoFactorOAuthUpgradeCookieName())?.value).toBe("");
   });
 
   it("login start maps unexpected service failures", async () => {
