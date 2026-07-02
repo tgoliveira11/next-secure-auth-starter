@@ -8,7 +8,7 @@ Conservative workflow for humans and AI agents working on `tgoliveira11/next-sec
 | --- | --- |
 | Default branch | `main` (no `develop`) |
 | Package | `@tgoliveira/secure-auth` |
-| Validate | `npm run validate` |
+| Validate | `npm run validate` (local) · parallel jobs in [validate workflow](../.github/workflows/validate.yml) |
 | Publish workflow | [`.github/workflows/publish-secure-auth.yml`](../.github/workflows/publish-secure-auth.yml) |
 | OIDC environment | `npmjs` |
 
@@ -50,6 +50,8 @@ Before opening a PR or declaring a task complete:
 5. Confirm no secrets (`.env`, credentials) are staged.
 
 Trivial docs-only changes may skip `npm run validate`.
+
+See [test-ci-performance-playbook.md](./test-ci-performance-playbook.md) when optimizing Vitest or CI wall clock.
 
 ## PR cycle
 
