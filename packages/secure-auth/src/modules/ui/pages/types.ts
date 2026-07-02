@@ -127,6 +127,8 @@ export type LoginTwoFactorPageProps = SecureAuthPageProps & {
   mode?: "credentials" | "oauth";
   errorCode?: string;
   afterLoginPath?: string;
+  /** Server-resolved email for password managers on credentials 2FA (optional). */
+  initialUsernameEmail?: string;
 };
 
 export type LoginCompletePageProps = SecureAuthPageProps & {

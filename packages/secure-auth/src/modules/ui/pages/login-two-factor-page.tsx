@@ -17,6 +17,7 @@ import { LoadingState } from "../primitives/loading-state.js";
 function LoginTwoFactorContent({
   mode: modeProp,
   errorCode: errorCodeProp,
+  initialUsernameEmail,
   brand,
   header,
   className,
@@ -51,9 +52,10 @@ function LoginTwoFactorContent({
     redirectIfAuthenticated,
     authenticatedRedirectPath: authenticatedRedirectPath ?? destination,
   });
-  const usernameEmail = useTwoFactorUsernameEmail(mode);
+  const usernameEmailState = useTwoFactorUsernameEmail(mode, initialUsernameEmail);
+  const usernameEmail = usernameEmailState.email;
 
-  if (guard.isLoading) {
+  if (guard.isLoading || !usernameEmailState.isReady) {
     return (
       <AuthPageShell width={width} className={className}>
         <LoadingState label="Loading two-factor sign in" />

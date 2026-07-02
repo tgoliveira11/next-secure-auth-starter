@@ -13,7 +13,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - **Forgot-password 500 on outdated database schema** — When the consumer database is missing v0.3+ `users` columns, `POST /api/auth/forgot-password` now returns the generic success message (200) instead of 500, logs a `migrationHint`, and `GET /api/auth/health` reports `database.ready: false` with migration guidance. `DatabaseSchemaError` maps to 503 via `apiError` on other routes.
-- **Password manager 2FA auto-submit** — Two-factor login forms now expose a visually hidden `username` association field, explicit OTP attributes (`one-time-code`, `maxLength`, `pattern`, `autoFocus`), and OAuth 2FA uses the same native HTML POST + middleware rewrite flow as credentials login (via `/login/2fa/complete`).
+- **Password manager 2FA auto-submit** — Two-factor login forms now expose a visually hidden `username` association field, explicit OTP attributes (`one-time-code`, `maxLength`, `pattern`), and OAuth 2FA uses the same native HTML POST + middleware rewrite flow as credentials login (via `/login/2fa/complete`). Server-rendered `/login/2fa` pages should pass `initialUsernameEmail` via `getLoginTwoFactorInitialUsernameEmail` so password managers (Enpass, 1Password, etc.) see the username field on first paint.
 
 ### Security
 

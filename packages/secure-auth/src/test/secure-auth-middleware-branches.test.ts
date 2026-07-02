@@ -56,6 +56,17 @@ describe("secure auth middleware branches", () => {
     expect(apiResponse.headers.get("location")).toBeNull();
   });
 
+  it("allows pending 2FA on oauth complete page", async () => {
+    getToken.mockResolvedValue({ twoFactorPending: true, twoFactorVerified: false });
+    const middleware = createSecureAuthMiddleware(baseMiddlewareConfig);
+
+    const response = await middleware(
+      new NextRequest("http://localhost:3001/login/2fa/complete")
+    );
+
+    expect(response.headers.get("location")).toBeNull();
+  });
+
   it("redirects authenticated users away from 2FA page", async () => {
     getToken.mockResolvedValue({
       sub: "user-1",
