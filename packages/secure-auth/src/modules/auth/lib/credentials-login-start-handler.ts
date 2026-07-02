@@ -37,14 +37,14 @@ export async function handleCredentialsLoginFormPost(
     await verifyCaptcha({
       config,
       token: String(formData.get(CAPTCHA_TOKEN_FIELD) ?? ""),
-      remoteIp: getClientIp(request),
+      remoteIp: getClientIp(request, services.config),
       action: "login",
     });
 
     const result = await authLoginService.startCredentialsLogin(
       parsed.data.email,
       parsed.data.password,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
 
     if (result.requiresTwoFactor) {

@@ -68,6 +68,8 @@ const DEFAULT_UI_MESSAGES: Record<string, string> = {
     "Enter the 6-digit code from your authenticator app to finish signing in.",
   loginCompleteTitle: "Signing you in",
   loginCompleteDescription: "Finishing your sign-in securely.",
+  magicLinkVerifyTitle: "Signing you in",
+  magicLinkVerifyDescription: "Verifying your magic link securely.",
   accountSettingsTitle: "Account settings",
   accountSettingsDescription:
     "Manage your email, password, verification, and account lifecycle.",
@@ -99,6 +101,7 @@ function mapConfigPathsToAuthPaths(config: SecureAuthConfig): AuthPaths {
     verifyEmail: uiPaths?.verifyEmail,
     loginTwoFactor: uiPaths?.loginTwoFactor,
     loginComplete: uiPaths?.loginComplete,
+    magicLinkVerify: uiPaths?.magicLinkVerify,
     afterLogin: config.auth.afterLoginPath,
     accountDeleted: uiPaths?.accountDeleted,
     accountSettings: uiPaths?.account ?? uiPaths?.accountSettings,

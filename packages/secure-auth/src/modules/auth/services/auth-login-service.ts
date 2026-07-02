@@ -5,6 +5,7 @@ import {
 import { verifyPassword } from "@/modules/security/policies/password-hashing";
 import { RateLimitError } from "@/modules/rate-limit/index";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
+import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -65,6 +66,7 @@ export function createAuthLoginService(deps: AuthLoginServiceDeps) {
       if (lockoutService) await lockoutService.recordSuccess(normalizedEmail, user.id);
 
       assertCredentialsEmailVerifiedForSignIn(user, config);
+      assertUserMayAuthenticate(user);
 
       const twoFactorEnabled = await twoFactorService.isEnabledForUser(user.id);
       if (twoFactorEnabled) {
@@ -181,6 +183,11 @@ export function createAuthLoginService(deps: AuthLoginServiceDeps) {
       if (!row) return null;
       const user = await repos.userRepository.findById(row.userId);
       if (!user) return null;
+      try {
+        assertUserMayAuthenticate(user);
+      } catch {
+        return null;
+      }
       return { user, authMethod: row.authMethod ?? "password" };
     },
   };

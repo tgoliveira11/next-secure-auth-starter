@@ -82,6 +82,8 @@ export type SecureAuthConfig = {
     requireEmailVerificationForAccountApis?: boolean;
   };
   security?: {
+    /** When true, honor X-Forwarded-For / X-Real-IP for rate limiting. Default: false. */
+    trustForwardedHeaders?: boolean;
     sameOriginProtection?: {
       /** Default: true for authenticated mutating package routes. */
       enabled?: boolean;
@@ -154,6 +156,11 @@ export type SecureAuthConfig = {
   server?: {
     /** When true, auth cookies use the Secure flag. Set from consumer env (e.g. NODE_ENV). */
     cookieSecure?: boolean;
+    /**
+     * Deployment environment. When `"production"`, in-memory rate limiting is rejected at startup.
+     * Set from consumer env (e.g. NODE_ENV).
+     */
+    environment?: "development" | "test" | "production";
   };
   debug?: {
     authTrace?: boolean;
@@ -207,6 +214,7 @@ export type SecureAuthConfig = {
       verifyEmail?: string;
       loginTwoFactor?: string;
       loginComplete?: string;
+      magicLinkVerify?: string;
       accountDeleted?: string;
       account?: string;
       accountSettings?: string;

@@ -110,11 +110,6 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
         () => import("./handlers/auth/magic-link-verify.js"),
         "POST"
       ),
-      GET: lazyServiceRoute(
-        getServices,
-        () => import("./handlers/auth/magic-link-verify.js"),
-        "GET"
-      ),
     },
 
     passkeyLoginOptions: route(() => import("./handlers/auth/passkey-login-options.js"), "POST"),

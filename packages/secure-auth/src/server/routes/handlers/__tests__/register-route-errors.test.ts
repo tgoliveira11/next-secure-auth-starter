@@ -47,7 +47,7 @@ describe("register route error mapping", () => {
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
-      error: expect.stringContaining("Database unavailable"),
+      error: "Registration failed. Please try again.",
     });
   });
 
@@ -62,7 +62,7 @@ describe("register route error mapping", () => {
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
-      error: expect.stringContaining("DATABASE_URL"),
+      error: "Registration failed. Please try again.",
     });
   });
 
@@ -77,7 +77,7 @@ describe("register route error mapping", () => {
     );
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toMatchObject({
-      error: expect.stringContaining("Apply migrations"),
+      error: "Registration failed. Please try again.",
     });
   });
 

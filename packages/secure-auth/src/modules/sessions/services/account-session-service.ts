@@ -84,7 +84,7 @@ export function createAccountSessionService(deps: AccountSessionServiceDeps) {
 
   function requestMetadata(request: Request) {
     const userAgent = request.headers.get("user-agent") ?? "";
-    const ip = getClientIp(request);
+    const ip = getClientIp(request, config);
     const ua = parseUserAgentMetadata(userAgent);
     return {
       ip,

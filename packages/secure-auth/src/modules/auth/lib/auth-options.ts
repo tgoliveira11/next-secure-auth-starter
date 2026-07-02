@@ -11,6 +11,11 @@ import {
   isValidMicrosoftTenantId,
 } from "@/modules/auth/lib/microsoft-provider-config";
 import { credentialsSignInRequiresEmailVerification } from "@/modules/account/lib/account-policy-config";
+import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
+import {
+  oauthRegistrationBlocked,
+  resolveInitialUserStatus,
+} from "@/modules/auth/lib/registration-policy";
 import { isSingleActiveSessionEnabled } from "@/modules/sessions/lib/session-config";
 import type { SecureAuthConfig } from "@/core/types";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
@@ -19,6 +24,7 @@ import type { AuthLoginService } from "@/modules/auth/services/auth-login-servic
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 import type { AccountSessionService } from "@/modules/sessions/services/account-session-service";
 import type { ProfileService } from "@/modules/account/services/profile-service";
+import type { InviteService } from "@/modules/admin/services/invite-service";
 
 export type AuthOptionsDeps = {
   config: SecureAuthConfig;
@@ -28,6 +34,7 @@ export type AuthOptionsDeps = {
   twoFactorService: TwoFactorService;
   accountSessionService: AccountSessionService;
   profileService?: ProfileService;
+  inviteService: InviteService;
 };
 
 function resolveMicrosoftProvider(config: SecureAuthConfig) {
@@ -60,9 +67,11 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
     twoFactorService,
     accountSessionService,
     profileService,
+    inviteService,
   } = deps;
   const microsoftProviderEnv = resolveMicrosoftProvider(config);
   const signInPath = config.ui?.paths?.login ?? "/login";
+  const waitlistPath = config.ui?.paths?.waitlistPending ?? "/waitlist";
 
   return {
     secret: config.auth.nextAuthSecret,
@@ -136,6 +145,11 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
           if (!user.email) return false;
           const dbUser = await repos.userRepository.findByEmail(user.email);
           if (!dbUser) return false;
+          try {
+            assertUserMayAuthenticate(dbUser);
+          } catch {
+            return false;
+          }
           await authService.recordLoginSuccess(dbUser.id, account.provider);
           return true;
         }
@@ -150,16 +164,29 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
           return decision.redirectPath;
         }
 
+        if (decision.action === "create_user" && oauthRegistrationBlocked(inviteService)) {
+          return `${config.ui?.paths?.register ?? "/register"}?error=invite_required`;
+        }
+
         let dbUser = user.email ? await repos.userRepository.findByEmail(user.email) : null;
 
         if (decision.action === "create_user" && user.email) {
           dbUser = await repos.userRepository.create({
             email: user.email,
             authProvider: decision.authProvider,
+            status: resolveInitialUserStatus(inviteService),
           });
           await repos.userRepository.markEmailVerified(dbUser.id);
         } else if (decision.action === "allow_existing" && dbUser && decision.markEmailVerified) {
           await repos.userRepository.markEmailVerified(dbUser.id);
+        }
+
+        if (dbUser) {
+          try {
+            assertUserMayAuthenticate(dbUser);
+          } catch {
+            return waitlistPath;
+          }
         }
 
         if (dbUser && account?.provider) {
@@ -187,6 +214,15 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
             ) {
               return { ...token, sub: undefined, sessionInvalidated: true };
             }
+            const twoFactorSettings = await repos.twoFactorRepository.findSettingsByUserId(dbUser.id);
+            if (
+              twoFactorSettings?.enabled &&
+              twoFactorSettings.enabledAt &&
+              issuedAtMs !== undefined &&
+              issuedAtMs < twoFactorSettings.enabledAt.getTime()
+            ) {
+              return { ...token, sub: undefined, sessionInvalidated: true };
+            }
             token.sub = dbUser.id;
             token.email = dbUser.email;
             token.emailVerificationRequired = credentialsSignInRequiresEmailVerification(
@@ -211,6 +247,20 @@ export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {
             issuedAtMs < dbUser.passwordUpdatedAt.getTime()
           ) {
             return { ...token, sub: undefined, sessionInvalidated: true };
+          }
+          if (dbUser && dbUser.status !== "active") {
+            return { ...token, sub: undefined, sessionInvalidated: true };
+          }
+          if (dbUser) {
+            const twoFactorSettings = await repos.twoFactorRepository.findSettingsByUserId(dbUser.id);
+            if (
+              twoFactorSettings?.enabled &&
+              twoFactorSettings.enabledAt &&
+              issuedAtMs !== undefined &&
+              issuedAtMs < twoFactorSettings.enabledAt.getTime()
+            ) {
+              return { ...token, sub: undefined, sessionInvalidated: true };
+            }
           }
           if (dbUser) {
             token.email = dbUser.email;

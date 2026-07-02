@@ -7,7 +7,7 @@ import type { SecureAuthServices } from "@/core/types";
 async function twoFactorSetupStartPost(request: Request, services: SecureAuthServices) {
   try {
     const user = await requireVerifiedMutatingAccountUser(request, services);
-    const setup = await services.twoFactorService.startSetup(user.id, getClientIp(request));
+    const setup = await services.twoFactorService.startSetup(user.id, getClientIp(request, services.config));
     return NextResponse.json({
       qrCodeDataUrl: setup.qrCodeDataUrl,
       manualSetupKey: setup.manualSetupKey,

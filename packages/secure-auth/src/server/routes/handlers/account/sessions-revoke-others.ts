@@ -14,7 +14,7 @@ async function sessionsRevokeOthersPost(request: Request, services: SecureAuthSe
     const result = await services.accountSessionService.revokeOtherSessions(
       user.id,
       user.accountSessionId,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

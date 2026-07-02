@@ -8,7 +8,7 @@ import type {
 import { RATE_LIMIT_POLICIES } from "./core/types";
 import { InMemoryRateLimitAdapter } from "./adapters/in-memory-adapter";
 import { PostgresRateLimitAdapter } from "./adapters/postgres-adapter";
-import { resolveRateLimitStore } from "@/core/config-accessors.js";
+import { resolveRateLimitStore, assertProductionRateLimitConfig } from "@/core/config-accessors.js";
 import type { SecureAuthConfig, SecureAuthDb } from "@/core/types.js";
 
 export class RateLimitError extends Error {
@@ -19,6 +19,7 @@ export class RateLimitError extends Error {
 }
 
 export function createRateLimitApi(deps: { config: SecureAuthConfig; db: SecureAuthDb }) {
+  assertProductionRateLimitConfig(deps.config);
   let adapter: RateLimitAdapter | null = null;
 
   function resolveAdapter(): RateLimitAdapter {

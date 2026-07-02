@@ -41,7 +41,7 @@ export async function handleCredentialsTwoFactorFormPost(
     const result = await authLoginService.verifyTwoFactorLogin(
       challengeToken,
       { code: parsed.data.code, backupCode: parsed.data.backupCode },
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
 
     const response = ctx.authTrace.authTraceRedirect(request, "/login/complete", "2fa_form_verified", {

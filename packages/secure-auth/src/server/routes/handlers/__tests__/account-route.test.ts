@@ -98,7 +98,7 @@ describe("/api/account", () => {
         confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
         password: "secret",
       },
-      { ip: "127.0.0.1", accountSessionId: "sess-current" }
+      { ip: "unknown-ip", accountSessionId: "sess-current" }
     );
   });
 

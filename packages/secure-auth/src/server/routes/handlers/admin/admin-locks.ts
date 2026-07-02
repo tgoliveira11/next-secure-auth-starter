@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { requireAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
+import { requireAdminUser, requireMutatingAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
 import type { SecureAuthServices } from "@/core/types";
 
 function handleAdminError(error: unknown, endpoint: string) {
@@ -27,7 +27,7 @@ const unlockSchema = z.object({ userId: z.string().uuid() });
 
 async function adminLocksPost(request: Request, services: SecureAuthServices) {
   try {
-    const { session } = await requireAdminUser(services);
+    const { session } = await requireMutatingAdminUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = unlockSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "userId required" }, { status: 400 });

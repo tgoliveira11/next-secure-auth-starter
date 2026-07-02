@@ -1,5 +1,6 @@
 import "server-only";
-import { getSessionUser, UnauthorizedError } from "@/modules/auth/lib/session";
+import { requireFullyAuthenticatedUser } from "@/modules/auth/lib/session";
+import { requireSameOriginRequest } from "@/modules/security/policies/same-origin";
 import type { SecureAuthServices } from "@/core/types";
 
 export class AdminDisabledError extends Error {
@@ -22,8 +23,7 @@ export async function requireAdminUser(services: SecureAuthServices) {
     throw new AdminDisabledError();
   }
 
-  const session = await getSessionUser(services);
-  if (!session) throw new UnauthorizedError("Authentication required");
+  const session = await requireFullyAuthenticatedUser(services);
 
   const user = await services.repos.adminUserRepository.findById(session.id);
   if (!user || user.role !== "admin") {
@@ -31,4 +31,10 @@ export async function requireAdminUser(services: SecureAuthServices) {
   }
 
   return { session, user };
+}
+
+/** Same-origin check + fully authenticated admin for mutating admin API routes. */
+export async function requireMutatingAdminUser(request: Request, services: SecureAuthServices) {
+  requireSameOriginRequest(request, services.config);
+  return requireAdminUser(services);
 }

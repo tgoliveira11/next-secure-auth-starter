@@ -25,6 +25,7 @@ export function createUserRepository(db: DbClient) {
       email: string;
       authProvider: string;
       passwordHash?: string | null;
+      status?: "pending" | "active" | "suspended";
     }) {
       validateStoredPasswordHash(data.passwordHash);
 
@@ -34,6 +35,7 @@ export function createUserRepository(db: DbClient) {
           email: data.email,
           authProvider: data.authProvider,
           passwordHash: data.passwordHash ?? null,
+          status: data.status ?? "active",
         })
         .returning();
       return user;

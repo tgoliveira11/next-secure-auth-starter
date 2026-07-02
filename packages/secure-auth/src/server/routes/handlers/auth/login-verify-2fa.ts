@@ -34,7 +34,7 @@ async function loginVerify2faPost(request: Request, services: SecureAuthServices
     const result = await authLoginService.verifyTwoFactorLogin(
       challengeToken,
       { code: parsed.data.code, backupCode: parsed.data.backupCode },
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     const response = NextResponse.json(result);
     ctx.clearLoginChallengeCookie(response);

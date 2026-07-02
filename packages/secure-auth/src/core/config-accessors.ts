@@ -115,3 +115,14 @@ export function resolveAuthTraceEnabled(config: SecureAuthConfig): boolean {
 export function resolveRateLimitStore(config: SecureAuthConfig): "memory" | "postgres" {
   return config.rateLimit?.store ?? "memory";
 }
+
+export function assertProductionRateLimitConfig(config: SecureAuthConfig): void {
+  if (config.server?.environment !== "production") {
+    return;
+  }
+  if (resolveRateLimitStore(config) !== "postgres") {
+    throw new Error(
+      "@tgoliveira/secure-auth: rateLimit.store must be \"postgres\" when server.environment is \"production\"."
+    );
+  }
+}

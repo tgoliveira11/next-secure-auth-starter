@@ -25,7 +25,7 @@ async function magicLinkRequestPost(request: Request, services: SecureAuthServic
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    await services.magicLinkService.requestMagicLink(parsed.data.email, getClientIp(request));
+    await services.magicLinkService.requestMagicLink(parsed.data.email, getClientIp(request, services.config));
     return NextResponse.json({ message: MAGIC_LINK_REQUEST_MESSAGE });
   } catch (error) {
     return apiError(error, "POST /api/auth/magic-link/request");

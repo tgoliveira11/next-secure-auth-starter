@@ -1,4 +1,5 @@
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
+import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
 import { TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS } from "@/modules/two-factor/lib/constants";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
@@ -91,6 +92,7 @@ export function createMagicLinkService(deps: MagicLinkServiceDeps) {
       }
 
       assertCredentialsEmailVerifiedForSignIn(user, config);
+      assertUserMayAuthenticate(user);
       return { userId: user.id };
     },
 

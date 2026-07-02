@@ -112,6 +112,29 @@ Verification, reset, and login tokens must be:
 
 API responses must not leak whether an email address is registered (no account enumeration).
 
+Password reset tokens must not be validated via a separate oracle endpoint; consumers submit the token only when resetting the password.
+
+Magic-link emails link to a UI page (`/login/magic-link` by default) that POSTs the token to the API. The verify API does not accept GET requests with tokens in the query string.
+
+---
+
+## Account status and invites
+
+- `users.status` (`active`, `pending`, `suspended`) is enforced on every authentication path (credentials, OAuth, passkey, magic link).
+- When `invites.requireInviteCode` is enabled, registration must include a valid invite code; OAuth self-registration is blocked.
+- When `invites.requireApproval` is enabled, new accounts are created as `pending` and cannot sign in until approved.
+
+Admin APIs require a **fully authenticated** session (including completed 2FA when enabled). Mutating admin routes also require same-origin protection.
+
+Sensitive security settings (`passwordPolicy.checkBreachedPasswords`, `accountLockout.enabled`, invite gate flags, etc.) cannot be overridden via the admin panel at runtime.
+
+---
+
+## Rate limiting and client IP
+
+- In production (`server.environment: "production"`), `rateLimit.store` must be `"postgres"` or the app fails at startup.
+- `X-Forwarded-For` / `X-Real-IP` are honored only when `security.trustForwardedHeaders: true`.
+
 ---
 
 ## Session management

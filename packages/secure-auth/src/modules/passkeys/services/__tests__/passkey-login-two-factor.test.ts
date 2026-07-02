@@ -109,6 +109,7 @@ describe("passkey login service verifyLogin", () => {
       email: "user@example.com",
       emailVerifiedAt: new Date(),
       authProvider: "credentials",
+      status: "active",
     });
     mocks.createOpaqueToken.mockReturnValue("challenge-token-1234567890");
     mocks.hashOpaqueToken.mockReturnValue("hash");

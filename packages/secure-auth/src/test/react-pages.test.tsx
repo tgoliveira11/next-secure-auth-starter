@@ -11,6 +11,7 @@ import {
   VerifyEmailPage,
   ResetPasswordPage,
   LoginCompletePage,
+  MagicLinkVerifyPage,
   AccountSettingsPage,
   SecuritySettingsPage,
   SessionsSettingsPage,
@@ -48,6 +49,7 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
     expect(VerifyEmailPage).toBeTypeOf("function");
     expect(LoginTwoFactorPage).toBeTypeOf("function");
     expect(LoginCompletePage).toBeTypeOf("function");
+    expect(MagicLinkVerifyPage).toBeTypeOf("function");
     expect(AccountSettingsPage).toBeTypeOf("function");
     expect(SecuritySettingsPage).toBeTypeOf("function");
     expect(SessionsSettingsPage).toBeTypeOf("function");

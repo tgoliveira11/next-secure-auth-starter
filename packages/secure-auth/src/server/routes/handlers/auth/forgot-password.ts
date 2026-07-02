@@ -18,7 +18,7 @@ async function forgotPasswordPost(request: Request, services: SecureAuthServices
 
     const result = await services.accountAuthService.requestPasswordReset(
       parsed.data.email,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

@@ -128,7 +128,6 @@ describe("two-factor API routes", () => {
     );
     await expect(res.json()).resolves.toEqual({
       requiresTwoFactor: true,
-      challengeToken: "challenge-token-1234567890",
     });
     expect(res.cookies.get(services.ctx.getTwoFactorLoginChallengeCookieName())?.value).toBe(
       "challenge-token-1234567890"

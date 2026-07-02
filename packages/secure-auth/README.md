@@ -216,7 +216,7 @@ createSecureAuth({
 
 When enabled, the login page shows a **Sign in with email link** option. The user receives a single-use link valid for 15 minutes. If the account has 2FA enabled, magic link verification creates a pending 2FA challenge (same flow as credentials login). Rate limit: 3 requests per email per 10 minutes. Request responses are anti-enumeration safe.
 
-Wire routes: `magicLinkRequest.POST` → `/api/auth/magic-link/request`, `magicLinkVerify.POST` → `/api/auth/magic-link/verify`. Email links use `GET` on the verify route for browser redirects.
+Wire routes: `magicLinkRequest.POST` → `/api/auth/magic-link/request`, `magicLinkVerify.POST` → `/api/auth/magic-link/verify`. Email links point to `LoginMagicLinkPage` (`/login/magic-link` by default), which POSTs the token to the verify API.
 
 ## Generic password components
 

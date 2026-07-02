@@ -50,7 +50,7 @@ async function changePasswordPost(request: Request, services: SecureAuthServices
     const result = await services.accountAuthService.changePassword(
       session.id,
       parsed.data,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

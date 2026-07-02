@@ -41,12 +41,20 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
   const profileService = createProfileService({ config, userRepository: repos.userRepository });
 
   const authService = createAuthService({ ctx, repos, rateLimit });
+  const accountSessionService = createAccountSessionService({
+    config,
+    ctx,
+    repos,
+    rateLimit,
+    securityNotificationService,
+  });
   const twoFactorService = createTwoFactorService({
     ctx,
     repos,
     rateLimit,
     runInTransaction,
     securityNotificationService,
+    accountSessionService,
   });
   const authLoginService = createAuthLoginService({
     config,
@@ -65,13 +73,6 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     securityNotificationService,
   });
   const accountService = createAccountService({ repos, rateLimit, runInTransaction });
-  const accountSessionService = createAccountSessionService({
-    config,
-    ctx,
-    repos,
-    rateLimit,
-    securityNotificationService,
-  });
   const passkeyLoginService = createPasskeyLoginService({
     config,
     ctx,
@@ -112,6 +113,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
       twoFactorService,
       accountSessionService,
       profileService,
+      inviteService,
     });
 
   return {

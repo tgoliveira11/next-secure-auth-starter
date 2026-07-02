@@ -33,7 +33,7 @@ async function accountDelete(request: Request, services: SecureAuthServices) {
     assertPasswordNotInUrl(request.url);
 
     const session = await requireVerifiedMutatingAccountUser(request, services);
-    const ip = getClientIp(request);
+    const ip = getClientIp(request, services.config);
     const body = await parseJsonBody(request);
     const parsed = deleteSchema.safeParse(body);
     if (!parsed.success) {

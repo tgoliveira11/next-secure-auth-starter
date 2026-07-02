@@ -71,14 +71,16 @@ Optional nested config (defaults applied when omitted):
 | `accountPolicy.requireEmailVerificationForAccountApis` | `boolean` | `true` | Block sensitive account APIs when session email is unverified |
 | `security.sameOriginProtection.enabled` | `boolean` | `true` | Require allowed Origin/Referer on authenticated mutating API routes |
 | `security.sameOriginProtection.allowedOrigins` | `string[]` | `[]` | Extra allowed origins (plus `app.baseUrl` and WebAuthn origins) |
+| `security.trustForwardedHeaders` | `boolean` | `false` | When `true`, rate limiting uses `X-Forwarded-For` / `X-Real-IP` |
 | `debug.authTrace` | `boolean` | `false` | Enable in-memory auth trace logging |
 | `debug.exposeTraceRoute` | `boolean` | `false` | Allow `GET /api/auth/login/trace` (requires `authTrace`) |
 | `passwordPolicy.*` | see [Password policy](#password-policy) | package defaults |
 | `sessions.maxAgeSeconds` | `number` | `2592000` (30 days) |
 | `sessions.lastUsedUpdateIntervalSeconds` | `number` | `300` |
 | `sessions.singleActiveSession` | `boolean` | `false` |
-| `rateLimit.store` | `"memory"` \| `"postgres"` | `"memory"` |
+| `rateLimit.store` | `"memory"` \| `"postgres"` | `"memory"` | **Required `postgres` when `server.environment` is `production`** |
 | `server.cookieSecure` | `boolean` | `false` (apps: `true` when `NODE_ENV=production` if env unset) |
+| `server.environment` | `"development"` \| `"test"` \| `"production"` | omitted | When `production`, in-memory rate limiting fails at startup |
 | `debug.authTrace` | `boolean` | `false` |
 | `oauth.google` / `apple` / `github` / `microsoft` | provider objects | omitted when credentials missing |
 | `ui.brand.name` | `string` | from `app.name` |

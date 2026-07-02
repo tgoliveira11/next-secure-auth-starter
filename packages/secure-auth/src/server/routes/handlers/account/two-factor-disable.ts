@@ -14,7 +14,7 @@ async function twoFactorDisablePost(request: Request, services: SecureAuthServic
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const result = await services.twoFactorService.disable(user.id, parsed.data, getClientIp(request));
+    const result = await services.twoFactorService.disable(user.id, parsed.data, getClientIp(request, services.config));
     return NextResponse.json(result);
   } catch (error) {
     return apiError(error, "POST /api/account/2fa/disable");

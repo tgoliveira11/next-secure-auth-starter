@@ -17,6 +17,7 @@ export type AuthPaths = {
   verifyEmail?: string;
   loginTwoFactor?: string;
   loginComplete?: string;
+  magicLinkVerify?: string;
   afterLogin?: string;
   accountDeleted?: string;
   accountSettings?: string;
@@ -36,6 +37,7 @@ export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
   verifyEmail: "/verify-email",
   loginTwoFactor: "/login/2fa",
   loginComplete: "/login/complete",
+  magicLinkVerify: "/login/magic-link",
   afterLogin: "/dashboard",
   accountDeleted: "/account-deleted",
   accountSettings: "/settings/account",
@@ -128,6 +130,13 @@ export type LoginTwoFactorPageProps = SecureAuthPageProps & {
 export type LoginCompletePageProps = SecureAuthPageProps & {
   afterLoginPath?: string;
   errorMessage?: string;
+};
+
+export type MagicLinkVerifyPageProps = SecureAuthPageProps & {
+  afterLoginPath?: string;
+  errorMessage?: string;
+  /** Token from query string; when omitted the page reads `?token=` via useSearchParams. */
+  token?: string;
 };
 
 export type AccountSettingsPageProps = SecureAuthPageProps & {

@@ -20,7 +20,7 @@ const push = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(() => ({ push, replace: vi.fn(), back: vi.fn() })),
   usePathname: vi.fn(() => "/"),
-  useSearchParams: vi.fn(() => new URLSearchParams("token=test-token")),
+  useSearchParams: vi.fn(() => new URLSearchParams("token=test-reset-token-1234567890")),
 }));
 
 vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
@@ -29,7 +29,6 @@ vi.mock("@tgoliveira/secure-auth/client", async (importOriginal) => {
     ...actual,
     accountAuthApi: {
       ...actual.accountAuthApi,
-      validateResetToken: vi.fn().mockResolvedValue({ valid: true }),
       resetPassword: vi.fn(),
       changePassword: vi.fn(),
     },

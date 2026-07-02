@@ -17,7 +17,7 @@ async function twoFactorBackupCodesPost(request: Request, services: SecureAuthSe
     const result = await services.twoFactorService.regenerateBackupCodes(
       user.id,
       parsed.data,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

@@ -19,10 +19,14 @@ async function passkeyLoginVerifyPost(request: Request, services: SecureAuthServ
     const { ctx } = services;
     const result = await services.passkeyLoginService.verifyLogin(
       parsed.data.response as Parameters<SecureAuthServices["passkeyLoginService"]["verifyLogin"]>[0],
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
 
-    const response = NextResponse.json(result);
+    const response = NextResponse.json(
+      result.requiresTwoFactor
+        ? { requiresTwoFactor: true as const, userId: result.userId, credentialId: result.credentialId }
+        : result
+    );
     if (result.requiresTwoFactor) {
       response.cookies.set(
         ctx.getTwoFactorLoginChallengeCookieName(),

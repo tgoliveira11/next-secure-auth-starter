@@ -19,7 +19,10 @@ vi.mock("@/modules/security/policies/password-hashing", () => ({
 
 let services: SecureAuthServices;
 
-async function buildServices(configOverrides: Parameters<typeof getTestServices>[0] = {}) {
+async function buildServices(
+  configOverrides: Parameters<typeof getTestServices>[0] = {},
+  inviteServiceOverrides: Record<string, unknown> = {}
+) {
   return getTestServices(configOverrides, (base) => ({
     repos: {
       ...base.repos,
@@ -37,6 +40,10 @@ async function buildServices(configOverrides: Parameters<typeof getTestServices>
       ...base.accountAuthService,
       sendVerificationEmailForUser: mocks.sendVerificationEmailForUser,
     },
+    inviteService: {
+      ...base.inviteService,
+      ...inviteServiceOverrides,
+    },
   }));
 }
 
@@ -49,7 +56,7 @@ describe("register API route", () => {
 
   it("creates a new user with a bcrypt password hash", async () => {
     mocks.findByEmail.mockResolvedValue(null);
-    mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com" });
+    mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com", status: "active" });
     const res = await POST(
       new Request("http://localhost/api/auth/register", {
         method: "POST",
@@ -63,12 +70,14 @@ describe("register API route", () => {
       email: "new@example.com",
       requiresEmailVerification: true,
       requireEmailVerificationBeforeSignIn: false,
+      status: "active",
     });
     expect(hashPassword).toHaveBeenCalledWith("password123");
     expect(mocks.create).toHaveBeenCalledWith({
       email: "new@example.com",
       authProvider: "credentials",
       passwordHash: "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+      status: "active",
     });
   });
 
@@ -244,5 +253,71 @@ describe("register API route", () => {
       error: expect.stringMatching(/5 characters/i),
     });
     expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it("requires invite code when invites.requireInviteCode is enabled", async () => {
+    const validateCode = vi.fn();
+    const consumeCode = vi.fn();
+    services = await buildServices(
+      { invites: { requireInviteCode: true } },
+      {
+        requiresCode: () => true,
+        requiresApproval: () => false,
+        validateCode,
+        consumeCode,
+      }
+    );
+    mocks.findByEmail.mockResolvedValue(null);
+
+    const missingCode = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email: "new@example.com", password: "password123" }),
+      }),
+      services
+    );
+    expect(missingCode.status).toBe(400);
+
+    validateCode.mockResolvedValue({ id: "invite-1" });
+    mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com", status: "active" });
+    const ok = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          email: "new@example.com",
+          password: "password123",
+          inviteCode: "ABC12345",
+        }),
+      }),
+      services
+    );
+    expect(ok.status).toBe(201);
+    expect(validateCode).toHaveBeenCalledWith("ABC12345", "new@example.com");
+    expect(consumeCode).toHaveBeenCalledWith("invite-1", "user-1");
+  });
+
+  it("creates pending users when invites.requireApproval is enabled", async () => {
+    services = await buildServices(
+      { invites: { requireApproval: true } },
+      {
+        requiresCode: () => false,
+        requiresApproval: () => true,
+      }
+    );
+    mocks.findByEmail.mockResolvedValue(null);
+    mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com", status: "pending" });
+
+    const res = await POST(
+      new Request("http://localhost/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ email: "new@example.com", password: "password123" }),
+      }),
+      services
+    );
+
+    expect(res.status).toBe(201);
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "pending" })
+    );
   });
 });

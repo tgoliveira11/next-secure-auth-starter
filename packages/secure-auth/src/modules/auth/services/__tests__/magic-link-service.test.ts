@@ -88,7 +88,8 @@ describe("magic link service", () => {
     mocks.findById.mockResolvedValue({
       id: "user-1",
       email: "user@example.com",
-      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      status: "active",
     });
     mocks.isEnabledForUser.mockResolvedValue(false);
     mocks.issueLoginToken.mockResolvedValue("login-token");

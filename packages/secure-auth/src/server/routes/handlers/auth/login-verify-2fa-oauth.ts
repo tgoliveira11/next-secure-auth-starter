@@ -27,7 +27,7 @@ async function loginVerify2faOauthPost(request: Request, services: SecureAuthSer
     const result = await services.authLoginService.verifyOAuthTwoFactor(
       user.id,
       parsed.data,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

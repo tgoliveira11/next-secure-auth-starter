@@ -11,7 +11,7 @@ const bodySchema = z.object({
 
 async function verifyEmailResendPost(request: Request, services: SecureAuthServices) {
   try {
-    const ip = getClientIp(request);
+    const ip = getClientIp(request, services.config);
     const body = await parseJsonBody(request);
     const parsed = bodySchema.safeParse(body);
 
