@@ -135,17 +135,62 @@ describe("two-factor API routes", () => {
   });
 
   it("challenge status reflects pending cookie state", async () => {
+    const peekLoginChallenge = vi.fn().mockResolvedValue({ userId: USER_ID });
+    const findById = vi.fn().mockResolvedValue({ email: "user@example.com" });
+    services = await getTestServices({}, (base) => ({
+      authLoginService: {
+        ...base.authLoginService,
+        startCredentialsLogin: mocks.startCredentialsLogin,
+        verifyTwoFactorLogin: mocks.verifyTwoFactorLogin,
+      },
+      twoFactorService: {
+        ...base.twoFactorService,
+        getStatus: mocks.getStatus,
+        startSetup: mocks.startSetup,
+        verifySetup: mocks.verifySetup,
+        disable: mocks.disable,
+      },
+      repos: {
+        ...base.repos,
+        twoFactorRepository: {
+          ...base.repos.twoFactorRepository,
+          peekLoginChallenge,
+        },
+        userRepository: {
+          ...base.repos.userRepository,
+          findById,
+        },
+      },
+    }));
+
     mocks.cookiesGet.mockImplementation((name: string) =>
       name === services.ctx.getTwoFactorLoginChallengeCookieName()
         ? { value: "challenge-token-1234567890" }
         : undefined
     );
     const pending = await challengeStatusGet(services);
-    await expect(pending.json()).resolves.toEqual({ pending: true });
+    await expect(pending.json()).resolves.toEqual({
+      pending: true,
+      email: "user@example.com",
+    });
 
     mocks.cookiesGet.mockReturnValue(undefined);
     const missing = await challengeStatusGet(services);
     await expect(missing.json()).resolves.toEqual({ pending: false });
+
+    mocks.cookiesGet.mockImplementation((name: string) =>
+      name === services.ctx.getTwoFactorLoginChallengeCookieName()
+        ? { value: "challenge-token-1234567890" }
+        : undefined
+    );
+    peekLoginChallenge.mockResolvedValueOnce(null);
+    const expired = await challengeStatusGet(services);
+    await expect(expired.json()).resolves.toEqual({ pending: false });
+
+    peekLoginChallenge.mockResolvedValueOnce({ userId: USER_ID });
+    findById.mockResolvedValueOnce(null);
+    const pendingWithoutEmail = await challengeStatusGet(services);
+    await expect(pendingWithoutEmail.json()).resolves.toEqual({ pending: true });
   });
 
   it("login start rejects invalid payloads and invalid credentials", async () => {

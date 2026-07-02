@@ -23,6 +23,11 @@ import {
   getLoginChallengeCookieOptions,
   getTwoFactorLoginChallengeCookieName,
 } from "../modules/two-factor/lib/login-challenge-cookie.js";
+import {
+  clearTwoFactorOAuthUpgradeCookie,
+  getTwoFactorOAuthUpgradeCookieName,
+  getTwoFactorOAuthUpgradeCookieOptions,
+} from "../modules/two-factor/lib/oauth-upgrade-cookie.js";
 import { getTwoFactorIssuer } from "../modules/two-factor/lib/constants.js";
 import {
   getSessionLastUsedUpdateIntervalMs,
@@ -74,6 +79,11 @@ export type SecureAuthContext = {
   getTwoFactorLoginChallengeCookieName: () => string;
   getLoginChallengeCookieOptions: () => ReturnType<typeof getLoginChallengeCookieOptions>;
   clearLoginChallengeCookie: (response: Parameters<typeof clearLoginChallengeCookie>[1]) => void;
+  getTwoFactorOAuthUpgradeCookieName: () => string;
+  getTwoFactorOAuthUpgradeCookieOptions: () => ReturnType<typeof getTwoFactorOAuthUpgradeCookieOptions>;
+  clearTwoFactorOAuthUpgradeCookie: (
+    response: Parameters<typeof clearTwoFactorOAuthUpgradeCookie>[1]
+  ) => void;
   getTwoFactorIssuer: () => string;
   getSessionMaxAgeMs: () => number;
   getSessionLastUsedUpdateIntervalMs: () => number;
@@ -122,6 +132,10 @@ export function createSecureAuthContext({ config }: { config: SecureAuthConfig }
     getTwoFactorLoginChallengeCookieName: () => getTwoFactorLoginChallengeCookieName(config),
     getLoginChallengeCookieOptions: () => getLoginChallengeCookieOptions(config),
     clearLoginChallengeCookie: (response) => clearLoginChallengeCookie(config, response),
+    getTwoFactorOAuthUpgradeCookieName: () => getTwoFactorOAuthUpgradeCookieName(config),
+    getTwoFactorOAuthUpgradeCookieOptions: () => getTwoFactorOAuthUpgradeCookieOptions(config),
+    clearTwoFactorOAuthUpgradeCookie: (response) =>
+      clearTwoFactorOAuthUpgradeCookie(config, response),
     getTwoFactorIssuer: () => getTwoFactorIssuer(config),
     getSessionMaxAgeMs: () => getSessionMaxAgeMs(config),
     getSessionLastUsedUpdateIntervalMs: () => getSessionLastUsedUpdateIntervalMs(config),

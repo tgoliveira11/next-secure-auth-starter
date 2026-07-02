@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Password manager 2FA auto-submit** — Two-factor login forms now expose a visually hidden `username` association field, explicit OTP attributes (`one-time-code`, `maxLength`, `pattern`, `autoFocus`), and OAuth 2FA uses the same native HTML POST + middleware rewrite flow as credentials login (via `/login/2fa/complete`).
+
 ### Security
 
 - **Security audit hardening** — Admin APIs require fully authenticated sessions (2FA complete); `users.status` enforced on all login paths; invite/approval flags wired into registration and OAuth signup; sessions revoked when 2FA is enabled; production requires `rateLimit.store: "postgres"`; forwarded IP headers trusted only when `security.trustForwardedHeaders` is set; password-reset token validation oracle removed; same-origin protection on admin mutating routes; magic-link verification moved to UI page + POST API (no GET token handler); sensitive admin config overrides restricted.

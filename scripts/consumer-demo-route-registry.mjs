@@ -17,6 +17,7 @@ export const ROUTE_REGISTRY = [
   { key: "loginVerify2fa", path: "auth/login/verify-2fa", methods: ["POST"] },
   { key: "loginVerify2faForm", path: "auth/login/verify-2fa-form", methods: ["POST"] },
   { key: "loginVerify2faOauth", path: "auth/login/verify-2fa-oauth", methods: ["POST"] },
+  { key: "loginOauth2faComplete", path: "auth/login/oauth-2fa-complete", methods: ["POST"] },
   { key: "loginChallengeStatus", path: "auth/login/challenge-status", methods: ["GET"] },
   { key: "loginTrace", path: "auth/login/trace", methods: ["GET"] },
   { key: "register", path: "auth/register", methods: ["POST"] },

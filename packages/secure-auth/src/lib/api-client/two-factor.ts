@@ -36,7 +36,8 @@ export const authLoginApi = {
       | { requiresTwoFactor: false; loginToken: string }
       | { requiresTwoFactor: true; challengeToken: string }
     >("/api/auth/login/start", payload),
-  challengeStatus: () => apiClient.get<{ pending: boolean }>("/api/auth/login/challenge-status"),
+  challengeStatus: () =>
+    apiClient.get<{ pending: boolean; email?: string }>("/api/auth/login/challenge-status"),
   verifyTwoFactor: (payload: { code?: string; backupCode?: string }) =>
     apiClient.post<{ loginToken: string }>("/api/auth/login/verify-2fa", payload),
   verifyOAuthTwoFactor: (payload: { code?: string; backupCode?: string }) =>

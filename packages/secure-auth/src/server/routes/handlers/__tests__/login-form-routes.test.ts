@@ -153,4 +153,18 @@ describe("credentials login form routes", () => {
     const response = await completePost(services);
     expect(response.status).toBe(401);
   });
+
+  it("oauth-2fa-complete returns the pending upgrade token once", async () => {
+    const { loginOauth2faCompletePost } = await import("@/test/helpers/handlers");
+    mocks.cookiesGet.mockImplementation((name: string) =>
+      name === services.ctx.getTwoFactorOAuthUpgradeCookieName()
+        ? { value: "upgrade-token-1234567890" }
+        : undefined
+    );
+
+    const response = await loginOauth2faCompletePost(services);
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ upgradeToken: "upgrade-token-1234567890" });
+    expect(response.cookies.get(services.ctx.getTwoFactorOAuthUpgradeCookieName())?.value).toBe("");
+  });
 });
