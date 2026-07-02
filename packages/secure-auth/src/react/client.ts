@@ -3,6 +3,7 @@
 export { ConfirmDialog } from "../modules/ui/primitives/confirm-dialog";
 export { usePasswordManagerFormSubmit } from "../lib/forms/use-password-manager-form";
 export { defaultSignOutAccount } from "../lib/sign-out-account";
+export { signOutWithRedirect } from "../lib/sign-out-with-redirect";
 export {
   signInWithPasskey,
   isPasskeyLoginSupported,

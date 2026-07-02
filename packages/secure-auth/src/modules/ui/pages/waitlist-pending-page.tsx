@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOutWithRedirect } from "../../../lib/sign-out-with-redirect.js";
 import { PageShell } from "../layouts/page-shell.js";
 import { Button } from "../primitives/button.js";
 import { Card } from "../primitives/card.js";
@@ -29,7 +29,7 @@ export function WaitlistPendingPage({ brand }: WaitlistPendingPageProps) {
         <Button
           variant="secondary"
           className="w-full"
-          onClick={() => signOut({ callbackUrl: resolved.login })}
+          onClick={() => signOutWithRedirect(resolved.afterLogout)}
         >
           Sign out
         </Button>

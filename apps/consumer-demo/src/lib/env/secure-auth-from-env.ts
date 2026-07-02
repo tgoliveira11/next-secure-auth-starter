@@ -103,7 +103,7 @@ export function buildSecureAuthConfigFromEnv(
     },
     auth: {
       afterLoginPath,
-      afterLogoutPath: readEnv(env, "AUTH_AFTER_LOGOUT_PATH") ?? defaults.afterLogoutPath ?? "/login",
+      afterLogoutPath: readEnv(env, "AUTH_AFTER_LOGOUT_PATH") ?? defaults.afterLogoutPath ?? "/",
       requireEmailVerificationBeforeSignIn: requireEmailVerification,
       nextAuthSecret: readEnv(env, "NEXTAUTH_SECRET") ?? "",
       twoFactorEncryptionKey: readEnv(env, "TWO_FACTOR_SECRET_ENCRYPTION_KEY") ?? "",

@@ -233,7 +233,7 @@ This document reflects **observed implementation**, not desired product behavior
 | Config | Location | Purpose |
 | --- | --- | --- |
 | `auth.afterLoginPath` | `createSecureAuth(config)` | Destination after **successful** login (also `paths.afterLogin` in UI config) |
-| `auth.afterLogoutPath` | `createSecureAuth(config)` | Consumer sign-out targets (not auto-enforced on pages) |
+| `auth.afterLogoutPath` | `createSecureAuth(config)` | Post sign-out redirect (`paths.afterLogout`); used by package sign-out UI |
 | `ui.paths.*` | `createSecureAuth(config).uiConfig` | Route path overrides |
 | Per-page `afterLoginPath` prop | `LoginPage`, `RegisterPage`, etc. | Override post-login destination |
 

@@ -106,6 +106,7 @@ function mapConfigPathsToAuthPaths(config: SecureAuthConfig): AuthPaths {
     loginComplete: uiPaths?.loginComplete,
     magicLinkVerify: uiPaths?.magicLinkVerify,
     afterLogin: config.auth.afterLoginPath,
+    afterLogout: config.auth.afterLogoutPath,
     accountDeleted: uiPaths?.accountDeleted,
     accountSettings: uiPaths?.account ?? uiPaths?.accountSettings,
     securitySettings: uiPaths?.security ?? uiPaths?.securitySettings,

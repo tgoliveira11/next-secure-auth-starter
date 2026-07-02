@@ -11,13 +11,12 @@
  * To adapt for your app:
  *  - Replace the logo/wordmark with your own brand
  *  - Add or remove nav items as needed
- *  - Change the sign-out destination via callbackUrl
+ *  - Change the sign-out destination via `AUTH_AFTER_LOGOUT_PATH` or `auth.afterLogoutPath`
  */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import { Button, useUiPaths } from "@tgoliveira/secure-auth/react";
+import { Button, useUiPaths, signOutWithRedirect } from "@tgoliveira/secure-auth/react";
 
 const NAV_ITEMS = [
   { key: "afterLogin" as const, label: "Dashboard" },
@@ -71,7 +70,7 @@ export function AppNav() {
         {/* Sign out */}
         <Button
           variant="secondary"
-          onClick={() => signOut({ callbackUrl: resolved.login })}
+          onClick={() => signOutWithRedirect(resolved.afterLogout)}
           className="shrink-0 text-sm"
         >
           Sign out

@@ -4,9 +4,9 @@ import { getSession, signOut, useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef } from "react";
 import { useSecureAuthUi } from "./secure-auth-ui-provider.js";
 
-async function terminateRevokedSession(loginPath: string): Promise<void> {
+async function terminateRevokedSession(afterLogoutPath: string): Promise<void> {
   await signOut({ redirect: false });
-  window.location.replace(loginPath);
+  window.location.replace(afterLogoutPath);
 }
 
 /**
@@ -17,7 +17,7 @@ export function SingleActiveSessionMonitor() {
   const ui = useSecureAuthUi();
   const { status } = useSession();
   const signingOut = useRef(false);
-  const loginPath = ui?.paths.login ?? "/login";
+  const afterLogoutPath = ui?.paths.afterLogout ?? "/";
   const intervalSeconds = ui?.sessionPolicy.revocationPollIntervalSeconds ?? 0;
 
   const verifySessionStillValid = useCallback(async () => {
@@ -26,9 +26,9 @@ export function SingleActiveSessionMonitor() {
     const session = await getSession();
     if (!session?.user) {
       signingOut.current = true;
-      await terminateRevokedSession(loginPath);
+      await terminateRevokedSession(afterLogoutPath);
     }
-  }, [loginPath]);
+  }, [afterLogoutPath]);
 
   useEffect(() => {
     if (!ui?.sessionPolicy.singleActiveSession || intervalSeconds <= 0) {
