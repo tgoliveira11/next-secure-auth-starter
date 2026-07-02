@@ -26,7 +26,7 @@ export const ROUTE_REGISTRY = [
   { key: "verifyEmailConfirm", path: "auth/verify-email/confirm", methods: ["POST"] },
   { key: "verifyEmailResend", path: "auth/verify-email/resend", methods: ["POST"] },
   { key: "magicLinkRequest", path: "auth/magic-link/request", methods: ["POST"] },
-  { key: "magicLinkVerify", path: "auth/magic-link/verify", methods: ["GET", "POST"] },
+  { key: "magicLinkVerify", path: "auth/magic-link/verify", methods: ["POST"] },
   { key: "passkeyLoginOptions", path: "auth/passkey/login/options", methods: ["POST"] },
   { key: "passkeyLoginVerify", path: "auth/passkey/login/verify", methods: ["POST"] },
   { key: "nextAuth", path: "auth/[...nextauth]", methods: ["GET", "POST"] },
