@@ -32,7 +32,6 @@ export function TwoFactorOtpFields({ usernameEmail }: TwoFactorOtpFieldsProps) {
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          autoFocus
           maxLength={6}
           pattern="[0-9]{6}"
           required

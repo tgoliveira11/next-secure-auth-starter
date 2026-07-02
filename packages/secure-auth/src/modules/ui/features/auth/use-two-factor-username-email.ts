@@ -4,27 +4,52 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { authLoginApi } from "../../../../lib/api-client/two-factor.js";
 
-export function useTwoFactorUsernameEmail(mode: "credentials" | "oauth"): string | undefined {
+export type TwoFactorUsernameEmailState = {
+  email?: string;
+  isReady: boolean;
+};
+
+export function useTwoFactorUsernameEmail(
+  mode: "credentials" | "oauth",
+  initialUsernameEmail?: string
+): TwoFactorUsernameEmailState {
   const { data: session, status } = useSession();
-  const [email, setEmail] = useState<string | undefined>();
+  const [credentialsEmail, setCredentialsEmail] = useState<string | undefined>(initialUsernameEmail);
+  const [credentialsReady, setCredentialsReady] = useState(initialUsernameEmail !== undefined);
 
   useEffect(() => {
     if (mode === "oauth") {
-      setEmail(session?.user?.email ?? undefined);
+      return;
+    }
+
+    if (initialUsernameEmail !== undefined) {
+      setCredentialsEmail(initialUsernameEmail);
+      setCredentialsReady(true);
       return;
     }
 
     let cancelled = false;
     void authLoginApi.challengeStatus().then((result) => {
-      if (!cancelled && result.pending && result.email) {
-        setEmail(result.email);
-      }
+      if (cancelled) return;
+      setCredentialsEmail(result.pending ? result.email : undefined);
+      setCredentialsReady(true);
     });
 
     return () => {
       cancelled = true;
     };
-  }, [mode, session?.user?.email, status]);
+  }, [initialUsernameEmail, mode]);
 
-  return email;
+  if (mode === "oauth") {
+    const email = initialUsernameEmail ?? session?.user?.email ?? undefined;
+    return {
+      email,
+      isReady: initialUsernameEmail !== undefined || status !== "loading",
+    };
+  }
+
+  return {
+    email: credentialsEmail,
+    isReady: credentialsReady,
+  };
 }

@@ -121,6 +121,7 @@ function buildTwoFactorAllowedPrefixes(paths: Required<AuthPaths>): string[] {
   return [
     paths.login,
     paths.loginTwoFactor,
+    paths.loginTwoFactorOauthComplete,
     paths.loginComplete,
     ...TWO_FACTOR_ALLOWED_SUFFIXES,
   ];

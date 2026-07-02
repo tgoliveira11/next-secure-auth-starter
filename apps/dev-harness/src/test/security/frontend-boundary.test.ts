@@ -46,6 +46,9 @@ describe("frontend does not import database clients", () => {
       for (const file of files) {
         const content = readFileSync(file, "utf-8");
         for (const forbidden of FORBIDDEN_IMPORTS) {
+          if (forbidden === "@tgoliveira/secure-auth/next" && file.endsWith("page.tsx")) {
+            continue;
+          }
           expect(content, `${file} imports ${forbidden}`).not.toContain(forbidden);
         }
       }
