@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOutWithRedirect } from "../../../lib/sign-out-with-redirect.js";
 import { Button } from "../primitives/button.js";
 import { useUiPaths } from "../pages/use-page-ui.js";
 import type { AuthPaths } from "../pages/types.js";
@@ -42,7 +42,7 @@ export function AuthNav({ paths, activePath }: AuthNavProps) {
           );
         })}
       </div>
-      <Button variant="secondary" onClick={() => signOut({ callbackUrl: resolved.login })}>
+      <Button variant="secondary" onClick={() => signOutWithRedirect(resolved.afterLogout)}>
         Sign out
       </Button>
     </nav>

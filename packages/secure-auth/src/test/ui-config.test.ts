@@ -20,6 +20,7 @@ describe("buildPublicUIConfig", () => {
     expect(ui.paths.login).toBe("/sign-in");
     expect(ui.paths.register).toBe("/join");
     expect(ui.paths.afterLogin).toBe("/dashboard");
+    expect(ui.paths.afterLogout).toBe("/");
     expect(ui.messages.loginTitle).toBe("Sign in now");
     expect(ui.cssVariables).toEqual({ "--primary": "#336699" });
     expect(ui.passwordPolicy.enforcement).toBe("warn");
@@ -92,13 +93,26 @@ describe("buildPublicUIConfig", () => {
     expect(JSON.stringify(ui)).not.toContain("secret-key");
   });
 
+  it("maps custom afterLogoutPath from createSecureAuth auth config", () => {
+    const ui = buildPublicUIConfig(
+      buildTestSecureAuthConfig({
+        auth: {
+          ...buildTestSecureAuthConfig().auth,
+          afterLogoutPath: "/goodbye",
+        },
+      })
+    );
+
+    expect(ui.paths.afterLogout).toBe("/goodbye");
+  });
+
   it("does not expose server-only config such as secrets or email provider", () => {
     const config = buildTestSecureAuthConfig({
       auth: {
         nextAuthSecret: "super-secret",
         twoFactorEncryptionKey: "encryption-key",
         afterLoginPath: "/dashboard",
-        afterLogoutPath: "/login",
+        afterLogoutPath: "/",
         requireEmailVerificationBeforeSignIn: false,
       },
       oauth: {

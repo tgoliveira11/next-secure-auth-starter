@@ -16,12 +16,12 @@ type ConfirmAction =
 
 export type ActiveSessionsSettingsProps = {
   onSignOut: () => Promise<void>;
-  loginPath?: string;
+  afterLogoutPath?: string;
 };
 
 export function ActiveSessionsSettings({
   onSignOut,
-  loginPath = "/login",
+  afterLogoutPath = "/",
 }: ActiveSessionsSettingsProps) {
   const router = useRouter();
   const [sessions, setSessions] = useState<AccountSessionView[]>([]);
@@ -58,7 +58,7 @@ export function ActiveSessionsSettings({
         const result = await accountSessionsApi.revoke(confirm.sessionId);
         if (result.signOut) {
           await onSignOut();
-          router.push(loginPath);
+          router.push(afterLogoutPath);
           return;
         }
         setSuccess("Session revoked.");
@@ -68,7 +68,7 @@ export function ActiveSessionsSettings({
       } else {
         await accountSessionsApi.revokeAll();
         await onSignOut();
-        router.push(loginPath);
+        router.push(afterLogoutPath);
         return;
       }
       await loadSessions();

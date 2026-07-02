@@ -20,6 +20,8 @@ export type AuthPaths = {
   loginComplete?: string;
   magicLinkVerify?: string;
   afterLogin?: string;
+  /** Post sign-out redirect (from `auth.afterLogoutPath`). Default: `/`. */
+  afterLogout?: string;
   accountDeleted?: string;
   accountSettings?: string;
   securitySettings?: string;
@@ -41,6 +43,7 @@ export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
   loginComplete: "/login/complete",
   magicLinkVerify: "/login/magic-link",
   afterLogin: "/dashboard",
+  afterLogout: "/",
   accountDeleted: "/account-deleted",
   accountSettings: "/settings/account",
   securitySettings: "/settings/security",

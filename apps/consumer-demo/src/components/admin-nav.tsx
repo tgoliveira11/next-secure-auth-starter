@@ -6,8 +6,7 @@
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import { Button, useUiPaths } from "@tgoliveira/secure-auth/react";
+import { Button, useUiPaths, signOutWithRedirect } from "@tgoliveira/secure-auth/react";
 
 const ADMIN_NAV_ITEMS = [
   { suffix: "", label: "Overview" },
@@ -57,7 +56,7 @@ export function AdminNav() {
           <Link href={resolved.afterLogin} className="text-xs text-[var(--muted)] hover:text-[var(--foreground)]">
             ← App
           </Link>
-          <Button variant="secondary" className="text-xs" onClick={() => signOut({ callbackUrl: resolved.login })}>
+          <Button variant="secondary" className="text-xs" onClick={() => signOutWithRedirect(resolved.afterLogout)}>
             Sign out
           </Button>
         </div>

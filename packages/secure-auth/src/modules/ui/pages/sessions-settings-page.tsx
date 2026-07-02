@@ -68,7 +68,7 @@ export function SessionsSettingsPage({
             Revoke sessions you do not recognize to sign those browsers out immediately.
           </CardDescription>
         </CardHeader>
-        <ActiveSessionsSettings onSignOut={onSignOut} loginPath={resolved.login} />
+        <ActiveSessionsSettings onSignOut={onSignOut} afterLogoutPath={resolved.afterLogout} />
       </Card>
     </PageShell>
   );

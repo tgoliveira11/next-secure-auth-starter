@@ -127,7 +127,7 @@ Not passed to `createSecureAuth`; the app constructs the Drizzle client and pass
 | `AUTH_AFTER_LOGIN_PATH` | string | `/dashboard` | optional | `auth.afterLoginPath` | Post-login redirect |
 | `AUTH_REDIRECT_AUTHENTICATED_FROM_GUEST_PAGES` | boolean | `true` | optional | `auth.redirectAuthenticatedFromGuestPages` | Guest-page redirect for signed-in users |
 | `AUTH_AUTHENTICATED_REDIRECT_PATH` | string | `AUTH_AFTER_LOGIN_PATH` | optional | `auth.authenticatedRedirectPath` | Landing path for guest-page redirect |
-| `AUTH_AFTER_LOGOUT_PATH` | string | `/login` | optional | `auth.afterLogoutPath` | Post-logout redirect |
+| `AUTH_AFTER_LOGOUT_PATH` | string | `/` | optional | `auth.afterLogoutPath` | Post-logout redirect (`paths.afterLogout` in UI config) |
 | `TWO_FACTOR_SECRET_ENCRYPTION_KEY` | string | `""` | **yes** in production | `auth.twoFactorEncryptionKey` | 32-byte base64 key for TOTP at rest |
 | `AUTH_MAGIC_LINK_ENABLED` | boolean | `false` | optional | `auth.magicLink.enabled` | Passwordless email magic link login (opt-in) |
 | `AUTH_SECURITY_NOTIFICATIONS_ENABLED` | boolean | `false` | optional | `auth.securityNotifications.enabled` | Email alerts on security events (opt-in) |

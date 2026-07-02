@@ -11,7 +11,7 @@ const baseTestConfig = {
   },
   auth: {
     afterLoginPath: "/dashboard",
-    afterLogoutPath: "/login",
+    afterLogoutPath: "/",
     requireEmailVerificationBeforeSignIn: false,
     nextAuthSecret: "test-secret-for-vitest-only",
     twoFactorEncryptionKey: "test-two-factor-secret-encryption-key",

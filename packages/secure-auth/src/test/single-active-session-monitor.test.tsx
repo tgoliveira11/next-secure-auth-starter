@@ -63,7 +63,7 @@ describe("SingleActiveSessionMonitor", () => {
     await waitFor(() => {
       expect(getSession).toHaveBeenCalled();
       expect(signOut).toHaveBeenCalledWith({ redirect: false });
-      expect(window.location.replace).toHaveBeenCalledWith("/login");
+      expect(window.location.replace).toHaveBeenCalledWith("/");
     });
   });
 
