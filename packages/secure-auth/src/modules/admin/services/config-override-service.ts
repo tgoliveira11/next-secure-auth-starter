@@ -2,22 +2,26 @@ import type { SecureAuthConfig } from "@/core/types";
 import type { ConfigOverrideRepository, AdminConfigOverride } from "../repositories/config-override-repository";
 
 const OVERRIDABLE_KEYS = new Set([
-  "auth.magicLink.enabled",
-  "auth.securityNotifications.enabled",
-  "accountLockout.enabled",
   "invites.enabled",
-  "invites.requireApproval",
-  "invites.requireInviteCode",
   "invites.defaultQuotaPerUser",
   "invites.codeExpiryDays",
-  "passwordPolicy.enforcement",
   "passwordPolicy.minLength",
-  "passwordPolicy.checkBreachedPasswords",
   "sessions.maxAgeSeconds",
-  "sessions.singleActiveSession",
   "profile.enabled",
   "apiKeys.enabled",
 ]);
+
+/** Keys that must not be weakened via the admin panel at runtime (env/deployment only). */
+export const RESTRICTED_CONFIG_OVERRIDE_KEYS = [
+  "auth.magicLink.enabled",
+  "auth.securityNotifications.enabled",
+  "accountLockout.enabled",
+  "invites.requireApproval",
+  "invites.requireInviteCode",
+  "passwordPolicy.enforcement",
+  "passwordPolicy.checkBreachedPasswords",
+  "sessions.singleActiveSession",
+] as const;
 
 function setNestedPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const parts = path.split(".");

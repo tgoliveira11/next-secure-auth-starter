@@ -18,5 +18,6 @@ export function buildMagicLinkEmail(config: SecureAuthConfig, magicLinkUrl: stri
 
 export function buildMagicLinkUrl(config: SecureAuthConfig, rawToken: string): string {
   const base = config.app.baseUrl.replace(/\/$/, "");
-  return `${base}/api/auth/magic-link/verify?token=${encodeURIComponent(rawToken)}`;
+  const path = config.ui?.paths?.magicLinkVerify ?? "/login/magic-link";
+  return `${base}${path}?token=${encodeURIComponent(rawToken)}`;
 }

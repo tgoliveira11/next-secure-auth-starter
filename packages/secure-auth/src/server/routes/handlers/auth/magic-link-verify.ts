@@ -49,7 +49,7 @@ async function verifyAndSignIn(rawToken: string, request: Request, services: Sec
     return { ok: false as const };
   }
 
-  const ip = getClientIp(request);
+  const ip = getClientIp(request, services.config);
   const userAgent = request.headers.get("user-agent") ?? undefined;
   const loginResult = await services.magicLinkService.completeMagicLinkSignIn(
     verified.userId,
@@ -93,56 +93,6 @@ async function magicLinkVerifyPost(request: Request, services: SecureAuthService
   }
 }
 
-async function magicLinkVerifyGet(request: Request, services: SecureAuthServices) {
-  if (!isMagicLinkEnabled(services)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  try {
-    const token = new URL(request.url).searchParams.get("token")?.trim();
-    if (!token || token.length < 16) {
-      return NextResponse.json({ error: MAGIC_LINK_INVALID_MESSAGE }, { status: 400 });
-    }
-
-    const result = await verifyAndSignIn(token, request, services);
-    if (!result.ok) {
-      return NextResponse.json({ error: MAGIC_LINK_INVALID_MESSAGE }, { status: 400 });
-    }
-
-    const loginCompletePath = services.config.ui?.paths?.loginComplete ?? "/login/complete";
-    const loginTwoFactorPath = services.config.ui?.paths?.loginTwoFactor ?? "/login/2fa";
-
-    if (result.loginResult.requiresTwoFactor) {
-      const response = NextResponse.redirect(
-        new URL(`${loginTwoFactorPath}?mode=magic_link`, request.url),
-        303
-      );
-      response.cookies.set(
-        services.ctx.getTwoFactorLoginChallengeCookieName(),
-        result.loginResult.challengeToken,
-        services.ctx.getLoginChallengeCookieOptions()
-      );
-      services.ctx.clearLoginPendingTokenCookie(response);
-      return response;
-    }
-
-    const response = NextResponse.redirect(new URL(loginCompletePath, request.url), 303);
-    response.cookies.set(
-      services.ctx.getLoginPendingTokenCookieName(),
-      result.loginResult.loginToken,
-      services.ctx.getLoginPendingTokenCookieOptions()
-    );
-    services.ctx.clearLoginChallengeCookie(response);
-    return response;
-  } catch (error) {
-    return apiError(error, "GET /api/auth/magic-link/verify");
-  }
-}
-
 export function createPostHandler(services: SecureAuthServices) {
   return (request: Request) => magicLinkVerifyPost(request, services);
-}
-
-export function createGetHandler(services: SecureAuthServices) {
-  return (request: Request) => magicLinkVerifyGet(request, services);
 }

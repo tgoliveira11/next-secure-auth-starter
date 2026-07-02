@@ -11,6 +11,7 @@ import {
   resolveCookieSecure,
   resolvePasswordPolicyConfig,
   resolveRateLimitStore,
+  assertProductionRateLimitConfig,
   resolveRevocationPollIntervalSeconds,
   resolveSameOriginProtectionConfig,
   resolveSessionLastUsedUpdateIntervalMs,
@@ -133,5 +134,22 @@ describe("config accessors", () => {
     });
     expect(resolveCookieSecure(custom)).toBe(true);
     expect(resolveRateLimitStore(custom)).toBe("postgres");
+  });
+
+  it("rejects in-memory rate limiting in production", () => {
+    expect(() =>
+      assertProductionRateLimitConfig(
+        buildTestSecureAuthConfig({ server: { environment: "production" } })
+      )
+    ).toThrow(/postgres/);
+
+    expect(() =>
+      assertProductionRateLimitConfig(
+        buildTestSecureAuthConfig({
+          server: { environment: "production" },
+          rateLimit: { store: "postgres" },
+        })
+      )
+    ).not.toThrow();
   });
 });

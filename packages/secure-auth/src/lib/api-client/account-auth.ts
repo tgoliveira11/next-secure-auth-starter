@@ -18,14 +18,8 @@ export const accountAuthApi = {
     }),
   forgotPassword: (email: string) =>
     apiClient.post<{ message: string }>("/api/auth/forgot-password", { email }),
-  validateResetToken: (token: string) =>
-    apiClient.post<{ valid: boolean }>("/api/auth/reset-password", {
-      action: "validate",
-      token,
-    }),
   resetPassword: (token: string, newPassword: string) =>
     apiClient.post<{ success: boolean }>("/api/auth/reset-password", {
-      action: "reset",
       token,
       newPassword,
     }),

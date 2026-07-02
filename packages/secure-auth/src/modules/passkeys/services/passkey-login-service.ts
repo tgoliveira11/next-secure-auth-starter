@@ -4,6 +4,7 @@ import {
 } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
+import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
 import { ValidationError } from "@/modules/account/lib/account-errors";
 import { TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS } from "@/modules/two-factor/lib/constants";
@@ -221,6 +222,7 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
         throw new NotFoundError("This passkey is not registered for sign-in.");
       }
       assertCredentialsEmailVerifiedForSignIn(user, config);
+      assertUserMayAuthenticate(user);
 
       await repos.auditRepository.record("passkey_login_success", credential.userId);
 

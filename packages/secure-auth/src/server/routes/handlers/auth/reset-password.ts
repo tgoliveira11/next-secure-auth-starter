@@ -9,18 +9,10 @@ import {
 import { getClientIp } from "@/modules/security/ip/request-ip";
 import type { SecureAuthServices } from "@/core/types";
 
-const validateSchema = z.object({
-  action: z.literal("validate"),
-  token: z.string().min(1),
-});
-
 const resetSchema = z.object({
-  action: z.literal("reset"),
   token: z.string().min(1),
   newPassword: z.string().min(8).max(128),
 });
-
-const bodySchema = z.discriminatedUnion("action", [validateSchema, resetSchema]);
 
 async function resetPasswordPost(request: Request, services: SecureAuthServices) {
   try {
@@ -28,20 +20,15 @@ async function resetPasswordPost(request: Request, services: SecureAuthServices)
     assertPasswordNotInUrl(request.url);
 
     const body = await parseJsonBody(request);
-    const parsed = bodySchema.safeParse(body);
+    const parsed = resetSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    if (parsed.data.action === "validate") {
-      const result = await services.accountAuthService.validatePasswordResetToken(parsed.data.token);
-      return NextResponse.json(result);
     }
 
     const result = await services.accountAuthService.resetPassword(
       parsed.data.token,
       parsed.data.newPassword,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

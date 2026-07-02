@@ -25,7 +25,7 @@ async function passkeyLoginOptionsPost(request: Request, services: SecureAuthSer
       email: parsed.data.email,
       userId: parsed.data.userId,
       credentialId: parsed.data.credentialId,
-      ip: getClientIp(request),
+      ip: getClientIp(request, services.config),
     });
     return NextResponse.json(result);
   } catch (error) {

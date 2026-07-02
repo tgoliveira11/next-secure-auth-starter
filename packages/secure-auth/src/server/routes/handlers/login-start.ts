@@ -36,17 +36,19 @@ async function loginStartPost(request: Request, services: SecureAuthServices) {
         typeof body === "object" && body !== null && CAPTCHA_TOKEN_FIELD in body
           ? String((body as Record<string, unknown>)[CAPTCHA_TOKEN_FIELD] ?? "")
           : "",
-      remoteIp: getClientIp(request),
+      remoteIp: getClientIp(request, config),
       action: "login",
     });
 
     const result = await authLoginService.startCredentialsLogin(
       parsed.data.email,
       parsed.data.password,
-      getClientIp(request)
+      getClientIp(request, config)
     );
 
-    const response = NextResponse.json(result);
+    const response = NextResponse.json(
+      result.requiresTwoFactor ? { requiresTwoFactor: true as const } : result
+    );
     if (result.requiresTwoFactor) {
       response.cookies.set(
         ctx.getTwoFactorLoginChallengeCookieName(),

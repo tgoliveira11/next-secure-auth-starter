@@ -148,52 +148,9 @@ describe("magic link API routes", () => {
     expect(res.status).toBe(400);
   });
 
-  it("GET /verify redirects to login complete on success", async () => {
-    const { createGetHandler } = await import("../auth/magic-link-verify.js");
-    const res = await createGetHandler(services)(
-      new Request("http://localhost/api/auth/magic-link/verify?token=valid-magic-link-token")
-    );
-    expect(res.status).toBe(303);
-    expect(res.headers.get("location")).toContain("/login/complete");
-  });
-
-  it("GET /verify redirects to 2FA when required", async () => {
-    mocks.completeMagicLinkSignIn.mockResolvedValue({
-      requiresTwoFactor: true,
-      challengeToken: "challenge-token",
-    });
-    const { createGetHandler } = await import("../auth/magic-link-verify.js");
-    const res = await createGetHandler(services)(
-      new Request("http://localhost/api/auth/magic-link/verify?token=valid-magic-link-token")
-    );
-    expect(res.status).toBe(303);
-    expect(res.headers.get("location")).toContain("/login/2fa");
-  });
-
-  it("GET /verify returns 400 for missing token", async () => {
-    const { createGetHandler } = await import("../auth/magic-link-verify.js");
-    const res = await createGetHandler(services)(
-      new Request("http://localhost/api/auth/magic-link/verify")
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("GET /verify returns 404 when magic link disabled", async () => {
-    services = await buildServices({
-      auth: {
-        afterLoginPath: "/dashboard",
-        afterLogoutPath: "/login",
-        requireEmailVerificationBeforeSignIn: false,
-        nextAuthSecret: "test-secret-for-vitest-only",
-        twoFactorEncryptionKey: "test-two-factor-secret-encryption-key",
-        magicLink: { enabled: false },
-      },
-    });
-    const { createGetHandler } = await import("../auth/magic-link-verify.js");
-    const res = await createGetHandler(services)(
-      new Request("http://localhost/api/auth/magic-link/verify?token=valid-magic-link-token")
-    );
-    expect(res.status).toBe(404);
+  it("GET /verify is no longer exposed on the API route", async () => {
+    const mod = await import("../auth/magic-link-verify.js");
+    expect("createGetHandler" in mod).toBe(false);
   });
 
   it("POST /request when magicLink.enabled = false returns 404", async () => {

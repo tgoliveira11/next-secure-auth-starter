@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { requireAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
+import { requireAdminUser, requireMutatingAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
 import type { SecureAuthServices } from "@/core/types";
 
 function handleAdminError(error: unknown, endpoint: string) {
@@ -24,7 +24,7 @@ const setSchema = z.object({ key: z.string(), value: z.unknown() });
 
 async function adminConfigPost(request: Request, services: SecureAuthServices) {
   try {
-    const { session } = await requireAdminUser(services);
+    const { session } = await requireMutatingAdminUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = setSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "key and value required" }, { status: 400 });
@@ -42,7 +42,7 @@ const deleteSchema = z.object({ key: z.string() });
 
 async function adminConfigDelete(request: Request, services: SecureAuthServices) {
   try {
-    await requireAdminUser(services);
+    await requireMutatingAdminUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = deleteSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "key required" }, { status: 400 });

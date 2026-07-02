@@ -14,6 +14,7 @@ function buildDeps(overrides: {
   twoFactorService?: Record<string, unknown>;
   accountSessionService?: Record<string, unknown>;
   profileService?: Record<string, unknown>;
+  inviteService?: Record<string, unknown>;
 } = {}) {
   const config = overrides.config ?? buildTestSecureAuthConfig();
   const createSession = vi.fn().mockResolvedValue({ id: SESSION_ID, userId: USER_ID });
@@ -41,11 +42,13 @@ function buildDeps(overrides: {
           passwordUpdatedAt: null,
           emailVerifiedAt: new Date(),
           authProvider: "google",
+          status: "active",
         }),
         findById: vi.fn().mockResolvedValue({
           id: USER_ID,
           email: "user@example.com",
           passwordUpdatedAt: null,
+          status: "active",
         }),
         create: vi.fn().mockResolvedValue({
           id: USER_ID,
@@ -53,6 +56,9 @@ function buildDeps(overrides: {
           authProvider: "google",
         }),
         markEmailVerified: vi.fn().mockResolvedValue(undefined),
+      },
+      twoFactorRepository: {
+        findSettingsByUserId: vi.fn().mockResolvedValue(null),
       },
       ...overrides.repos,
     } as never,
@@ -71,6 +77,11 @@ function buildDeps(overrides: {
     } as never,
     accountSessionService: accountSessionService as never,
     profileService: overrides.profileService as never,
+    inviteService: {
+      requiresApproval: () => false,
+      requiresCode: () => false,
+      ...overrides.inviteService,
+    } as never,
   });
 
   return { options, accountSessionService, config };
@@ -219,6 +230,7 @@ describe("createAuthOptions signIn callback", () => {
       id: "new-user",
       email: "new@example.com",
       authProvider: "google",
+      status: "active",
     });
     const markEmailVerified = vi.fn();
     const recordLoginSuccess = vi.fn();
@@ -254,6 +266,7 @@ describe("createAuthOptions signIn callback", () => {
             email: "user@example.com",
             authProvider: "google",
             emailVerifiedAt: null,
+            status: "active",
           }),
           markEmailVerified,
         },
@@ -284,16 +297,49 @@ describe("createAuthOptions signIn callback", () => {
     });
   });
 
-  it("continues when profile sync fails", async () => {
-    const syncFromOAuth = vi.fn().mockRejectedValue(new Error("sync failed"));
-    const deps = buildDeps({ profileService: { syncFromOAuth } });
+  it("redirects inactive users to waitlist path", async () => {
+    const deps = buildDeps({
+      repos: {
+        userRepository: {
+          findByEmail: vi.fn().mockResolvedValue({
+            id: USER_ID,
+            email: "user@example.com",
+            authProvider: "google",
+            emailVerifiedAt: new Date(),
+            status: "pending",
+          }),
+        },
+      },
+    });
 
     const result = await signIn(deps, {
       user: { email: "user@example.com" },
       account: { provider: "google" },
     });
 
-    expect(result).toBe(true);
+    expect(result).toBe("/waitlist");
+  });
+
+  it("blocks OAuth signup when invite code is required", async () => {
+    const deps = buildDeps({
+      inviteService: {
+        requiresCode: () => true,
+        requiresApproval: () => false,
+      },
+      repos: {
+        userRepository: {
+          findByEmail: vi.fn().mockResolvedValue(null),
+          create: vi.fn(),
+        },
+      },
+    });
+
+    const result = await signIn(deps, {
+      user: { email: "new@example.com" },
+      account: { provider: "google" },
+    });
+
+    expect(result).toContain("invite_required");
   });
 });
 
@@ -323,6 +369,69 @@ describe("createAuthOptions jwt callback", () => {
       user: { email: "user@example.com" },
       account: { provider: "login-token" },
       trigger: "signIn",
+    } as never);
+
+    expect(result).toMatchObject({ sessionInvalidated: true, sub: undefined });
+  });
+
+  it("invalidates token when two-factor was enabled after issue", async () => {
+    const enabledAt = new Date();
+    const deps = buildDeps({
+      repos: {
+        userRepository: {
+          findByEmail: vi.fn().mockResolvedValue({
+            id: USER_ID,
+            email: "user@example.com",
+            passwordUpdatedAt: null,
+            status: "active",
+          }),
+          findById: vi.fn().mockResolvedValue({
+            id: USER_ID,
+            email: "user@example.com",
+            passwordUpdatedAt: null,
+            status: "active",
+          }),
+        },
+        twoFactorRepository: {
+          findSettingsByUserId: vi.fn().mockResolvedValue({
+            enabled: true,
+            enabledAt,
+          }),
+        },
+      },
+    });
+    const jwt = deps.options.callbacks!.jwt!;
+    const issuedBefore2fa = Math.floor(enabledAt.getTime() / 1000) - 60;
+
+    const result = await jwt({
+      token: { iat: issuedBefore2fa, sub: USER_ID },
+      trigger: "update",
+    } as never);
+
+    expect(result).toMatchObject({ sessionInvalidated: true, sub: undefined });
+  });
+
+  it("invalidates token when user status is not active", async () => {
+    const deps = buildDeps({
+      repos: {
+        userRepository: {
+          findById: vi.fn().mockResolvedValue({
+            id: USER_ID,
+            email: "user@example.com",
+            passwordUpdatedAt: null,
+            status: "suspended",
+          }),
+        },
+        twoFactorRepository: {
+          findSettingsByUserId: vi.fn().mockResolvedValue(null),
+        },
+      },
+    });
+    const jwt = deps.options.callbacks!.jwt!;
+
+    const result = await jwt({
+      token: { sub: USER_ID, iat: Math.floor(Date.now() / 1000) },
+      trigger: "update",
     } as never);
 
     expect(result).toMatchObject({ sessionInvalidated: true, sub: undefined });

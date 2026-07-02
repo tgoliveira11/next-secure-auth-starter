@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { requireAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
+import { requireAdminUser, requireMutatingAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
 import type { SecureAuthServices } from "@/core/types";
 import type { RouteContext } from "../../create-routes.js";
 
@@ -40,7 +40,7 @@ async function adminUsersGet(request: Request, services: SecureAuthServices) {
 
 async function adminUsersPatch(request: Request, services: SecureAuthServices, context?: RouteContext) {
   try {
-    const { session } = await requireAdminUser(services);
+    const { session } = await requireMutatingAdminUser(request, services);
 
     const params = context?.params ? await context.params : {};
     const targetId = params["id"] as string | undefined;

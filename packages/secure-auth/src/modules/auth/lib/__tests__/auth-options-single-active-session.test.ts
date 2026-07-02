@@ -36,12 +36,17 @@ function buildAuthOptions(singleActiveSession: boolean) {
           id: USER_ID,
           email: "user@example.com",
           passwordUpdatedAt: null,
+          status: "active",
         }),
         findById: vi.fn().mockResolvedValue({
           id: USER_ID,
           email: "user@example.com",
           passwordUpdatedAt: null,
+          status: "active",
         }),
+      },
+      twoFactorRepository: {
+        findSettingsByUserId: vi.fn().mockResolvedValue(null),
       },
     } as never,
     authService: { recordLoginSuccess: vi.fn() } as never,
@@ -51,6 +56,7 @@ function buildAuthOptions(singleActiveSession: boolean) {
       consumeSessionUpgradeToken,
     } as never,
     accountSessionService: accountSessionService as never,
+    inviteService: { requiresApproval: () => false, requiresCode: () => false } as never,
   });
 
   const jwt = options.callbacks?.jwt;
@@ -148,12 +154,17 @@ describe("createAuthOptions single active session policy", () => {
             id: USER_ID,
             email: "user@example.com",
             passwordUpdatedAt: null,
+            status: "active",
           }),
           findById: vi.fn().mockResolvedValue({
             id: USER_ID,
             email: "user@example.com",
             passwordUpdatedAt: null,
+            status: "active",
           }),
+        },
+        twoFactorRepository: {
+          findSettingsByUserId: vi.fn().mockResolvedValue({ enabled: true, enabledAt: null }),
         },
       } as never,
       authService: { recordLoginSuccess: vi.fn() } as never,
@@ -169,6 +180,7 @@ describe("createAuthOptions single active session policy", () => {
         touchSessionThrottled: vi.fn(),
         mapProviderToAuthMethod: vi.fn(() => "google"),
       } as never,
+      inviteService: { requiresApproval: () => false, requiresCode: () => false } as never,
     });
 
     const jwt = options.callbacks!.jwt!;

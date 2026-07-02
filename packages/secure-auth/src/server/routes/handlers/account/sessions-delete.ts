@@ -24,7 +24,7 @@ async function sessionsDelete(
       user.id,
       id,
       user.accountSessionId,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

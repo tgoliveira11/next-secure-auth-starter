@@ -141,7 +141,6 @@ describe("account auth API routes", () => {
       new Request("http://localhost/api/auth/reset-password?password=secret", {
         method: "POST",
         body: JSON.stringify({
-          action: "reset",
           token: "abc",
           newPassword: "long-enough-password",
         }),
@@ -156,34 +155,15 @@ describe("account auth API routes", () => {
     const res = await POST(
       new Request("http://localhost", {
         method: "POST",
-        body: JSON.stringify({ action: "reset", token: "abc" }),
+        body: JSON.stringify({ token: "abc" }),
       }),
       services
     );
     expect(res.status).toBe(400);
   });
 
-  it("POST /api/auth/reset-password validates and resets", async () => {
+  it("POST /api/auth/reset-password resets password", async () => {
     const { resetPasswordPost: POST } = await import("@/test/helpers/handlers");
-    mocks.validatePasswordResetToken.mockResolvedValue({ valid: false });
-    const invalidRes = await POST(
-      new Request("http://localhost", {
-        method: "POST",
-        body: JSON.stringify({ action: "validate", token: "bad" }),
-      }),
-      services
-    );
-    expect((await invalidRes.json()).valid).toBe(false);
-
-    mocks.validatePasswordResetToken.mockResolvedValue({ valid: true });
-    const validateRes = await POST(
-      new Request("http://localhost", {
-        method: "POST",
-        body: JSON.stringify({ action: "validate", token: "abc" }),
-      }),
-      services
-    );
-    expect(validateRes.status).toBe(200);
 
     const { ValidationError } = await import("@/modules/account/services/account-service");
     mocks.resetPassword.mockRejectedValue(new ValidationError("expired"));
@@ -191,7 +171,6 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({
-          action: "reset",
           token: "abc",
           newPassword: "long-enough-password",
         }),
@@ -205,7 +184,6 @@ describe("account auth API routes", () => {
       new Request("http://localhost", {
         method: "POST",
         body: JSON.stringify({
-          action: "reset",
           token: "abc",
           newPassword: "long-enough-password",
         }),

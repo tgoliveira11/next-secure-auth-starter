@@ -21,7 +21,7 @@ async function passkeysRegisterPost(request: Request, services: SecureAuthServic
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
-    const ip = getClientIp(request);
+    const ip = getClientIp(request, services.config);
 
     if (parsed.data.action === "options") {
       const options = await services.passkeyAccountService.getRegistrationOptions(

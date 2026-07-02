@@ -18,7 +18,7 @@ async function verifyEmailConfirmPost(request: Request, services: SecureAuthServ
 
     const result = await services.accountAuthService.confirmEmailVerification(
       parsed.data.token,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

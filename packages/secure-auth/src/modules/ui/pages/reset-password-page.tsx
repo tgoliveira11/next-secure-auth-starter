@@ -44,22 +44,11 @@ function ResetPasswordContent({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) {
+    if (!token || token.length < 16) {
       setState("invalid");
       return;
     }
-    let cancelled = false;
-    accountAuthApi
-      .validateResetToken(token)
-      .then((result) => {
-        if (!cancelled) setState(result.valid ? "ready" : "invalid");
-      })
-      .catch(() => {
-        if (!cancelled) setState("invalid");
-      });
-    return () => {
-      cancelled = true;
-    };
+    setState("ready");
   }, [token]);
 
   async function handleSubmit(e: React.FormEvent) {

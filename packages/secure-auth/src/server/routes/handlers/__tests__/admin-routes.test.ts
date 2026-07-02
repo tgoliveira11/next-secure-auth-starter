@@ -4,6 +4,7 @@ import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   requireAdminUser: vi.fn(),
+  requireMutatingAdminUser: vi.fn(),
   listUsers: vi.fn(),
   approveUser: vi.fn(),
   listLockedAccounts: vi.fn(),
@@ -22,7 +23,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/modules/admin/lib/require-admin", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/admin/lib/require-admin")>();
-  return { ...actual, requireAdminUser: mocks.requireAdminUser };
+  return { ...actual, requireAdminUser: mocks.requireAdminUser, requireMutatingAdminUser: mocks.requireMutatingAdminUser };
 });
 
 import {
@@ -81,6 +82,7 @@ describe("admin API routes", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mocks.requireAdminUser.mockResolvedValue(adminSession);
+    mocks.requireMutatingAdminUser.mockImplementation(async (_request, svc) => mocks.requireAdminUser(svc));
     mocks.listUsers.mockResolvedValue({ users: [], total: 0 });
     mocks.listLockedAccounts.mockResolvedValue([]);
     mocks.listFrozenAccounts.mockResolvedValue([]);

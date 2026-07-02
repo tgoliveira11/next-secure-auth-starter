@@ -26,7 +26,8 @@ export function createNextAuthRouteHandlers(
   }
 
   async function wrappedHandler(request: Request, context: unknown) {
-    const ip = getClientIp(request);
+    const services = await getServices();
+    const ip = getClientIp(request, services.config);
     return runWithLoginRequestContext(ip, () => getHandler().then((h) => h(request, context)));
   }
 

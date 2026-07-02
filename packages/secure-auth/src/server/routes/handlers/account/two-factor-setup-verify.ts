@@ -22,7 +22,7 @@ async function twoFactorSetupVerifyPost(request: Request, services: SecureAuthSe
     const result = await services.twoFactorService.verifySetup(
       user.id,
       parsed.data.code,
-      getClientIp(request)
+      getClientIp(request, services.config)
     );
     return NextResponse.json(result);
   } catch (error) {

@@ -15,6 +15,13 @@ import { CaptchaVerificationError } from "@/modules/captcha/index";
 import { verifyCaptcha } from "@/modules/captcha/services/turnstile-verifier";
 import { CAPTCHA_TOKEN_FIELD } from "@/modules/captcha/lib/constants";
 import { GENERIC_REGISTRATION_ERROR } from "@/modules/auth/lib/public-auth-messages";
+import { resolveInitialUserStatus } from "@/modules/auth/lib/registration-policy";
+import {
+  EmailMismatchInviteCodeError,
+  ExhaustedInviteCodeError,
+  ExpiredInviteCodeError,
+  InvalidInviteCodeError,
+} from "@/modules/admin/services/invite-service";
 import {
   BREACHED_PASSWORD_ERROR,
   checkPasswordBreached,
@@ -24,38 +31,23 @@ import type { SecureAuthServices } from "@/core/types";
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1).max(128),
+  inviteCode: z.string().min(1).optional(),
   [CAPTCHA_TOKEN_FIELD]: z.string().optional(),
 });
 
 function registrationErrorMessage(error: unknown): string {
-  if (!(error instanceof Error)) return "Registration failed";
-
-  const message = error.message.toLowerCase();
-  if (message.includes("database_url")) {
-    return "Server misconfiguration: DATABASE_URL is not set.";
-  }
-  if (
-    message.includes("connect") ||
-    message.includes("econnrefused") ||
-    message.includes("connection")
-  ) {
-    return "Database unavailable. Verify database connectivity and retry.";
-  }
-  if (message.includes("relation") && message.includes("does not exist")) {
-    return "Database schema missing. Apply migrations for your consuming application.";
-  }
-
+  if (!(error instanceof Error)) return "Registration failed. Please try again.";
   return "Registration failed. Please try again.";
 }
 
 async function registerPost(request: Request, services: SecureAuthServices) {
-  const { config, ctx, repos, rateLimit, accountAuthService } = services;
+  const { config, ctx, repos, rateLimit, accountAuthService, inviteService } = services;
 
   try {
     assertAuthPasswordRequestMethod(request.method, new Set(["POST"]));
     assertPasswordNotInUrl(request.url);
 
-    const ip = getClientIp(request);
+    const ip = getClientIp(request, config);
 
     const body = await request.json().catch(() => ({}));
     const parsed = registerSchema.safeParse(body);
@@ -87,6 +79,16 @@ async function registerPost(request: Request, services: SecureAuthServices) {
 
     const { email, password } = parsed.data;
 
+    let inviteCodeId: string | undefined;
+    if (inviteService.requiresCode()) {
+      const code = parsed.data.inviteCode?.trim();
+      if (!code) {
+        return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+      }
+      const invite = await inviteService.validateCode(code, email);
+      inviteCodeId = invite.id;
+    }
+
     const policyResult = ctx.validatePasswordForSubmission(password);
     if (!policyResult.valid) {
       throw new ValidationError(
@@ -104,7 +106,12 @@ async function registerPost(request: Request, services: SecureAuthServices) {
       email,
       authProvider: "credentials",
       passwordHash,
+      status: resolveInitialUserStatus(inviteService),
     });
+
+    if (inviteCodeId) {
+      await inviteService.consumeCode(inviteCodeId, user.id);
+    }
 
     const policy = ctx.getAccountPolicyConfig();
     if (policy.sendVerificationOnRegister) {
@@ -117,6 +124,7 @@ async function registerPost(request: Request, services: SecureAuthServices) {
         email: user.email,
         requiresEmailVerification: policy.sendVerificationOnRegister,
         requireEmailVerificationBeforeSignIn: policy.requireEmailVerificationBeforeSignIn,
+        status: user.status,
       },
       { status: 201 }
     );
@@ -132,6 +140,14 @@ async function registerPost(request: Request, services: SecureAuthServices) {
     }
     if (error instanceof ValidationError) {
       return apiError(error, "/api/auth/register");
+    }
+    if (
+      error instanceof InvalidInviteCodeError ||
+      error instanceof ExpiredInviteCodeError ||
+      error instanceof ExhaustedInviteCodeError ||
+      error instanceof EmailMismatchInviteCodeError
+    ) {
+      return NextResponse.json({ error: GENERIC_REGISTRATION_ERROR }, { status: 400 });
     }
     safeLogger.error("Registration failed", {
       error: error instanceof Error ? error.message : "unknown",

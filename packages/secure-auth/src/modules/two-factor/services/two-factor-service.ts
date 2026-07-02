@@ -20,6 +20,7 @@ import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { RunInTransaction } from "@/lib/db/transaction";
 import type { SecurityNotificationService } from "@/modules/security/notifications/security-notification-service";
+import type { AccountSessionService } from "@/modules/sessions/services/account-session-service";
 
 type TwoFactorServiceDeps = {
   ctx: SecureAuthContext;
@@ -27,10 +28,12 @@ type TwoFactorServiceDeps = {
   rateLimit: RateLimitApi;
   runInTransaction: RunInTransaction;
   securityNotificationService?: SecurityNotificationService;
+  accountSessionService: AccountSessionService;
 };
 
 export function createTwoFactorService(deps: TwoFactorServiceDeps) {
-  const { ctx, repos, rateLimit, runInTransaction, securityNotificationService } = deps;
+  const { ctx, repos, rateLimit, runInTransaction, securityNotificationService, accountSessionService } =
+    deps;
 
   const service = {
     async getStatus(userId: string) {
@@ -131,6 +134,8 @@ export function createTwoFactorService(deps: TwoFactorServiceDeps) {
       await repos.auditRepository.record("two_factor_backup_codes_generated", userId, {
         endpoint: "/api/account/2fa/setup/verify",
       });
+
+      await accountSessionService.revokeAllSessions(userId);
 
       return {
         success: true,

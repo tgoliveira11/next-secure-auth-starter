@@ -8,6 +8,7 @@ export { CheckEmailPage } from "./check-email-page.js";
 export { VerifyEmailPage } from "./verify-email-page.js";
 export { LoginTwoFactorPage } from "./login-two-factor-page.js";
 export { LoginCompletePage } from "./login-complete-page.js";
+export { MagicLinkVerifyPage } from "./magic-link-verify-page.js";
 export { AccountSettingsPage } from "./account-settings-page.js";
 export { SecuritySettingsPage } from "./security-settings-page.js";
 export { SessionsSettingsPage } from "./sessions-settings-page.js";

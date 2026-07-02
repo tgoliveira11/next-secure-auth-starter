@@ -8,6 +8,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Security
 
+- **Security audit hardening** — Admin APIs require fully authenticated sessions (2FA complete); `users.status` enforced on all login paths; invite/approval flags wired into registration and OAuth signup; sessions revoked when 2FA is enabled; production requires `rateLimit.store: "postgres"`; forwarded IP headers trusted only when `security.trustForwardedHeaders` is set; password-reset token validation oracle removed; same-origin protection on admin mutating routes; magic-link verification moved to UI page + POST API (no GET token handler); sensitive admin config overrides restricted.
 - **nodemailer** — upgraded to `9.0.3` (latest 9.x; TLS validation by default, GHSA-p6gq-j5cr-w38f fix). Root override includes `next-auth > nodemailer`.
 
 ## [0.4.1] - 2026-06-30

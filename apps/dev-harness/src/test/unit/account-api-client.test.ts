@@ -43,9 +43,6 @@ describe("account API clients", () => {
         }
 
         if (url === "/api/auth/reset-password" && method === "POST") {
-          if (body?.action === "validate") {
-            return new Response(JSON.stringify({ valid: true }), { status: 200 });
-          }
           return new Response(JSON.stringify({ success: true }), { status: 200 });
         }
 
@@ -195,7 +192,6 @@ describe("account API clients", () => {
     await expect(accountAuthApi.forgotPassword("user@example.com")).resolves.toEqual({
       message: "Check email",
     });
-    await expect(accountAuthApi.validateResetToken("token")).resolves.toEqual({ valid: true });
     await expect(accountAuthApi.resetPassword("token", "new-password")).resolves.toEqual({
       success: true,
     });

@@ -140,8 +140,6 @@ describe("api client wrappers", () => {
       verified: true,
       email: "user@example.com",
     });
-    mockFetch({ valid: true });
-    await expect(accountAuthApi.validateResetToken("token")).resolves.toEqual({ valid: true });
     mockFetch({ success: true });
     await expect(accountAuthApi.resetPassword("token", "new-password")).resolves.toEqual({
       success: true,

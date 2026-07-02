@@ -7,7 +7,7 @@ import type { SecureAuthServices } from "@/core/types";
 async function sessionsRevokeAllPost(request: Request, services: SecureAuthServices) {
   try {
     const user = await requireVerifiedMutatingAccountUser(request, services);
-    const result = await services.accountSessionService.revokeAllSessions(user.id, getClientIp(request));
+    const result = await services.accountSessionService.revokeAllSessions(user.id, getClientIp(request, services.config));
     return NextResponse.json(result);
   } catch (error) {
     return apiError(error, "POST /api/account/sessions/revoke-all");

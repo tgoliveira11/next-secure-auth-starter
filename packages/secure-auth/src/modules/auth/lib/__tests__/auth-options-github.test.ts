@@ -12,6 +12,7 @@ function providerIdsFromConfig(
     authLoginService: {} as never,
     twoFactorService: { isEnabledForUser: vi.fn() } as never,
     accountSessionService: { mapProviderToAuthMethod: vi.fn() } as never,
+    inviteService: { requiresApproval: () => false, requiresCode: () => false } as never,
   });
 
   return (options.providers ?? []).map((provider) => provider.id);

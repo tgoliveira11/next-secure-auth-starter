@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiError, parseJsonBody } from "@/lib/api-helpers";
-import { requireAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
+import { requireAdminUser, requireMutatingAdminUser, AdminDisabledError, ForbiddenError } from "@/modules/admin/lib/require-admin";
 import type { SecureAuthServices } from "@/core/types";
 
 function handleAdminError(error: unknown, endpoint: string) {
@@ -27,7 +27,7 @@ const createSchema = z.object({
 
 async function adminInvitesPost(request: Request, services: SecureAuthServices) {
   try {
-    const { session } = await requireAdminUser(services);
+    const { session } = await requireMutatingAdminUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -42,7 +42,7 @@ const revokeSchema = z.object({ codeId: z.string().uuid() });
 
 async function adminInvitesDelete(request: Request, services: SecureAuthServices) {
   try {
-    const { session } = await requireAdminUser(services);
+    const { session } = await requireMutatingAdminUser(request, services);
     const body = await parseJsonBody(request);
     const parsed = revokeSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "codeId required" }, { status: 400 });
