@@ -7,6 +7,7 @@ import { EmailVerificationRequiredError } from "@/modules/account/lib/account-po
 import { NotFoundError, ValidationError, ReauthenticationRequiredError } from "@/modules/account/lib/account-errors";
 import { ConflictError } from "@/modules/two-factor/services/two-factor-service";
 import { RateLimitError } from "@/modules/rate-limit";
+import { DatabaseSchemaError } from "@/modules/database/lib/database-errors";
 import { ChallengeError } from "@/modules/passkeys/services/passkey-service";
 
 describe("apiError", () => {
@@ -14,6 +15,7 @@ describe("apiError", () => {
     const cases: Array<{ error: Error; status: number }> = [
       { error: new UnauthorizedError("auth"), status: 401 },
       { error: new TwoFactorEncryptionKeyError(), status: 503 },
+      { error: new DatabaseSchemaError("schema out of date"), status: 503 },
       { error: new SameOriginError(), status: 403 },
       { error: new EmailVerificationRequiredError(), status: 403 },
       { error: new NotFoundError("missing"), status: 404 },

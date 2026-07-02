@@ -69,6 +69,25 @@ Drizzle SQL migrations are **forward-only** in this starter. Rollback procedure:
 
 Do not delete applied migration files.
 
+## Troubleshooting
+
+### `POST /api/auth/forgot-password` returns 500 with `Failed query: select ... from "users"`
+
+The package schema expects v0.3+ columns on `users` (`role`, `status`, `display_name`, etc.). This error usually means **migrations were not applied** to the consumer database.
+
+1. Confirm the installed package version in [CHANGELOG.md](../CHANGELOG.md).
+2. Run migrations against the same database your app uses:
+
+   ```bash
+   npm run db:migrate
+   # or drizzle-kit migrate with migrations from @tgoliveira/secure-auth/migrations
+   ```
+
+3. Ensure migration `0002_v0_3_admin_platform.sql` (or later) has been applied.
+4. Call `GET /api/auth/health` — when the schema is current, the response includes `"database": { "ready": true }`. When migrations are missing, it returns **503** with a migration hint.
+
+Forgot-password intentionally returns a **generic 200** message when a schema error occurs (no account enumeration), but logs include `migrationHint` for operators.
+
 ---
 
 ## Package version upgrades

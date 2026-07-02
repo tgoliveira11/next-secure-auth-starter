@@ -84,8 +84,10 @@ describe("account auth API routes", () => {
     });
   });
 
-  it("POST /api/auth/forgot-password maps service failures", async () => {
-    mocks.requestPasswordReset.mockRejectedValue(new Error("mailer down"));
+  it("POST /api/auth/forgot-password returns generic message on service failures", async () => {
+    mocks.requestPasswordReset.mockRejectedValue(
+      new Error('Failed query: select "status" from "users" where "users"."email" = $1')
+    );
     const { forgotPasswordPost: POST } = await import("@/test/helpers/handlers");
     const res = await POST(
       new Request("http://localhost", {
@@ -94,7 +96,10 @@ describe("account auth API routes", () => {
       }),
       services
     );
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      message: "If an account exists for this email, we'll send password reset instructions.",
+    });
   });
 
   it("POST /api/auth/verify-email/confirm rejects invalid body", async () => {

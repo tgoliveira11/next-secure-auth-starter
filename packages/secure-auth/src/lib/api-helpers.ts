@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { UnauthorizedError } from "@/modules/auth/lib/session";
 import { safeLogger } from "@/modules/security/logger/index";
 import { TwoFactorEncryptionKeyError } from "@/modules/two-factor/policies/two-factor-secret-crypto";
+import { DatabaseSchemaError } from "@/modules/database/lib/database-errors";
 
 export function apiError(error: unknown, endpoint: string) {
   if (error instanceof UnauthorizedError) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
   if (error instanceof TwoFactorEncryptionKeyError) {
+    return NextResponse.json({ error: error.message }, { status: 503 });
+  }
+  if (error instanceof DatabaseSchemaError) {
     return NextResponse.json({ error: error.message }, { status: 503 });
   }
   if (error && typeof error === "object" && "name" in error) {
