@@ -16,6 +16,7 @@ export type AuthPaths = {
   checkEmail?: string;
   verifyEmail?: string;
   loginTwoFactor?: string;
+  loginTwoFactorOauthComplete?: string;
   loginComplete?: string;
   magicLinkVerify?: string;
   afterLogin?: string;
@@ -36,6 +37,7 @@ export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
   checkEmail: "/check-email",
   verifyEmail: "/verify-email",
   loginTwoFactor: "/login/2fa",
+  loginTwoFactorOauthComplete: "/login/2fa/complete",
   loginComplete: "/login/complete",
   magicLinkVerify: "/login/magic-link",
   afterLogin: "/dashboard",
@@ -128,6 +130,11 @@ export type LoginTwoFactorPageProps = SecureAuthPageProps & {
 };
 
 export type LoginCompletePageProps = SecureAuthPageProps & {
+  afterLoginPath?: string;
+  errorMessage?: string;
+};
+
+export type LoginTwoFactorOauthCompletePageProps = SecureAuthPageProps & {
   afterLoginPath?: string;
   errorMessage?: string;
 };

@@ -213,6 +213,7 @@ export type SecureAuthConfig = {
       checkEmail?: string;
       verifyEmail?: string;
       loginTwoFactor?: string;
+      loginTwoFactorOauthComplete?: string;
       loginComplete?: string;
       magicLinkVerify?: string;
       accountDeleted?: string;

@@ -1,13 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { handleCredentialsLoginFormPost } from "@/modules/auth/lib/credentials-login-start-handler";
-import { handleCredentialsTwoFactorFormPost } from "@/modules/auth/lib/credentials-two-factor-form-handler";
+import { handleCredentialsTwoFactorFormPost, handleTwoFactorFormPost } from "@/modules/auth/lib/two-factor-form-handler";
 import { getTestServices } from "@/test/helpers/mock-services";
 import type { SecureAuthServices } from "@/core/types";
 
 const mocks = vi.hoisted(() => ({
   startCredentialsLogin: vi.fn(),
   verifyTwoFactorLogin: vi.fn(),
+  verifyOAuthTwoFactor: vi.fn(),
+  getSessionUser: vi.fn(),
   cookiesGet: vi.fn(),
+}));
+
+vi.mock("@/modules/auth/lib/session", () => ({
+  getSessionUser: (...args: unknown[]) => mocks.getSessionUser(...args),
 }));
 
 vi.mock("next/headers", () => ({
@@ -24,6 +30,7 @@ async function buildServices() {
       ...base.authLoginService,
       startCredentialsLogin: mocks.startCredentialsLogin,
       verifyTwoFactorLogin: mocks.verifyTwoFactorLogin,
+      verifyOAuthTwoFactor: mocks.verifyOAuthTwoFactor,
     },
   }));
 }
@@ -179,5 +186,53 @@ describe("credentials login form handlers", () => {
       services
     );
     expect(response.headers.get("location")).toContain("/login/complete");
+  });
+
+  it("redirects oauth 2FA form posts to the oauth complete page", async () => {
+    mocks.getSessionUser.mockResolvedValue({ id: "user-1", email: "user@example.com" });
+    mocks.verifyOAuthTwoFactor.mockResolvedValue({ upgradeToken: "upgrade-token-1234567890" });
+
+    const response = await handleTwoFactorFormPost(
+      formRequest("http://localhost/login/2fa", {
+        mode: "oauth",
+        code: "123456",
+      }),
+      services
+    );
+
+    expect(response.headers.get("location")).toContain("/login/2fa/complete");
+    expect(response.cookies.get(services.ctx.getTwoFactorOAuthUpgradeCookieName())?.value).toBe(
+      "upgrade-token-1234567890"
+    );
+  });
+
+  it("redirects oauth 2FA form posts without a session back to login", async () => {
+    mocks.getSessionUser.mockResolvedValue(null);
+
+    const response = await handleTwoFactorFormPost(
+      formRequest("http://localhost/login/2fa", {
+        mode: "oauth",
+        code: "123456",
+      }),
+      services
+    );
+
+    expect(response.headers.get("location")).toContain("authentication_required");
+  });
+
+  it("redirects invalid oauth 2FA codes from the form handler", async () => {
+    const { InvalidTwoFactorCodeError } = await import("@/modules/auth/services/auth-login-service");
+    mocks.getSessionUser.mockResolvedValue({ id: "user-1", email: "user@example.com" });
+    mocks.verifyOAuthTwoFactor.mockRejectedValue(new InvalidTwoFactorCodeError());
+
+    const response = await handleTwoFactorFormPost(
+      formRequest("http://localhost/login/2fa", {
+        mode: "oauth",
+        code: "123456",
+      }),
+      services
+    );
+
+    expect(response.headers.get("location")).toContain("invalid_code");
   });
 });

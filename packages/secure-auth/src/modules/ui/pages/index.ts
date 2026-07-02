@@ -7,6 +7,7 @@ export { ResetPasswordPage } from "./reset-password-page.js";
 export { CheckEmailPage } from "./check-email-page.js";
 export { VerifyEmailPage } from "./verify-email-page.js";
 export { LoginTwoFactorPage } from "./login-two-factor-page.js";
+export { LoginTwoFactorOauthCompletePage } from "./login-two-factor-oauth-complete-page.js";
 export { LoginCompletePage } from "./login-complete-page.js";
 export { MagicLinkVerifyPage } from "./magic-link-verify-page.js";
 export { AccountSettingsPage } from "./account-settings-page.js";

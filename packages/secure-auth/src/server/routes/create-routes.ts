@@ -126,6 +126,7 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     loginVerify2fa: route(() => import("./handlers/auth/login-verify-2fa.js"), "POST"),
     loginVerify2faForm: route(() => import("./handlers/auth/login-verify-2fa-form.js"), "POST"),
     loginVerify2faOauth: route(() => import("./handlers/auth/login-verify-2fa-oauth.js"), "POST"),
+    loginOauth2faComplete: route(() => import("./handlers/auth/login-oauth-2fa-complete.js"), "POST"),
     loginChallengeStatus: route(() => import("./handlers/auth/login-challenge-status.js"), "GET"),
     loginTrace: route(() => import("./handlers/auth/login-trace.js"), "GET"),
 
