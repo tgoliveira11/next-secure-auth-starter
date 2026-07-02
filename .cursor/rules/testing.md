@@ -58,10 +58,11 @@ Every PR that touches behavior must include tests for:
 
 ## Test hygiene
 
+- Prefer **Vitest projects** (`node` for `*.test.ts`, `happy-dom` for `*.test.tsx`) — see [docs/test-ci-performance-playbook.md](../../docs/test-ci-performance-playbook.md).
 - Use factories/fixtures — no real secrets in repo.
 - Assert generic error messages where account enumeration must be prevented.
 - Mock email and OAuth in unit/service tests; use Mailpit or integration setup for E2E.
 
 ## Documentation
 
-When testing strategy or tooling changes, update this file and [docs/security.md](../../docs/security.md) in the same change.
+When testing strategy or tooling changes, update this file, [docs/test-ci-performance-playbook.md](../../docs/test-ci-performance-playbook.md), and [docs/security.md](../../docs/security.md) in the same change.

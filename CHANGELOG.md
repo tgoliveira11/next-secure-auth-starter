@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **CI validate** — Split into parallel jobs (`typecheck`, `lint`, `test`, `build`); ESLint and TypeScript incremental caches; Vitest `unit`/`ui` projects (`node` / `happy-dom`). See [docs/test-ci-performance-playbook.md](docs/test-ci-performance-playbook.md).
+
 ### Fixed
 
 - **Forgot-password 500 on outdated database schema** — When the consumer database is missing v0.3+ `users` columns, `POST /api/auth/forgot-password` now returns the generic success message (200) instead of 500, logs a `migrationHint`, and `GET /api/auth/health` reports `database.ready: false` with migration guidance. `DatabaseSchemaError` maps to 503 via `apiError` on other routes.

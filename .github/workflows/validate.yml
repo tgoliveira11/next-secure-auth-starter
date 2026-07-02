@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   branch-name:
     if: github.event_name == 'pull_request'
@@ -27,9 +31,70 @@ jobs:
               ;;
           esac
 
-  validate:
+  typecheck:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore TypeScript incremental cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache
+            packages/secure-auth/.cache
+            apps/dev-harness/.cache
+            apps/consumer-demo/.cache
+          key: tsc-${{ runner.os }}-${{ hashFiles('**/tsconfig.json', 'package-lock.json') }}
+          restore-keys: |
+            tsc-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package (types for app workspaces)
+        run: npm run build -w @tgoliveira/secure-auth
+
+      - name: Typecheck monorepo
+        run: npm run typecheck
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Restore ESLint cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .eslintcache
+            apps/dev-harness/.eslintcache
+            apps/consumer-demo/.eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('apps/**/eslint.config.mjs', 'package-lock.json') }}
+          restore-keys: |
+            eslint-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint monorepo
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,8 +108,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate monorepo
-        run: npm run validate
+      - name: Build package (dist required by consumer-entrypoints tests)
+        run: npm run build -w @tgoliveira/secure-auth
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build monorepo
+        run: npm run build
 
       - name: Verify package contents
         run: npm pack --workspace @tgoliveira/secure-auth --dry-run --ignore-scripts

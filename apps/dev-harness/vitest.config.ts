@@ -34,59 +34,81 @@ function packageAwareAliasPlugin(): Plugin {
   };
 }
 
+const coverageConfig = {
+  provider: "v8" as const,
+  reporter: ["text", "text-summary", "lcov"],
+  include: [
+    "src/modules/email/**/*.ts",
+    "src/lib/**/*.ts",
+    "src/features/passkey/**/*.ts",
+    "src/app/api/**/*.ts",
+    "src/components/**/*.tsx",
+  ],
+  exclude: [
+    "src/test/**",
+    "src/types/**",
+    "src/lib/db/schema.ts",
+    "src/lib/db/index.ts",
+    "src/app/api/auth/**/route.ts",
+    "**/nextauth/**",
+    "**/*.d.ts",
+  ],
+  thresholds: {
+    lines: 90,
+    functions: 90,
+    branches: 90,
+    statements: 90,
+  },
+};
+
+const resolveConfig = {
+  alias: [
+    { find: "@tgoliveira/secure-auth/react/client", replacement: path.join(packageSrc, "react/client.ts") },
+    {
+      find: "@tgoliveira/secure-auth/client/password-policy",
+      replacement: path.join(packageSrc, "client/password-policy.ts"),
+    },
+    { find: "@tgoliveira/secure-auth/drizzle/schema", replacement: path.join(packageSrc, "drizzle/schema.ts") },
+    { find: "@tgoliveira/secure-auth/react", replacement: path.join(packageSrc, "react/index.ts") },
+    { find: "@tgoliveira/secure-auth/next/middleware", replacement: path.join(packageSrc, "next/middleware-entry.ts") },
+    { find: "@tgoliveira/secure-auth/next", replacement: path.join(packageSrc, "next/index.ts") },
+    { find: "@tgoliveira/secure-auth/client", replacement: path.join(packageSrc, "client/index.ts") },
+    { find: "@tgoliveira/secure-auth/email", replacement: path.join(packageSrc, "email/index.ts") },
+    { find: "@tgoliveira/secure-auth", replacement: path.join(packageSrc, "index.ts") },
+    { find: "next/link", replacement: path.join(nextDir, "link.js") },
+    { find: "next/server", replacement: path.join(nextDir, "server.js") },
+    { find: "next/navigation", replacement: path.join(nextDir, "navigation.js") },
+    { find: "server-only", replacement: path.resolve(__dirname, "./src/test/mocks/server-only.ts") },
+  ],
+};
+
 export default defineConfig({
   plugins: [packageAwareAliasPlugin()],
   test: {
-    environment: "node",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     exclude: ["e2e/**", "node_modules/**"],
-    coverage: {
-      provider: "v8",
-      reporter: ["text", "text-summary", "lcov"],
-      include: [
-        "src/modules/email/**/*.ts",
-        "src/lib/**/*.ts",
-        "src/features/passkey/**/*.ts",
-        "src/app/api/**/*.ts",
-        "src/components/**/*.tsx",
-      ],
-      exclude: [
-        "src/test/**",
-        "src/types/**",
-        "src/lib/db/schema.ts",
-        "src/lib/db/index.ts",
-        "src/app/api/auth/**/route.ts",
-        "**/nextauth/**",
-        "**/*.d.ts",
-      ],
-      thresholds: {
-        lines: 90,
-        functions: 90,
-        branches: 90,
-        statements: 90,
-      },
-    },
-  },
-  resolve: {
-    alias: [
-      { find: "@tgoliveira/secure-auth/react/client", replacement: path.join(packageSrc, "react/client.ts") },
+    coverage: coverageConfig,
+    projects: [
       {
-        find: "@tgoliveira/secure-auth/client/password-policy",
-        replacement: path.join(packageSrc, "client/password-policy.ts"),
+        extends: true,
+        resolve: resolveConfig,
+        test: {
+          name: "unit",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
       },
-      { find: "@tgoliveira/secure-auth/drizzle/schema", replacement: path.join(packageSrc, "drizzle/schema.ts") },
-      { find: "@tgoliveira/secure-auth/react", replacement: path.join(packageSrc, "react/index.ts") },
-      { find: "@tgoliveira/secure-auth/next/middleware", replacement: path.join(packageSrc, "next/middleware-entry.ts") },
-      { find: "@tgoliveira/secure-auth/next", replacement: path.join(packageSrc, "next/index.ts") },
-      { find: "@tgoliveira/secure-auth/client", replacement: path.join(packageSrc, "client/index.ts") },
-      { find: "@tgoliveira/secure-auth/email", replacement: path.join(packageSrc, "email/index.ts") },
-      { find: "@tgoliveira/secure-auth", replacement: path.join(packageSrc, "index.ts") },
-      { find: "next/link", replacement: path.join(nextDir, "link.js") },
-      { find: "next/server", replacement: path.join(nextDir, "server.js") },
-      { find: "next/navigation", replacement: path.join(nextDir, "navigation.js") },
-      { find: "server-only", replacement: path.resolve(__dirname, "./src/test/mocks/server-only.ts") },
+      {
+        extends: true,
+        resolve: resolveConfig,
+        test: {
+          name: "ui",
+          environment: "happy-dom",
+          include: ["src/**/*.test.tsx"],
+        },
+      },
     ],
   },
+  resolve: resolveConfig,
 });

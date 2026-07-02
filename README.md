@@ -198,6 +198,7 @@ Branch-first workflow, PR checklist, and agent rules: [CONTRIBUTING.md](CONTRIBU
 | [docs/security.md](docs/security.md) | Security requirements and readiness |
 | [docs/migrations.md](docs/migrations.md) | Database migrations and upgrade notes |
 | [docs/contributing.md](docs/contributing.md) | Branch, PR, changelog, validation |
+| [docs/test-ci-performance-playbook.md](docs/test-ci-performance-playbook.md) | Vitest + CI optimization guide |
 | [docs/publishing.md](docs/publishing.md) | Manual publish, release invariant, recovery |
 | [docs/repo-settings.md](docs/repo-settings.md) | GitHub branch protection and environments |
 | [docs/CURRENT_PRODUCT_SURFACE.md](docs/CURRENT_PRODUCT_SURFACE.md) | Live exports, routes, migrations inventory |
