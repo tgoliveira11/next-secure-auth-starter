@@ -108,6 +108,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build package (dist required by consumer-entrypoints tests)
+        run: npm run build -w @tgoliveira/secure-auth
+
       - name: Run tests with coverage
         run: npm run test:coverage
 

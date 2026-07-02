@@ -18,7 +18,7 @@ Open the slowest recent [Validate secure-auth](https://github.com/tgoliveira11/n
 | --- | --- |
 | `typecheck` | `build @tgoliveira/secure-auth` + `npm run typecheck` |
 | `lint` | ESLint (dev-harness + consumer-demo; package lint is a no-op stub) |
-| `test` | `npm run test:coverage` (package + dev-harness) |
+| `test` | `build @tgoliveira/secure-auth` + `npm run test:coverage` |
 | `build` | Full monorepo build + `npm pack --dry-run` |
 
 After parallelization, **workflow wall clock ≈ max(job times)**, not their sum.
