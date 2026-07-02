@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Forgot-password 500 on outdated database schema** — When the consumer database is missing v0.3+ `users` columns, `POST /api/auth/forgot-password` now returns the generic success message (200) instead of 500, logs a `migrationHint`, and `GET /api/auth/health` reports `database.ready: false` with migration guidance. `DatabaseSchemaError` maps to 503 via `apiError` on other routes.
+
 ### Security
 
 - **Security audit hardening** — Admin APIs require fully authenticated sessions (2FA complete); `users.status` enforced on all login paths; invite/approval flags wired into registration and OAuth signup; sessions revoked when 2FA is enabled; production requires `rateLimit.store: "postgres"`; forwarded IP headers trusted only when `security.trustForwardedHeaders` is set; password-reset token validation oracle removed; same-origin protection on admin mutating routes; magic-link verification moved to UI page + POST API (no GET token handler); sensitive admin config overrides restricted.

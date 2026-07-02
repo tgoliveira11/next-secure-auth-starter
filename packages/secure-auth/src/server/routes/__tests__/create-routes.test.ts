@@ -9,6 +9,7 @@ describe("createRoutes", () => {
     await expect(response.json()).resolves.toMatchObject({
       ok: true,
       package: "@tgoliveira/secure-auth",
+      database: { ready: true },
     });
   });
 

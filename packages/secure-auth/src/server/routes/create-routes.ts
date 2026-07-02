@@ -65,18 +65,52 @@ function lazyNextAuth(getServices: () => Promise<SecureAuthServices>): {
  * Route handler registry for Next.js App Router consumers.
  */
 export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
-  const healthGet = async () =>
-    new Response(
-      JSON.stringify({
-        ok: true,
-        package: "@tgoliveira/secure-auth",
-        version: SECURE_AUTH_PACKAGE_VERSION,
-      }),
-      {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }
-    );
+  const healthGet = async () => {
+    const base = {
+      package: "@tgoliveira/secure-auth",
+      version: SECURE_AUTH_PACKAGE_VERSION,
+    };
+
+    try {
+      const services = await getServices();
+      const { assertUsersTableSchema } = await import(
+        "../../modules/database/lib/database-errors.js"
+      );
+      await assertUsersTableSchema(services.db);
+
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          ...base,
+          database: { ready: true },
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }
+      );
+    } catch (error) {
+      const { getDatabaseErrorHint, extractPostgresMessage } = await import(
+        "../../modules/database/lib/database-errors.js"
+      );
+      const hint = getDatabaseErrorHint(error);
+
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          ...base,
+          database: {
+            ready: false,
+            error: hint ?? extractPostgresMessage(error),
+          },
+        }),
+        {
+          status: 503,
+          headers: { "content-type": "application/json" },
+        }
+      );
+    }
+  };
 
   const route = (
     loader: () => Promise<HandlerFactories>,
