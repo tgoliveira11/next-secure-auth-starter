@@ -160,6 +160,10 @@ export type SecureAuthConfig = {
     maxValueBytes?: number;
     /** Extra allowed namespaces beyond app.slug and secure-auth. Default: []. */
     allowedNamespaces?: string[];
+    /** Seed keys for `app.slug` when the namespace is empty on first read. */
+    defaults?: Record<string, unknown>;
+    /** Seed keys per namespace when empty on first read. */
+    defaultsByNamespace?: Record<string, Record<string, unknown>>;
   };
   rateLimit?: {
     store: "memory" | "postgres";

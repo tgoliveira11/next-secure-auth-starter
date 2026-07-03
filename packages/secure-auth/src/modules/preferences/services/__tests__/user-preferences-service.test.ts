@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createUserPreferencesService } from "../user-preferences-service.js";
 import type { SecureAuthConfig } from "@/core/types.js";
 import {
+  PreferenceConflictError,
   PreferenceKeyLimitError,
   PreferenceNamespaceForbiddenError,
   PreferenceNotFoundError,
@@ -11,6 +12,7 @@ import { PreferenceValidationError } from "../../lib/preference-limits.js";
 
 const mocks = vi.hoisted(() => ({
   listByNamespace: vi.fn(),
+  listAllForUser: vi.fn(),
   get: vi.fn(),
   countByNamespace: vi.fn(),
   upsert: vi.fn(),
@@ -42,6 +44,7 @@ function buildService(configOverrides: Partial<SecureAuthConfig> = {}) {
     config,
     userPreferencesRepository: {
       listByNamespace: mocks.listByNamespace,
+      listAllForUser: mocks.listAllForUser,
       get: mocks.get,
       countByNamespace: mocks.countByNamespace,
       upsert: mocks.upsert,
@@ -56,6 +59,7 @@ describe("user-preferences-service", () => {
     vi.clearAllMocks();
     mocks.enforceRateLimit.mockResolvedValue(undefined);
     mocks.listByNamespace.mockResolvedValue([]);
+    mocks.listAllForUser.mockResolvedValue([]);
     mocks.get.mockResolvedValue(null);
     mocks.countByNamespace.mockResolvedValue(0);
     mocks.upsert.mockImplementation(async (_userId, _ns, key, value) => ({
@@ -104,7 +108,10 @@ describe("user-preferences-service", () => {
   it("upserts a preference value", async () => {
     const service = buildService();
     const result = await service.set("user-1", "theme", "dark", null);
-    expect(result).toEqual({ namespace: "demo-app", key: "theme", value: "dark" });
+    expect(result.namespace).toBe("demo-app");
+    expect(result.key).toBe("theme");
+    expect(result.value).toBe("dark");
+    expect(result.etag).toMatch(/^"\d+"$/);
     expect(mocks.upsert).toHaveBeenCalledWith("user-1", "demo-app", "theme", "dark");
   });
 
@@ -130,9 +137,12 @@ describe("user-preferences-service", () => {
 
   it("patches multiple entries", async () => {
     const service = buildService();
-    mocks.listByNamespace.mockResolvedValue([{ key: "theme", value: "light" }]);
+    mocks.listByNamespace.mockResolvedValue([
+      { key: "theme", value: "light", updatedAt: new Date(1000) },
+    ]);
     const result = await service.patch("user-1", { theme: "dark", sidebar: true }, null);
     expect(result.updated).toEqual(["theme", "sidebar"]);
+    expect(result.etags.theme).toBeDefined();
     expect(mocks.upsert).toHaveBeenCalledTimes(2);
   });
 
@@ -173,5 +183,47 @@ describe("user-preferences-service", () => {
     const result = await service.patch("user-1", {}, null);
     expect(result.updated).toEqual([]);
     expect(mocks.upsert).not.toHaveBeenCalled();
+  });
+
+  it("seeds configured defaults when namespace is empty", async () => {
+    const service = buildService({
+      preferences: {
+        enabled: true,
+        defaults: { theme: "system", "layout.sidebarCollapsed": false },
+      },
+    });
+    mocks.countByNamespace.mockResolvedValue(0);
+    await service.list("user-1", null);
+    expect(mocks.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects set when If-Match does not match", async () => {
+    const service = buildService();
+    mocks.get.mockResolvedValue({
+      key: "theme",
+      value: "dark",
+      updatedAt: new Date(1000),
+      userId: "user-1",
+      namespace: "demo-app",
+    });
+    await expect(
+      service.set("user-1", "theme", "light", null, undefined, '"999"')
+    ).rejects.toBeInstanceOf(PreferenceConflictError);
+  });
+
+  it("exports all namespaces for the user", async () => {
+    const service = buildService();
+    mocks.listAllForUser.mockResolvedValue([
+      {
+        userId: "user-1",
+        namespace: "demo-app",
+        key: "theme",
+        value: "dark",
+        updatedAt: new Date(2000),
+      },
+    ]);
+    const result = await service.exportAll("user-1");
+    expect(result.namespaces["demo-app"]?.entries.theme).toBe("dark");
+    expect(result.exportedAt).toBeTruthy();
   });
 });

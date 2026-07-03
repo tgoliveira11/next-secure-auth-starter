@@ -1,6 +1,6 @@
 # ADR: User preferences engine
 
-**Status:** Accepted (implemented — Phase A in `0.6.0`; Phase B pending)  
+**Status:** Accepted — Phase A/B/C implemented in `0.6.x`  
 **Date:** 2026-07-03  
 **Target release:** `0.6.0` (core API); `0.6.x` (React merge helper + hooks)  
 **Authors:** Product / architecture review

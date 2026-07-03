@@ -6,6 +6,7 @@ import {
 import { PreferencesDisabledError } from "@/modules/preferences/lib/preferences-errors.js";
 import {
   PreferenceKeyLimitError,
+  PreferenceConflictError,
   PreferenceNamespaceForbiddenError,
   PreferenceNotFoundError,
 } from "@/modules/preferences/lib/preferences-errors.js";
@@ -40,5 +41,8 @@ describe("user-preferences-shared", () => {
     expect(
       (await handleUserPreferencesError(new PreferenceKeyLimitError(), "PATCH")).status
     ).toBe(400);
+    expect(
+      (await handleUserPreferencesError(new PreferenceConflictError(), "PUT")).status
+    ).toBe(412);
   });
 });

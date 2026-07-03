@@ -15,6 +15,22 @@ export {
 } from "../lib/passkey/sign-in-with-passkey.js";
 export { TurnstileCaptcha, type TurnstileCaptchaProps } from "../modules/ui/features/auth/turnstile-captcha";
 export {
+  mergeGuestPreferences,
+  buildPreferencesMergeStorageKey,
+  type MergeGuestPreferencesOptions,
+  type MergeGuestPreferencesResult,
+  type MergeGuestPreferencesStrategy,
+} from "../modules/preferences/react/merge-guest-preferences.js";
+export {
+  useUserPreferences,
+  useUserPreference,
+  usePreferencesEnabled,
+} from "../modules/preferences/react/use-user-preferences.js";
+export {
+  useMergeGuestPreferences,
+  type UseMergeGuestPreferencesOptions,
+} from "../modules/preferences/react/use-merge-guest-preferences.js";
+export {
   PasswordStrengthField,
   type PasswordStrengthFieldProps,
 } from "../modules/ui/features/password/password-strength-field";

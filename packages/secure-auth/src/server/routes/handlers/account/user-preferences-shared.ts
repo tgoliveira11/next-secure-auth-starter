@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { RateLimitError } from "@/modules/rate-limit/index.js";
 import {
   PreferenceKeyLimitError,
+  PreferenceConflictError,
   PreferenceNamespaceForbiddenError,
   PreferenceNotFoundError,
   PreferencesDisabledError,
@@ -18,6 +19,9 @@ export function handleUserPreferencesError(error: unknown, endpoint: string) {
   }
   if (error instanceof PreferenceNotFoundError) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (error instanceof PreferenceConflictError) {
+    return NextResponse.json({ error: "Conflict" }, { status: 412 });
   }
   if (error instanceof PreferenceValidationError || error instanceof PreferenceKeyLimitError) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });

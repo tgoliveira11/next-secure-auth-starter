@@ -260,6 +260,10 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
         "DELETE"
       ),
     },
+    accountPreferencesExport: route(
+      () => import("./handlers/account/user-preferences-export.js"),
+      "GET"
+    ),
   };
 }
 

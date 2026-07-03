@@ -25,3 +25,10 @@ export class PreferenceKeyLimitError extends Error {
     this.name = "PreferenceKeyLimitError";
   }
 }
+
+export class PreferenceConflictError extends Error {
+  constructor() {
+    super("Preference was modified elsewhere");
+    this.name = "PreferenceConflictError";
+  }
+}

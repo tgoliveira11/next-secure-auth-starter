@@ -81,6 +81,14 @@ export function createUserPreferencesRepository(db: DbClient) {
         .returning({ key: userPreferences.key });
       return deleted.length > 0;
     },
+
+    async listAllForUser(userId: string): Promise<UserPreferenceRow[]> {
+      return db
+        .select()
+        .from(userPreferences)
+        .where(eq(userPreferences.userId, userId))
+        .orderBy(userPreferences.namespace, userPreferences.key);
+    },
   };
 }
 

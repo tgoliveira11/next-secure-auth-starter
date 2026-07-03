@@ -11,6 +11,7 @@ import {
 
 const patchSchema = z.object({
   entries: z.record(z.string(), z.unknown()),
+  ifMatch: z.record(z.string(), z.string()).optional(),
 });
 
 async function preferencesListPatch(request: Request, services: SecureAuthServices) {
@@ -27,7 +28,8 @@ async function preferencesListPatch(request: Request, services: SecureAuthServic
       user.id,
       parsed.data.entries,
       namespace,
-      getClientIp(request, services.config)
+      getClientIp(request, services.config),
+      parsed.data.ifMatch
     );
     return NextResponse.json(result);
   } catch (error) {

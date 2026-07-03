@@ -6,6 +6,7 @@ import { requireVerifiedFullyAuthenticatedUser } from "@/modules/auth/lib/sessio
 import { getClientIp } from "@/modules/security/ip/request-ip.js";
 import type { SecureAuthServices } from "@/core/types.js";
 import type { RouteContext } from "../../create-routes.js";
+import { normalizeIfMatchHeader } from "@/modules/preferences/lib/preference-etag.js";
 import {
   handleUserPreferencesError,
   readPreferencesNamespaceParam,
@@ -44,7 +45,9 @@ async function preferencesByKeyGet(
       namespace,
       getClientIp(request, services.config)
     );
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { ETag: result.etag },
+    });
   } catch (error) {
     return handleUserPreferencesError(error, "GET /api/account/preferences/:key");
   }
@@ -69,14 +72,18 @@ async function preferencesByKeyPut(
     }
 
     const namespace = readPreferencesNamespaceParam(request, services.config.app.slug);
+    const ifMatch = normalizeIfMatchHeader(request.headers.get("If-Match"));
     const result = await services.userPreferencesService.set(
       user.id,
       key,
       parsed.data.value,
       namespace,
-      getClientIp(request, services.config)
+      getClientIp(request, services.config),
+      ifMatch
     );
-    return NextResponse.json(result);
+    return NextResponse.json(result, {
+      headers: { ETag: result.etag },
+    });
   } catch (error) {
     return handleUserPreferencesError(error, "PUT /api/account/preferences/:key");
   }
@@ -95,11 +102,13 @@ async function preferencesByKeyDelete(
     }
 
     const namespace = readPreferencesNamespaceParam(request, services.config.app.slug);
+    const ifMatch = normalizeIfMatchHeader(request.headers.get("If-Match"));
     const result = await services.userPreferencesService.remove(
       user.id,
       key,
       namespace,
-      getClientIp(request, services.config)
+      getClientIp(request, services.config),
+      ifMatch
     );
     return NextResponse.json(result);
   } catch (error) {

@@ -93,6 +93,7 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `twoFactorBackupCodesRegenerate` | POST | shipped |
 | `accountPreferences` | GET, PATCH | opt-in (`preferences.enabled`) — [guide](./user-preferences.md) |
 | `accountPreferencesByKey` | GET, PUT, DELETE | opt-in (`preferences.enabled`) |
+| `accountPreferencesExport` | GET | opt-in (`preferences.enabled`) — GDPR self-export |
 
 ### Admin (authenticated + `role = admin`)
 
@@ -138,16 +139,15 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | --- | --- |
 | `preferencesApi` | shipped (requires `preferences.enabled`) |
 
-## Planned client exports (Phase B)
+## Client exports (`@tgoliveira/secure-auth/react/client`)
 
-| Symbol | Entry | Status |
-| --- | --- | --- |
-| `useUserPreferences`, `useUserPreference` | `@tgoliveira/secure-auth/react/client` | planned |
-| `mergeGuestPreferences`, `useMergeGuestPreferences` | `@tgoliveira/secure-auth/react/client` | planned |
+| Symbol | Status |
+| --- | --- |
+| `useUserPreferences`, `useUserPreference` | shipped (requires `preferences.enabled`) |
+| `mergeGuestPreferences`, `useMergeGuestPreferences` | shipped |
+| `usePreferencesEnabled` | shipped |
 
-See [adr/user-preferences.md](./adr/user-preferences.md).
-
-## Monorepo apps (not published)
+## Planned client exports
 
 | App | Role |
 | --- | --- |
@@ -155,9 +155,5 @@ See [adr/user-preferences.md](./adr/user-preferences.md).
 | `apps/dev-harness` | Internal harness (Swagger, extra tooling) |
 
 ## Planned (roadmap — not in surface above)
-
-| Feature | Target | Notes |
-| --- | --- | --- |
-| **User preferences (React merge)** | `0.6.x` | [adr/user-preferences.md](./adr/user-preferences.md) Phase B — hooks + guest merge helper |
 
 See [roadmap.md](./roadmap.md) for other future work.

@@ -70,4 +70,5 @@ export const ROUTE_REGISTRY = [
     path: "account/preferences/[key]",
     methods: ["GET", "PUT", "DELETE"],
   },
+  { key: "accountPreferencesExport", path: "account/preferences/export", methods: ["GET"] },
 ];

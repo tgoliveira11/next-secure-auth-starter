@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   set: vi.fn(),
   patch: vi.fn(),
   remove: vi.fn(),
+  exportAll: vi.fn(),
 }));
 
 vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
@@ -40,6 +41,7 @@ async function buildServices(preferencesEnabled = true) {
         set: mocks.set,
         patch: mocks.patch,
         remove: mocks.remove,
+        exportAll: mocks.exportAll,
       },
     })
   );
@@ -56,10 +58,24 @@ describe("account preferences API routes", () => {
       id: "user-1",
       email: "user@example.com",
     });
-    mocks.list.mockResolvedValue({ namespace: "demo-app", entries: { theme: "dark" } });
-    mocks.get.mockResolvedValue({ namespace: "demo-app", key: "theme", value: "dark" });
-    mocks.set.mockResolvedValue({ namespace: "demo-app", key: "theme", value: "dark" });
-    mocks.patch.mockResolvedValue({ namespace: "demo-app", updated: ["theme"] });
+    mocks.list.mockResolvedValue({
+      namespace: "demo-app",
+      entries: { theme: "dark" },
+      etags: { theme: '"1"' },
+    });
+    mocks.get.mockResolvedValue({
+      namespace: "demo-app",
+      key: "theme",
+      value: "dark",
+      etag: '"1"',
+    });
+    mocks.set.mockResolvedValue({
+      namespace: "demo-app",
+      key: "theme",
+      value: "dark",
+      etag: '"2"',
+    });
+    mocks.patch.mockResolvedValue({ namespace: "demo-app", updated: ["theme"], etags: { theme: '"2"' } });
     mocks.remove.mockResolvedValue({ namespace: "demo-app", key: "theme", deleted: true });
     services = await buildServices();
   });
@@ -81,7 +97,11 @@ describe("account preferences API routes", () => {
       new Request("http://localhost/api/account/preferences")
     );
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ namespace: "demo-app", entries: { theme: "dark" } });
+    await expect(res.json()).resolves.toEqual({
+      namespace: "demo-app",
+      entries: { theme: "dark" },
+      etags: { theme: '"1"' },
+    });
   });
 
   it("PUT /preferences/:key upserts a value", async () => {
@@ -95,7 +115,14 @@ describe("account preferences API routes", () => {
       { params: Promise.resolve({ key: "theme" }) }
     );
     expect(res.status).toBe(200);
-    expect(mocks.set).toHaveBeenCalledWith("user-1", "theme", "dark", "demo-app", expect.any(String));
+    expect(mocks.set).toHaveBeenCalledWith(
+      "user-1",
+      "theme",
+      "dark",
+      "demo-app",
+      expect.any(String),
+      null
+    );
   });
 
   it("PATCH /preferences merges entries", async () => {
@@ -121,7 +148,13 @@ describe("account preferences API routes", () => {
       { params: Promise.resolve({ key: "theme" }) }
     );
     expect(res.status).toBe(200);
-    expect(mocks.remove).toHaveBeenCalledWith("user-1", "theme", "demo-app", expect.any(String));
+    expect(mocks.remove).toHaveBeenCalledWith(
+      "user-1",
+      "theme",
+      "demo-app",
+      expect.any(String),
+      null
+    );
   });
 
   it("GET /preferences/:key returns 404 when missing", async () => {
@@ -226,5 +259,18 @@ describe("account preferences API routes", () => {
       new Request("http://localhost/api/account/preferences?namespace=widgets")
     );
     expect(mocks.list).toHaveBeenCalledWith("user-1", "widgets", expect.any(String));
+  });
+
+  it("GET /preferences/export returns bulk export", async () => {
+    mocks.exportAll.mockResolvedValue({
+      exportedAt: "2026-01-01T00:00:00.000Z",
+      namespaces: { "demo-app": { entries: { theme: "dark" }, etags: { theme: '"1"' } } },
+    });
+    const { createGetHandler } = await import("../account/user-preferences-export.js");
+    const res = await createGetHandler(services)(
+      new Request("http://localhost/api/account/preferences/export")
+    );
+    expect(res.status).toBe(200);
+    expect(mocks.exportAll).toHaveBeenCalled();
   });
 });
