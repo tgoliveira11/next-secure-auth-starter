@@ -2,8 +2,8 @@
 
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
-**Package version (manifest):** `0.4.0`  
-**Last reviewed:** 2026-06-30
+**Package version (manifest):** `0.5.1`  
+**Last reviewed:** 2026-07-03
 
 ## Status legend
 
@@ -38,6 +38,7 @@ Living inventory of what the package exposes today. Update this file when export
 | `0000_optimal_warpath.sql` | shipped | Core auth schema |
 | `0001_passkey_vault_unlock_enabled.sql` | shipped | `passkey_credentials.vault_unlock_enabled` |
 | `0002_v0_3_admin_platform.sql` | shipped | Admin platform tables + user profile/role columns |
+| `0003_user_preferences.sql` | shipped | Per-user key-value preferences (`user_preferences`) — see [user-preferences.md](./user-preferences.md) |
 
 ## Route keys (`secureAuth.routes.*`)
 
@@ -90,6 +91,8 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `twoFactorSetupVerify` | POST | shipped |
 | `twoFactorDisable` | POST | shipped |
 | `twoFactorBackupCodesRegenerate` | POST | shipped |
+| `accountPreferences` | GET, PATCH | opt-in (`preferences.enabled`) — [guide](./user-preferences.md) |
+| `accountPreferencesByKey` | GET, PUT, DELETE | opt-in (`preferences.enabled`) |
 
 ### Admin (authenticated + `role = admin`)
 
@@ -123,10 +126,26 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `invites.enabled` | `false` | shipped |
 | `apiKeys.enabled` | `false` | shipped |
 | `profile.enabled` | `false` | shipped |
+| `preferences.enabled` | `false` | shipped — [guide](./user-preferences.md) |
 | `accountLockout.enabled` | `false` | shipped |
 | `auth.magicLink.enabled` | `false` | shipped |
 | `auth.securityNotifications.enabled` | `true` | shipped |
 | `passwordPolicy.checkBreachedPasswords` | `true` | shipped |
+
+## Client exports (`@tgoliveira/secure-auth/client`)
+
+| Symbol | Status |
+| --- | --- |
+| `preferencesApi` | shipped (requires `preferences.enabled`) |
+
+## Planned client exports (Phase B)
+
+| Symbol | Entry | Status |
+| --- | --- | --- |
+| `useUserPreferences`, `useUserPreference` | `@tgoliveira/secure-auth/react/client` | planned |
+| `mergeGuestPreferences`, `useMergeGuestPreferences` | `@tgoliveira/secure-auth/react/client` | planned |
+
+See [adr/user-preferences.md](./adr/user-preferences.md).
 
 ## Monorepo apps (not published)
 
@@ -137,4 +156,8 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 
 ## Planned (roadmap — not in surface above)
 
-See [roadmap.md](./roadmap.md) for future work. Do not list items here unless they are explicitly deferred from a shipped release.
+| Feature | Target | Notes |
+| --- | --- | --- |
+| **User preferences (React merge)** | `0.6.x` | [adr/user-preferences.md](./adr/user-preferences.md) Phase B — hooks + guest merge helper |
+
+See [roadmap.md](./roadmap.md) for other future work.

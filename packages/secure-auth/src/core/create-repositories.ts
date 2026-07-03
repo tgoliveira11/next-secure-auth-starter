@@ -10,6 +10,7 @@ import { createLockoutRepository } from "../modules/admin/repositories/lockout-r
 import { createInviteRepository } from "../modules/admin/repositories/invite-repository.js";
 import { createApiKeyRepository } from "../modules/admin/repositories/api-key-repository.js";
 import { createConfigOverrideRepository } from "../modules/admin/repositories/config-override-repository.js";
+import { createUserPreferencesRepository } from "../modules/preferences/repositories/user-preferences-repository.js";
 
 export function createRepositories({ db }: { db: SecureAuthDb }) {
   return {
@@ -24,6 +25,7 @@ export function createRepositories({ db }: { db: SecureAuthDb }) {
     inviteRepository: createInviteRepository(db),
     apiKeyRepository: createApiKeyRepository(db),
     configOverrideRepository: createConfigOverrideRepository(db),
+    userPreferencesRepository: createUserPreferencesRepository(db),
   };
 }
 

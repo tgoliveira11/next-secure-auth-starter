@@ -23,6 +23,7 @@ import type { createInviteService } from "../modules/admin/services/invite-servi
 import type { createApiKeyService } from "../modules/admin/services/api-key-service.js";
 import type { createConfigOverrideService } from "../modules/admin/services/config-override-service.js";
 import type { createProfileService } from "../modules/account/services/profile-service.js";
+import type { createUserPreferencesService } from "../modules/preferences/services/user-preferences-service.js";
 
 export type SecureAuthDb = PostgresJsDatabase<AuthSchema>;
 
@@ -150,6 +151,16 @@ export type SecureAuthConfig = {
     /** Consumer-provided handler to store avatar files and return a URL. */
     uploadHandler?: (file: Buffer, mimeType: string, userId: string) => Promise<string>;
   };
+  preferences?: {
+    /** Enable per-user key-value preferences. Default: false. */
+    enabled?: boolean;
+    /** Max keys per user per namespace. Default: 50. */
+    maxKeysPerUser?: number;
+    /** Max serialized JSON bytes per value. Default: 4096. */
+    maxValueBytes?: number;
+    /** Extra allowed namespaces beyond app.slug and secure-auth. Default: []. */
+    allowedNamespaces?: string[];
+  };
   rateLimit?: {
     store: "memory" | "postgres";
   };
@@ -257,5 +268,6 @@ export type SecureAuthServices = {
   readonly apiKeyService: ReturnType<typeof createApiKeyService>;
   readonly configOverrideService: ReturnType<typeof createConfigOverrideService>;
   readonly profileService: ReturnType<typeof createProfileService>;
+  readonly userPreferencesService: ReturnType<typeof createUserPreferencesService>;
   readonly getAuthOptions: () => NextAuthOptions;
 };

@@ -8,6 +8,7 @@ const OVERRIDABLE_KEYS = new Set([
   "passwordPolicy.minLength",
   "sessions.maxAgeSeconds",
   "profile.enabled",
+  "preferences.enabled",
   "apiKeys.enabled",
 ]);
 

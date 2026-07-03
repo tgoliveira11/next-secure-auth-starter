@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **User preferences (Phase A)** — Opt-in per-user key-value JSON storage (`preferences.enabled`, default `false`). Migration `0003_user_preferences.sql`, account APIs (`accountPreferences`, `accountPreferencesByKey`), client `preferencesApi`, namespace default `app.slug`. ADR: [docs/adr/user-preferences.md](docs/adr/user-preferences.md). Integration: [docs/user-preferences.md](docs/user-preferences.md).
+
 ## [0.5.1] - 2026-07-02
 
 ### Changed

@@ -78,8 +78,12 @@ Wire each handler in your App Router under the consumer URL path shown below. Ca
 | `sessionsRevokeCurrent` | POST | `/api/account/sessions/revoke-current` | Yes |
 | `sessionsRevokeOthers` | POST | `/api/account/sessions/revoke-others` | Yes |
 | `sessionsRevokeAll` | POST | `/api/account/sessions/revoke-all` | Yes |
+| `accountPreferences` | GET, PATCH | `/api/account/preferences` | Yes (opt-in) |
+| `accountPreferencesByKey` | GET, PUT, DELETE | `/api/account/preferences/[key]` | Yes (opt-in) |
 
 **Auth required** means the handler expects a valid NextAuth session cookie (`getServerSession`). Handlers that call `requireSessionUser`, `requireVerifiedFullyAuthenticatedUser`, or `requireVerifiedMutatingAccountUser` return **401** when no session is present.
+
+When `preferences.enabled` is `false`, preference routes return **404**.
 
 Example wrapper:
 

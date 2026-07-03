@@ -8,20 +8,26 @@ type RouteHandler = (request: Request, context?: RouteContext) => Response | Pro
 type HandlerFactories = {
   createGetHandler?: (services: SecureAuthServices) => RouteHandler;
   createPostHandler?: (services: SecureAuthServices) => RouteHandler;
+  createPutHandler?: (services: SecureAuthServices) => RouteHandler;
+  createPatchHandler?: (services: SecureAuthServices) => RouteHandler;
   createDeleteHandler?: (services: SecureAuthServices) => RouteHandler;
 };
 
 function lazyServiceRoute(
   getServices: () => Promise<SecureAuthServices>,
   loader: () => Promise<HandlerFactories>,
-  method: "GET" | "POST" | "DELETE"
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 ): RouteHandler {
   const factoryKey =
     method === "GET"
       ? "createGetHandler"
       : method === "POST"
         ? "createPostHandler"
-        : "createDeleteHandler";
+        : method === "PUT"
+          ? "createPutHandler"
+          : method === "PATCH"
+            ? "createPatchHandler"
+            : "createDeleteHandler";
 
   return (request, context) =>
     Promise.all([getServices(), loader()]).then(([services, mod]) => {
@@ -114,7 +120,7 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
 
   const route = (
     loader: () => Promise<HandlerFactories>,
-    method: "GET" | "POST" | "DELETE"
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
   ) => ({ [method]: lazyServiceRoute(getServices, loader, method) });
 
   return {
@@ -222,6 +228,37 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     accountProfile: {
       GET: lazyServiceRoute(getServices, () => import("./handlers/account/profile.js"), "GET"),
       POST: lazyServiceRoute(getServices, () => import("./handlers/account/profile.js"), "POST"),
+    },
+
+    // Account preferences (opt-in via preferences.enabled)
+    accountPreferences: {
+      GET: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/user-preferences-list.js"),
+        "GET"
+      ),
+      PATCH: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/user-preferences-patch.js"),
+        "PATCH"
+      ),
+    },
+    accountPreferencesByKey: {
+      GET: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/user-preferences-by-key.js"),
+        "GET"
+      ),
+      PUT: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/user-preferences-by-key.js"),
+        "PUT"
+      ),
+      DELETE: lazyServiceRoute(
+        getServices,
+        () => import("./handlers/account/user-preferences-by-key.js"),
+        "DELETE"
+      ),
     },
   };
 }

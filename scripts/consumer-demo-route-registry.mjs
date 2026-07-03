@@ -63,4 +63,11 @@ export const ROUTE_REGISTRY = [
   { key: "adminConfig", path: "auth/admin/config", methods: ["GET", "POST", "DELETE"] },
   // Account profile
   { key: "accountProfile", path: "account/profile", methods: ["GET", "POST"] },
+  // Account preferences
+  { key: "accountPreferences", path: "account/preferences", methods: ["GET", "PATCH"] },
+  {
+    key: "accountPreferencesByKey",
+    path: "account/preferences/[key]",
+    methods: ["GET", "PUT", "DELETE"],
+  },
 ];
