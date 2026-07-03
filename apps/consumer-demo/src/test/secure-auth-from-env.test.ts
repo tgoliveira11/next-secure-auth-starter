@@ -48,6 +48,13 @@ describe("buildSecureAuthConfigFromEnv (consumer-demo)", () => {
     expect(buildSecureAuthConfigFromEnv(defaults, {}).passwordPolicy?.minLength).toBe(12);
   });
 
+  it("maps AUTH_USER_PREFERENCES_ENABLED=true", () => {
+    const config = buildSecureAuthConfigFromEnv(defaults, {
+      AUTH_USER_PREFERENCES_ENABLED: "true",
+    });
+    expect(config.preferences?.enabled).toBe(true);
+  });
+
   it("maps GitHub OAuth when both credentials are present", () => {
     const config = buildSecureAuthConfigFromEnv(defaults, {
       AUTH_GITHUB_CLIENT_ID: "gh-id",

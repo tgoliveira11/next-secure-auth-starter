@@ -12,6 +12,7 @@ export * from "../lib/api-client/parse-response.js";
 export * from "../lib/api-client/passkey-account.js";
 export * from "../lib/api-client/passkey-login.js";
 export * from "../lib/api-client/two-factor.js";
+export * from "../lib/api-client/preferences.js";
 
 export * from "../modules/account/lib/account-auth-messages.js";
 export * from "../modules/account/lib/account-deletion.js";

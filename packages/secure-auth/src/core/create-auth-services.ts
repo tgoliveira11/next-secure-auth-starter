@@ -20,6 +20,7 @@ import { createInviteService } from "../modules/admin/services/invite-service.js
 import { createApiKeyService } from "../modules/admin/services/api-key-service.js";
 import { createConfigOverrideService } from "../modules/admin/services/config-override-service.js";
 import { createProfileService } from "../modules/account/services/profile-service.js";
+import { createUserPreferencesService } from "../modules/preferences/services/user-preferences-service.js";
 
 /**
  * Creates the injected service registry for @tgoliveira/secure-auth.
@@ -39,6 +40,11 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
   const apiKeyService = createApiKeyService({ config, apiKeyRepository: repos.apiKeyRepository });
   const configOverrideService = createConfigOverrideService({ config, configOverrideRepository: repos.configOverrideRepository });
   const profileService = createProfileService({ config, userRepository: repos.userRepository });
+  const userPreferencesService = createUserPreferencesService({
+    config,
+    userPreferencesRepository: repos.userPreferencesRepository,
+    rateLimit,
+  });
 
   const authService = createAuthService({ ctx, repos, rateLimit });
   const accountSessionService = createAccountSessionService({
@@ -139,6 +145,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     apiKeyService,
     configOverrideService,
     profileService,
+    userPreferencesService,
     getAuthOptions,
   };
 }

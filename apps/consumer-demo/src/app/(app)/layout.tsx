@@ -11,10 +11,12 @@
  */
 
 import { AppNav } from "@/components/app-nav";
+import { UserPreferencesBootstrap } from "@/components/user-preferences-bootstrap";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      <UserPreferencesBootstrap />
       <AppNav />
       <main>{children}</main>
     </div>

@@ -13,6 +13,8 @@ const V03_ADMIN_TABLES = [
   "login_attempt_counters",
 ] as const;
 
+const USER_PREFERENCES_TABLE = "user_preferences";
+
 describe("published SQL migrations", () => {
   it("includes v0.3 admin platform migration in the journal", () => {
     const journal = JSON.parse(readFileSync(join(META_DIR, "_journal.json"), "utf-8")) as {
@@ -31,6 +33,14 @@ describe("published SQL migrations", () => {
 
     expect(sql).toContain('ALTER TABLE "users" ADD COLUMN "role"');
     expect(sql).not.toContain("vault_unlock_enabled");
+  });
+
+  it("0003 migration creates user_preferences with cascade delete", () => {
+    const sql = readFileSync(join(MIGRATIONS_DIR, "0003_user_preferences.sql"), "utf-8");
+
+    expect(sql).toContain(`CREATE TABLE "${USER_PREFERENCES_TABLE}"`);
+    expect(sql).toContain("ON DELETE cascade");
+    expect(sql).toContain("idx_user_preferences_user_namespace");
   });
 
   it("has a snapshot for every journal entry", () => {

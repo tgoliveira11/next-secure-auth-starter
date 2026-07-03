@@ -8,6 +8,8 @@ import {
   index,
   integer,
   uniqueIndex,
+  varchar,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -263,6 +265,23 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const userPreferences = pgTable(
+  "user_preferences",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    namespace: varchar("namespace", { length: 64 }).notNull(),
+    key: varchar("key", { length: 128 }).notNull(),
+    value: jsonb("value").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.namespace, table.key] }),
+    index("idx_user_preferences_user_namespace").on(table.userId, table.namespace),
+  ]
+);
+
 export const adminConfigOverrides = pgTable("admin_config_overrides", {
   id: uuid("id").primaryKey().defaultRandom(),
   key: text("key").notNull().unique(),
@@ -275,6 +294,7 @@ export type User = typeof users.$inferSelect;
 export type InviteCode = typeof inviteCodes.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
 export type LoginAttemptCounter = typeof loginAttemptCounters.$inferSelect;
+export type UserPreference = typeof userPreferences.$inferSelect;
 
 export const authSchema = {
   users,
@@ -294,6 +314,7 @@ export const authSchema = {
   inviteUses,
   apiKeys,
   adminConfigOverrides,
+  userPreferences,
 };
 
 export type AuthSchema = typeof authSchema;

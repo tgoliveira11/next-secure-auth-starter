@@ -49,6 +49,9 @@ export type SecureAuthUIPublicConfig = {
   magicLink?: {
     enabled: boolean;
   };
+  preferences?: {
+    enabled: boolean;
+  };
 };
 
 const DEFAULT_UI_MESSAGES: Record<string, string> = {
@@ -147,6 +150,9 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
     auth: buildPublicAuthRedirectConfig(config, paths.afterLogin),
     magicLink: {
       enabled: config.auth.magicLink?.enabled === true,
+    },
+    preferences: {
+      enabled: config.preferences?.enabled === true,
     },
   };
 }

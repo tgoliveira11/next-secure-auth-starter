@@ -17,6 +17,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button, useUiPaths, signOutWithRedirect } from "@tgoliveira/secure-auth/react";
+import { useGuestOrSyncedTheme } from "@/components/user-preferences-bootstrap";
 
 const NAV_ITEMS = [
   { key: "afterLogin" as const, label: "Dashboard" },
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
 export function AppNav() {
   const resolved = useUiPaths();
   const pathname = usePathname();
+  const { theme, setTheme } = useGuestOrSyncedTheme();
 
   return (
     <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--card)]">
@@ -66,6 +68,21 @@ export function AppNav() {
             );
           })}
         </nav>
+
+        <label className="flex shrink-0 items-center gap-2 text-xs text-[var(--muted)]">
+          Theme
+          <select
+            value={theme}
+            onChange={(event) => {
+              void setTheme(event.target.value as "light" | "dark" | "system");
+            }}
+            className="rounded border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs text-[var(--foreground)]"
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
 
         {/* Sign out */}
         <Button

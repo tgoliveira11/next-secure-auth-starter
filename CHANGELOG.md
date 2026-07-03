@@ -6,6 +6,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **User preferences (Phase A)** — Opt-in per-user key-value JSON storage (`preferences.enabled`, default `false`). Migration `0003_user_preferences.sql`, account APIs (`accountPreferences`, `accountPreferencesByKey`), client `preferencesApi`, namespace default `app.slug`. ADR: [docs/adr/user-preferences.md](docs/adr/user-preferences.md). Integration: [docs/user-preferences.md](docs/user-preferences.md).
+- **User preferences (Phase B)** — React hooks (`useUserPreferences`, `useUserPreference`, `mergeGuestPreferences`, `useMergeGuestPreferences`) in `@tgoliveira/secure-auth/react/client`. Consumer-demo theme + guest merge example.
+- **User preferences (Phase C)** — Config defaults on first read (`preferences.defaults`, `defaultsByNamespace`), GDPR self-export route (`accountPreferencesExport`), optimistic concurrency via `etags` / `If-Match` (412 on conflict).
+
 ## [0.5.1] - 2026-07-02
 
 ### Changed

@@ -41,6 +41,7 @@ export type SecureAuthEnvSlice = Pick<
   | "invites"
   | "apiKeys"
   | "profile"
+  | "preferences"
 >;
 
 /** Maps app-owned environment variables to `createSecureAuth(config)` fields. */
@@ -142,6 +143,17 @@ export function buildSecureAuthConfigFromEnv(
     },
     profile: {
       enabled: readBooleanEnv(env, ["AUTH_PROFILE_ENABLED"], false),
+    },
+    preferences: {
+      enabled: readBooleanEnv(env, ["AUTH_USER_PREFERENCES_ENABLED"], false),
+      maxKeysPerUser: readNumberEnv(env, ["AUTH_USER_PREFERENCES_MAX_KEYS"], 50, {
+        min: 1,
+        max: 500,
+      }),
+      maxValueBytes: readNumberEnv(env, ["AUTH_USER_PREFERENCES_MAX_VALUE_BYTES"], 4096, {
+        min: 256,
+        max: 65536,
+      }),
     },
     accountPolicy: {
       sendVerificationOnRegister: readBooleanEnv(
