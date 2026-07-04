@@ -2,8 +2,8 @@
 
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
-**Package version (manifest):** `0.5.1`  
-**Last reviewed:** 2026-07-03
+**Package version (manifest):** `0.6.0`  
+**Last reviewed:** 2026-07-04
 
 ## Status legend
 
