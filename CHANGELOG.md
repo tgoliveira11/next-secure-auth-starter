@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-07-05
+
 ### Fixed
 
 - **`email.templates` wiring** — All package-sent account emails now honor optional `email.templates` overrides (verification, password reset, magic link, and security notifications). Previously documented but ignored at runtime. Default templates resolve action URLs from `ui.paths` where applicable.
