@@ -1,11 +1,10 @@
 import { safeLogger } from "@/modules/security/logger/index";
 import {
-  buildAccountEmailChangedNotificationEmail,
-  buildMagicLinkUsedNotificationEmail,
-  buildNewLoginNotificationEmail,
-  buildPasswordChangedNotificationEmail,
-  buildTwoFactorDisabledNotificationEmail,
-  getAppNameFromConfig,
+  accountEmailChangedNotificationEmailContent,
+  magicLinkUsedNotificationEmailContent,
+  newLoginNotificationEmailContent,
+  passwordChangedNotificationEmailContent,
+  twoFactorDisabledNotificationEmailContent,
 } from "@/modules/email/templates/security-notification-templates";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
@@ -87,7 +86,6 @@ export function createSecurityNotificationService(deps: SecurityNotificationServ
       }
 
       try {
-        const appName = getAppNameFromConfig(config);
         const occurredAt = event.occurredAt ?? new Date();
 
         if (event.type === "new_login") {
@@ -96,7 +94,7 @@ export function createSecurityNotificationService(deps: SecurityNotificationServ
             return;
           }
 
-          const content = buildNewLoginNotificationEmail(appName, {
+          const content = newLoginNotificationEmailContent(config, {
             browser: event.browser,
             platform: event.platform,
             deviceType: event.deviceType,
@@ -108,19 +106,19 @@ export function createSecurityNotificationService(deps: SecurityNotificationServ
         }
 
         if (event.type === "password_changed") {
-          const content = buildPasswordChangedNotificationEmail(appName, occurredAt);
+          const content = passwordChangedNotificationEmailContent(config, occurredAt);
           await ctx.deliverAccountEmail({ to: event.userEmail, ...content });
           return;
         }
 
         if (event.type === "two_factor_disabled") {
-          const content = buildTwoFactorDisabledNotificationEmail(appName, occurredAt);
+          const content = twoFactorDisabledNotificationEmailContent(config, occurredAt);
           await ctx.deliverAccountEmail({ to: event.userEmail, ...content });
           return;
         }
 
         if (event.type === "account_email_changed") {
-          const content = buildAccountEmailChangedNotificationEmail(appName, {
+          const content = accountEmailChangedNotificationEmailContent(config, {
             previousEmail: event.previousEmail,
             newEmail: event.newEmail,
             occurredAt,
@@ -130,7 +128,7 @@ export function createSecurityNotificationService(deps: SecurityNotificationServ
         }
 
         if (event.type === "magic_link_used") {
-          const content = buildMagicLinkUsedNotificationEmail(appName, {
+          const content = magicLinkUsedNotificationEmailContent(config, {
             browser: event.browser,
             platform: event.platform,
             deviceType: event.deviceType,

@@ -6,6 +6,42 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **`email.templates` wiring** — All package-sent account emails now honor optional `email.templates` overrides (verification, password reset, magic link, and security notifications). Previously documented but ignored at runtime. Default templates resolve action URLs from `ui.paths` where applicable.
+
+  **Usage:**
+
+  ```typescript
+  createSecureAuth({
+    email: {
+      from: "Acme <noreply@acme.com>",
+      provider: myEmailProvider,
+      templates: {
+        verificationEmail: ({ appName, verifyUrl }) => ({
+          subject: `Verify your ${appName} email`,
+          html: `<p><a href="${verifyUrl}">Verify email</a></p>`,
+          text: `Verify: ${verifyUrl}`,
+        }),
+        passwordReset: ({ appName, resetUrl }) => ({
+          subject: `Reset your ${appName} password`,
+          html: `<p><a href="${resetUrl}">Reset password</a></p>`,
+        }),
+        magicLink: ({ appName, magicLinkUrl }) => ({
+          subject: `Sign in to ${appName}`,
+          html: `<p><a href="${magicLinkUrl}">Sign in</a></p>`,
+        }),
+        newLoginNotification: ({ appName, browser, occurredAt }) => ({
+          subject: `New sign-in to ${appName}`,
+          html: `<p>Sign-in from ${browser ?? "unknown device"} at ${occurredAt.toISOString()}</p>`,
+        }),
+      },
+    },
+  });
+  ```
+
+  See [docs/customization.md](docs/customization.md) for all template keys.
+
 ## [0.6.0] - 2026-07-04
 
 ### Added

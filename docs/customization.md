@@ -202,6 +202,19 @@ Default (when omitted): `singleActiveSession: false`.
 
 ## Email
 
+All package-sent emails can be customized via optional `email.templates` functions on `createSecureAuth(config)`. When omitted, the package uses built-in defaults.
+
+| Template key | Trigger |
+| --- | --- |
+| `verificationEmail` | Registration / resend verification |
+| `passwordReset` | Forgot-password flow |
+| `magicLink` | Magic-link sign-in request |
+| `newLoginNotification` | Security alert: sign-in from new device |
+| `passwordChangedNotification` | Security alert: password changed |
+| `twoFactorDisabledNotification` | Security alert: 2FA disabled |
+| `accountEmailChangedNotification` | Security alert: account email changed |
+| `magicLinkUsedNotification` | Security alert: magic link sign-in completed |
+
 ```typescript
 email: {
   from: "Acme <noreply@acme.com>",
@@ -213,11 +226,17 @@ email: {
       text: `...`,
     }),
     passwordReset: ({ appName, resetUrl }) => ({ ... }),
+    magicLink: ({ appName, magicLinkUrl }) => ({ ... }),
+    newLoginNotification: ({ appName, browser, platform, deviceType, ipMasked, occurredAt }) => ({ ... }),
+    passwordChangedNotification: ({ appName, occurredAt }) => ({ ... }),
+    twoFactorDisabledNotification: ({ appName, occurredAt }) => ({ ... }),
+    accountEmailChangedNotification: ({ appName, previousEmail, newEmail, occurredAt }) => ({ ... }),
+    magicLinkUsedNotification: ({ appName, browser, platform, deviceType, ipMasked, occurredAt }) => ({ ... }),
   },
 }
 ```
 
-The app owns delivery credentials (`SMTP_*`, etc.). The package owns template structure and send call sites.
+The app owns delivery credentials (`SMTP_*`, etc.). The package owns send call sites and default copy. Security notification templates apply only when `auth.securityNotifications.enabled` is `true`.
 
 ## Auth flow paths
 

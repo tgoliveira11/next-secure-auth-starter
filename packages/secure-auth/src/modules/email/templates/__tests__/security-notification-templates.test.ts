@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
 import {
   buildAccountEmailChangedNotificationEmail,
   buildMagicLinkUsedNotificationEmail,
@@ -6,6 +7,8 @@ import {
   buildPasswordChangedNotificationEmail,
   buildTwoFactorDisabledNotificationEmail,
   getAppNameFromConfig,
+  newLoginNotificationEmailContent,
+  passwordChangedNotificationEmailContent,
 } from "../security-notification-templates";
 
 const occurredAt = new Date("2026-01-15T12:00:00.000Z");
@@ -73,5 +76,39 @@ describe("security notification templates", () => {
     ).toBe("Brand Name");
 
     expect(getAppNameFromConfig({ app: { name: "Config Name" } })).toBe("Config Name");
+  });
+
+  it("delegates security notification emails to email.templates overrides", () => {
+    const config = buildTestSecureAuthConfig({
+      email: {
+        from: "Test <noreply@test>",
+        provider: { send: async () => undefined },
+        templates: {
+          newLoginNotification: ({ appName }) => ({
+            subject: `Custom login — ${appName}`,
+            html: "<p>Custom login</p>",
+          }),
+          passwordChangedNotification: ({ appName }) => ({
+            subject: `Custom password — ${appName}`,
+            html: "<p>Custom password</p>",
+          }),
+        },
+      },
+    });
+
+    expect(
+      newLoginNotificationEmailContent(config, {
+        browser: "Chrome",
+        occurredAt,
+      })
+    ).toEqual({
+      subject: "Custom login — Test App",
+      html: "<p>Custom login</p>",
+    });
+
+    expect(passwordChangedNotificationEmailContent(config, occurredAt)).toEqual({
+      subject: "Custom password — Test App",
+      html: "<p>Custom password</p>",
+    });
   });
 });
