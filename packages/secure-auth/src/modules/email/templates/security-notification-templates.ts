@@ -1,4 +1,6 @@
-import { getAppName } from "@/core/config-accessors";
+import { getAppName } from "@/core/config-accessors.js";
+import type { SecureAuthConfig } from "@/core/types.js";
+import { resolveEmailTemplate } from "./resolve-email-template.js";
 
 function supportFooter(appName: string): string {
   return `If this wasn't you, contact ${appName} support immediately.`;
@@ -110,5 +112,65 @@ export function buildMagicLinkUsedNotificationEmail(
 }
 
 export function getAppNameFromConfig(config: { app: { name: string }; ui?: { brand?: { name?: string } } }) {
-  return config.ui?.brand?.name ?? getAppName(config as never);
+  return config.ui?.brand?.name ?? getAppName(config as SecureAuthConfig);
+}
+
+export function newLoginNotificationEmailContent(
+  config: SecureAuthConfig,
+  input: { browser?: string; platform?: string; deviceType?: string; ipMasked?: string; occurredAt: Date }
+) {
+  const appName = getAppNameFromConfig(config);
+  return resolveEmailTemplate(
+    config.email.templates?.newLoginNotification,
+    { appName, ...input },
+    () => buildNewLoginNotificationEmail(appName, input)
+  );
+}
+
+export function passwordChangedNotificationEmailContent(
+  config: SecureAuthConfig,
+  occurredAt: Date
+) {
+  const appName = getAppNameFromConfig(config);
+  return resolveEmailTemplate(
+    config.email.templates?.passwordChangedNotification,
+    { appName, occurredAt },
+    () => buildPasswordChangedNotificationEmail(appName, occurredAt)
+  );
+}
+
+export function twoFactorDisabledNotificationEmailContent(
+  config: SecureAuthConfig,
+  occurredAt: Date
+) {
+  const appName = getAppNameFromConfig(config);
+  return resolveEmailTemplate(
+    config.email.templates?.twoFactorDisabledNotification,
+    { appName, occurredAt },
+    () => buildTwoFactorDisabledNotificationEmail(appName, occurredAt)
+  );
+}
+
+export function accountEmailChangedNotificationEmailContent(
+  config: SecureAuthConfig,
+  input: { previousEmail: string; newEmail: string; occurredAt: Date }
+) {
+  const appName = getAppNameFromConfig(config);
+  return resolveEmailTemplate(
+    config.email.templates?.accountEmailChangedNotification,
+    { appName, ...input },
+    () => buildAccountEmailChangedNotificationEmail(appName, input)
+  );
+}
+
+export function magicLinkUsedNotificationEmailContent(
+  config: SecureAuthConfig,
+  input: { browser?: string; platform?: string; deviceType?: string; ipMasked?: string; occurredAt: Date }
+) {
+  const appName = getAppNameFromConfig(config);
+  return resolveEmailTemplate(
+    config.email.templates?.magicLinkUsedNotification,
+    { appName, ...input },
+    () => buildMagicLinkUsedNotificationEmail(appName, input)
+  );
 }

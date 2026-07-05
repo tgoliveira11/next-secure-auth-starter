@@ -37,17 +37,40 @@ export type SecureAuthLogger = {
   error(message: string, meta?: Record<string, unknown>): void;
 };
 
+export type SecureAuthEmailContent = {
+  subject: string;
+  html: string;
+  text?: string;
+};
+
 export type SecureAuthEmailTemplates = {
-  verificationEmail?: (input: { appName: string; verifyUrl: string }) => {
-    subject: string;
-    html: string;
-    text?: string;
-  };
-  passwordReset?: (input: { appName: string; resetUrl: string }) => {
-    subject: string;
-    html: string;
-    text?: string;
-  };
+  verificationEmail?: (input: { appName: string; verifyUrl: string }) => SecureAuthEmailContent;
+  passwordReset?: (input: { appName: string; resetUrl: string }) => SecureAuthEmailContent;
+  magicLink?: (input: { appName: string; magicLinkUrl: string }) => SecureAuthEmailContent;
+  newLoginNotification?: (input: {
+    appName: string;
+    browser?: string;
+    platform?: string;
+    deviceType?: string;
+    ipMasked?: string;
+    occurredAt: Date;
+  }) => SecureAuthEmailContent;
+  passwordChangedNotification?: (input: { appName: string; occurredAt: Date }) => SecureAuthEmailContent;
+  twoFactorDisabledNotification?: (input: { appName: string; occurredAt: Date }) => SecureAuthEmailContent;
+  accountEmailChangedNotification?: (input: {
+    appName: string;
+    previousEmail: string;
+    newEmail: string;
+    occurredAt: Date;
+  }) => SecureAuthEmailContent;
+  magicLinkUsedNotification?: (input: {
+    appName: string;
+    browser?: string;
+    platform?: string;
+    deviceType?: string;
+    ipMasked?: string;
+    occurredAt: Date;
+  }) => SecureAuthEmailContent;
 };
 
 export type SecureAuthConfig = {

@@ -4,6 +4,7 @@ export type {
   SecureAuthLogger,
   SecureAuthServices,
   EmailProvider,
+  SecureAuthEmailContent,
   SecureAuthEmailTemplates,
 } from "./core/types.js";
 export { SECURE_AUTH_PACKAGE_VERSION } from "./core/package-version.js";

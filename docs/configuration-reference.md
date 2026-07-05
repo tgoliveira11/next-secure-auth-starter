@@ -87,7 +87,7 @@ Optional nested config (defaults applied when omitted):
 | `ui.paths.*` | `string` | package defaults (apps override in code) |
 | `ui.messages.*` | `string` | apps override in code |
 | `ui.passwordStrength.position` | `"above"` \| `"below"` | `"above"` |
-| `email.templates` | optional template fns | package defaults |
+| `email.templates` | optional template fns | package defaults for all outbound account emails (verification, reset, magic link, security notifications) |
 
 ---
 

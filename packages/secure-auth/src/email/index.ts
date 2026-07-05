@@ -1,1 +1,1 @@
-export type { EmailProvider, SecureAuthEmailTemplates } from "../core/types.js";
+export type { EmailProvider, SecureAuthEmailContent, SecureAuthEmailTemplates } from "../core/types.js";

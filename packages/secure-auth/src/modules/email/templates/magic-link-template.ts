@@ -1,8 +1,9 @@
-import type { SecureAuthConfig } from "@/core/types";
-import { getAppName } from "@/core/config-accessors";
+import type { SecureAuthConfig } from "@/core/types.js";
+import { getAppName } from "@/core/config-accessors.js";
+import { resolveAuthPaths } from "@/modules/ui/pages/types.js";
+import { resolveEmailTemplate } from "./resolve-email-template.js";
 
-export function buildMagicLinkEmail(config: SecureAuthConfig, magicLinkUrl: string) {
-  const appName = getAppName(config);
+function defaultMagicLinkEmailContent(appName: string, magicLinkUrl: string) {
   return {
     subject: `Sign in to ${appName}`,
     text: [
@@ -16,8 +17,17 @@ export function buildMagicLinkEmail(config: SecureAuthConfig, magicLinkUrl: stri
   };
 }
 
+export function buildMagicLinkEmail(config: SecureAuthConfig, magicLinkUrl: string) {
+  const appName = getAppName(config);
+  return resolveEmailTemplate(
+    config.email.templates?.magicLink,
+    { appName, magicLinkUrl },
+    () => defaultMagicLinkEmailContent(appName, magicLinkUrl)
+  );
+}
+
 export function buildMagicLinkUrl(config: SecureAuthConfig, rawToken: string): string {
   const base = config.app.baseUrl.replace(/\/$/, "");
-  const path = config.ui?.paths?.magicLinkVerify ?? "/login/magic-link";
-  return `${base}${path}?token=${encodeURIComponent(rawToken)}`;
+  const paths = resolveAuthPaths(config.ui?.paths);
+  return `${base}${paths.magicLinkVerify}?token=${encodeURIComponent(rawToken)}`;
 }
