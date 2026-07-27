@@ -48,7 +48,14 @@ export const secureAuth = createSecureAuth({
 
 Override `passwordPolicy.minLength` in app env (`AUTH_PASSWORD_MIN_LENGTH`) or TypeScript config. The package merges partial overrides with defaults via `mergePasswordPolicy()` (`minLength` defaults to **12** when omitted). The effective policy is exposed as `secureAuth.passwordPolicy`, `secureAuth.uiConfig.passwordPolicy`, and used consistently by register, reset-password, and change-password flows when `SecureAuthUIProvider` is wired.
 
-`uiConfig` includes resolved `paths`, `messages`, `appSlug`, `appName`, `passwordPolicy`, and `passwordStrength`. It contains **no secrets** and **no React nodes** — safe to pass from server layout to client provider.
+`uiConfig` includes resolved `paths`, `messages`, `appSlug`, `appName`, `passwordPolicy`,
+`passwordStrength`, and `oauthProviderIds`. It contains **no secrets**, OAuth client IDs, tenant
+details, or React nodes — safe to pass from server layout to client provider.
+
+OAuth buttons and registration copy use `oauthProviderIds` on the first client render. There is no
+post-hydration request to discover providers. If the provider is omitted or an old/manual config has
+no `oauthProviderIds`, social sign-in fails closed. A standalone `SocialSignIn` may receive an
+explicit `providerIds` prop.
 
 ### Client provider
 

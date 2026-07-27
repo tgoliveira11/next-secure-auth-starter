@@ -10,7 +10,11 @@ import { Input } from "../primitives/input.js";
 import { Card } from "../primitives/card.js";
 import { FormField } from "../primitives/form-field.js";
 import { PageHeader } from "../primitives/page-header.js";
-import { SocialSignIn } from "../features/auth/social-sign-in.js";
+import {
+  formatOAuthProviderNames,
+  SocialSignIn,
+  useConfiguredOAuthProviderIds,
+} from "../features/auth/social-sign-in.js";
 import { PasswordStrengthField } from "../features/auth/password-strength-field.js";
 import { TurnstileCaptcha } from "../features/auth/turnstile-captcha.js";
 import {
@@ -72,6 +76,8 @@ export function RegisterPage({
     "Set up secure email/password sign-in for your account."
   );
   const loginLinkLabel = useUiMessage(loginLinkLabelProp, "loginLinkLabel", "Sign in");
+  const oauthProviderIds = useConfiguredOAuthProviderIds();
+  const oauthProviderNames = formatOAuthProviderNames(oauthProviderIds);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -211,10 +217,14 @@ export function RegisterPage({
 
         <SocialSignIn dividerLabel="or sign up with" afterLoginPath={destination} />
 
-        <p className="text-center text-xs text-[var(--muted)]">
-          Google, Apple, GitHub, and Microsoft create your account automatically on first sign-in — the same
-          providers available on the sign-in page.
-        </p>
+        {oauthProviderNames ? (
+          <p className="text-center text-xs text-[var(--muted)]">
+            {oauthProviderNames} {oauthProviderIds.length === 1 ? "creates" : "create"} your
+            account automatically on first sign-in — using the same
+            {oauthProviderIds.length === 1 ? " provider" : " providers"} available on the sign-in
+            page.
+          </p>
+        ) : null}
       </Card>
 
       {footer ?? (

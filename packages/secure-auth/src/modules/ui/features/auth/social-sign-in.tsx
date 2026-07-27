@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "../../primitives/button.js";
 import { OAuthProviderLogo } from "./oauth-provider-logos.js";
 import { MICROSOFT_OAUTH_PROVIDER_ID } from "@tgoliveira/secure-auth/client";
+import type { OAuthProviderId } from "../../../../core/ui-config.js";
+import { useSecureAuthUi } from "../../secure-auth-ui-provider.js";
 
 export type SocialSignInProps = {
   dividerLabel?: string;
   afterLoginPath?: string;
+  /** Explicit provider IDs override `SecureAuthUIProvider`; omitted config fails closed. */
+  providerIds?: readonly OAuthProviderId[];
 };
 
 const SOCIAL_PROVIDERS = [
@@ -18,39 +21,33 @@ const SOCIAL_PROVIDERS = [
   { id: MICROSOFT_OAUTH_PROVIDER_ID, label: "Continue with Microsoft" },
 ] as const;
 
+export function useConfiguredOAuthProviderIds(
+  providerIds?: readonly OAuthProviderId[]
+): readonly OAuthProviderId[] {
+  const ui = useSecureAuthUi();
+  return providerIds ?? ui?.oauthProviderIds ?? [];
+}
+
+export function formatOAuthProviderNames(providerIds: readonly OAuthProviderId[]): string {
+  const names = SOCIAL_PROVIDERS.filter((provider) => providerIds.includes(provider.id)).map(
+    (provider) => provider.label.replace("Continue with ", "")
+  );
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}
+
 export function SocialSignIn({
   dividerLabel = "or continue with",
   afterLoginPath = "/dashboard",
+  providerIds,
 }: SocialSignInProps) {
-  const [availableProviderIds, setAvailableProviderIds] = useState<string[] | null>(null);
+  const configuredProviderIds = useConfiguredOAuthProviderIds(providerIds);
+  const visibleProviders = SOCIAL_PROVIDERS.filter((provider) =>
+    configuredProviderIds.includes(provider.id)
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void fetch("/api/auth/providers")
-      .then((response) => (response.ok ? response.json() : {}))
-      .then((providers: Record<string, unknown>) => {
-        if (!cancelled) {
-          setAvailableProviderIds(Object.keys(providers));
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAvailableProviderIds([]);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const visibleProviders =
-    availableProviderIds === null
-      ? SOCIAL_PROVIDERS
-      : SOCIAL_PROVIDERS.filter((provider) => availableProviderIds.includes(provider.id));
-
-  if (availableProviderIds !== null && visibleProviders.length === 0) {
+  if (visibleProviders.length === 0) {
     return null;
   }
 

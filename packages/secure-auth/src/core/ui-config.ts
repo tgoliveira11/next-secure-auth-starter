@@ -16,6 +16,10 @@ import {
   buildPublicAuthRedirectConfig,
   type PublicAuthRedirectConfig,
 } from "./auth-redirect-config.js";
+import {
+  resolveConfiguredOAuthProviderIds,
+  type OAuthProviderId,
+} from "./oauth-provider-config.js";
 
 export type PasswordStrengthFeedbackPosition = "above" | "below";
 
@@ -52,6 +56,8 @@ export type SecureAuthUIPublicConfig = {
   preferences?: {
     enabled: boolean;
   };
+  /** Configured NextAuth OAuth provider IDs. Provider credentials are never exposed. */
+  oauthProviderIds?: OAuthProviderId[];
 };
 
 const DEFAULT_UI_MESSAGES: Record<string, string> = {
@@ -154,5 +160,8 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
     preferences: {
       enabled: config.preferences?.enabled === true,
     },
+    oauthProviderIds: resolveConfiguredOAuthProviderIds(config),
   };
 }
+
+export type { OAuthProviderId } from "./oauth-provider-config.js";
