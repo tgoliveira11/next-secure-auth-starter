@@ -37,7 +37,7 @@ Start here: [docs/consumer-quick-start.md](docs/consumer-quick-start.md)
 
 | Tool | Version |
 | --- | --- |
-| Node.js | 20+ |
+| Node.js | 20.9+ |
 | npm | 10+ |
 | Docker | 24+ (for PostgreSQL + Mailpit) |
 | PostgreSQL | 16 (via Docker Compose) |

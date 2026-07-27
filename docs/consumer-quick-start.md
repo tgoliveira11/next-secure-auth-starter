@@ -20,10 +20,10 @@ This guide is self-contained. You do not need to read package source code.
 
 | Tool | Version |
 | --- | --- |
-| Node.js | 20+ |
+| Node.js | 20.9+ |
 | npm | 10+ |
 | PostgreSQL | 14+ (16 recommended) |
-| Next.js | 16+ (App Router) |
+| Next.js | 16.2.11+ (App Router) |
 
 ---
 
@@ -48,7 +48,7 @@ npm install @tgoliveira/secure-auth@x.y.z
 The package **requires** these peers in your application. Install them explicitly:
 
 ```bash
-npm install next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
+npm install next@^16.2.11 react@^19 react-dom@^19 next-auth@^4.24.15 drizzle-orm@^0.45.2 postgres
 ```
 
 Also install dev tooling you will need:

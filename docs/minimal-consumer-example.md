@@ -12,7 +12,7 @@ Uses **public exports only**. See [consumer-quick-start.md](./consumer-quick-sta
 
 ```bash
 npm install @tgoliveira/secure-auth@0.1.25 \
-  next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
+  next@^16.2.11 react@^19 react-dom@^19 next-auth@^4.24.15 drizzle-orm@^0.45.2 postgres
 npm install -D drizzle-kit
 ```
 

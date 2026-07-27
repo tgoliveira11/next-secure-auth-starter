@@ -13,6 +13,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - **Stable first-frame auth UI** — `SocialSignIn` now renders synchronously from `SecureAuthUIProvider` (or explicit `providerIds`) instead of first showing every supported provider and then fetching `/api/auth/providers`. Missing legacy UI config fails closed, registration copy names only available providers, and passkey login distinguishes `checking`, `supported`, and `unsupported` capability states.
+- **Deterministic admin data states** — `AdminLocksPage`, `AdminApiKeysPage`, `AdminConfigPage`, and `AdminWaitlistPage` now distinguish `pending`, `ready`, `ready-empty`, and `error`. Initial and failed requests no longer paint false zero counts, empty cards, or stale final data.
+
+### Security
+
+- **Release dependency remediation** — Raised peer minimums to Next.js `^16.2.11` and NextAuth `^4.24.15`, validated on Next.js `16.2.12`, and pinned patched monorepo resolutions for PostCSS `8.5.23`, sharp `0.35.0`, brace-expansion `5.0.8`, esbuild `0.28.1`, and uuid `11.1.1`. The guarded postinstall compatibility patch keeps legacy minimatch 3 and 9 consumers working with brace-expansion 5. A clean install now passes the high/critical release audit with zero findings.
 
 ## [0.6.1] - 2026-07-05
 

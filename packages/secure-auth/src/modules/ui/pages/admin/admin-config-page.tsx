@@ -8,6 +8,7 @@ import { Badge } from "../../primitives/badge.js";
 import { Card, CardHeader, CardTitle, CardDescription } from "../../primitives/card.js";
 import { PageHeader } from "../../primitives/page-header.js";
 import { LoadingState } from "../../primitives/loading-state.js";
+import { EmptyState } from "../../primitives/empty-state.js";
 import { Input } from "../../primitives/input.js";
 
 type ConfigKey = {
@@ -19,6 +20,8 @@ type ConfigKey = {
 type AdminConfigPageProps = {
   apiBase?: string;
 };
+
+type LoadState = "pending" | "ready" | "ready-empty" | "error";
 
 function sourceBadge(source: ConfigKey["source"]) {
   if (source === "admin") return <Badge variant="info">admin</Badge>;
@@ -33,24 +36,26 @@ function valueDisplay(value: unknown): string {
 
 export function AdminConfigPage({ apiBase = "/api/auth" }: AdminConfigPageProps) {
   const [configKeys, setConfigKeys] = useState<ConfigKey[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("pending");
   const [error, setError] = useState("");
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    setIsLoading(true);
+    setLoadState("pending");
     setError("");
     try {
       const res = await fetch(`${apiBase}/admin/config`);
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
-      setConfigKeys(data.keys ?? []);
+      const nextConfigKeys = data.keys ?? [];
+      setConfigKeys(nextConfigKeys);
+      setLoadState(nextConfigKeys.length === 0 ? "ready-empty" : "ready");
     } catch {
+      setConfigKeys([]);
       setError("Failed to load config overrides.");
-    } finally {
-      setIsLoading(false);
+      setLoadState("error");
     }
   }, [apiBase]);
 
@@ -112,80 +117,86 @@ export function AdminConfigPage({ apiBase = "/api/auth" }: AdminConfigPageProps)
       <PageHeader
         title="Config Overrides"
         description="Override environment configuration at runtime via the database."
-        action={<Button variant="secondary" onClick={load} disabled={isLoading}>Refresh</Button>}
+        action={<Button variant="secondary" onClick={load} disabled={loadState === "pending"}>Refresh</Button>}
       />
       {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
-      {isLoading ? (
-        <LoadingState label="Loading config…" />
-      ) : (
+      {loadState === "pending" ? (
+        <LoadingState label="Loading config" />
+      ) : loadState === "ready" || loadState === "ready-empty" ? (
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Overridable settings</CardTitle>
             <CardDescription>Admin overrides take precedence over env vars and package defaults.</CardDescription>
           </CardHeader>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[var(--border)] bg-[var(--card-muted)]">
-                <tr>
-                  <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Key</th>
-                  <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Source</th>
-                  <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Value</th>
-                  <th className="px-4 py-2" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {configKeys.map((ck) => (
-                  <tr key={ck.key} className="hover:bg-[var(--card-muted)]">
-                    <td className="px-4 py-3 font-mono text-xs">{ck.key}</td>
-                    <td className="px-4 py-3">{sourceBadge(ck.source)}</td>
-                    <td className="px-4 py-3">
-                      {editingKey === ck.key ? (
-                        <Input
-                          className="h-7 text-xs"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") void saveEdit(ck.key);
-                            if (e.key === "Escape") setEditingKey(null);
-                          }}
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="font-mono text-xs">{valueDisplay(ck.value)}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {editingKey === ck.key ? (
-                          <>
-                            <Button variant="primary" className="text-xs" disabled={saving} onClick={() => saveEdit(ck.key)}>
-                              {saving ? "Saving…" : "Save"}
-                            </Button>
-                            <Button variant="secondary" className="text-xs" onClick={() => setEditingKey(null)}>
-                              Cancel
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button variant="secondary" className="text-xs" onClick={() => startEdit(ck)}>
-                              Edit
-                            </Button>
-                            {ck.source === "admin" && (
-                              <Button variant="danger" className="text-xs" disabled={saving} onClick={() => resetOverride(ck.key)}>
-                                Reset
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </td>
+          {loadState === "ready-empty" ? (
+            <div className="px-6 pb-6">
+              <EmptyState title="No configurable settings" description="There are no runtime settings available to override." />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-[var(--border)] bg-[var(--card-muted)]">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Key</th>
+                    <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Source</th>
+                    <th className="px-4 py-2 text-left font-medium text-[var(--muted)]">Value</th>
+                    <th className="px-4 py-2" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)]">
+                  {configKeys.map((ck) => (
+                    <tr key={ck.key} className="hover:bg-[var(--card-muted)]">
+                      <td className="px-4 py-3 font-mono text-xs">{ck.key}</td>
+                      <td className="px-4 py-3">{sourceBadge(ck.source)}</td>
+                      <td className="px-4 py-3">
+                        {editingKey === ck.key ? (
+                          <Input
+                            className="h-7 text-xs"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") void saveEdit(ck.key);
+                              if (e.key === "Escape") setEditingKey(null);
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="font-mono text-xs">{valueDisplay(ck.value)}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {editingKey === ck.key ? (
+                            <>
+                              <Button variant="primary" className="text-xs" disabled={saving} onClick={() => saveEdit(ck.key)}>
+                                {saving ? "Saving…" : "Save"}
+                              </Button>
+                              <Button variant="secondary" className="text-xs" onClick={() => setEditingKey(null)}>
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button variant="secondary" className="text-xs" onClick={() => startEdit(ck)}>
+                                Edit
+                              </Button>
+                              {ck.source === "admin" && (
+                                <Button variant="danger" className="text-xs" disabled={saving} onClick={() => resetOverride(ck.key)}>
+                                  Reset
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
-      )}
+      ) : null}
     </PageShell>
   );
 }

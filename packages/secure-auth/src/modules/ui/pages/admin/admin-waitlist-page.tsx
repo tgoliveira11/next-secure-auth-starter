@@ -19,26 +19,31 @@ type AdminWaitlistPageProps = {
   apiBase?: string;
 };
 
+type LoadState = "pending" | "ready" | "ready-empty" | "error";
+
 export function AdminWaitlistPage({ apiBase = "/api/auth" }: AdminWaitlistPageProps) {
   const [users, setUsers] = useState<PendingUser[]>([]);
   const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("pending");
   const [error, setError] = useState("");
   const [approving, setApproving] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
-    setIsLoading(true);
+    setLoadState("pending");
     setError("");
     try {
       const res = await fetch(`${apiBase}/admin/waitlist`);
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
-      setUsers(data.users ?? []);
+      const nextUsers = data.users ?? [];
+      setUsers(nextUsers);
       setTotal(data.total ?? data.users?.length ?? 0);
+      setLoadState(nextUsers.length === 0 ? "ready-empty" : "ready");
     } catch {
+      setUsers([]);
+      setTotal(0);
       setError("Failed to load waitlist.");
-    } finally {
-      setIsLoading(false);
+      setLoadState("error");
     }
   }, [apiBase]);
 
@@ -66,13 +71,19 @@ export function AdminWaitlistPage({ apiBase = "/api/auth" }: AdminWaitlistPagePr
     <PageShell width="wide">
       <PageHeader
         title="Waitlist"
-        description={`${total} account${total !== 1 ? "s" : ""} pending approval.`}
-        action={<Button variant="secondary" onClick={load} disabled={isLoading}>Refresh</Button>}
+        description={
+          loadState === "pending"
+            ? "Loading accounts pending approval…"
+            : loadState === "error"
+              ? "Pending account count is unavailable."
+              : `${total} account${total !== 1 ? "s" : ""} pending approval.`
+        }
+        action={<Button variant="secondary" onClick={load} disabled={loadState === "pending"}>Refresh</Button>}
       />
       {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
-      {isLoading ? (
-        <LoadingState label="Loading waitlist…" />
-      ) : (
+      {loadState === "pending" ? (
+        <LoadingState label="Loading waitlist" />
+      ) : loadState === "ready" || loadState === "ready-empty" ? (
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Pending accounts</CardTitle>
@@ -116,7 +127,7 @@ export function AdminWaitlistPage({ apiBase = "/api/auth" }: AdminWaitlistPagePr
             </div>
           )}
         </Card>
-      )}
+      ) : null}
     </PageShell>
   );
 }

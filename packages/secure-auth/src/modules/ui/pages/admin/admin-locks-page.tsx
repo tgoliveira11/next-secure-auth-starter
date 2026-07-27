@@ -23,6 +23,8 @@ type AdminLocksPageProps = {
   apiBase?: string;
 };
 
+type LoadState = "pending" | "ready" | "ready-empty" | "error";
+
 function formatDate(d?: string | null) {
   if (!d) return "—";
   return new Date(d).toLocaleString();
@@ -99,24 +101,28 @@ function LockTable({
 export function AdminLocksPage({ apiBase = "/api/auth" }: AdminLocksPageProps) {
   const [locked, setLocked] = useState<LockRecord[]>([]);
   const [frozen, setFrozen] = useState<LockRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("pending");
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<Set<string>>(new Set());
   const [success, setSuccess] = useState("");
 
   const load = useCallback(async () => {
-    setIsLoading(true);
+    setLoadState("pending");
     setError("");
     try {
       const res = await fetch(`${apiBase}/admin/locks`);
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
-      setLocked(data.locked ?? []);
-      setFrozen(data.frozen ?? []);
+      const nextLocked = data.locked ?? [];
+      const nextFrozen = data.frozen ?? [];
+      setLocked(nextLocked);
+      setFrozen(nextFrozen);
+      setLoadState(nextLocked.length === 0 && nextFrozen.length === 0 ? "ready-empty" : "ready");
     } catch {
+      setLocked([]);
+      setFrozen([]);
       setError("Failed to load lock data. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setLoadState("error");
     }
   }, [apiBase]);
 
@@ -147,8 +153,8 @@ export function AdminLocksPage({ apiBase = "/api/auth" }: AdminLocksPageProps) {
         title="Account Locks"
         description="Manage accounts locked or frozen due to failed login attempts."
         action={
-          <Button variant="secondary" onClick={load} disabled={isLoading}>
-            {isLoading ? "Loading…" : "Refresh"}
+          <Button variant="secondary" onClick={load} disabled={loadState === "pending"}>
+            {loadState === "pending" ? "Loading…" : "Refresh"}
           </Button>
         }
       />
@@ -166,9 +172,9 @@ export function AdminLocksPage({ apiBase = "/api/auth" }: AdminLocksPageProps) {
         </Alert>
       )}
 
-      {isLoading ? (
-        <LoadingState label="Loading lock records…" />
-      ) : (
+      {loadState === "pending" ? (
+        <LoadingState label="Loading lock records" />
+      ) : loadState === "ready" || loadState === "ready-empty" ? (
         <div className="space-y-6">
           <LockTable
             title="Permanently locked accounts"
@@ -187,7 +193,7 @@ export function AdminLocksPage({ apiBase = "/api/auth" }: AdminLocksPageProps) {
             loading={actionLoading}
           />
         </div>
-      )}
+      ) : null}
     </PageShell>
   );
 }
