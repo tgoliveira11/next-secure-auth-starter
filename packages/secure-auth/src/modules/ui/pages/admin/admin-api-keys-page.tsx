@@ -28,6 +28,8 @@ type AdminApiKeysPageProps = {
   apiBase?: string;
 };
 
+type LoadState = "pending" | "ready" | "ready-empty" | "error";
+
 function keyStatus(k: ApiKey): { label: string; variant: "success" | "danger" | "muted" } {
   if (k.revokedAt) return { label: "Revoked", variant: "danger" };
   if (k.expiresAt && new Date(k.expiresAt) < new Date()) return { label: "Expired", variant: "muted" };
@@ -36,7 +38,7 @@ function keyStatus(k: ApiKey): { label: string; variant: "success" | "danger" | 
 
 export function AdminApiKeysPage({ apiBase = "/api/auth" }: AdminApiKeysPageProps) {
   const [keys, setKeys] = useState<ApiKey[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("pending");
   const [error, setError] = useState("");
   const [revoking, setRevoking] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
@@ -48,16 +50,19 @@ export function AdminApiKeysPage({ apiBase = "/api/auth" }: AdminApiKeysPageProp
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
-    setIsLoading(true);
+    setLoadState("pending");
+    setError("");
     try {
       const res = await fetch(`${apiBase}/admin/api-keys`);
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
-      setKeys(data.keys ?? []);
+      const nextKeys = data.keys ?? [];
+      setKeys(nextKeys);
+      setLoadState(nextKeys.length === 0 ? "ready-empty" : "ready");
     } catch {
+      setKeys([]);
       setError("Failed to load API keys.");
-    } finally {
-      setIsLoading(false);
+      setLoadState("error");
     }
   }, [apiBase]);
 
@@ -163,9 +168,9 @@ export function AdminApiKeysPage({ apiBase = "/api/auth" }: AdminApiKeysPageProp
         </Card>
       )}
 
-      {isLoading ? (
-        <LoadingState label="Loading API keys…" />
-      ) : (
+      {loadState === "pending" ? (
+        <LoadingState label="Loading API keys" />
+      ) : loadState === "ready" || loadState === "ready-empty" ? (
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>All API keys</CardTitle>
@@ -222,6 +227,8 @@ export function AdminApiKeysPage({ apiBase = "/api/auth" }: AdminApiKeysPageProp
             </div>
           )}
         </Card>
+      ) : (
+        <Button variant="secondary" onClick={load}>Try again</Button>
       )}
     </PageShell>
   );

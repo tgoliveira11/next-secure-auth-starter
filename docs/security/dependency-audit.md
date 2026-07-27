@@ -1,7 +1,7 @@
 # Dependency security audit
 
-**Last updated:** 2026-06-15  
-**Package:** `@tgoliveira/secure-auth@0.1.11-internal`
+**Last updated:** 2026-07-27
+**Package:** `@tgoliveira/secure-auth@0.7.0`
 
 This document records npm advisory findings, remediation actions, and residual risk for the monorepo. It complements [../security.md](../security.md).
 
@@ -41,20 +41,19 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 
 ---
 
-## Remediation summary (0.1.11-internal)
+## Remediation summary (0.7.0)
 
 | Package | Severity | Class | Path | Fix | Fixed version | Affects consumers? |
 | --- | --- | --- | --- | --- | --- | --- |
-| `drizzle-orm` | high | A | direct (peer + apps) | Direct upgrade | `0.45.2` | Yes — peer dependency |
-| `happy-dom` | critical | B | starter, consumer-demo dev | Direct upgrade | `20.10.3` | No |
-| `esbuild` | high | B | drizzle-kit, tsup, vite, vitest | Direct upgrades + root override | `0.28.1` | No |
-| `drizzle-kit` | high | B | apps dev | Direct upgrade | `0.31.10` | No |
-| `vitest` / `vite` | high | B | apps + package dev | Direct upgrade + esbuild override | vitest `3.2.6` | No |
-| `tsup` | high | B | package dev | Direct upgrade + esbuild override | `8.5.1` | No |
-| `nodemailer` | high | B | starter direct; `next-auth` optional peer | Direct upgrade + override | `9.0.3` | No (app-only; not in published package) |
-| `uuid` | moderate | A/C | `next-auth` nested | `next-auth@4.24.14` + root override | `11.1.1` | Indirect — override replaces nested `uuid@8` used by NextAuth v4 |
-| `postcss` | moderate | C | `next` bundled | Root override `next > postcss` | `8.5.15` | Indirect — Next still declares `8.4.31`; override supplies patched PostCSS at install time |
-| `@esbuild-kit/*` | high | B | `drizzle-kit` transitive | esbuild override dedupes to safe build | `0.28.1` | No |
+| `next` | high | A | apps + package peer/dev | Direct upgrade; peer minimum raised | `16.2.12` (peer `^16.2.11`) | Yes — consumers must satisfy the new peer minimum |
+| `next-auth` | critical | A | apps + package peer/dev | Direct upgrade; peer minimum raised | `4.24.15` | Yes — fixes malformed bearer, email normalization, and provider-bound OAuth state findings |
+| `postcss` | high | A/C | `next` bundled + build tooling | Root resolution | `8.5.23` | Indirect — Next still declares `8.4.31` |
+| `sharp` | high | A/C | `next` optional dependency | Root resolution | `0.35.0` | Indirect — Next still declares `^0.34.5` |
+| `brace-expansion` | high | B/C | ESLint, glob, coverage tooling | Root resolution + guarded minimatch 3 compatibility patch | `5.0.8` | No — monorepo tooling only |
+| `js-yaml` | high | B | ESLint tooling | Lockfile refresh after direct tooling upgrade | `4.3.0` | No |
+| `esbuild` | low | B | drizzle-kit, tsup, vite, vitest | Root resolution | `0.28.1` | No |
+| `uuid` | moderate | A | `next-auth` nested + package direct | NextAuth upgrade + root resolution | `11.1.1` | Indirect — NextAuth 4.24.15 now declares `^11.1.1` |
+| `nodemailer` | high | B | dev-harness + `next-auth` optional peer | Direct upgrade + root resolution | `9.0.3` | No (app-only; not in published package) |
 
 **Result:** `npm audit` reports **0 vulnerabilities** after lockfile regeneration with overrides applied.
 
@@ -102,25 +101,45 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 - **Consumer impact:** none in published package (consumers supply their own `EmailProvider`)  
 - **Residual risk:** none at audit time  
 
+### NextAuth / Auth.js
+
+- **Severity:** critical/high/moderate
+- **Type:** direct peer/dev
+- **Production:** yes
+- **Dependency path:** consumer → `next-auth`
+- **Strategy:** Raise the package peer minimum and all monorepo installs to `4.24.15`.
+- **Consumer impact:** Consumers must upgrade to NextAuth `4.24.15` or newer in the v4 line.
+- **Residual risk:** none for the advisories present at release time.
+
 ### uuid via next-auth (GHSA-w5hq-g745-h8pq)
 
 - **Severity:** moderate  
 - **Type:** transitive  
 - **Production:** yes when consumers use NextAuth v4 with this package  
-- **Dependency path:** `next-auth@4.24.14` → `uuid@^8.3.2`  
-- **Strategy:** Upgrade to latest NextAuth v4 (`4.24.14`); override `"next-auth": { "uuid": "11.1.1" }`  
-- **Consumer impact:** Override applies in monorepo install; consumers should mirror override or upgrade when NextAuth v4 drops uuid@8  
-- **Residual risk:** **low** — uuid v11 is API-compatible for v4() usage in NextAuth; override validated by full test suite. Long-term fix is NextAuth v4 dependency bump or Auth.js v5 migration (out of scope for this release)  
+- **Dependency path:** `next-auth@4.24.15` → `uuid@^11.1.1`
+- **Strategy:** Upgrade to NextAuth `4.24.15`; keep the monorepo resolution at uuid `11.1.1`.
+- **Consumer impact:** Satisfied by the new NextAuth peer minimum.
+- **Residual risk:** none at audit time.
 
-### postcss via next (GHSA-qx2v-qp2m-jg93)
+### Next.js, PostCSS, and sharp
 
-- **Severity:** moderate  
+- **Severity:** high
 - **Type:** transitive  
 - **Production:** yes (Next.js CSS pipeline)  
-- **Dependency path:** `next@16.2.9` → `postcss@8.4.31`  
-- **Strategy:** Root override `"next": { "postcss": "8.5.15" }` — npm audit clean  
-- **Consumer impact:** Consumers on Next 16.2.x should apply the same override until Next bundles PostCSS ≥ 8.5.10  
-- **Residual risk:** **low** — PostCSS 8.5.x is compatible with Next 16; `npm ls` may show semver “invalid” warnings because Next’s package.json still pins 8.4.31  
+- **Dependency path:** `next@16.2.12` → `postcss@8.4.31` and optional `sharp@^0.34.5`.
+- **Strategy:** Raise the peer floor to patched Next `^16.2.11`, validate on `16.2.12`, and resolve PostCSS to `8.5.23` plus sharp to `0.35.0` in the monorepo.
+- **Consumer impact:** Root overrides are not inherited from a published package. Consumer applications must keep their own audit clean and may need the same PostCSS/sharp resolutions until Next declares patched ranges.
+- **Residual risk:** none in the validated monorepo tree; upstream dependency declarations remain a consumer-install concern.
+
+### brace-expansion and js-yaml in tooling
+
+- **Severity:** high
+- **Type:** transitive dev
+- **Production:** no
+- **Dependency path:** ESLint/minimatch and Vitest coverage/glob tooling
+- **Strategy:** Resolve brace-expansion to `5.0.8` and js-yaml to `4.3.0`. `scripts/apply-security-compat-patches.mjs` updates minimatch 3's CommonJS import and minimatch 9's CommonJS/ESM imports to accept brace-expansion 5's named export; it verifies the exact minimatch versions and source shapes before writing, then fails closed if upstream changes. Validate lint and coverage after the cross-major resolution.
+- **Consumer impact:** none; these packages are not in the published tarball.
+- **Residual risk:** none at audit time.
 
 ---
 
@@ -129,18 +148,30 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 Applied when upstream manifests block safe transitive versions:
 
 ```json
-"overrides": {
+"devDependencies": {
+  "brace-expansion": "5.0.8",
   "esbuild": "0.28.1",
-  "postcss": "8.5.15",
-  "nodemailer": "9.0.3",
-  "uuid": "11.1.1",
-  "happy-dom": "20.10.3",
-  "next": { "postcss": "8.5.15" },
+  "next": "^16.2.12",
+  "postcss": "8.5.23",
+  "sharp": "0.35.0"
+},
+"overrides": {
+  "brace-expansion": "$brace-expansion",
+  "esbuild": "$esbuild",
+  "postcss": "$postcss",
+  "sharp": "$sharp",
+  "next": {
+    ".": "$next",
+    "postcss": "$postcss",
+    "sharp": "$sharp"
+  },
   "next-auth": { "uuid": "11.1.1", "nodemailer": "9.0.3" }
 }
 ```
 
-**Important:** After changing overrides, regenerate the lockfile (`rm package-lock.json && npm install`) so overrides take effect. Stale lockfiles can leave vulnerable nested copies.
+The root development dependencies are intentional resolution sources for npm's `$dependency` override syntax and are not included in the published package. After changing overrides, regenerate from a genuinely clean tree (`package-lock.json` and `node_modules` absent) so npm does not reuse stale nested versions.
+
+The root `postinstall` script applies only the minimatch 3/9 compatibility imports described above. It does not alter the vulnerability fix or package versions; it makes the patched brace-expansion API callable by legacy tooling. A clean `npm ci` exercises this fail-closed patch before validation.
 
 ---
 

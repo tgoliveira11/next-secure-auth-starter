@@ -25,7 +25,7 @@ Full instructions: **[publishing-npm-automation.md](./publishing-npm-automation.
 
 ```bash
 npm install @tgoliveira/secure-auth@latest \
-  next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2 postgres
+  next@^16.2.11 react@^19 react-dom@^19 next-auth@^4.24.15 drizzle-orm@^0.45.2 postgres
 ```
 
 See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding flow.
@@ -34,11 +34,11 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding
 {
   "dependencies": {
     "@tgoliveira/secure-auth": "^0.1.22",
-    "next": "^16.0.0",
-    "next-auth": "^4.24.11",
+    "next": "^16.2.11",
+    "next-auth": "^4.24.15",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.0"
   }
 }

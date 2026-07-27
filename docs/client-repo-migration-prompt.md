@@ -102,8 +102,8 @@ For each item record: file path, purpose, replacement (`secureAuth.routes.*`, pa
 
 ```bash
 npm install @tgoliveira/secure-auth@0.1.11-internal \
-  next@^16 react@^19 react-dom@^19 \
-  next-auth@^4.24.11 drizzle-orm@^0.45.2 postgres
+  next@^16.2.11 react@^19 react-dom@^19 \
+  next-auth@^4.24.15 drizzle-orm@^0.45.2 postgres
 
 npm install -D drizzle-kit typescript
 ```

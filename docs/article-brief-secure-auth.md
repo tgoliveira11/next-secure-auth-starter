@@ -480,7 +480,7 @@ npm install @tgoliveira/secure-auth@0.1.11-internal \
   drizzle-orm postgres next next-auth react react-dom
 ```
 
-Peers: `next@^16`, `react@^19`, `next-auth@^4.24`, `drizzle-orm@^0.45.2`. Consumer supplies `postgres` driver and database.
+Peers: `next@^16.2.11`, `react@^19`, `next-auth@^4.24.15`, `drizzle-orm@^0.45.2`. Consumer supplies `postgres` driver and database.
 
 ### 2. Creating `secureAuth`
 
@@ -661,7 +661,7 @@ User signs in on device B
 | OAuth providers supported | Google, Apple, Microsoft in config reference |
 | Not production-ready | README, security.md, package description |
 | MIT license | `package.json`, LICENSE file |
-| NextAuth version | Peer `^4.24.11`; not v5 |
+| NextAuth version | Peer `^4.24.15`; not v5 |
 | Default password min length | 12 (from tests and docs) |
 | Consumer-demo passes validation | `docs/consumer-demo-validation.md` checklist |
 

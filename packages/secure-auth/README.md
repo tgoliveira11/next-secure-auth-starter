@@ -66,7 +66,7 @@ Password strength and validation feedback render **above** password fields by de
 
 ```bash
 npm install @tgoliveira/secure-auth@latest \
-  next@^16 react@^19 react-dom@^19 next-auth@^4.24.11 drizzle-orm@^0.44.2
+  next@^16.2.11 react@^19 react-dom@^19 next-auth@^4.24.15 drizzle-orm@^0.45.2
 ```
 
 See [publishing-npm-automation.md](../../docs/publishing-npm-automation.md) for automated npm releases and [consumer-quick-start.md](../../docs/consumer-quick-start.md) for install.

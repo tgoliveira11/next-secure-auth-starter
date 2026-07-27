@@ -119,6 +119,8 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | Admin panel + Users, Waitlist, Invites, Locks, API Keys, Config | opt-in (`admin.enabled`) |
 | Dashboard placeholder | shipped (consumer replaces) |
 
+Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empty, and error UI states. Failed initial reads do not fall through to empty/final cards or zero counts.
+
 ## Feature flags (config)
 
 | Config path | Default | Status |
