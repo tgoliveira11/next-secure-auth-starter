@@ -199,4 +199,4 @@ Starter and consumer-demo `next build` may fail with RSC boundary errors when th
 3. `npm run build -w @tgoliveira/secure-auth`
 4. `npm run test`
 5. Update this document if advisories or overrides change
-6. Run **Publish package to npmjs** on `main` — the workflow runs the audit gate automatically
+6. Prepare and merge release metadata through a PR, then run **Publish package to npmjs** on `main` — the workflow repeats the audit gate automatically

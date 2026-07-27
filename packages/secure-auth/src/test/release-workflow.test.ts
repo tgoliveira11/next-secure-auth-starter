@@ -23,6 +23,20 @@ const changelog = `# Changelog
 `;
 
 describe("release preparation", () => {
+  it("requires release metadata to reach protected main through a pull request", () => {
+    const workflowPath = path.resolve(
+      import.meta.dirname,
+      "../../../..",
+      ".github/workflows/publish-secure-auth.yml",
+    );
+    const workflow = readFileSync(workflowPath, "utf8");
+
+    expect(workflow).toContain("Require release metadata to be merged through a pull request");
+    expect(workflow).toContain("steps.release.outputs.changed == 'true'");
+    expect(workflow).not.toContain("git push origin HEAD:main");
+    expect(workflow).not.toContain("Commit and push release metadata");
+  });
+
   it("infers SemVer bumps and migrates legacy internal versions", () => {
     const unreleased = extractUnreleased(changelog);
     expect(inferReleaseBump("0.1.22-internal", unreleased)).toBe("minor");

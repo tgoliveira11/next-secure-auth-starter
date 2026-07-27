@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-27
+
 ### Added
 
 - **Deterministic OAuth UI config** — `secureAuth.uiConfig.oauthProviderIds` exposes only the effective configured provider IDs (`google`, `apple`, `github`, `azure-ad`) and the exported `OAuthProviderId` type. Credentials, client IDs, tenant details, and secrets remain server-only.
@@ -14,6 +16,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Stable first-frame auth UI** — `SocialSignIn` now renders synchronously from `SecureAuthUIProvider` (or explicit `providerIds`) instead of first showing every supported provider and then fetching `/api/auth/providers`. Missing legacy UI config fails closed, registration copy names only available providers, and passkey login distinguishes `checking`, `supported`, and `unsupported` capability states.
 - **Deterministic admin data states** — `AdminLocksPage`, `AdminApiKeysPage`, `AdminConfigPage`, and `AdminWaitlistPage` now distinguish `pending`, `ready`, `ready-empty`, and `error`. Initial and failed requests no longer paint false zero counts, empty cards, or stale final data.
+- **Protected-main release flow** — Release metadata is now prepared on a branch and merged through a pull request before the official npm workflow runs in recovery/readiness mode. The workflow fails early with an actionable instruction instead of attempting a direct push that branch protection rejects.
 
 ### Security
 

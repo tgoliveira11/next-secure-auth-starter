@@ -161,7 +161,7 @@ The release workflow runs the security audit before `npm run validate` and the p
 
 ### npm publish (manual only)
 
-Start **Publish package to npmjs** manually on `main`. The workflow derives or accepts the next stable SemVer, validates the monorepo and exact tarball, publishes with npm Trusted Publishing/provenance, then creates the release commit, `secure-auth-vX.Y.Z` tag, and GitHub release. Do not bump versions or create release tags manually.
+Prepare the release metadata on a release branch with `scripts/prepare-release.mjs`, merge it through a pull request, then start **Publish package to npmjs** manually on `main` with a blank version. The workflow validates the monorepo and exact tarball, publishes with npm Trusted Publishing/provenance, then creates the `secure-auth-vX.Y.Z` tag and GitHub release. Do not create release tags or publish from a workstation.
 
 See [docs/publishing.md](docs/publishing.md) (invariant + recovery) and [docs/publishing-npm-automation.md](docs/publishing-npm-automation.md) (OIDC setup).
 

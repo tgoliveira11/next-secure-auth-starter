@@ -1,8 +1,8 @@
 # npm release process
 
-Releases of `@tgoliveira/secure-auth` are initiated manually, while version calculation, validation,
-npm publication, the release commit, Git tag, and GitHub release are automated. Do not bump package
-versions or create release tags manually.
+Releases of `@tgoliveira/secure-auth` are initiated manually. Version metadata is prepared with the
+repository script and merged through a pull request; validation, npm publication, the Git tag, and
+the GitHub release are automated. Do not create release tags or publish from a workstation.
 
 ## Version policy
 
@@ -25,8 +25,8 @@ SemVer. An automatic patch becomes `0.1.23`; an explicit version must be greater
 ## One-time GitHub and npm setup
 
 1. Create a protected GitHub environment named `npmjs` and add required reviewers if desired.
-2. Allow GitHub Actions to push release commits and `secure-auth-v*` tags to `main`, or provide an
-   equivalently scoped GitHub App token if branch protection blocks `GITHUB_TOKEN` pushes.
+2. Keep `main` protected and require release metadata to arrive through a pull request. Allow GitHub
+   Actions to create `secure-auth-v*` tags after npm publication.
 3. Configure an npm GitHub Actions trusted publisher for `@tgoliveira/secure-auth`:
    - Repository owner: `tgoliveira11`
    - Repository: `next-secure-auth-starter`
@@ -39,31 +39,35 @@ SemVer. An automatic patch becomes `0.1.23`; an explicit version must be greater
 Trusted publishing requires a GitHub-hosted runner, Node 22.14 or newer, npm 11.5.1 or newer, and
 `id-token: write`. The workflow uses Node 24 and verifies the npm version before continuing.
 
-## Start a release
+## Prepare and publish a release
 
-Use GitHub Actions — see [publishing.md](./publishing.md) for the release invariant and recovery mode.
+Use the protected-main flow below — see [publishing.md](./publishing.md) for the release invariant and recovery mode.
 
-1. Open **Actions** → **Publish package to npmjs**.
-2. Select **Run workflow** on `main`.
-3. Leave `version` blank for automatic versioning, or enter an exact stable version, `patch`,
-   `minor`, or `major`.
+1. Create a release branch from current `main`.
+2. Run `node scripts/prepare-release.mjs` for automatic versioning, or set `RELEASE_SPEC` to an exact
+   stable version, `patch`, `minor`, or `major`.
+3. Commit the generated version/changelog metadata, open a pull request, and merge it after checks.
+4. Open **Actions** → **Publish package to npmjs**, select `main`, leave `version` blank, and run it.
 
 Equivalent GitHub CLI commands:
 
 ```bash
+node scripts/prepare-release.mjs
+RELEASE_SPEC=patch node scripts/prepare-release.mjs
+# after the metadata PR is merged:
 gh workflow run publish-secure-auth.yml --ref main
-gh workflow run publish-secure-auth.yml --ref main -f version=0.2.0
-gh workflow run publish-secure-auth.yml --ref main -f version=patch
 ```
 
-When `version` is blank or `auto`, `scripts/prepare-release.mjs` uses the `Unreleased` changelog:
+When `RELEASE_SPEC` is unset or `auto`, `scripts/prepare-release.mjs` uses the `Unreleased` changelog:
 
 1. A `**Breaking:**` entry selects major, or minor while the current major is `0`.
 2. Otherwise, an entry under `Added` selects minor.
 3. Otherwise, the release selects patch.
 
-If `Unreleased` is empty, the workflow enters recovery mode for the current version. It can finish
-missing npm, tag, or GitHub release state without publishing a duplicate.
+If `Unreleased` is empty, the workflow enters readiness/recovery mode for the current version. It can
+publish a prepared version or finish missing npm, tag, or GitHub release state without publishing a
+duplicate. If `Unreleased` is not empty, the workflow fails before validation/publication and tells
+the operator to merge release metadata through a PR.
 
 ## Publication gates and ordering
 
@@ -71,14 +75,13 @@ The workflow serializes releases and then:
 
 1. Checks out `main` with full tag history and installs the exact lockfile.
 2. Audits dependencies at the high threshold, which also blocks critical vulnerabilities.
-3. Calculates the version and moves `Unreleased` into a dated release section.
+3. Confirms version/changelog metadata was already merged through a PR.
 4. Runs types, lint, tests, the 95% coverage gate, and all builds.
 5. Builds one package tarball and uses that exact artifact for publication.
 6. Rejects npm version collisions and inconsistent pre-existing tags.
-7. Commits all package manifests, `package-lock.json`, and `CHANGELOG.md` as `Release x.y.z`.
-8. Publishes the tarball with OIDC/provenance.
-9. Creates `secure-auth-vx.y.z` only after npm succeeds.
-10. Creates GitHub release notes and a workflow summary.
+7. Publishes the tarball with OIDC/provenance.
+8. Creates `secure-auth-vx.y.z` only after npm succeeds.
+9. Creates GitHub release notes and a workflow summary.
 
 The npm registry is immutable. If publication succeeds but later metadata creation fails, rerun the
 workflow with a blank version; recovery mode completes the missing state.

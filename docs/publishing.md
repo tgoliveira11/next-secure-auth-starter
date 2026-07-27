@@ -12,7 +12,7 @@ npm @tgoliveira/secure-auth@X.Y.Z  ⟺  git tag secure-auth-vX.Y.Z  ⟺  GitHub 
 
 This repository uses the **`secure-auth-v`** tag prefix (not bare `vX.Y.Z`) because the monorepo may publish other packages later.
 
-The publish workflow must complete all three in one run, or finish missing pieces in **recovery mode** (re-dispatch on `main` after partial failure — no duplicate version bump).
+Release metadata is merged first through a pull request. The publish workflow then completes all three publication artifacts in one run, or finishes missing pieces in **recovery mode** (re-dispatch on `main` after partial failure — no duplicate version bump).
 
 ## Who may publish
 
@@ -24,10 +24,10 @@ The publish workflow must complete all three in one run, or finish missing piece
 
 ## Changelog and version selection
 
-| `CHANGELOG.md` `Unreleased` | Workflow behavior |
+| `CHANGELOG.md` `Unreleased` | Release preparation behavior |
 | --- | --- |
-| Has entries | **New release** — bump version from notes, move `Unreleased` into dated section |
-| Empty | **Recovery only** — retry npm / tag / GitHub Release for version in `packages/secure-auth/package.json` |
+| Has entries | Run `scripts/prepare-release.mjs` on a release branch, then merge the generated metadata through a PR |
+| Empty | The publish workflow may publish or recover the version already in `packages/secure-auth/package.json` |
 
 `scripts/prepare-release.mjs` enforces this before any bump:
 
@@ -40,43 +40,54 @@ Automatic bump rules (when `Unreleased` is non-empty and `version` is blank):
 2. `### Added` has entries → minor.
 3. Otherwise → patch.
 
-## Start a release (owner)
+## Prepare release metadata (owner)
 
 1. Ensure `main` is green and `Unreleased` has the release notes.
-2. GitHub → **Actions** → **Publish package to npmjs** → **Run workflow** on `main`.
-3. Leave `version` blank for automatic bump, or pass `patch`, `minor`, `major`, or exact `x.y.z`.
+2. Create a release branch from current `main`.
+3. Run the preparation script. Leave `RELEASE_SPEC` unset for automatic bumping, or set `patch`, `minor`, `major`, or exact `x.y.z`.
+4. Commit only the generated manifests, lockfile, and changelog metadata as `Release x.y.z`.
+5. Open a pull request, let required checks pass, and merge it to `main`.
+
+```bash
+git switch -c release/secure-auth-vx.y.z
+node scripts/prepare-release.mjs
+# or: RELEASE_SPEC=patch node scripts/prepare-release.mjs
+```
+
+## Publish the prepared release (owner)
+
+After the metadata PR is merged and `Unreleased` is empty, run **Publish package to npmjs** on `main` with a blank version:
 
 ```bash
 gh workflow run publish-secure-auth.yml --ref main
-gh workflow run publish-secure-auth.yml --ref main -f version=patch
 ```
+
+The workflow refuses a premature dispatch while release notes are still in `Unreleased`; it never pushes directly to protected `main`.
 
 ## Workflow order
 
 [`.github/workflows/publish-secure-auth.yml`](../.github/workflows/publish-secure-auth.yml) (`workflow_dispatch` **only** — no push/tag/release triggers):
 
-1. Pre-flight changelog (`prepare-release.mjs`) — new release vs recovery.
+1. Confirm the merged metadata puts the workflow in recovery/readiness mode (`prepare-release.mjs` reports `changed=false`, `recovery=true`).
 2. `npm run audit:security` + `npm run validate`.
 3. Build exact publication tarball (`npm pack`).
 4. Reject npm version collisions and inconsistent pre-existing tags.
-5. Commit release metadata to `main` (`github-actions[bot]`) when version changed.
-6. `npm publish` with provenance (OIDC / Trusted Publishing).
-7. Create and push `secure-auth-vX.Y.Z` tag (`git config` set on runner).
-8. Create GitHub Release if missing.
+5. `npm publish` with provenance (OIDC / Trusted Publishing).
+6. Create and push `secure-auth-vX.Y.Z` tag (`git config` set on runner).
+7. Create GitHub Release if missing.
 
 ## Recovery mode
 
 Use when a release partially succeeded (e.g. npm published but tag missing):
 
-1. Move shipped notes out of `Unreleased` manually if needed so `Unreleased` is **empty**.
-2. Ensure manifests already show target `X.Y.Z`.
-3. Re-run **Publish package to npmjs** on `main`.
+1. If metadata is incomplete, fix it on a branch and merge it through a PR so `Unreleased` is **empty** and manifests show target `X.Y.Z`.
+2. Re-run **Publish package to npmjs** on `main` with a blank version.
 
 The workflow skips duplicate npm publish and completes missing tag/release steps.
 
 ## One-time setup
 
-OIDC Trusted Publisher, environment `npmjs`, and branch protection that allows the release bot to push metadata are documented in:
+OIDC Trusted Publisher, environment `npmjs`, and protected-main settings are documented in:
 
 - [publishing-npm-automation.md](./publishing-npm-automation.md) — Trusted Publisher and npm settings
 - [repo-settings.md](./repo-settings.md) — GitHub protection and environment rules
@@ -97,8 +108,8 @@ Required for npm provenance.
 
 ## What agents must not do
 
-- Bump `package.json` / lockfile versions for release
+- Bump `package.json` / lockfile versions for release without explicit owner authorization
 - Create `secure-auth-v*` tags locally
 - Run `npm publish`
 - Dispatch `publish-secure-auth.yml`
-- Push release metadata commits to `main`
+- Push release metadata commits directly to `main`
