@@ -48,4 +48,5 @@ export const starterTestUiConfig: SecureAuthUIPublicConfig = {
     redirectAuthenticatedFromGuestPages: true,
     authenticatedRedirectPath: "/dashboard",
   },
+  oauthProviderIds: ["google", "apple", "azure-ad"],
 };
