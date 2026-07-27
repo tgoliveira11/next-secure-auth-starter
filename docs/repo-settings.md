@@ -13,7 +13,7 @@ Settings below live in GitHub — not in git. Apply with the GitHub UI or `gh` C
 | Require linear history | Yes |
 | Allow force pushes | No |
 | Allow deletions | No |
-| Lock branch | **Off** — publish workflow must push release metadata |
+| Lock branch | Off (normal PR merges and tag creation remain allowed) |
 
 ### Apply with `gh` (admin)
 
@@ -43,11 +43,9 @@ EOF
 
 Adjust `required_approving_review_count` if you want mandatory human review.
 
-### Why `Lock branch` stays off
+### Release metadata respects branch protection
 
-`publish-secure-auth.yml` commits `Release x.y.z` to `main` via `github-actions[bot]` after manual dispatch. A locked branch would block that push.
-
-Grant the bot bypass via **Rules → Bypass list** → `github-actions[bot]`, or ensure `GITHUB_TOKEN` has permission to push protected branches (Settings → Actions → Workflow permissions → read and write).
+Release metadata is prepared on a release branch and merged through a normal pull request. `publish-secure-auth.yml` does not push commits to `main` and needs no branch-protection bypass. It writes only the post-publication `secure-auth-v*` tag and GitHub Release.
 
 ## Environment — `npmjs`
 
@@ -95,4 +93,4 @@ gh api repos/tgoliveira11/next-secure-auth-starter/environments/npmjs
 
 - **CODEOWNERS** — automatic review routing
 - **Required reviewers** on `npmjs` environment
-- **Rulesets** — alternative to classic branch protection (ensure bot bypass for publish workflow)
+- **Rulesets** — alternative to classic branch protection (preserve the release-metadata PR requirement)

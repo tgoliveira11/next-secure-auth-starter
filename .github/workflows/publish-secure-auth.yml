@@ -52,6 +52,14 @@ jobs:
           RELEASE_SPEC: ${{ inputs.version }}
         run: node scripts/prepare-release.mjs
 
+      - name: Require release metadata to be merged through a pull request
+        if: steps.release.outputs.changed == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          echo "::error::Release metadata for ${RELEASE_VERSION} is not on main. Run scripts/prepare-release.mjs on a release branch, merge that metadata through a pull request, then dispatch this workflow again with a blank version."
+          exit 1
+
       - name: Validate tests, coverage, lint, types, and build
         run: npm run validate
 
@@ -95,17 +103,6 @@ jobs:
           else
             echo "tag_exists=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Commit and push release metadata
-        if: steps.release.outputs.changed == 'true'
-        env:
-          RELEASE_VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json packages/secure-auth/package.json apps/dev-harness/package.json apps/consumer-demo/package.json CHANGELOG.md
-          git commit -m "Release ${RELEASE_VERSION}"
-          git push origin HEAD:main
 
       - name: Publish the validated tarball to npmjs
         if: steps.registry.outputs.published == 'false'

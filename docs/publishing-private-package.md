@@ -11,9 +11,9 @@
 | Current version | See `packages/secure-auth/package.json` |
 | npm dist-tag | `latest` |
 
-## Automated publishing (recommended)
+## Protected-main publishing (recommended)
 
-Run the **Publish package to npmjs** workflow on `main`. Do not bump versions or create tags manually.
+Prepare version/changelog metadata on a release branch with `scripts/prepare-release.mjs`, merge it through a pull request, then run **Publish package to npmjs** on `main` with a blank version. Do not create tags or publish from a workstation.
 
 Full instructions: **[publishing-npm-automation.md](./publishing-npm-automation.md)**
 
@@ -46,8 +46,9 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for the full onboarding
 
 **Required peer dependencies:** `next`, `next-auth`, `react`, `react-dom`, `drizzle-orm`.
 
-The workflow owns validation, version metadata, publication provenance, release tags, and GitHub
-releases. If it is interrupted, rerun it with a blank version to enter recovery mode.
+The preparation script owns version metadata; the workflow owns validation, publication provenance,
+release tags, and GitHub releases. If publication is interrupted, rerun the workflow with a blank
+version to enter recovery mode.
 
 ## Versioning rules
 

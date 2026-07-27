@@ -64,9 +64,9 @@ See [test-ci-performance-playbook.md](./test-ci-performance-playbook.md) when op
 ## Changelog and versions
 
 - Work in progress → `CHANGELOG.md` → `## [Unreleased]`.
-- **Agents do not bump versions**, create release tags, run the publish workflow, or `npm publish`.
-- A new release requires a non-empty `Unreleased` section (the publish workflow bumps from those notes).
-- Empty `Unreleased` → **recovery only** (retry npm/tag/GitHub Release for the version already in manifests).
+- **Agents do not prepare versions**, create release tags, run the publish workflow, or `npm publish` unless the owner explicitly requests release execution.
+- A new release requires a non-empty `Unreleased` section; the preparation script moves those notes into the release through a reviewed PR.
+- Empty `Unreleased` → the official workflow may publish or recover the version already in manifests.
 
 See [publishing.md](./publishing.md) for the release invariant and recovery mode.
 
@@ -76,7 +76,7 @@ These automated paths may push to `main` without human/agent action:
 
 | Workflow | Purpose |
 | --- | --- |
-| `publish-secure-auth.yml` | Release metadata commit (`Release x.y.z`) after manual dispatch |
+| `publish-secure-auth.yml` | npm publication, `secure-auth-v*` tag, and GitHub Release after metadata PR merge |
 | `sync-consumer-demo.yml` | Regenerated consumer-demo route files when package routes change |
 
 Agents must not mimic these bots unless explicitly instructed.
