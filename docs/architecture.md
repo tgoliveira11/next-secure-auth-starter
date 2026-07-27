@@ -63,7 +63,11 @@ Page defaults (copy, paths, password policy) flow from config — not from globa
 
 ### Server: `createSecureAuth(config).uiConfig`
 
-`uiConfig` is a JSON-serializable `SecureAuthUIPublicConfig` built from `config.ui`, `config.app`, `config.auth`, and `config.passwordPolicy`. It includes `passwordStrength.position` (default `"above"`) for password feedback placement.
+`uiConfig` is a JSON-serializable `SecureAuthUIPublicConfig` built from `config.ui`, `config.app`,
+`config.auth`, `config.oauth`, and `config.passwordPolicy`. It includes
+`passwordStrength.position` (default `"above"`) and the safe
+`oauthProviderIds` list. Only effective provider IDs cross the server/client boundary; credentials,
+client IDs, secrets, and tenant details do not.
 
 ```typescript
 export const secureAuth = createSecureAuth({
@@ -99,6 +103,10 @@ export default function RootLayout({ children }) {
 ```
 
 Package pages (`LoginPage`, `RegisterPage`, …) call `useSecureAuthUi()` internally. When wrapped, they inherit paths, messages, `appSlug`, `appName`, and `passwordPolicy` from config. Props on individual pages still override provider defaults.
+
+Auth pages also use `oauthProviderIds` synchronously. They never render a speculative provider
+catalog or discover providers after hydration. Consumers that render `SocialSignIn` without
+`SecureAuthUIProvider` must pass `providerIds` explicitly; otherwise it fails closed.
 
 Reference: `apps/consumer-demo/src/app/layout.tsx`, `apps/consumer-demo/src/components/providers.tsx` (canonical consumer). Internal harness: `apps/dev-harness/src/app/layout.tsx`.
 

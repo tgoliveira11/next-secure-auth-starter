@@ -38,7 +38,7 @@ npm install @tgoliveira/secure-auth@latest
 Or pin a specific version:
 
 ```bash
-npm install @tgoliveira/secure-auth@0.1.22
+npm install @tgoliveira/secure-auth@x.y.z
 ```
 
 ---
@@ -278,6 +278,11 @@ Register redirect URIs with each provider:
 {APP_BASE_URL}/api/auth/callback/github
 {APP_BASE_URL}/api/auth/callback/azure-ad
 ```
+
+Pass `secureAuth.uiConfig` to `SecureAuthUIProvider` as shown above. It contains only the effective
+provider IDs, so `LoginPage` and `RegisterPage` render the final OAuth controls on the first client
+frame without exposing credentials or fetching `/api/auth/providers`. Manually constructed legacy
+UI config without `oauthProviderIds` intentionally renders no social providers.
 
 ---
 

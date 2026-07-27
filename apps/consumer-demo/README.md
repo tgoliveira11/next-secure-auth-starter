@@ -22,6 +22,10 @@ Every time a new version of the package adds routes or config options,
 `consumer-demo` must be updated to reflect them. The version checklist in
 `docs/roadmap.md` enforces this.
 
+The root provider receives `secureAuth.uiConfig` directly. That config includes only the effective
+OAuth provider IDs, allowing package login/registration pages to render their final social controls
+on the first client frame without exposing credentials or discovering providers in the browser.
+
 ## Keeping consumer-demo in sync
 
 Route files in `src/app/api/` are automatically generated when the package adds

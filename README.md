@@ -6,7 +6,9 @@
 
 **`apps/consumer-demo`** is the canonical consumer reference — minimal integration using public exports only.
 
-**Maturity:** `0.2.0` experimental — not production-ready. See [docs/security.md](docs/security.md).
+**Maturity:** experimental — not production-ready. See the current version in
+[`packages/secure-auth/package.json`](packages/secure-auth/package.json) and review
+[docs/security.md](docs/security.md).
 
 ## Structure
 
@@ -76,7 +78,12 @@ OAuth (optional for local dev) — prefer `AUTH_*` names; legacy aliases still w
 | --- | --- |
 | `AUTH_GOOGLE_CLIENT_ID` / `AUTH_GOOGLE_CLIENT_SECRET` | Google |
 | `AUTH_APPLE_CLIENT_ID` / `AUTH_APPLE_CLIENT_SECRET` | Apple |
+| `AUTH_GITHUB_CLIENT_ID` / `AUTH_GITHUB_CLIENT_SECRET` | GitHub |
 | `AUTH_MICROSOFT_CLIENT_ID` / `AUTH_MICROSOFT_CLIENT_SECRET` | Microsoft |
+
+`secureAuth.uiConfig` contains only the effective provider IDs, so package login and registration
+pages render the final OAuth button set on their first client frame. OAuth credentials never enter
+the public UI config.
 
 Passkeys use `WEBAUTHN_*` above. SMTP dev defaults target Mailpit (`SMTP_HOST=localhost`, `SMTP_PORT=1025`).
 

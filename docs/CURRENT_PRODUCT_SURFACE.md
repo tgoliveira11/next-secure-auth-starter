@@ -2,8 +2,8 @@
 
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
-**Package version (manifest):** `0.6.1`  
-**Last reviewed:** 2026-07-05
+**Package version:** see [`packages/secure-auth/package.json`](../packages/secure-auth/package.json)
+**Last reviewed:** 2026-07-27
 
 ## Status legend
 
@@ -146,6 +146,13 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `useUserPreferences`, `useUserPreference` | shipped (requires `preferences.enabled`) |
 | `mergeGuestPreferences`, `useMergeGuestPreferences` | shipped |
 | `usePreferencesEnabled` | shipped |
+
+## Public UI config (`@tgoliveira/secure-auth/react`, `@tgoliveira/secure-auth/next`)
+
+| Symbol / field | Status |
+| --- | --- |
+| `SecureAuthUIPublicConfig.oauthProviderIds` | shipped — optional provider-ID-only list; current `createSecureAuth` always populates it |
+| `OAuthProviderId` | shipped — `google \| apple \| github \| azure-ad` |
 
 ## Planned client exports
 

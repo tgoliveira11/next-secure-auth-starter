@@ -7,9 +7,8 @@ import { safeLogger } from "@/modules/security/logger/index";
 import { evaluateOAuthSignIn } from "@/modules/auth/lib/oauth-sign-in-policy";
 import { createMicrosoftAzureAdProvider } from "@/modules/auth/lib/microsoft-azure-ad-provider";
 import {
-  isValidMicrosoftApplicationClientId,
-  isValidMicrosoftTenantId,
-} from "@/modules/auth/lib/microsoft-provider-config";
+  resolveMicrosoftOAuthProvider,
+} from "@/core/oauth-provider-config";
 import { credentialsSignInRequiresEmailVerification } from "@/modules/account/lib/account-policy-config";
 import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
 import {
@@ -38,24 +37,14 @@ export type AuthOptionsDeps = {
 };
 
 function resolveMicrosoftProvider(config: SecureAuthConfig) {
-  const ms = config.oauth?.microsoft;
-  if (!ms?.clientId || !ms.clientSecret) return null;
-  if (!isValidMicrosoftApplicationClientId(ms.clientId)) {
+  const resolved = resolveMicrosoftOAuthProvider(config);
+  if (resolved.issue) {
     safeLogger.warn("Microsoft OAuth provider disabled due to invalid configuration", {
-      errorCode: "invalid_client_id_format",
+      errorCode: resolved.issue,
       endpoint: "auth-options",
     });
-    return null;
   }
-  const tenantId = ms.tenantId?.trim() || "common";
-  if (!isValidMicrosoftTenantId(tenantId)) {
-    safeLogger.warn("Microsoft OAuth provider disabled due to invalid configuration", {
-      errorCode: "invalid_tenant_id_format",
-      endpoint: "auth-options",
-    });
-    return null;
-  }
-  return { clientId: ms.clientId, clientSecret: ms.clientSecret, tenantId };
+  return resolved.provider;
 }
 
 export function createAuthOptions(deps: AuthOptionsDeps): NextAuthOptions {

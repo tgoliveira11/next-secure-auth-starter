@@ -33,7 +33,8 @@ export const secureAuth = createSecureAuth(config);
 
 ## UI provider
 
-Page copy, paths, and password policy defaults come from config — not global state.
+Page copy, paths, password policy defaults, and configured OAuth provider IDs come from config —
+not global state or client-side provider discovery.
 
 ```tsx
 // app/layout.tsx
@@ -50,6 +51,12 @@ export default function RootLayout({ children }) {
 ```
 
 Configure via `createSecureAuth({ ui: { paths, messages, cssVariables, passwordStrength }, passwordPolicy: { minLength } })`. Package pages use `useSecureAuthUi()` internally when wrapped in `SecureAuthUIProvider config={secureAuth.uiConfig}`. Default minimum password length is **12**; map `AUTH_PASSWORD_MIN_LENGTH` in your app env into `passwordPolicy.minLength` to override (the package never reads env directly). The resolved policy is available as `secureAuth.passwordPolicy` and `secureAuth.uiConfig.passwordPolicy`.
+
+`secureAuth.uiConfig.oauthProviderIds` contains only effective provider IDs. `LoginPage`,
+`RegisterPage`, and `SocialSignIn` render that final list synchronously without requesting
+`/api/auth/providers`. Missing UI config fails closed and renders no OAuth controls. For standalone
+composition, pass `providerIds` directly to `SocialSignIn`. Provider secrets and client IDs remain
+server-only.
 
 Password strength and validation feedback render **above** password fields by default. Set `ui.passwordStrength.position` to `"below"` to restore legacy placement. The feedback region is stable from first render (neutral requirements before typing; strength updates in place without focus loss). See [customization.md](../../docs/customization.md).
 
@@ -248,7 +255,11 @@ createSecureAuth({
 });
 ```
 
-Supported provider ids: `google`, `apple`, `github`, `azure-ad` (Microsoft). Buttons render only when the matching config block is present. GitHub callback: `{APP_BASE_URL}/api/auth/callback/github`. See [configuration-reference.md](../../docs/configuration-reference.md).
+Supported provider ids: `google`, `apple`, `github`, `azure-ad` (Microsoft). Buttons render on the
+first client frame only when the matching effective config is present in
+`secureAuth.uiConfig.oauthProviderIds`. GitHub callback:
+`{APP_BASE_URL}/api/auth/callback/github`. See
+[configuration-reference.md](../../docs/configuration-reference.md).
 
 ## Database
 

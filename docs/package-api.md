@@ -1,6 +1,7 @@
 # Package API
 
-Package: `@tgoliveira/secure-auth` @ `0.1.25`
+Package: `@tgoliveira/secure-auth` (current version in
+[`packages/secure-auth/package.json`](../packages/secure-auth/package.json))
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [minimal-consumer-example.md](./minimal-consumer-example.md) · [apps/consumer-demo](../apps/consumer-demo) · [consumer-validation-checklist.md](./consumer-validation-checklist.md)
 
@@ -209,9 +210,15 @@ When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.
 | --- | --- |
 | `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
 | `useSecureAuthUi()` | Read provider config in package pages or custom components |
-| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position` and `auth.redirectAuthenticatedFromGuestPages` |
+| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position`, `auth.redirectAuthenticatedFromGuestPages`, and optional `oauthProviderIds` |
+| `OAuthProviderId` | Public provider ID union: `google \| apple \| github \| azure-ad` |
 
 Guest-only pages redirect fully authenticated users to `uiConfig.auth.authenticatedRedirectPath` by default. Opt out globally via `auth.redirectAuthenticatedFromGuestPages: false` or per page with `redirectIfAuthenticated={false}`. See [consumer-authenticated-redirect-migration.md](./consumer-authenticated-redirect-migration.md).
+
+`createSecureAuth(config)` always populates `uiConfig.oauthProviderIds` with the effective NextAuth
+OAuth providers. The property is optional in the TypeScript shape for backward compatibility with
+previously serialized or manually constructed UI config. Package UI treats a missing property as an
+empty list. `SocialSignIn` accepts an explicit `providerIds` override for standalone composition.
 
 #### Middleware (optional)
 

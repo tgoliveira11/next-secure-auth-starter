@@ -33,6 +33,7 @@ describe("buildPublicUIConfig", () => {
       redirectAuthenticatedFromGuestPages: true,
       authenticatedRedirectPath: "/dashboard",
     });
+    expect(ui.oauthProviderIds).toEqual([]);
   });
 
   it("enables session revocation polling when singleActiveSession is true", () => {
@@ -130,5 +131,41 @@ describe("buildPublicUIConfig", () => {
     expect(ui).not.toHaveProperty("db");
     expect(ui).not.toHaveProperty("email");
     expect(ui).not.toHaveProperty("oauth");
+    expect(ui.oauthProviderIds).toEqual(["google"]);
+  });
+
+  it("advertises only OAuth providers that NextAuth can install", () => {
+    const ui = buildPublicUIConfig(
+      buildTestSecureAuthConfig({
+        oauth: {
+          google: { clientId: "google-id", clientSecret: "google-secret" },
+          apple: { clientId: "apple-id", clientSecret: "apple-secret" },
+          github: { clientId: "github-id", clientSecret: "github-secret" },
+          microsoft: {
+            clientId: "11111111-1111-4111-8111-111111111111",
+            clientSecret: "microsoft-secret",
+            tenantId: "organizations",
+          },
+        },
+      })
+    );
+
+    expect(ui.oauthProviderIds).toEqual(["google", "apple", "github", "azure-ad"]);
+  });
+
+  it("does not advertise incomplete or invalid OAuth provider blocks", () => {
+    const ui = buildPublicUIConfig(
+      buildTestSecureAuthConfig({
+        oauth: {
+          github: { clientId: "github-id", clientSecret: "" },
+          microsoft: {
+            clientId: "not-a-guid",
+            clientSecret: "microsoft-secret",
+          },
+        },
+      })
+    );
+
+    expect(ui.oauthProviderIds).toEqual([]);
   });
 });

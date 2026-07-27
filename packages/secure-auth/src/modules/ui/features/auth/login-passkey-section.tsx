@@ -24,6 +24,8 @@ export type LoginPasskeySectionProps = {
   loginTwoFactorPath?: string;
 };
 
+export type PasskeyLoginCapabilityStatus = "checking" | "supported" | "unsupported";
+
 export function LoginPasskeySection({
   appSlug,
   afterLoginPath = "/dashboard",
@@ -33,16 +35,15 @@ export function LoginPasskeySection({
   const router = useRouter();
   const [error, setError] = useState("");
   const [passkeyLoading, setPasskeyLoading] = useState(false);
-  const [passkeySupported, setPasskeySupported] = useState(false);
-  const [passkeySupportChecked, setPasskeySupportChecked] = useState(false);
+  const [passkeyCapability, setPasskeyCapability] =
+    useState<PasskeyLoginCapabilityStatus>("checking");
 
   useEffect(() => {
-    setPasskeySupported(isPasskeyLoginSupported());
-    setPasskeySupportChecked(true);
+    setPasskeyCapability(isPasskeyLoginSupported() ? "supported" : "unsupported");
   }, []);
 
   async function handlePasskeySignIn() {
-    if (!passkeySupported) {
+    if (passkeyCapability !== "supported") {
       setError(PASSKEY_LOGIN_UNSUPPORTED_MESSAGE);
       return;
     }
@@ -106,17 +107,22 @@ export function LoginPasskeySection({
         type="button"
         variant="secondary"
         className="w-full"
-        disabled={passkeyLoading || !passkeySupported}
+        disabled={passkeyLoading || passkeyCapability !== "supported"}
+        aria-busy={passkeyCapability === "checking" || passkeyLoading}
         onClick={() => void handlePasskeySignIn()}
       >
-        {passkeyLoading ? "Signing in…" : "Sign in with passkey"}
+        {passkeyLoading
+          ? "Signing in…"
+          : passkeyCapability === "checking"
+            ? "Checking passkey support…"
+            : "Sign in with passkey"}
       </Button>
-      {passkeySupportChecked && passkeySupported && (
+      {passkeyCapability === "supported" && (
         <p className="text-sm text-[var(--muted)]">
           Enter your email above, then sign in with the passkey registered to that account.
         </p>
       )}
-      {passkeySupportChecked && !passkeySupported && (
+      {passkeyCapability === "unsupported" && (
         <p className="text-sm text-[var(--muted)]">{PASSKEY_LOGIN_UNSUPPORTED_MESSAGE}</p>
       )}
 

@@ -1,6 +1,8 @@
 # Security
 
-**Maturity:** `@tgoliveira/secure-auth@0.1.20-internal` is experimental — **not production-ready**.
+**Maturity:** the current `@tgoliveira/secure-auth` release is experimental — **not
+production-ready**. See the version in
+[`packages/secure-auth/package.json`](../packages/secure-auth/package.json).
 
 **Consumer onboarding:** [configuration-reference.md](./configuration-reference.md) · [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
@@ -205,6 +207,8 @@ Rules:
 - Request minimal identity scopes only.
 - Do not persist OAuth access/refresh tokens unless explicitly required and documented.
 - Enforce safe account linking to prevent provider takeover.
+- Public UI config may expose only effective provider IDs through `oauthProviderIds`; OAuth client
+  IDs, secrets, tenant details, and tokens remain server-only.
 
 Apple Sign in typically requires HTTPS and a real or tunneled domain.
 
