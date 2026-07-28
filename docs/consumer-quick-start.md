@@ -156,6 +156,9 @@ export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/my_app
 npm run db:migrate
 ```
 
+For the shared-passkey contract, confirm `0004_outgoing_william_stryker.sql` has run before deploying
+the package. It safely initializes existing credentials with `counter_revision = 0`.
+
 See [migrations.md](./migrations.md) for monorepo vs downstream details.
 
 ---
@@ -313,7 +316,15 @@ export const POST = secureAuth.routes.passkeyLoginOptions.POST;
 
 Use `@tgoliveira/secure-auth/client` helpers in login UI (`passkeyLoginApi`, `prepareAuthenticationOptions`).
 
-Account passkey settings (`PasskeySettings` / `GET /api/account/passkeys`) are capability-aware: vault-only credentials may be listed but are not removable from account security. See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+Account passkey settings (`PasskeySettings` / `GET /api/account/passkeys`) are capability-aware:
+vault-only credentials are protected from deletion and can be explicitly enabled for sign-in through
+`secureAuth.routes.passkeyEnableSignIn`. Wire that route at
+`/api/account/passkeys/[id]/enable-sign-in`. See
+[consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+
+If an independent browser-only feature reuses the same credential, use the package preparation and
+verified callbacks and keep all PRF results out of server payloads. See
+[passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 When TOTP 2FA is enabled, passkey verify returns `requiresTwoFactor: true` and sets the same httpOnly challenge cookie as credentials login. The client redirects to `ui.paths.loginTwoFactor` (default `/login/2fa?mode=credentials`); the session is finalized only after TOTP verification.
 

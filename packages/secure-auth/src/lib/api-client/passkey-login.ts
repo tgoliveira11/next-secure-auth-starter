@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import type { PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
+import { sanitizeWebAuthnResponseForSecureAuthServer } from "../../modules/passkeys/lib/webauthn-response-privacy";
 
 export type PasskeyLoginVerifyResult =
   | {
@@ -21,6 +22,10 @@ export const passkeyLoginApi = {
       "/api/auth/passkey/login/options",
       payload ?? {}
     ),
-  verify: (payload: { response: unknown }) =>
-    apiClient.post<PasskeyLoginVerifyResult>("/api/auth/passkey/login/verify", payload),
+  verify: <T extends object>(payload: {
+    response: T & { clientExtensionResults?: unknown };
+  }) =>
+    apiClient.post<PasskeyLoginVerifyResult>("/api/auth/passkey/login/verify", {
+      response: sanitizeWebAuthnResponseForSecureAuthServer(payload.response),
+    }),
 };

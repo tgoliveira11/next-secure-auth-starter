@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   findByUserId: vi.fn(),
   findByEmail: vi.fn(),
   storeChallenge: vi.fn(),
-  updateCounter: vi.fn(),
+  advanceCounter: vi.fn(),
   updateLastUsedAt: vi.fn(),
   findById: vi.fn(),
   record: vi.fn(),
@@ -61,7 +61,7 @@ function buildService() {
         findByCredentialId: mocks.findByCredentialId,
         findByUserId: mocks.findByUserId,
         storeChallenge: mocks.storeChallenge,
-        updateCounter: mocks.updateCounter,
+        advanceCounter: mocks.advanceCounter,
         updateLastUsedAt: mocks.updateLastUsedAt,
       },
       userRepository: {
@@ -83,6 +83,7 @@ describe("passkey login getLoginOptions branches", () => {
     vi.clearAllMocks();
     mocks.storeChallenge.mockResolvedValue(undefined);
     mocks.enforceRateLimit.mockResolvedValue(undefined);
+    mocks.advanceCounter.mockResolvedValue("advanced");
   });
 
   it("throws when email has no account", async () => {
@@ -159,6 +160,7 @@ describe("passkey login verifyLogin branches", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.enforceRateLimit.mockResolvedValue(undefined);
+    mocks.advanceCounter.mockResolvedValue("advanced");
     mocks.consumeValidChallenge.mockResolvedValue({ challenge: "challenge-1", userId: USER_ID });
     mocks.findByCredentialId.mockResolvedValue({
       userId: USER_ID,
@@ -166,12 +168,15 @@ describe("passkey login verifyLogin branches", () => {
       signInEnabled: true,
       publicKey: Buffer.from("key").toString("base64url"),
       counter: "0",
+      counterRevision: 4,
       transports: null,
     });
     mocks.findById.mockResolvedValue({
       id: USER_ID,
       email: "user@example.com",
       emailVerifiedAt: new Date(),
+      status: "active",
+      authProvider: "credentials",
     });
     vi.mocked(verifyAuthenticationResponse).mockResolvedValue({
       verified: true,
@@ -230,5 +235,58 @@ describe("passkey login verifyLogin branches", () => {
     const service = buildService();
 
     await expect(service.verifyLogin(buildVerifyResponse())).rejects.toThrow(NotFoundError);
+  });
+
+  it("fails closed when another ceremony advances the counter first", async () => {
+    mocks.advanceCounter.mockResolvedValue("conflict");
+    const service = buildService();
+
+    await expect(service.verifyLogin(buildVerifyResponse())).rejects.toThrow(ChallengeError);
+    expect(mocks.advanceCounter).toHaveBeenCalledWith("cred-id", "0", "2", 4);
+    expect(mocks.record).toHaveBeenCalledWith(
+      "passkey_login_failed",
+      USER_ID,
+      expect.objectContaining({ reason: "counter_conflict" })
+    );
+    expect(mocks.updateLastUsedAt).not.toHaveBeenCalled();
+  });
+
+  it("uses compare-and-set for counterless authenticators", async () => {
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({
+      verified: true,
+      authenticationInfo: { newCounter: 0 },
+    } as never);
+    const service = buildService();
+
+    await service.verifyLogin(buildVerifyResponse());
+
+    expect(verifyAuthenticationResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ requireUserVerification: true })
+    );
+    expect(mocks.advanceCounter).toHaveBeenCalledWith("cred-id", "0", "0", 4);
+  });
+
+  it("rejects malformed or non-advancing counters before issuing a login", async () => {
+    mocks.findByCredentialId.mockResolvedValue({
+      userId: USER_ID,
+      credentialId: "cred-id",
+      signInEnabled: true,
+      publicKey: Buffer.from("key").toString("base64url"),
+      counter: "2",
+      transports: null,
+    });
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({
+      verified: true,
+      authenticationInfo: { newCounter: 2 },
+    } as never);
+    const service = buildService();
+
+    await expect(service.verifyLogin(buildVerifyResponse())).rejects.toThrow(ChallengeError);
+    expect(mocks.advanceCounter).not.toHaveBeenCalled();
+    expect(mocks.record).toHaveBeenCalledWith(
+      "passkey_login_failed",
+      USER_ID,
+      expect.objectContaining({ reason: "counter_not_advanced" })
+    );
   });
 });

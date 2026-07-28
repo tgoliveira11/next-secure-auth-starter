@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   passkeysListGet as listGet,
   passkeyRegisterPost as registerPost,
+  passkeyEnableSignInPost as enableSignInPost,
   passkeyDelete as deletePasskey,
 } from "@/test/helpers/handlers";
 import { getTestServices } from "@/test/helpers/mock-services";
@@ -15,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   getRegistrationOptions: vi.fn(),
   verifyRegistration: vi.fn(),
   removePasskey: vi.fn(),
+  getSignInCapabilityOptions: vi.fn(),
+  verifySignInCapability: vi.fn(),
 }));
 
 vi.mock("@/modules/auth/lib/session", async (importOriginal) => {
@@ -49,6 +52,8 @@ async function buildServices() {
       getRegistrationOptions: mocks.getRegistrationOptions,
       verifyRegistration: mocks.verifyRegistration,
       removePasskey: mocks.removePasskey,
+      getSignInCapabilityOptions: mocks.getSignInCapabilityOptions,
+      verifySignInCapability: mocks.verifySignInCapability,
     },
   }));
 }
@@ -143,6 +148,137 @@ describe("account passkeys API routes", () => {
       services
     );
     expect(res.status).toBe(500);
+  });
+
+  it("starts and verifies an exact passkey sign-in capability upgrade", async () => {
+    mocks.getSignInCapabilityOptions.mockResolvedValue({ options: { challenge: "challenge" } });
+    mocks.verifySignInCapability.mockResolvedValue({
+      verified: true,
+      credentialId: "credential-id",
+      signInEnabled: true,
+    });
+    const context = { params: Promise.resolve({ id: "pk-vault" }) };
+
+    const options = await enableSignInPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-vault/enable-sign-in", {
+        method: "POST",
+        body: JSON.stringify({ action: "options" }),
+      }),
+      context,
+      services
+    );
+    expect(options.status).toBe(200);
+    expect(mocks.getSignInCapabilityOptions).toHaveBeenCalledWith(
+      USER_ID,
+      "pk-vault",
+      expect.anything()
+    );
+
+    const verify = await enableSignInPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-vault/enable-sign-in", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "verify",
+          response: { id: "credential-id", clientExtensionResults: {} },
+        }),
+      }),
+      context,
+      services
+    );
+    expect(verify.status).toBe(200);
+    expect(mocks.verifySignInCapability).toHaveBeenCalledWith(
+      USER_ID,
+      "pk-vault",
+      { id: "credential-id", clientExtensionResults: {} },
+      expect.anything()
+    );
+  });
+
+  it("rejects PRF in capability proof before invoking the service", async () => {
+    const res = await enableSignInPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-vault/enable-sign-in", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "verify",
+          response: {
+            id: "credential-id",
+            clientExtensionResults: { prf: { results: { first: "PRF-SECRET-SENTINEL" } } },
+          },
+        }),
+      }),
+      { params: Promise.resolve({ id: "pk-vault" }) },
+      services
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.verifySignInCapability).not.toHaveBeenCalled();
+  });
+
+  it("rejects nested PRF-derived aliases in capability proof", async () => {
+    const res = await enableSignInPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/pk-vault/enable-sign-in", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "verify",
+          response: { id: "credential-id", metadata: { nested: { prfResults: null } } },
+        }),
+      }),
+      { params: Promise.resolve({ id: "pk-vault" }) },
+      services
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.verifySignInCapability).not.toHaveBeenCalled();
+  });
+
+  it("rejects capability upgrade requests without a credential route id", async () => {
+    const res = await enableSignInPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/unknown/enable-sign-in", {
+        method: "POST",
+        body: JSON.stringify({ action: "options" }),
+      }),
+      undefined,
+      services
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.getSignInCapabilityOptions).not.toHaveBeenCalled();
+  });
+
+  it.each([null, {}, { enabled: true }, { results: { first: "PRF-SECRET-SENTINEL" } }])(
+    "rejects registration responses containing PRF extension results: %o",
+    async (prf) => {
+      const res = await registerPost(
+        sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
+          method: "POST",
+          body: JSON.stringify({
+            action: "verify",
+            response: { id: "cred", clientExtensionResults: { prf } },
+          }),
+        }),
+        services
+      );
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: "Invalid request" });
+      expect(mocks.verifyRegistration).not.toHaveBeenCalled();
+    }
+  );
+
+  it("rejects nested PRF-derived aliases before registration verification", async () => {
+    const res = await registerPost(
+      sameOriginRequest("http://localhost:3001/api/account/passkeys/register", {
+        method: "POST",
+        body: JSON.stringify({
+          action: "verify",
+          response: { id: "cred", metadata: { nested: { prf_output: null } } },
+        }),
+      }),
+      services
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.verifyRegistration).not.toHaveBeenCalled();
   });
 
   it("deletes a passkey by id", async () => {

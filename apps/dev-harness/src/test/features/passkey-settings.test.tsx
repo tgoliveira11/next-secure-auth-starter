@@ -75,6 +75,23 @@ describe("PasskeySettings", () => {
     });
   });
 
+  it("hides sign-in capability promotion by default", async () => {
+    render(<PasskeySettings userId={USER_ID} appSlug="test-app" />);
+    await screen.findByText("Vault passkey");
+    expect(screen.queryByRole("button", { name: "Enable sign-in" })).toBeNull();
+  });
+
+  it("shows sign-in capability promotion only when explicitly enabled", async () => {
+    render(
+      <PasskeySettings
+        userId={USER_ID}
+        appSlug="test-app"
+        allowSignInCapabilityPromotion
+      />
+    );
+    expect(await screen.findByRole("button", { name: "Enable sign-in" })).toBeTruthy();
+  });
+
   it("does not use account sign-in copy for vault-only passkeys", async () => {
     render(<PasskeySettings userId={USER_ID} appSlug="test-app" />);
     await waitFor(() => {

@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  startRegistration,
-  type PublicKeyCredentialCreationOptionsJSON,
-} from "@simplewebauthn/browser";
-import {
   passkeyAccountApi,
-  prepareRegistrationOptions,
   setPasskeyLoginHint,
   type AccountPasskey,
 } from "@tgoliveira/secure-auth/client";
+import {
+  enableAccountPasskeySignIn,
+  registerAccountPasskey,
+  type AccountPasskeyRegistrationHooks,
+} from "@tgoliveira/secure-auth/react/client";
 import { Card, CardDescription, CardHeader, CardTitle } from "../../primitives/card.js";
 import { Button } from "../../primitives/button.js";
 import { Alert } from "../../primitives/alert.js";
@@ -23,6 +23,10 @@ import { SuccessState } from "../../primitives/success-state.js";
 export type PasskeySettingsProps = {
   userId: string;
   appSlug: string;
+  /** Optional browser-only composition hooks for an additional passkey capability. */
+  registrationHooks?: AccountPasskeyRegistrationHooks;
+  /** Show vault-only to account-sign-in promotion. Default: false. */
+  allowSignInCapabilityPromotion?: boolean;
 };
 
 function formatDate(value: string | null): string {
@@ -34,7 +38,12 @@ function formatDate(value: string | null): string {
   });
 }
 
-export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
+export function PasskeySettings({
+  userId,
+  appSlug,
+  registrationHooks,
+  allowSignInCapabilityPromotion = false,
+}: PasskeySettingsProps) {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [passkeys, setPasskeys] = useState<AccountPasskey[]>([]);
@@ -65,19 +74,15 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
     setSuccess(null);
 
     try {
-      const options =
-        (await passkeyAccountApi.registerOptions()) as PublicKeyCredentialCreationOptionsJSON;
-      const attestation = await startRegistration({
-        optionsJSON: prepareRegistrationOptions(options),
-      });
-
-      const result = await passkeyAccountApi.registerVerify({
-        response: attestation,
-      });
+      const result = await registerAccountPasskey({ hooks: registrationHooks });
 
       if (result.verified) {
         setPasskeyLoginHint(appSlug, { userId, credentialId: result.credentialId });
-        setSuccess("Passkey added for sign-in.");
+        setSuccess(
+          result.integration.status === "failed"
+            ? "Passkey added for sign-in. Additional passkey setup did not complete."
+            : "Passkey added for sign-in."
+        );
         await loadPasskeys();
       }
     } catch (e) {
@@ -100,6 +105,23 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
       await loadPasskeys();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not remove passkey");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleEnableSignIn(passkey: AccountPasskey) {
+    setActionLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const result = await enableAccountPasskeySignIn(passkey.id);
+      setPasskeyLoginHint(appSlug, { userId, credentialId: result.credentialId });
+      setSuccess("This passkey can now sign in to your account.");
+      await loadPasskeys();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not enable passkey sign-in");
     } finally {
       setActionLoading(false);
     }
@@ -148,6 +170,16 @@ export function PasskeySettings({ userId, appSlug }: PasskeySettingsProps) {
                 {passkey.removableFromAccountSettings ? (
                   <Button variant="secondary" onClick={() => setRemoveTarget(passkey)}>
                     Remove
+                  </Button>
+                ) : allowSignInCapabilityPromotion &&
+                  !passkey.signInEnabled &&
+                  passkey.vaultUnlockEnabled ? (
+                  <Button
+                    variant="secondary"
+                    disabled={actionLoading}
+                    onClick={() => void handleEnableSignIn(passkey)}
+                  >
+                    Enable sign-in
                   </Button>
                 ) : null}
               </li>

@@ -68,6 +68,7 @@ Wire each handler in your App Router under the consumer URL path shown below. Ca
 | `passkeysList` | GET | `/api/account/passkeys` | Yes |
 | `passkeyRegister` | POST | `/api/account/passkeys/register` | Yes |
 | `passkeyById` | DELETE | `/api/account/passkeys/[id]` | Yes |
+| `passkeyEnableSignIn` | POST | `/api/account/passkeys/[id]/enable-sign-in` | Yes |
 | `twoFactorStatus` | GET | `/api/account/2fa/status` | Yes |
 | `twoFactorSetupStart` | POST | `/api/account/2fa/setup/start` | Yes |
 | `twoFactorSetupVerify` | POST | `/api/account/2fa/setup/verify` | Yes |
@@ -139,6 +140,8 @@ Form-based auth routes (`loginStartForm`, `loginVerify2faForm`) respond with **3
 | `POST /api/account/change-password` | 400 | New password fails policy | Policy message from `ValidationError` |
 | `DELETE /api/account/passkeys/[id]` | 400 | Missing route param | `"Invalid request"` |
 | `DELETE /api/account/passkeys/[id]` | 409 | Vault-only or dual-capability passkey | `"This passkey is not managed from account security settings."` or `"This passkey is used by another security feature. Manage it from the relevant settings page."` |
+| `POST /api/account/passkeys/[id]/enable-sign-in` | 400 | Missing id, invalid payload, PRF extension result, invalid/expired proof, or failed WebAuthn verification | `"Invalid request"` or passkey verification message |
+| `POST /api/account/passkeys/[id]/enable-sign-in` | 409 | Credential is already sign-in enabled or is not vault-only | Capability-specific conflict message |
 | `POST /api/account/2fa/disable` | 400 | Invalid body | `"Invalid request"` |
 | `POST /api/account/2fa/disable` | 400 | Invalid TOTP or backup code | `"Invalid authenticator or backup code"` |
 
@@ -301,7 +304,21 @@ export default function Page() {
 | --- | --- |
 | **Purpose** | Client-only UI (`ConfirmDialog`, hooks, passkey sign-in helper, default sign-out) |
 | **Audience** | Client components (`"use client"`) |
-| **Example** | `import { ConfirmDialog, PasswordStrengthField, PasswordSetupFields, signInWithPasskey } from "@tgoliveira/secure-auth/react/client"` |
+| **Example** | `import { ConfirmDialog, registerAccountPasskey, signInWithPasskey } from "@tgoliveira/secure-auth/react/client"` |
+
+Passkey browser orchestration exports:
+
+- `registerAccountPasskey` and `AccountPasskeyRegistrationHooks`
+- `signInWithPasskey` and `PasskeyLoginHooks`
+- `enableAccountPasskeySignIn`
+
+`SecuritySettingsPage.allowPasskeySignInCapabilityPromotion` and
+`PasskeySettings.allowSignInCapabilityPromotion` default to `false`. Mounting the route alone does
+not expose the promotion action in package UI.
+
+Registration hooks run only after exact server/browser credential-id equality. Login's
+`onFullyAuthenticated` runs only after final account-session creation and never while TOTP is
+pending. See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 ---
 
@@ -312,6 +329,12 @@ export default function Page() {
 | **Purpose** | Browser-safe API client, passkey helpers, formatters, cookie name builders |
 | **Audience** | Client components, shared isomorphic helpers |
 | **Example** | `import { accountApi, passkeyLoginApi, buildLoginPendingTokenCookieName } from "@tgoliveira/secure-auth/client"` |
+
+Passkey privacy and capability exports include:
+
+- `sanitizeWebAuthnResponseForSecureAuthServer(response)` — returns a non-mutating copy without
+  documented PRF-derived fields; server routes independently enforce a recursive bounded guard;
+- `passkeyAccountApi.enableSignInOptions(id)` / `enableSignInVerify(id, payload)`.
 
 ---
 
@@ -455,7 +478,7 @@ Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route strin
 
 See [Route map](#route-map) for handler keys and paths.
 
-### Account passkeys (`passkeysList` / `passkeyById`)
+### Account passkeys (`passkeysList` / `passkeyById` / `passkeyEnableSignIn`)
 
 `GET /api/account/passkeys` returns capability-aware items:
 
@@ -479,13 +502,22 @@ See [Route map](#route-map) for handler keys and paths.
 
 `DELETE /api/account/passkeys/:id` removes **account sign-in-only** credentials. Returns **409** when the credential is vault-only, dual-capability, or otherwise not managed from account settings.
 
-`POST /api/account/passkeys/register` with `action: "options"` returns WebAuthn registration options whose `excludeCredentials` list includes **only** existing credentials with `signInEnabled: true`. Vault-only credentials are omitted so they do not block account passkey registration. Verification always inserts `signInEnabled: true`, `vaultUnlockEnabled: false` — it does not upgrade vault-only rows.
+`POST /api/account/passkeys/register` with `action: "options"` returns WebAuthn registration options whose `excludeCredentials` list includes **only** existing credentials with `signInEnabled: true`. Vault-only credentials are omitted so they do not block account passkey registration. Verification always inserts `signInEnabled: true`, `vaultUnlockEnabled: false` — it does not silently upgrade vault-only rows.
+
+`POST /api/account/passkeys/:id/enable-sign-in` explicitly promotes an existing vault-only
+credential. Use `{ action: "options" }`, complete the exact WebAuthn assertion, then submit
+`{ action: "verify", response }`. The route requires a fully authenticated same-origin session,
+`userVerification: "required"`, a distinct single-use challenge audience, and a successful
+monotonic counter/revision compare-and-set. Apply migration `0004_outgoing_william_stryker.sql`
+before deploying this contract.
 
 Passkey login continues to use only `signInEnabled: true` credentials.
 
-Some authenticators may still prevent registering a second passkey for the same site on the same device (platform limitation). A future capability-upgrade flow may be required to enable account sign-in on an existing vault-only passkey.
+Some authenticators prevent registering a second passkey for the same site on the same device. Use
+the explicit capability upgrade for an existing vault-only credential instead of re-registering it.
 
-See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md).
+See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md) and
+[passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 ---
 

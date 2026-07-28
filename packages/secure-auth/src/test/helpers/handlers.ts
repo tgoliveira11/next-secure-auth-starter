@@ -131,6 +131,19 @@ export async function passkeyRegisterPost(request: Request, services?: SecureAut
   return invokePost("../../server/routes/handlers/account/passkeys-register.js", request, undefined, services);
 }
 
+export async function passkeyEnableSignInPost(
+  request: Request,
+  context?: RouteContext,
+  services?: SecureAuthServices
+) {
+  return invokePost(
+    "../../server/routes/handlers/account/passkeys-enable-sign-in.js",
+    request,
+    context,
+    services
+  );
+}
+
 export async function passkeyDelete(
   request: Request,
   context?: RouteContext,

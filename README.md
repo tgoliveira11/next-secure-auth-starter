@@ -198,6 +198,7 @@ Branch-first workflow, PR checklist, and agent rules: [CONTRIBUTING.md](CONTRIBU
 | [docs/customization.md](docs/customization.md) | UI, email, and auth flow customization |
 | [docs/authenticated-user-auth-pages-audit.md](docs/authenticated-user-auth-pages-audit.md) | Authenticated users visiting login/register (audit) |
 | [docs/consumer-authenticated-redirect-migration.md](docs/consumer-authenticated-redirect-migration.md) | Migrating client apps to guest-page redirects |
+| [docs/passkey-credential-interoperability.md](docs/passkey-credential-interoperability.md) | Safely reuse one passkey for account sign-in and an independent browser-only capability |
 | [packages/secure-auth/README.md](packages/secure-auth/README.md) | Package overview |
 | [apps/consumer-demo/README.md](apps/consumer-demo/README.md) | Canonical consumer reference |
 | [apps/dev-harness/README.md](apps/dev-harness/README.md) | Internal package development harness |

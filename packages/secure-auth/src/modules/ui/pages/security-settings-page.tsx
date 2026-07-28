@@ -22,6 +22,8 @@ export function SecuritySettingsPage({
   title: titleProp,
   subtitle,
   description: descriptionProp,
+  passkeyRegistrationHooks,
+  allowPasskeySignInCapabilityPromotion = false,
 }: SecuritySettingsPageProps) {
   const resolved = useUiPaths(paths);
   const appSlug = useUiAppSlug(appSlugProp);
@@ -58,7 +60,12 @@ export function SecuritySettingsPage({
       {brand}
       {header}
       <PageHeader title={title} description={description} />
-      <PasskeySettings userId={userId} appSlug={appSlug} />
+      <PasskeySettings
+        userId={userId}
+        appSlug={appSlug}
+        registrationHooks={passkeyRegistrationHooks}
+        allowSignInCapabilityPromotion={allowPasskeySignInCapabilityPromotion}
+      />
       <TwoFactorSettings appSlug={appSlug} />
     </PageShell>
   );

@@ -95,6 +95,40 @@ describe("passkey login API routes", () => {
     expect(res.status).toBe(400);
   });
 
+  it.each([null, {}, { enabled: true }, { results: { first: "PRF-SECRET-SENTINEL" } }])(
+    "rejects login responses containing PRF extension results: %o",
+    async (prf) => {
+      const res = await verifyPost(
+        new Request("http://localhost", {
+          method: "POST",
+          body: JSON.stringify({
+            response: { id: "cred", clientExtensionResults: { prf } },
+          }),
+        }),
+        services
+      );
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: "Invalid request" });
+      expect(mocks.verifyLogin).not.toHaveBeenCalled();
+    }
+  );
+
+  it("rejects nested PRF-derived aliases before login verification", async () => {
+    const res = await verifyPost(
+      new Request("http://localhost", {
+        method: "POST",
+        body: JSON.stringify({
+          response: { id: "cred", metadata: { nested: { prfHash: null } } },
+        }),
+      }),
+      services
+    );
+
+    expect(res.status).toBe(400);
+    expect(mocks.verifyLogin).not.toHaveBeenCalled();
+  });
+
   it("rejects reused challenge via service error", async () => {
     const { ChallengeError } = await import("@/modules/passkeys/services/passkey-service");
     mocks.verifyLogin.mockRejectedValue(new ChallengeError("Invalid or expired challenge"));

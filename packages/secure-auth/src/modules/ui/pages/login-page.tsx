@@ -28,6 +28,7 @@ export function LoginPage({
   afterLoginPath,
   redirectIfAuthenticated,
   authenticatedRedirectPath,
+  passkeyLoginHooks,
 }: LoginPageProps) {
   const resolved = useUiPaths(paths);
   const destination = afterLoginPath ?? resolved.afterLogin;
@@ -62,6 +63,7 @@ export function LoginPage({
           afterLoginPath={destination}
           loginPath={resolved.login}
           loginTwoFactorPath={`${resolved.loginTwoFactor}?mode=credentials`}
+          hooks={passkeyLoginHooks}
         />
       </Card>
       {footer ?? (

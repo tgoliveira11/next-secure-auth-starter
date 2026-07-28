@@ -54,6 +54,11 @@ Keep app tables in a separate schema namespace or prefixed table names to avoid 
 | `0.3.x` / `0.4.x` | Admin platform tables in `0002_v0_3_admin_platform.sql` (users profile/role columns + `login_attempt_counters`, `invite_codes`, `invite_uses`, `api_keys`, `admin_config_overrides`) |
 | `0.5.x+` | Semver for API; major bump for breaking DB |
 | `0.6.x` | `user_preferences` table in `0003_user_preferences.sql` (opt-in via `preferences.enabled`) |
+| Next minor | `passkey_credentials.counter_revision` in `0004_outgoing_william_stryker.sql`; existing rows are safely backfilled to `0` before the new package is deployed |
+
+Apply `0004` before deploying the package version that reads `counter_revision`. The additive,
+non-null column has a default of `0`; no credential is revoked and no existing counter is changed.
+After deployment, every successful assertion atomically increments the revision.
 
 ## Breaking DB changes
 

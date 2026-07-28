@@ -43,6 +43,13 @@ describe("published SQL migrations", () => {
     expect(sql).toContain("idx_user_preferences_user_namespace");
   });
 
+  it("0004 migration adds the passkey assertion CAS revision with a safe backfill", () => {
+    const sql = readFileSync(join(MIGRATIONS_DIR, "0004_outgoing_william_stryker.sql"), "utf-8");
+
+    expect(sql).toContain('ALTER TABLE "passkey_credentials" ADD COLUMN "counter_revision"');
+    expect(sql).toContain("DEFAULT 0 NOT NULL");
+  });
+
   it("has a snapshot for every journal entry", () => {
     const journal = JSON.parse(readFileSync(join(META_DIR, "_journal.json"), "utf-8")) as {
       entries: Array<{ idx: number }>;
