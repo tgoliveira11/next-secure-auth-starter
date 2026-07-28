@@ -14,6 +14,7 @@ import type { RateLimitApi } from "@/modules/rate-limit/index";
 import type { AuthLoginService } from "@/modules/auth/services/auth-login-service";
 import type { AuthService } from "@/modules/auth/services/auth-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
+import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
 
 type PasskeyLoginServiceDeps = {
   config: SecureAuthContext["config"];
@@ -190,10 +191,11 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
           expectedChallenge: challengeRecord.challenge,
           expectedOrigin: origins,
           expectedRPID: rpID,
+          requireUserVerification: true,
           credential: {
             id: credential.credentialId,
             publicKey: new Uint8Array(Buffer.from(credential.publicKey, "base64url")),
-            counter: Number.parseInt(credential.counter, 10) || 0,
+            counter: Number(credential.counter),
             transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
           },
         });
@@ -211,10 +213,29 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
         throw new ChallengeError("Passkey sign-in failed. Try again.");
       }
 
-      await repos.passkeyRepository.updateCounter(
-        credential.credentialId,
-        String(verification.authenticationInfo.newCounter)
+      const counterPlan = resolvePasskeyCounterAdvance(
+        credential.counter,
+        verification.authenticationInfo.newCounter
       );
+      if (counterPlan.status === "invalid") {
+        await repos.auditRepository.record("passkey_login_failed", credential.userId, {
+          reason: counterPlan.reason,
+        });
+        throw new ChallengeError("Passkey sign-in failed. Try again.");
+      }
+
+      const counterAdvance = await repos.passkeyRepository.advanceCounter(
+        credential.credentialId,
+        counterPlan.expectedCounter,
+        counterPlan.nextCounter,
+        credential.counterRevision
+      );
+      if (counterAdvance === "conflict") {
+        await repos.auditRepository.record("passkey_login_failed", credential.userId, {
+          reason: "counter_conflict",
+        });
+        throw new ChallengeError("Passkey sign-in failed. Try again.");
+      }
       await repos.passkeyRepository.updateLastUsedAt(credential.credentialId);
 
       const user = await repos.userRepository.findById(credential.userId);

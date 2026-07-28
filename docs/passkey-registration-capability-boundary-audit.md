@@ -10,7 +10,10 @@
 
 **Fixed:** `getRegistrationOptions` now builds `excludeCredentials` via `toSignInExcludeCredentials()`, including only credentials with `signInEnabled === true`. Vault-only credentials are omitted. Account registration still creates new rows with `signInEnabled: true` and `vaultUnlockEnabled: false` without modifying existing vault-only credentials.
 
-**Remaining platform caveat:** Some authenticators may still prevent multiple credentials for the same user/RP on one device even when vault-only IDs are omitted from `excludeCredentials`. A future explicit capability-upgrade flow may be required to enable account sign-in on an existing vault-only passkey.
+**Platform caveat resolved by explicit reuse:** Some authenticators prevent multiple credentials for
+the same user/RP on one device even when vault-only IDs are omitted from `excludeCredentials`.
+`passkeyEnableSignIn` now proves possession and promotes the existing vault-only credential without a
+second registration. See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 ---
 
@@ -28,7 +31,9 @@ This is a **package-level bug** relative to the intended capability model docume
 
 **Recommended fix (future implementation):** Filter `excludeCredentials` to credentials that already occupy account sign-in capability — at minimum `signInEnabled === true`. Do not silently upgrade vault-only rows during account registration.
 
-**Caveat:** Fixing `excludeCredentials` alone does not enable “same authenticator, two separate capability rows” on all platforms. WebAuthn generally allows one discoverable credential per authenticator per RP. Enabling sign-in on an authenticator that already holds a vault-only credential for the same RP likely requires a dedicated **capability-upgrade flow** (proof of possession + explicit user confirmation), not a second registration.
+**Caveat:** Fixing `excludeCredentials` alone does not enable “same authenticator, two separate
+capability rows” on all platforms. The dedicated **capability-upgrade flow** described above now
+provides proof of possession and explicit user confirmation without a second registration.
 
 ---
 
@@ -83,7 +88,9 @@ Consumer guidance (`docs/consumer-passkey-capability-boundaries.md`):
 - Vault credentials: `signInEnabled: false`, `vaultUnlockEnabled: true`
 - Account registration (package): always inserts `signInEnabled: true`, `vaultUnlockEnabled: false`
 
-There is no package API for vault passkey setup, capability upgrade, or merging flags on an existing row.
+The package still does not own vault setup or envelope persistence. It now exposes an explicit
+account-side capability upgrade for a vault-only row; it does not merge flags silently during
+registration.
 
 ---
 
@@ -267,7 +274,8 @@ Backwards compatibility: **behavior change** for users with vault-only credentia
 **Expected after fix**
 
 - Step 5: vault `credential_id` **absent** from `excludeCredentials`.
-- Step 6 (same authenticator): may still fail on some platforms (one credential per RP per authenticator) — that indicates need for capability-upgrade flow, not exclude list.
+- Step 6 (same authenticator): may still fail on platforms that allow only one credential per RP. Use
+  the explicit **Enable sign-in** capability proof instead of a second registration.
 - Step 6 (different authenticator): registration should proceed.
 
 ---

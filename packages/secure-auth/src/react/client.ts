@@ -11,8 +11,18 @@ export {
   buildPasskeyLoginOutcomeKey,
   buildPasskeyLoginOptionsPayload,
   type PasskeyLoginOutcome,
+  type PasskeyLoginHooks,
+  type FullyAuthenticatedPasskeyContext,
   type SignInWithPasskeyOptions,
+  type SignInWithPasskeyResult,
 } from "../lib/passkey/sign-in-with-passkey.js";
+export {
+  registerAccountPasskey,
+  type AccountPasskeyRegistrationHooks,
+  type AccountPasskeyRegistrationVerifiedContext,
+  type RegisterAccountPasskeyResult,
+} from "../lib/passkey/register-account-passkey.js";
+export { enableAccountPasskeySignIn } from "../lib/passkey/enable-account-passkey-sign-in.js";
 export { TurnstileCaptcha, type TurnstileCaptchaProps } from "../modules/ui/features/auth/turnstile-captcha";
 export {
   mergeGuestPreferences,

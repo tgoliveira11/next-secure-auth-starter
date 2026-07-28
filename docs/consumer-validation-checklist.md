@@ -57,7 +57,12 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-dem
 - [ ] `webauthn.rpId`, `webauthn.origin`, `webauthn.rpName` configured
 - [ ] `WEBAUTHN_ORIGIN` matches browser URL exactly
 - [ ] Passkey login/register routes wired (`secureAuth.routes.passkeyLoginOptions`, etc.)
+- [ ] `passkeyEnableSignIn` route wired and promotion UI explicitly enabled when shared credential capabilities are used
 - [ ] Passkey sign-in works in supported browser
+- [ ] PRF extension results are absent from registration/login/capability API request bodies
+- [ ] Migration `0004_outgoing_william_stryker.sql` applied before deploying counter-revision code
+- [ ] Shared credential integrations use one authoritative counter and revision with compare-and-set
+- [ ] Consumer vault challenges use a feature-specific audience, never secure-auth `registration`
 
 ---
 

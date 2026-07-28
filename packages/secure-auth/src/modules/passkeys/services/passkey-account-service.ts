@@ -1,14 +1,21 @@
 import {
+  generateAuthenticationOptions,
   generateRegistrationOptions,
+  verifyAuthenticationResponse,
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
-import type { RegistrationResponseJSON } from "@simplewebauthn/server";
+import type {
+  AuthenticationResponseJSON,
+  RegistrationResponseJSON,
+} from "@simplewebauthn/server";
 import { ChallengeError, NotFoundError } from "@/modules/passkeys/services/passkey-service";
 import {
   toAccountPasskeyListItem,
   assertRemovableFromAccountSettings,
   toSignInExcludeCredentials,
+  assertMayEnableAccountSignIn,
 } from "@/modules/passkeys/lib/passkey-capabilities";
+import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -18,6 +25,10 @@ function defaultFriendlyName(deviceType?: string): string {
   if (deviceType === "singleDevice") return "This device";
   if (deviceType === "multiDevice") return "Synced passkey";
   return "Passkey";
+}
+
+function signInCapabilityChallengeType(credentialDbId: string): string {
+  return `sign_in_capability_enable:${credentialDbId}`;
 }
 
 type PasskeyAccountServiceDeps = {
@@ -69,7 +80,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
         excludeCredentials: toSignInExcludeCredentials(existing),
         authenticatorSelection: {
           residentKey: "preferred",
-          userVerification: "preferred",
+          userVerification: "required",
         },
       });
 
@@ -108,6 +119,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
         expectedChallenge: challengeRecord.challenge,
         expectedOrigin: origins,
         expectedRPID: rpID,
+        requireUserVerification: true,
       });
 
       if (!verification.verified || !verification.registrationInfo) {
@@ -137,6 +149,145 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
       return {
         verified: true,
         credentialId: credential.id,
+      };
+    },
+
+    async getSignInCapabilityOptions(userId: string, credentialDbId: string, ip?: string) {
+      await rateLimit.enforceRateLimit({
+        operation: "passkey.authenticate",
+        userId,
+        ip,
+        endpoint: "/api/account/passkeys/:id/enable-sign-in/options",
+      });
+
+      const credential = await repos.passkeyRepository.findByIdForUser(credentialDbId, userId);
+      if (!credential) {
+        throw new NotFoundError("Passkey not found");
+      }
+      assertMayEnableAccountSignIn(credential);
+
+      const options = await generateAuthenticationOptions({
+        rpID,
+        allowCredentials: [
+          {
+            id: credential.credentialId,
+            transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
+          },
+        ],
+        userVerification: "required",
+      });
+
+      await repos.passkeyRepository.storeChallenge({
+        userId,
+        challenge: options.challenge,
+        type: signInCapabilityChallengeType(credential.id),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      });
+
+      return { options };
+    },
+
+    async verifySignInCapability(
+      userId: string,
+      credentialDbId: string,
+      response: AuthenticationResponseJSON,
+      ip?: string
+    ) {
+      const credential = await repos.passkeyRepository.findByIdForUser(credentialDbId, userId);
+      if (!credential) {
+        throw new NotFoundError("Passkey not found");
+      }
+      assertMayEnableAccountSignIn(credential);
+      if (response.id !== credential.credentialId) {
+        throw new ChallengeError("Passkey capability verification failed");
+      }
+
+      await rateLimit.enforceRateLimit({
+        operation: "passkey.authenticate",
+        userId,
+        ip,
+        endpoint: "/api/account/passkeys/:id/enable-sign-in/verify",
+      });
+
+      const clientData = JSON.parse(
+        Buffer.from(response.response.clientDataJSON, "base64url").toString()
+      );
+      let challengeRecord;
+      try {
+        challengeRecord = await repos.passkeyRepository.consumeValidChallenge(
+          clientData.challenge,
+          signInCapabilityChallengeType(credential.id),
+          userId
+        );
+      } catch {
+        throw new ChallengeError("Invalid or expired challenge");
+      }
+
+      let verification;
+      try {
+        verification = await verifyAuthenticationResponse({
+          response,
+          expectedChallenge: challengeRecord.challenge,
+          expectedOrigin: origins,
+          expectedRPID: rpID,
+          requireUserVerification: true,
+          credential: {
+            id: credential.credentialId,
+            publicKey: new Uint8Array(Buffer.from(credential.publicKey, "base64url")),
+            counter: Number(credential.counter),
+            transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
+          },
+        });
+      } catch (error) {
+        throw new ChallengeError(ctx.toPasskeyVerificationErrorMessage(error));
+      }
+
+      if (!verification.verified) {
+        throw new ChallengeError("Passkey capability verification failed");
+      }
+
+      const counterPlan = resolvePasskeyCounterAdvance(
+        credential.counter,
+        verification.authenticationInfo.newCounter
+      );
+      if (counterPlan.status === "invalid") {
+        throw new ChallengeError("Passkey capability verification failed");
+      }
+
+      await runInTransaction(async (tx) => {
+        const counterAdvance = await repos.passkeyRepository.advanceCounter(
+          credential.credentialId,
+          counterPlan.expectedCounter,
+          counterPlan.nextCounter,
+          credential.counterRevision,
+          tx
+        );
+        if (counterAdvance === "conflict") {
+          throw new ChallengeError("Passkey capability verification failed");
+        }
+
+        const updated = await repos.passkeyRepository.updateCredentialFlags(
+          credential.id,
+          userId,
+          { signInEnabled: true },
+          tx
+        );
+        if (!updated) {
+          throw new ChallengeError("Passkey capability verification failed");
+        }
+        await repos.passkeyRepository.updateLastUsedAt(credential.credentialId, tx);
+        await repos.auditRepository.record(
+          "passkey_added",
+          userId,
+          { context: "sign_in_capability_enabled", credentialId: credential.id },
+          tx
+        );
+      });
+
+      return {
+        verified: true as const,
+        credentialId: credential.credentialId,
+        signInEnabled: true as const,
       };
     },
 

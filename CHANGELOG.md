@@ -6,6 +6,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Opt-in passkey credential interoperability** — Browser-only registration and fully-authenticated login hooks let consumers compose an independent local capability onto the same WebAuthn credential without adding a package dependency. Vault-only credentials can be explicitly promoted to account sign-in through a fully authenticated, exact-credential, UV-required proof route (`passkeyEnableSignIn`).
+- **Counter revision migration** — `0004_outgoing_william_stryker.sql` adds the monotonic `passkey_credentials.counter_revision` epoch required to serialize every assertion, including counterless authenticators.
+
+### Security
+
+- **PRF response privacy boundary** — Secure-auth client verification helpers recursively remove documented PRF-derived aliases before serialization. Registration, login, and sign-in-capability verification routes use a bounded recursive guard and fail closed if sensitive material reaches the server. Browser ceremonies retain extension results through their verified hook and then perform recursive best-effort cleanup from an outer `finally`, including verification/session failures and early exits.
+- **Monotonic passkey counters** — Passkey verification compares and advances both the authoritative WebAuthn counter and `counter_revision`. Nonzero counters must strictly increase; counterless `0 -> 0` credentials advance the revision, so concurrent stale assertions fail closed.
+- **Fail-closed session confirmation** — Passkey browser callbacks and success markers run only when NextAuth explicitly returns `ok: true`; null, incomplete, undefined, or `ok: false` results fail authentication.
+- **Explicit user verification** — Registration, login, and sign-in-capability proofs now request and verify user verification as required. Deployments that previously allowed non-UV passkey registration must re-enroll with a UV-capable authenticator.
+
 ## [0.7.0] - 2026-07-27
 
 ### Added

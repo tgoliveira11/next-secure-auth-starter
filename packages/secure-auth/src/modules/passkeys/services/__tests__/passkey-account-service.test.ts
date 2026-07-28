@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { DbClient } from "@/lib/db/types";
 import { createPasskeyAccountService } from "../passkey-account-service";
-import { PasskeyAccountBoundaryError } from "../passkey-service";
-import { generateRegistrationOptions, verifyRegistrationResponse } from "@simplewebauthn/server";
+import { ChallengeError, PasskeyAccountBoundaryError } from "../passkey-service";
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server";
 
 const mocks = vi.hoisted(() => ({
   findByUserId: vi.fn(),
@@ -12,6 +17,9 @@ const mocks = vi.hoisted(() => ({
   storeChallenge: vi.fn(),
   consumeValidChallenge: vi.fn(),
   createCredential: vi.fn(),
+  advanceCounter: vi.fn(),
+  updateCredentialFlags: vi.fn(),
+  updateLastUsedAt: vi.fn(),
   runInTransaction: vi.fn(async <T>(fn: (tx: DbClient) => Promise<T>) => fn({} as DbClient)),
 }));
 
@@ -23,7 +31,13 @@ vi.mock("@simplewebauthn/server", () => ({
     pubKeyCredParams: [],
     excludeCredentials: opts.excludeCredentials,
   })),
+  generateAuthenticationOptions: vi.fn(async (opts) => ({
+    challenge: "capability-challenge",
+    allowCredentials: opts.allowCredentials,
+    userVerification: opts.userVerification,
+  })),
   verifyRegistrationResponse: vi.fn(),
+  verifyAuthenticationResponse: vi.fn(),
 }));
 
 function createService() {
@@ -32,6 +46,7 @@ function createService() {
       getWebAuthnRpName: () => "Test",
       getWebAuthnRpId: () => "localhost",
       getWebAuthnOrigins: () => ["http://localhost:3003"],
+      toPasskeyVerificationErrorMessage: () => "Passkey verification failed",
     } as never,
     repos: {
       passkeyRepository: {
@@ -41,6 +56,9 @@ function createService() {
         storeChallenge: mocks.storeChallenge,
         consumeValidChallenge: mocks.consumeValidChallenge,
         createCredential: mocks.createCredential,
+        advanceCounter: mocks.advanceCounter,
+        updateCredentialFlags: mocks.updateCredentialFlags,
+        updateLastUsedAt: mocks.updateLastUsedAt,
       },
       auditRepository: {
         record: mocks.record,
@@ -61,6 +79,26 @@ function buildRegistrationVerifyResponse() {
         JSON.stringify({ challenge: "test-challenge", type: "webauthn.create" })
       ).toString("base64url"),
       attestationObject: "attestation",
+    },
+    clientExtensionResults: {},
+    authenticatorAttachment: "platform" as const,
+  };
+}
+
+function buildAuthenticationVerifyResponse(
+  credentialId = "vault-credential-id",
+  challenge = "capability-challenge"
+) {
+  return {
+    id: credentialId,
+    rawId: credentialId,
+    type: "public-key" as const,
+    response: {
+      clientDataJSON: Buffer.from(
+        JSON.stringify({ challenge, type: "webauthn.get" })
+      ).toString("base64url"),
+      authenticatorData: "authenticator-data",
+      signature: "signature",
     },
     clientExtensionResults: {},
     authenticatorAttachment: "platform" as const,
@@ -272,6 +310,10 @@ describe("passkey account service verifyRegistration", () => {
     const service = createService();
     await service.verifyRegistration("user-1", buildRegistrationVerifyResponse());
 
+    expect(verifyRegistrationResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ requireUserVerification: true })
+    );
+
     expect(mocks.createCredential).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: "user-1",
@@ -306,5 +348,154 @@ describe("passkey account service verifyRegistration", () => {
       }),
       expect.anything()
     );
+  });
+});
+
+describe("passkey account service sign-in capability upgrade", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.findByIdForUser.mockResolvedValue({
+      id: "pk-vault",
+      userId: "user-1",
+      credentialId: "vault-credential-id",
+      publicKey: Buffer.from("public-key").toString("base64url"),
+      counter: "0",
+      counterRevision: 7,
+      transports: ["internal"],
+      signInEnabled: false,
+      vaultUnlockEnabled: true,
+    });
+    mocks.storeChallenge.mockResolvedValue(undefined);
+    mocks.consumeValidChallenge.mockResolvedValue({
+      challenge: "capability-challenge",
+      userId: "user-1",
+      type: "sign_in_capability_enable:pk-vault",
+    });
+    mocks.advanceCounter.mockResolvedValue("advanced");
+    mocks.updateCredentialFlags.mockResolvedValue({ id: "pk-vault", signInEnabled: true });
+    mocks.updateLastUsedAt.mockResolvedValue(undefined);
+    vi.mocked(verifyAuthenticationResponse).mockResolvedValue({
+      verified: true,
+      authenticationInfo: { newCounter: 1 },
+    } as never);
+  });
+
+  it("issues exact-credential, UV-required options under a separate challenge audience", async () => {
+    const service = createService();
+
+    const result = await service.getSignInCapabilityOptions("user-1", "pk-vault");
+
+    expect(generateAuthenticationOptions).toHaveBeenCalledWith({
+      rpID: "localhost",
+      allowCredentials: [{ id: "vault-credential-id", transports: ["internal"] }],
+      userVerification: "required",
+    });
+    expect(mocks.storeChallenge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-1",
+        type: "sign_in_capability_enable:pk-vault",
+      })
+    );
+    expect(result.options.challenge).toBe("capability-challenge");
+  });
+
+  it("verifies proof, advances the shared counter, and enables sign-in atomically", async () => {
+    const service = createService();
+
+    await expect(
+      service.verifySignInCapability(
+        "user-1",
+        "pk-vault",
+        buildAuthenticationVerifyResponse()
+      )
+    ).resolves.toEqual({
+      verified: true,
+      credentialId: "vault-credential-id",
+      signInEnabled: true,
+    });
+
+    expect(mocks.consumeValidChallenge).toHaveBeenCalledWith(
+      "capability-challenge",
+      "sign_in_capability_enable:pk-vault",
+      "user-1"
+    );
+    expect(verifyAuthenticationResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ requireUserVerification: true })
+    );
+    expect(mocks.advanceCounter).toHaveBeenCalledWith(
+      "vault-credential-id",
+      "0",
+      "1",
+      7,
+      expect.anything()
+    );
+    expect(mocks.updateCredentialFlags).toHaveBeenCalledWith(
+      "pk-vault",
+      "user-1",
+      { signInEnabled: true },
+      expect.anything()
+    );
+    expect(mocks.record).toHaveBeenCalledWith(
+      "passkey_added",
+      "user-1",
+      expect.objectContaining({ context: "sign_in_capability_enabled" }),
+      expect.anything()
+    );
+  });
+
+  it("rejects a different browser credential before consuming the challenge", async () => {
+    const service = createService();
+
+    await expect(
+      service.verifySignInCapability(
+        "user-1",
+        "pk-vault",
+        buildAuthenticationVerifyResponse("different-credential")
+      )
+    ).rejects.toBeInstanceOf(ChallengeError);
+    expect(mocks.consumeValidChallenge).not.toHaveBeenCalled();
+    expect(verifyAuthenticationResponse).not.toHaveBeenCalled();
+  });
+
+  it("rejects replayed or cross-audience challenges", async () => {
+    mocks.consumeValidChallenge.mockRejectedValue(new Error("challenge not found"));
+    const service = createService();
+
+    await expect(
+      service.verifySignInCapability(
+        "user-1",
+        "pk-vault",
+        buildAuthenticationVerifyResponse()
+      )
+    ).rejects.toBeInstanceOf(ChallengeError);
+    expect(verifyAuthenticationResponse).not.toHaveBeenCalled();
+    expect(mocks.updateCredentialFlags).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on a concurrent counter advance", async () => {
+    mocks.advanceCounter.mockResolvedValue("conflict");
+    const service = createService();
+
+    await expect(
+      service.verifySignInCapability(
+        "user-1",
+        "pk-vault",
+        buildAuthenticationVerifyResponse()
+      )
+    ).rejects.toBeInstanceOf(ChallengeError);
+    expect(mocks.updateCredentialFlags).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { signInEnabled: true, vaultUnlockEnabled: true },
+    { signInEnabled: false, vaultUnlockEnabled: false },
+  ])("rejects credentials outside the vault-only upgrade state: %o", async (flags) => {
+    mocks.findByIdForUser.mockResolvedValue({ id: "pk", ...flags });
+    const service = createService();
+
+    await expect(
+      service.getSignInCapabilityOptions("user-1", "pk")
+    ).rejects.toBeInstanceOf(PasskeyAccountBoundaryError);
+    expect(generateAuthenticationOptions).not.toHaveBeenCalled();
   });
 });

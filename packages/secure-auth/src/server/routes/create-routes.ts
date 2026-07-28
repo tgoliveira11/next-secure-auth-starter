@@ -172,6 +172,10 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
     passkeysList: route(() => import("./handlers/account/passkeys-list.js"), "GET"),
     passkeyRegister: route(() => import("./handlers/account/passkeys-register.js"), "POST"),
     passkeyById: route(() => import("./handlers/account/passkeys-delete.js"), "DELETE"),
+    passkeyEnableSignIn: route(
+      () => import("./handlers/account/passkeys-enable-sign-in.js"),
+      "POST"
+    ),
 
     twoFactorStatus: route(() => import("./handlers/account/two-factor-status.js"), "GET"),
     twoFactorSetupStart: route(() => import("./handlers/account/two-factor-setup-start.js"), "POST"),

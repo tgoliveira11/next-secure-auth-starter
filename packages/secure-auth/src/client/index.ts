@@ -22,6 +22,11 @@ export * from "../modules/passkeys/lib/credential-label.js";
 export * from "../modules/passkeys/lib/login-hint.js";
 export * from "../modules/passkeys/lib/messages.js";
 export * from "../modules/passkeys/lib/prepare-webauthn-options.js";
+export {
+  sanitizeWebAuthnResponseForSecureAuthServer,
+  type SecureAuthServerWebAuthnResponse,
+  type WebAuthnResponseWithClientExtensionResults,
+} from "../modules/passkeys/lib/webauthn-response-privacy.js";
 
 export * from "../lib/forms/read-named-form-field.js";
 

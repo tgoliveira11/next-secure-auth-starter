@@ -189,7 +189,18 @@ When `singleActiveSession` is enabled, other sessions are revoked only after **f
 
 Passkey sign-in is a primary authentication method. When TOTP 2FA is enabled on the account, passkey verification creates a pending login challenge (same httpOnly cookie and `/login/2fa` flow as email/password). The session is finalized only after valid TOTP verification — passkeys do not bypass app-level 2FA.
 
-**Capability boundaries:** account security settings list passkeys with `signInEnabled` / `vaultUnlockEnabled` metadata. Only pure account sign-in passkeys are removable from account settings; vault-only and dual-capability credentials are protected at the API and UI. Account passkey registration excludes only `signInEnabled: true` credentials from WebAuthn `excludeCredentials`, so vault-only passkeys do not block adding account sign-in passkeys. The package does not silently upgrade vault-only credentials to account sign-in. See [docs/consumer-passkey-capability-boundaries.md](../../docs/consumer-passkey-capability-boundaries.md) and [docs/passkey-registration-capability-boundary-audit.md](../../docs/passkey-registration-capability-boundary-audit.md).
+**Capability boundaries:** account security settings list passkeys with `signInEnabled` /
+`vaultUnlockEnabled` metadata. Only pure account sign-in passkeys are removable from account
+settings; vault-only and dual-capability credentials are protected at the API and UI. Existing
+vault-only credentials can be explicitly enabled for sign-in with an exact UV-required proof; they
+are never silently upgraded.
+
+Optional browser-only preparation and verified callbacks let a consumer compose another capability
+without making secure-auth depend on that package. Secure-auth strips PRF client-extension results
+before serialization and rejects them at every account verification route. See
+[consumer-passkey-capability-boundaries.md](../../docs/consumer-passkey-capability-boundaries.md),
+[passkey-registration-capability-boundary-audit.md](../../docs/passkey-registration-capability-boundary-audit.md),
+and [passkey-credential-interoperability.md](../../docs/passkey-credential-interoperability.md).
 
 ## CAPTCHA (Cloudflare Turnstile)
 
@@ -266,6 +277,10 @@ first client frame only when the matching effective config is present in
 - Schema: `@tgoliveira/secure-auth/drizzle/schema`
 - Migrations: shipped in package `migrations/` folder
 - App owns `DATABASE_URL`; package owns auth tables
+
+Shared-credential deployments must apply `0004_outgoing_william_stryker.sql` before deploying the
+corresponding package. Vault-only to sign-in promotion is hidden by default and requires the
+explicit page/component promotion prop in addition to mounting the route.
 
 See [migrations.md](../../docs/migrations.md) and [consumer-quick-start.md](../../docs/consumer-quick-start.md).
 

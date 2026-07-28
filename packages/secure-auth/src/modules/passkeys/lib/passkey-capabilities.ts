@@ -27,12 +27,26 @@ const ACCOUNT_BOUNDARY_MESSAGE =
   "This passkey is not managed from account security settings.";
 const FEATURE_BOUNDARY_MESSAGE =
   "This passkey is used by another security feature. Manage it from the relevant settings page.";
+const SIGN_IN_ALREADY_ENABLED_MESSAGE = "This passkey is already enabled for account sign-in.";
+const SIGN_IN_UPGRADE_NOT_ALLOWED_MESSAGE =
+  "This credential cannot be enabled for account sign-in from this flow.";
 
 /** Raised when account passkey management boundaries block an operation (maps to HTTP 409). */
 export class PasskeyAccountBoundaryError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ConflictError";
+  }
+}
+
+export function assertMayEnableAccountSignIn(
+  flags: Pick<PasskeyCredentialCapabilityFlags, "signInEnabled" | "vaultUnlockEnabled">
+): void {
+  if (flags.signInEnabled) {
+    throw new PasskeyAccountBoundaryError(SIGN_IN_ALREADY_ENABLED_MESSAGE);
+  }
+  if (!flags.vaultUnlockEnabled) {
+    throw new PasskeyAccountBoundaryError(SIGN_IN_UPGRADE_NOT_ALLOWED_MESSAGE);
   }
 }
 

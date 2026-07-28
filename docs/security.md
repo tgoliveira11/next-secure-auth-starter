@@ -174,10 +174,26 @@ Passkey login follows the same policy: when TOTP 2FA is enabled, passkey verific
 
 Passkeys are account authentication only:
 
-- Do not use WebAuthn signatures or PRF as encryption keys.
+- Secure-auth never uses WebAuthn signatures or PRF as encryption keys.
 - Do not introduce vault unlock or trusted-device vault behavior.
 - WebAuthn challenges are single-use and consumed atomically.
 - Passkey sign-in is a strong primary factor but **does not bypass TOTP** when app-level 2FA is enabled. Users must complete the same TOTP step as credentials/OAuth logins.
+
+Consumers may opt into sharing the same credential with an independent browser-only capability. The
+packages remain independent: secure-auth verifies account authentication; the consumer owns the
+additional capability. Secure-auth recursively strips documented PRF-derived fields in its client helpers and
+rejects documented PRF-derived fields anywhere in the bounded request graph. PRF output must never reach secure-auth,
+another server route, logs, analytics, storage, or URL state.
+
+Signature counters and the monotonic `counter_revision` are updated through compare-and-set against
+the single authoritative credential row. Nonzero counters must strictly advance. Authenticators
+that report `0 -> 0` are supported because every accepted assertion still increments the revision.
+
+Consumer-owned vault ceremonies must use a feature-specific, single-use challenge audience. The
+secure-auth `registration` audience remains reserved for account registration and must not be reused
+as a vault enrollment or unlock challenge.
+
+See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 Configure via `webauthn` in `createSecureAuth(config)`. The configured `webauthn.origin` must match how users reach the app; the package also accepts the paired **apex ↔ www** origin automatically (e.g. `https://example.com` and `https://www.example.com`). Use optional `webauthn.origins` for additional hostnames (e.g. subdomains).
 
@@ -334,8 +350,13 @@ Account authentication and other WebAuthn uses (for example vault unlock in down
 - **`vault_unlock_enabled`** — credential is used by another security feature; account settings must not revoke it. Vault-only credentials are omitted from account registration `excludeCredentials`.
 - Account **`GET /api/account/passkeys`** exposes safe capability metadata; **`DELETE /api/account/passkeys/:id`** rejects non-removable credentials (409).
 - Account **`POST /api/account/passkeys/register`** creates new credentials with `sign_in_enabled: true` and `vault_unlock_enabled: false` only — it does not upgrade vault-only rows.
+- Account **`POST /api/account/passkeys/:id/enable-sign-in`** explicitly upgrades a vault-only row only after a fully authenticated session, exact-credential UV-required assertion, separate challenge audience, and counter/revision compare-and-set. Package UI exposure is explicit opt-in and defaults off.
 - Dual-capability credentials (`sign_in_enabled` + `vault_unlock_enabled`) are not removable from account settings until the owning app disables vault unlock.
 
-**Platform limitation:** Even with correct exclude lists, some authenticators may not allow multiple passkeys per RP on one device. A future explicit capability-upgrade flow may be needed to enable account sign-in on an existing vault-only passkey.
+**Platform limitation:** Some authenticators do not allow a second passkey per RP on one device. Use
+the explicit capability-upgrade flow to reuse the existing vault-only credential; do not attempt a
+second registration.
 
-See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md) and [passkey-registration-capability-boundary-audit.md](./passkey-registration-capability-boundary-audit.md).
+See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md),
+[passkey-registration-capability-boundary-audit.md](./passkey-registration-capability-boundary-audit.md),
+and [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).

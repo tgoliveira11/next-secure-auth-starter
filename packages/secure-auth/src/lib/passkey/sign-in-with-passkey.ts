@@ -1,20 +1,53 @@
-import { startAuthentication } from "@simplewebauthn/browser";
+import {
+  startAuthentication,
+  type AuthenticationResponseJSON,
+  type PublicKeyCredentialRequestOptionsJSON,
+} from "@simplewebauthn/browser";
 import { signIn } from "next-auth/react";
+import { passkeyLoginApi } from "../api-client/passkey-login.js";
 import {
   getPasskeyLoginHint,
-  passkeyLoginApi,
-  prepareAuthenticationOptions,
   setPasskeyLoginHint,
   type PasskeyLoginHint,
-} from "@tgoliveira/secure-auth/client";
+} from "../../modules/passkeys/lib/login-hint.js";
+import { prepareAuthenticationOptions } from "../../modules/passkeys/lib/prepare-webauthn-options.js";
+import { releaseSensitiveClientExtensionResults } from "../../modules/passkeys/lib/webauthn-response-privacy.js";
 
 export type PasskeyLoginOutcome = "signed-in" | "requires-two-factor" | "cancelled" | "unsupported";
+
+export type FullyAuthenticatedPasskeyContext = {
+  /** Exact credential id returned by successful secure-auth server verification. */
+  verifiedCredentialId: string;
+  /** Browser-only. Never send this value to a server. */
+  clientExtensionResults: AuthenticationResponseJSON["clientExtensionResults"];
+};
+
+export type PasskeyLoginHooks = {
+  /** Browser-option preparation before SimpleWebAuthn starts the ceremony; BufferSource is kept. */
+  prepareOptions?: (
+    options: PublicKeyCredentialRequestOptionsJSON
+  ) => PublicKeyCredentialRequestOptionsJSON | Promise<PublicKeyCredentialRequestOptionsJSON>;
+  /**
+   * Runs only after WebAuthn verification and final account-session creation. It is never called
+   * while TOTP is pending.
+   */
+  onFullyAuthenticated?: (context: FullyAuthenticatedPasskeyContext) => void | Promise<void>;
+};
 
 export type SignInWithPasskeyOptions = {
   appSlug: string;
   loginPath?: string;
   afterLoginPath?: string;
   loginTwoFactorPath?: string;
+  hooks?: PasskeyLoginHooks;
+};
+
+export type SignInWithPasskeyResult = {
+  outcome: PasskeyLoginOutcome;
+  redirectTo: string;
+  integration?:
+    | { status: "not_configured" | "completed" }
+    | { status: "failed"; error: unknown };
 };
 
 export function buildPasskeyLoginOutcomeKey(appSlug: string): string {
@@ -51,10 +84,7 @@ export function buildPasskeyLoginOptionsPayload(
 export async function signInWithPasskey(
   input: { email?: string } | undefined,
   options: SignInWithPasskeyOptions
-): Promise<{
-  outcome: PasskeyLoginOutcome;
-  redirectTo: string;
-}> {
+): Promise<SignInWithPasskeyResult> {
   const loginPath = options.loginPath ?? "/login";
   const afterLoginPath = options.afterLoginPath ?? "/dashboard";
   const loginTwoFactorPath = options.loginTwoFactorPath ?? "/login/2fa?mode=credentials";
@@ -78,9 +108,11 @@ export async function signInWithPasskey(
 
   let assertion;
   try {
-    assertion = await startAuthentication({
-      optionsJSON: prepareAuthenticationOptions(optionsResponse.options),
-    });
+    const defaultOptions = prepareAuthenticationOptions(optionsResponse.options);
+    const optionsJSON = options.hooks?.prepareOptions
+      ? await options.hooks.prepareOptions(defaultOptions)
+      : defaultOptions;
+    assertion = await startAuthentication({ optionsJSON });
   } catch (error) {
     if (error instanceof Error && error.name === "NotAllowedError") {
       return { outcome: "cancelled", redirectTo: loginPath };
@@ -88,26 +120,59 @@ export async function signInWithPasskey(
     throw error;
   }
 
-  const verifyResult = await passkeyLoginApi.verify({ response: assertion });
+  try {
+    const verifyResult = await passkeyLoginApi.verify({ response: assertion });
 
-  setPasskeyLoginHint(options.appSlug, {
-    userId: verifyResult.userId,
-    credentialId: verifyResult.credentialId ?? assertion.id,
-  });
+    if (verifyResult.credentialId !== assertion.id) {
+      throw new Error("Passkey authentication credential verification mismatch");
+    }
 
-  if (verifyResult.requiresTwoFactor) {
-    return { outcome: "requires-two-factor", redirectTo: loginTwoFactorPath };
+    setPasskeyLoginHint(options.appSlug, {
+      userId: verifyResult.userId,
+      credentialId: verifyResult.credentialId ?? assertion.id,
+    });
+
+    if (verifyResult.requiresTwoFactor) {
+      return { outcome: "requires-two-factor", redirectTo: loginTwoFactorPath };
+    }
+
+    const authResult = await signIn("login-token", {
+      loginToken: verifyResult.loginToken,
+      redirect: false,
+    });
+
+    if (authResult?.ok !== true || authResult.error) {
+      throw new Error("Passkey sign-in could not complete your session.");
+    }
+
+    sessionStorage.setItem(buildPasskeyLoginOutcomeKey(options.appSlug), "signed-in");
+
+    if (!options.hooks?.onFullyAuthenticated) {
+      return {
+        outcome: "signed-in",
+        redirectTo: afterLoginPath,
+        integration: { status: "not_configured" },
+      };
+    }
+
+    try {
+      await options.hooks.onFullyAuthenticated({
+        verifiedCredentialId: verifyResult.credentialId,
+        clientExtensionResults: assertion.clientExtensionResults,
+      });
+      return {
+        outcome: "signed-in",
+        redirectTo: afterLoginPath,
+        integration: { status: "completed" },
+      };
+    } catch (error) {
+      return {
+        outcome: "signed-in",
+        redirectTo: afterLoginPath,
+        integration: { status: "failed", error },
+      };
+    }
+  } finally {
+    releaseSensitiveClientExtensionResults(assertion);
   }
-
-  const authResult = await signIn("login-token", {
-    loginToken: verifyResult.loginToken,
-    redirect: false,
-  });
-
-  if (authResult?.error) {
-    throw new Error("Passkey sign-in could not complete your session.");
-  }
-
-  sessionStorage.setItem(buildPasskeyLoginOutcomeKey(options.appSlug), "signed-in");
-  return { outcome: "signed-in", redirectTo: afterLoginPath };
 }

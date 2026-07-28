@@ -14,6 +14,7 @@ import {
   getPasskeyLoginUnsupportedMessage,
   isPasskeyLoginSupported,
   signInWithPasskey,
+  type PasskeyLoginHooks,
 } from "@tgoliveira/secure-auth/react/client";
 import { SocialSignIn } from "./social-sign-in.js";
 
@@ -22,6 +23,8 @@ export type LoginPasskeySectionProps = {
   afterLoginPath?: string;
   loginPath?: string;
   loginTwoFactorPath?: string;
+  /** Optional browser-only composition hooks for passkey authentication. */
+  hooks?: PasskeyLoginHooks;
 };
 
 export type PasskeyLoginCapabilityStatus = "checking" | "supported" | "unsupported";
@@ -31,6 +34,7 @@ export function LoginPasskeySection({
   afterLoginPath = "/dashboard",
   loginPath = "/login",
   loginTwoFactorPath = "/login/2fa?mode=credentials",
+  hooks,
 }: LoginPasskeySectionProps) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -65,6 +69,7 @@ export function LoginPasskeySection({
         loginPath,
         afterLoginPath,
         loginTwoFactorPath,
+        hooks,
       });
       if (result.outcome === "cancelled") {
         setError(PASSKEY_LOGIN_CANCELLED_MESSAGE);

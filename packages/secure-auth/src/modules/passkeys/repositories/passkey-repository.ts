@@ -59,7 +59,11 @@ export function createPasskeyRepository(db: DbClient) {
     async updateCredentialFlags(
       id: string,
       userId: string,
-      data: { friendlyName?: string | null },
+      data: {
+        friendlyName?: string | null;
+        signInEnabled?: boolean;
+        vaultUnlockEnabled?: boolean;
+      },
       client: DbClient = db
     ) {
       const [cred] = await client
@@ -101,11 +105,30 @@ export function createPasskeyRepository(db: DbClient) {
         .where(and(eq(passkeyCredentials.userId, userId), isNull(passkeyCredentials.revokedAt)));
     },
 
-    async updateCounter(credentialId: string, counter: string, client: DbClient = db) {
-      await client
+    async advanceCounter(
+      credentialId: string,
+      expectedCounter: string,
+      nextCounter: string,
+      expectedRevision: number,
+      client: DbClient = db
+    ): Promise<"advanced" | "conflict"> {
+      const [updated] = await client
         .update(passkeyCredentials)
-        .set({ counter })
-        .where(eq(passkeyCredentials.credentialId, credentialId));
+        .set({
+          counter: nextCounter,
+          counterRevision: sql`${passkeyCredentials.counterRevision} + 1`,
+        })
+        .where(
+          and(
+            eq(passkeyCredentials.credentialId, credentialId),
+            eq(passkeyCredentials.counter, expectedCounter),
+            eq(passkeyCredentials.counterRevision, expectedRevision),
+            isNull(passkeyCredentials.revokedAt)
+          )
+        )
+        .returning({ credentialId: passkeyCredentials.credentialId });
+
+      return updated ? "advanced" : "conflict";
     },
 
     async revoke(id: string, userId: string, client: DbClient = db) {

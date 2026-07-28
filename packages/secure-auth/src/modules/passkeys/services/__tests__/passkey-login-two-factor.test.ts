@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   findByCredentialId: vi.fn(),
   findByUserId: vi.fn(),
   storeChallenge: vi.fn(),
-  updateCounter: vi.fn(),
+  advanceCounter: vi.fn(),
   updateLastUsedAt: vi.fn(),
   findById: vi.fn(),
   isEnabledForUser: vi.fn(),
@@ -64,7 +64,7 @@ function buildService() {
         findByCredentialId: mocks.findByCredentialId,
         findByUserId: mocks.findByUserId,
         storeChallenge: mocks.storeChallenge,
-        updateCounter: mocks.updateCounter,
+        advanceCounter: mocks.advanceCounter,
         updateLastUsedAt: mocks.updateLastUsedAt,
       },
       userRepository: {
@@ -102,6 +102,7 @@ describe("passkey login service verifyLogin", () => {
       signInEnabled: true,
       publicKey: Buffer.from("key").toString("base64url"),
       counter: "0",
+      counterRevision: 3,
       transports: null,
     });
     mocks.findById.mockResolvedValue({
@@ -115,6 +116,7 @@ describe("passkey login service verifyLogin", () => {
     mocks.hashOpaqueToken.mockReturnValue("hash");
     mocks.issueLoginToken.mockResolvedValue("login-token");
     mocks.createLoginChallenge.mockResolvedValue({ id: "challenge-row" });
+    mocks.advanceCounter.mockResolvedValue("advanced");
   });
 
   it("completes login when two-factor is disabled", async () => {

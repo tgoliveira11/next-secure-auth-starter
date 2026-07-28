@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import type { PasswordStrengthFeedbackPosition } from "../../../core/ui-config.js";
 import type { PasswordPolicyConfig } from "../../security/password-policy/password-policy-core.js";
+import type { AccountPasskeyRegistrationHooks } from "../../../lib/passkey/register-account-passkey.js";
+import type { PasskeyLoginHooks } from "../../../lib/passkey/sign-in-with-passkey.js";
 
 export type { PasswordStrengthFeedbackPosition };
 
@@ -97,6 +99,8 @@ export type LoginPageProps = SecureAuthPageProps & {
   submitLabel?: string;
   /** OAuth / passkey callback after successful sign-in. */
   afterLoginPath?: string;
+  /** Optional browser-only composition hooks for passkey authentication. */
+  passkeyLoginHooks?: PasskeyLoginHooks;
 };
 
 export type RegisterPageProps = SecureAuthPageProps & {
@@ -158,6 +162,10 @@ export type AccountSettingsPageProps = SecureAuthPageProps & {
 
 export type SecuritySettingsPageProps = SecureAuthPageProps & {
   userId?: string;
+  /** Optional browser-only composition hooks for account passkey registration. */
+  passkeyRegistrationHooks?: AccountPasskeyRegistrationHooks;
+  /** Show vault-only to account-sign-in promotion. Default: false. */
+  allowPasskeySignInCapabilityPromotion?: boolean;
 };
 
 export type SessionsSettingsPageProps = SecureAuthPageProps;

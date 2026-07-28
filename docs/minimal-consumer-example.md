@@ -274,6 +274,12 @@ export const DELETE = secureAuth.routes.passkeyById.DELETE;
 ```
 
 ```typescript
+// src/app/api/account/passkeys/[id]/enable-sign-in/route.ts
+import { secureAuth } from "@/lib/secure-auth";
+export const POST = secureAuth.routes.passkeyEnableSignIn.POST;
+```
+
+```typescript
 // src/app/api/account/2fa/status/route.ts
 import { secureAuth } from "@/lib/secure-auth";
 export const GET = secureAuth.routes.twoFactorStatus.GET;

@@ -3,7 +3,7 @@
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
 **Package version:** see [`packages/secure-auth/package.json`](../packages/secure-auth/package.json)
-**Last reviewed:** 2026-07-27
+**Last reviewed:** 2026-07-28
 
 ## Status legend
 
@@ -39,6 +39,7 @@ Living inventory of what the package exposes today. Update this file when export
 | `0001_passkey_vault_unlock_enabled.sql` | shipped | `passkey_credentials.vault_unlock_enabled` |
 | `0002_v0_3_admin_platform.sql` | shipped | Admin platform tables + user profile/role columns |
 | `0003_user_preferences.sql` | shipped | Per-user key-value preferences (`user_preferences`) — see [user-preferences.md](./user-preferences.md) |
+| `0004_outgoing_william_stryker.sql` | shipped | Monotonic passkey assertion CAS epoch (`passkey_credentials.counter_revision`) |
 
 ## Route keys (`secureAuth.routes.*`)
 
@@ -80,6 +81,7 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `passkeysList` | GET | shipped |
 | `passkeyRegister` | POST | shipped |
 | `passkeyById` | DELETE | shipped |
+| `passkeyEnableSignIn` | POST | shipped — explicit vault-only credential promotion |
 | `sessionsList` | GET | shipped |
 | `sessionById` | DELETE | shipped |
 | `sessionsPing` | POST | shipped |
@@ -140,6 +142,8 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | Symbol | Status |
 | --- | --- |
 | `preferencesApi` | shipped (requires `preferences.enabled`) |
+| `sanitizeWebAuthnResponseForSecureAuthServer` | shipped — recursively removes documented browser-only PRF-derived results before serialization |
+| `passkeyAccountApi.enableSignInOptions` / `enableSignInVerify` | shipped |
 
 ## Client exports (`@tgoliveira/secure-auth/react/client`)
 
@@ -148,6 +152,10 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `useUserPreferences`, `useUserPreference` | shipped (requires `preferences.enabled`) |
 | `mergeGuestPreferences`, `useMergeGuestPreferences` | shipped |
 | `usePreferencesEnabled` | shipped |
+| `registerAccountPasskey`, `AccountPasskeyRegistrationHooks` | shipped — optional browser composition |
+| `signInWithPasskey`, `PasskeyLoginHooks` | shipped — optional fully-authenticated browser callback |
+| `enableAccountPasskeySignIn` | shipped |
+| `PasskeySettings.allowSignInCapabilityPromotion` / `SecuritySettingsPage.allowPasskeySignInCapabilityPromotion` | shipped — explicit opt-in, default false |
 
 ## Public UI config (`@tgoliveira/secure-auth/react`, `@tgoliveira/secure-auth/next`)
 

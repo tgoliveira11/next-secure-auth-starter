@@ -38,6 +38,11 @@ export const ROUTE_REGISTRY = [
   { key: "passkeysList", path: "account/passkeys", methods: ["GET"] },
   { key: "passkeyRegister", path: "account/passkeys/register", methods: ["POST"] },
   { key: "passkeyById", path: "account/passkeys/[id]", methods: ["DELETE"] },
+  {
+    key: "passkeyEnableSignIn",
+    path: "account/passkeys/[id]/enable-sign-in",
+    methods: ["POST"],
+  },
   { key: "sessionsList", path: "account/sessions", methods: ["GET"] },
   { key: "sessionById", path: "account/sessions/[id]", methods: ["DELETE"] },
   { key: "sessionsPing", path: "account/sessions/ping", methods: ["POST"] },

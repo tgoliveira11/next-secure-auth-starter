@@ -9,6 +9,7 @@ Guidance for downstream apps that share the `passkey_credentials` table with non
 - **Account passkey delete** (`DELETE /api/account/passkeys/:id`) rejects credentials that are not removable from account settings (HTTP 409). UI-only hiding is not sufficient.
 - **Schema** adds `vault_unlock_enabled` on `passkey_credentials` (default `false`). Account registration sets `sign_in_enabled: true` and `vault_unlock_enabled: false`.
 - **Account passkey registration** (`POST /api/account/passkeys/register`, `action: "options"`) builds WebAuthn `excludeCredentials` from **sign-in credentials only** (`signInEnabled === true`). Vault-only credentials do not block account passkey registration.
+- **Explicit sign-in promotion** (`POST /api/account/passkeys/:id/enable-sign-in`) proves possession of an existing vault-only credential and enables sign-in without registering another passkey.
 
 ## Capability flags
 
@@ -17,7 +18,9 @@ Guidance for downstream apps that share the `passkey_credentials` table with non
 | `signInEnabled` | Credential may be used for account passkey login and is considered when preventing duplicate account sign-in registration |
 | `vaultUnlockEnabled` | Credential is used for vault unlock (or another non-auth feature) in the consumer app |
 
-The package does **not** silently upgrade a vault-only credential to account sign-in. Enabling sign-in on an existing vault passkey requires a separate explicit capability-upgrade flow (future work).
+The package does **not** silently upgrade a vault-only credential to account sign-in. The explicit
+capability-upgrade flow requires a fully authenticated session, an exact UV-required assertion, a
+separate challenge audience, and a monotonic counter/revision compare-and-set.
 
 ## Capability rules
 
@@ -32,7 +35,9 @@ Passkey **login** continues to allow only `signInEnabled: true` credentials.
 
 Account passkey **registration** excludes only existing `signInEnabled: true` credentials from WebAuthn `excludeCredentials`. Vault-only credentials (`signInEnabled: false`, `vaultUnlockEnabled: true`) do not block adding an account sign-in passkey.
 
-**Platform note:** Some authenticators may still refuse to create a second passkey for the same site on the same device. That is a WebAuthn/platform limitation, not a package exclusion bug. Users may need another authenticator or a future capability-upgrade flow to use the same physical passkey for both vault unlock and account sign-in.
+**Platform note:** Some authenticators refuse a second passkey for the same site on the same device.
+After explicitly enabling the package UI promotion prop, use **Enable sign-in** on the existing
+vault-only passkey instead of starting another registration.
 
 ## What downstream apps should do
 
@@ -42,6 +47,8 @@ Account passkey **registration** excludes only existing `signInEnabled: true` cr
 4. **Use package passkey UI** or respect `removableFromAccountSettings` in custom UI — never show account remove for `signInEnabled: false`.
 5. **Route vault passkey removal** through your vault settings flow; revoke envelopes and credentials there, not via account delete.
 6. **Do not delete shared WebAuthn rows** from account APIs when they protect another feature.
+7. **Wire `passkeyEnableSignIn`** at `/api/account/passkeys/[id]/enable-sign-in` when users may reuse vault-only credentials for account sign-in.
+8. **Keep one counter authority** — every WebAuthn verifier must compare-and-set the counter on the same `passkey_credentials` row.
 
 The package does **not** own vault envelope tables. It fails closed: account delete will not revoke vault-only or dual-capability credentials.
 
@@ -56,9 +63,12 @@ The package does **not** own vault envelope tables. It fails closed: account del
 - [ ] Passkey login still rejects `signInEnabled: false` credentials
 - [ ] Vault-only passkey does not appear in account registration `excludeCredentials`
 - [ ] User can add account sign-in passkey when only vault-only passkeys exist (on a different authenticator, or same device when platform allows)
+- [ ] Existing vault-only passkey can be promoted with one exact assertion and no re-registration
+- [ ] PRF output is absent from every account server request
 
 ## Related docs
 
 - [passkey-registration-capability-boundary-audit.md](./passkey-registration-capability-boundary-audit.md) — registration exclude investigation and fix
 - [package-api.md](./package-api.md) — account passkey API fields
 - [security.md](./security.md) — passkey capability boundaries
+- [passkey-credential-interoperability.md](./passkey-credential-interoperability.md) — shared credential orchestration and privacy contract
