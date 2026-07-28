@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-28
+
 ### Added
 
 - **Opt-in passkey credential interoperability** — Browser-only registration and fully-authenticated login hooks let consumers compose an independent local capability onto the same WebAuthn credential without adding a package dependency. Vault-only credentials can be explicitly promoted to account sign-in through a fully authenticated, exact-credential, UV-required proof route (`passkeyEnableSignIn`).
