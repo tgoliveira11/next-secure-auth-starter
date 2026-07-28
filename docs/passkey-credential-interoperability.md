@@ -159,12 +159,47 @@ counter. Persist the new envelope and `vault_unlock_enabled = true` atomically.
 
 ## Login plus local unlock
 
-`PasskeyLoginHooks.prepareOptions` may request a browser extension during account login.
+For a first login in an isolated PWA or a new browser, client storage may not contain an account
+hint. Configure the server-only `webauthn.getLoginAuthenticationExtensions` callback so the account
+service can add public extension input after resolving the account and sign-in allow-list:
+
+```typescript
+import { buildPasskeyPrfAuthenticationExtensionsJson } from "@tgoliveira/vault-core";
+import { createSecureAuth } from "@tgoliveira/secure-auth/next";
+
+export const secureAuth = createSecureAuth({
+  // ...required app, auth, db, email, and policy config...
+  webauthn: {
+    rpId: "example.com",
+    rpName: "Example",
+    origin: "https://www.example.com",
+    originAliasPolicy: "none",
+    getLoginAuthenticationExtensions: ({ userId }) =>
+      buildPasskeyPrfAuthenticationExtensionsJson("example-passkey-prf-v1:", userId),
+  },
+});
+```
+
+The callback receives `userId` and `credentialIds` only inside the trusted server process. Its
+return value is merged exclusively into `options.extensions`, must be bounded JSON-safe data, and
+must not vary in a way that reveals private feature state. For PRF, send the public salt as a
+base64url string and use `prepareVaultUnlockAuthenticationOptions()` in
+`PasskeyLoginHooks.prepareOptions` to hydrate it to `ArrayBuffer` immediately before WebAuthn.
+Secure-auth never adds `userId` as separate response metadata.
+
+`PasskeyLoginHooks.prepareOptions` may prepare that browser extension during account login.
 `onFullyAuthenticated` runs only after WebAuthn verification and final NextAuth session creation.
 The package preserves the complete extension result only until that callback settles and sends a
 sanitized copy to the server. It then best-effort zeroes reachable `ArrayBuffer`/view contents and
 drops its PRF references. JavaScript garbage collection is nondeterministic, and this cannot erase
 copies made by the browser, runtime, or consumer; consumers must zero their own derived buffers.
+
+`onFullyAuthenticated` may return `{ status: "completed" }` or a generic
+`{ status: "action_required", code, redirectTo, message? }`. The redirect must be a same-app
+absolute path. Package UI follows the action-required destination; unexpected callback failures
+are surfaced and are not silently redirected as a completed integration. Map feature-specific
+states such as unavailable extension output or candidate mismatch into consumer-owned codes rather
+than adding that domain to secure-auth.
 
 When login requires TOTP, the callback is not invoked and the local extension result is discarded.
 After TOTP, run a new exact feature-specific assertion. Avoiding that second prompt would require a

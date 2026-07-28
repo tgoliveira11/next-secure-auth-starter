@@ -37,6 +37,27 @@ export type SecureAuthLogger = {
   error(message: string, meta?: Record<string, unknown>): void;
 };
 
+export type SecureAuthJsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | SecureAuthJsonValue[]
+  | { [key: string]: SecureAuthJsonValue };
+
+/**
+ * Server-only context for adding JSON-safe extension inputs to an account passkey login.
+ * `userId` and `credentialIds` are never included in the public options response by secure-auth.
+ */
+export type PasskeyLoginAuthenticationExtensionsContext = {
+  userId: string;
+  credentialIds: readonly string[];
+};
+
+export type PasskeyLoginAuthenticationExtensions = Record<string, SecureAuthJsonValue>;
+
+export type WebAuthnOriginAliasPolicy = "apex-www" | "none";
+
 export type SecureAuthEmailContent = {
   subject: string;
   html: string;
@@ -224,8 +245,27 @@ export type SecureAuthConfig = {
     rpId: string;
     rpName: string;
     origin: string;
-    /** Additional allowed WebAuthn origins (optional). Apex/www variants of `origin` are accepted automatically. */
+    /** Additional explicitly allowed WebAuthn origins. Automatic aliases follow `originAliasPolicy`. */
     origins?: string[];
+    /**
+     * Controls automatic origin aliases. `"apex-www"` preserves the default apex/www and local
+     * loopback aliases. `"none"` accepts only each explicitly configured origin.
+     * Default: `"apex-www"`.
+     */
+    originAliasPolicy?: WebAuthnOriginAliasPolicy;
+    /**
+     * Optional server-only composition hook for independent browser capabilities that need
+     * WebAuthn extension inputs during account passkey login. It runs only after secure-auth has
+     * resolved a user and a non-empty sign-in credential allow-list. The callback may add
+     * JSON-safe extension inputs, but cannot replace the challenge, RP ID, user-verification
+     * policy, or credential allow-list.
+     */
+    getLoginAuthenticationExtensions?: (
+      context: Readonly<PasskeyLoginAuthenticationExtensionsContext>
+    ) =>
+      | PasskeyLoginAuthenticationExtensions
+      | undefined
+      | Promise<PasskeyLoginAuthenticationExtensions | undefined>;
   };
   captcha?: {
     provider?: "turnstile";

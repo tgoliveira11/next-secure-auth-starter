@@ -83,6 +83,10 @@ export function LoginPasskeySection({
         router.push(result.redirectTo);
         return;
       }
+      if (result.outcome === "signed-in-integration-failed") {
+        setError("Sign-in succeeded, but an additional security step could not be completed.");
+        return;
+      }
       router.push(result.redirectTo);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Passkey sign-in failed");

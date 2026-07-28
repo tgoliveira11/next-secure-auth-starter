@@ -123,6 +123,7 @@ export const secureAuth = createSecureAuth({
     rpId: process.env.WEBAUTHN_RP_ID!,
     rpName: "My App",
     origin: process.env.WEBAUTHN_ORIGIN!,
+    originAliasPolicy: process.env.NODE_ENV === "production" ? "none" : "apex-www",
   },
   ui: {
     paths: { login: "/login", register: "/register" },
@@ -130,6 +131,17 @@ export const secureAuth = createSecureAuth({
   },
 });
 ```
+
+`webauthn.originAliasPolicy` defaults to `"apex-www"` for compatibility, including the local
+localhost/127.0.0.1 pair. Set it to `"none"` when production redirects to one canonical host; only
+the primary origin and exact `webauthn.origins` entries are then accepted by assertion verification.
+
+Consumers that compose an independent browser-only capability may set the server-only
+`webauthn.getLoginAuthenticationExtensions({ userId, credentialIds })` callback. It can add only
+bounded JSON-safe WebAuthn extension inputs after the account allow-list is resolved; it cannot
+replace the challenge, RP ID, user-verification policy, or credentials. Pair it with
+`PasskeyLoginHooks.prepareOptions` and the typed `onFullyAuthenticated` result. See
+[passkey-credential-interoperability.md](../../docs/passkey-credential-interoperability.md).
 
 ## Route handlers
 

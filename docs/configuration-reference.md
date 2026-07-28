@@ -54,7 +54,8 @@ Required top-level fields when calling `createSecureAuth`:
 | `webauthn.rpId` | `string` | WebAuthn RP ID |
 | `webauthn.rpName` | `string` | WebAuthn RP display name |
 | `webauthn.origin` | `string` | WebAuthn origin (primary) |
-| `webauthn.origins` | `string[]` | optional | Additional allowed origins (e.g. subdomains). Apex ↔ www of `origin` is accepted automatically. |
+| `webauthn.origins` | `string[]` | optional | Additional explicitly allowed origins (e.g. subdomains) |
+| `webauthn.originAliasPolicy` | `"apex-www" \| "none"` | `"apex-www"` | Automatic origin aliases; use `"none"` for exact canonical-origin enforcement |
 | `captcha.enabled` | `boolean` | `false` | Master switch for Turnstile CAPTCHA |
 | `captcha.provider` | `"turnstile"` | `turnstile` | CAPTCHA provider (Turnstile only in this release) |
 | `captcha.siteKey` | `string` | — | Turnstile site key (public; exposed via `uiConfig` when enabled) |
@@ -188,7 +189,13 @@ Provider id in NextAuth and account records: `github`. UI label: **GitHub**. The
 | --- | --- | --- | --- | --- |
 | `WEBAUTHN_RP_ID` | string | `localhost` | `webauthn.rpId` | Relying party ID |
 | `WEBAUTHN_RP_NAME` | string | `APP_NAME` | `webauthn.rpName` | RP display name |
-| `WEBAUTHN_ORIGIN` | string | `APP_BASE_URL` | `webauthn.origin` | Primary expected origin; paired apex/www is accepted automatically |
+| `WEBAUTHN_ORIGIN` | string | `APP_BASE_URL` | `webauthn.origin` | Primary expected origin |
+
+`webauthn.originAliasPolicy` is a TypeScript configuration field rather than a package-read env
+variable. `"apex-www"` preserves legacy apex/www and localhost/127.0.0.1 aliases. `"none"` accepts
+only `webauthn.origin` (or `app.baseUrl` when the primary origin is invalid) plus each exact entry in
+`webauthn.origins`. Production apps with a canonical host should set `"none"` and redirect every
+other host before authentication.
 
 ### CAPTCHA (Cloudflare Turnstile)
 
@@ -388,7 +395,14 @@ createSecureAuth({
   webauthn: {
     rpId: "example.com",
     rpName: "My App",
-    origin: "https://example.com",
+    origin: "https://www.example.com",
+    originAliasPolicy: "none",
+    // Optional server-only hook. Return public, JSON-safe WebAuthn extension inputs only.
+    getLoginAuthenticationExtensions: async ({ userId, credentialIds }) => {
+      void userId;
+      void credentialIds;
+      return undefined;
+    },
   },
   email: { from: "...", provider: myProvider },
   ui: {
@@ -396,6 +410,13 @@ createSecureAuth({
   },
 });
 ```
+
+`webauthn.getLoginAuthenticationExtensions` runs only after secure-auth resolves a user and a
+non-empty sign-in credential allow-list. Its context stays server-side and its bounded JSON-safe
+return value is merged only into authentication `options.extensions`. Do not condition the response
+shape on private enrollment state. Binary extension inputs must use an application-defined JSON
+encoding (for example base64url) and be hydrated by the consumer's browser preparation hook. See
+[passkey-credential-interoperability.md](passkey-credential-interoperability.md).
 
 ---
 

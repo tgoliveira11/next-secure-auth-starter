@@ -6,6 +6,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-28
+
+### Added
+
+- **Server-composed passkey login extensions** — Optional `webauthn.getLoginAuthenticationExtensions` runs after secure-auth resolves the account and sign-in credential allow-list, allowing consumers to add bounded JSON-safe WebAuthn extension inputs without relying on browser-local account hints or exposing `userId` as separate response metadata.
+- **Typed post-login integration outcomes** — `PasskeyLoginHooks.onFullyAuthenticated` may return a generic `action_required` result with a stable consumer code and same-app redirect. `signInWithPasskey` and package login UI now distinguish completed, action-required, and failed integrations instead of silently treating every account-session success as full integration success.
+- **Explicit WebAuthn origin alias policy** — `webauthn.originAliasPolicy` accepts `"apex-www"` (backward-compatible default) or `"none"`. Strict deployments can now accept only the configured primary and explicit extra origins instead of automatically trusting paired apex/www or localhost/loopback aliases.
+
+### Security
+
+- **Bounded login-extension boundary** — Consumer-supplied login extension inputs are copied and validated as finite JSON with strict depth, node-count, byte-size, and prototype-key limits. The hook cannot alter the challenge, RP ID, required user verification, or credential allow-list; PRF output remains browser-only and is discarded rather than retained across TOTP.
+- **Canonical-origin enforcement** — With `originAliasPolicy: "none"`, WebAuthn verification no longer implicitly accepts `app.baseUrl`, apex/www counterparts, or localhost/127.0.0.1 counterparts. Explicit `webauthn.origins` remain exact opt-ins.
+
 ## [0.8.0] - 2026-07-28
 
 ### Added

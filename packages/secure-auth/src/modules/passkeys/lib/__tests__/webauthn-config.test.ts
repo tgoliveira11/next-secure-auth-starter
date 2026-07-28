@@ -54,6 +54,65 @@ describe("getWebAuthnOrigins", () => {
     );
   });
 
+  it("accepts only the canonical www origin when automatic aliases are disabled", () => {
+    const config = buildTestSecureAuthConfig({
+      app: { name: "Test", slug: "test", baseUrl: "https://www.tgoliveira11.tech" },
+      webauthn: {
+        rpId: "tgoliveira11.tech",
+        rpName: "Test",
+        origin: "https://www.tgoliveira11.tech",
+        originAliasPolicy: "none",
+      },
+    });
+
+    expect(getWebAuthnOrigins(config)).toEqual(["https://www.tgoliveira11.tech"]);
+  });
+
+  it("does not implicitly accept a different app base URL under the strict policy", () => {
+    const config = buildTestSecureAuthConfig({
+      app: { name: "Test", slug: "test", baseUrl: "https://tgoliveira11.tech" },
+      webauthn: {
+        rpId: "tgoliveira11.tech",
+        rpName: "Test",
+        origin: "https://www.tgoliveira11.tech",
+        originAliasPolicy: "none",
+      },
+    });
+
+    expect(getWebAuthnOrigins(config)).toEqual(["https://www.tgoliveira11.tech"]);
+  });
+
+  it("does not derive aliases for explicit extra origins when aliases are disabled", () => {
+    const config = buildTestSecureAuthConfig({
+      app: { name: "Test", slug: "test", baseUrl: "https://www.tgoliveira11.tech" },
+      webauthn: {
+        rpId: "tgoliveira11.tech",
+        rpName: "Test",
+        origin: "https://www.tgoliveira11.tech",
+        origins: ["https://passkeys.tgoliveira11.tech"],
+        originAliasPolicy: "none",
+      },
+    });
+
+    expect(getWebAuthnOrigins(config).sort()).toEqual(
+      ["https://passkeys.tgoliveira11.tech", "https://www.tgoliveira11.tech"].sort()
+    );
+  });
+
+  it("disables localhost loopback aliases under the strict policy", () => {
+    const config = buildTestSecureAuthConfig({
+      app: { name: "Test", slug: "test", baseUrl: "http://localhost:3000" },
+      webauthn: {
+        rpId: "localhost",
+        rpName: "Test",
+        origin: "http://localhost:3000",
+        originAliasPolicy: "none",
+      },
+    });
+
+    expect(getWebAuthnOrigins(config)).toEqual(["http://localhost:3000"]);
+  });
+
   it("merges explicit extra origins", () => {
     const config = buildTestSecureAuthConfig({
       webauthn: {
@@ -66,6 +125,19 @@ describe("getWebAuthnOrigins", () => {
 
     expect(getWebAuthnOrigins(config)).toContain("https://ltg.tgoliveira11.tech");
     expect(getWebAuthnOrigins(config)).toContain("https://www.tgoliveira11.tech");
+  });
+
+  it("rejects invalid alias policies at runtime", () => {
+    const config = buildTestSecureAuthConfig({
+      webauthn: {
+        rpId: "tgoliveira11.tech",
+        rpName: "Test",
+        origin: "https://www.tgoliveira11.tech",
+        originAliasPolicy: "unexpected",
+      } as never,
+    });
+
+    expect(() => getWebAuthnOrigins(config)).toThrow(/origin alias policy/i);
   });
 });
 

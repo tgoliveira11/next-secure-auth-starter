@@ -306,7 +306,7 @@ describe("signInWithPasskey", () => {
       },
     });
 
-    expect(result.outcome).toBe("signed-in");
+    expect(result.outcome).toBe("signed-in-integration-failed");
     expect(result.integration).toMatchObject({ status: "failed" });
     expectSensitiveAssertionReleased(sensitive);
   });

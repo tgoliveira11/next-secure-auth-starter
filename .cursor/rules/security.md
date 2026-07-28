@@ -20,6 +20,15 @@ Forbidden plaintext storage and logging:
 - Passkeys and TOTP are for **account authentication** — not vault unlock or encryption key derivation.
 - Do not implement WebAuthn PRF vault envelopes or trusted-device vault behavior.
 - Do not copy product-specific cryptography from other projects.
+- Generic passkey option composition may add only bounded, public, JSON-safe extension input after
+  account resolution. It must not alter the challenge, RP ID, required user verification, or
+  credential allow-list, and must not expose resolved account identifiers as separate metadata.
+- WebAuthn PRF output and other derived browser secrets must be stripped from server payloads,
+  retained only through the verified browser callback, and discarded instead of being persisted
+  across TOTP.
+- A production app that redirects to one canonical hostname must also set
+  `webauthn.originAliasPolicy: "none"`; navigation redirects do not constrain the assertion origin
+  accepted by the verification endpoint.
 
 ## Tokens
 

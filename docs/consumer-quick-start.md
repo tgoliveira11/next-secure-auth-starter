@@ -298,13 +298,15 @@ webauthn: {
   rpId: process.env.WEBAUTHN_RP_ID ?? "localhost",
   rpName: "My App",
   origin: process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000",
+  // Recommended in production when all traffic redirects to one canonical host.
+  originAliasPolicy: process.env.NODE_ENV === "production" ? "none" : "apex-www",
 },
 ```
 
 | Variable | Rule |
 | --- | --- |
 | `WEBAUTHN_RP_ID` | Hostname only (`localhost` in dev — not `127.0.0.1`) |
-| `WEBAUTHN_ORIGIN` | Full origin including scheme and port. Set to your canonical URL; the package also accepts the paired apex or `www` hostname automatically. Use `webauthn.origins` for extra hostnames (e.g. subdomains). |
+| `WEBAUTHN_ORIGIN` | Full origin including scheme and port. Set to your canonical URL. `originAliasPolicy` defaults to `"apex-www"`; set it to `"none"` in canonical-host production deployments. Use `webauthn.origins` for exact extra hostnames. |
 
 Expose passkey API routes via `secureAuth.routes`:
 
@@ -325,6 +327,13 @@ vault-only credentials are protected from deletion and can be explicitly enabled
 If an independent browser-only feature reuses the same credential, use the package preparation and
 verified callbacks and keep all PRF results out of server payloads. See
 [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
+
+For an isolated PWA or a new browser, do not depend on `localStorage` or a copied login hint to add
+extension input. Configure the optional server-only
+`webauthn.getLoginAuthenticationExtensions({ userId, credentialIds })`, return only bounded
+JSON-safe public extension input, and hydrate any encoded `BufferSource` in
+`PasskeyLoginHooks.prepareOptions`. Secure-auth does not expose the resolved `userId` separately in
+the options response.
 
 When TOTP 2FA is enabled, passkey verify returns `requiresTwoFactor: true` and sets the same httpOnly challenge cookie as credentials login. The client redirects to `ui.paths.loginTwoFactor` (default `/login/2fa?mode=credentials`); the session is finalized only after TOTP verification.
 

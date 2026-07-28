@@ -43,10 +43,12 @@ function buildVerifyResponse(challenge = "challenge-1") {
   };
 }
 
-function buildService() {
+function buildService(config: Record<string, unknown> = {}) {
   return createPasskeyLoginService({
     config: {
       auth: { requireEmailVerificationBeforeSignIn: false },
+      webauthn: {},
+      ...config,
     } as never,
     ctx: {
       getWebAuthnRpId: () => "localhost",
@@ -152,6 +154,44 @@ describe("passkey login getLoginOptions branches", () => {
 
     expect(generateAuthenticationOptions).toHaveBeenCalledWith(
       expect.objectContaining({ allowCredentials: undefined })
+    );
+  });
+
+  it("adds consumer authentication extensions after resolving the login allow-list", async () => {
+    mocks.findById.mockResolvedValue({ id: USER_ID });
+    mocks.findByUserId.mockResolvedValue([
+      { credentialId: "cred-1", signInEnabled: true, transports: ["internal"] },
+    ]);
+    vi.mocked(generateAuthenticationOptions).mockResolvedValueOnce({
+      challenge: "login-challenge",
+      extensions: { appid: "https://example.com" },
+    } as never);
+    const getLoginAuthenticationExtensions = vi.fn().mockResolvedValue({
+      appid: "https://consumer-override.example",
+      prf: { eval: { first: "base64url-salt" } },
+    });
+    const service = buildService({
+      webauthn: { getLoginAuthenticationExtensions },
+    });
+
+    const result = await service.getLoginOptions({ userId: USER_ID });
+
+    expect(getLoginAuthenticationExtensions).toHaveBeenCalledWith({
+      userId: USER_ID,
+      credentialIds: ["cred-1"],
+    });
+    expect(result).toEqual({
+      options: {
+        challenge: "login-challenge",
+        extensions: {
+          appid: "https://example.com",
+          prf: { eval: { first: "base64url-salt" } },
+        },
+      },
+    });
+    expect(result).not.toHaveProperty("userId");
+    expect(mocks.storeChallenge).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: USER_ID, challenge: "login-challenge" })
     );
   });
 });
