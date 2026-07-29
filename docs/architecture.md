@@ -55,6 +55,20 @@ Consumers must **not**:
 - call `createRoutes`, `createAuthServices`, or internal helpers;
 - deep-import `packages/secure-auth/src/**`.
 
+### Server-composed passkey login extensions
+
+`SecureAuthConfig.webauthn.getLoginAuthenticationExtensions` is an optional server-only
+composition hook for independent browser capabilities. The passkey login service invokes it only
+after resolving an account and non-empty sign-in credential allow-list, then merges its bounded
+JSON-safe result exclusively into WebAuthn `options.extensions`. The resolved identifiers remain
+inside the callback; they are not added as separate public response metadata. Browser hydration and
+consumption remain client-owned through `PasskeyLoginHooks`, preserving the server/client boundary.
+
+Origin verification is resolved from the same composition root. The backward-compatible
+`webauthn.originAliasPolicy: "apex-www"` expands aliases; `"none"` keeps only the primary WebAuthn
+origin and exact explicit extras, so a canonical-host redirect and assertion verification share the
+same boundary.
+
 **Consumer docs:** [consumer-quick-start.md](./consumer-quick-start.md) · [package-api.md](./package-api.md)
 
 ## UI configuration

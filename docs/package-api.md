@@ -159,7 +159,19 @@ Routes return **401** with `{ "error": "Authentication required" }` when the rou
 | **Audience** | Server-side app wiring, email adapters |
 | **Example** | `import { authSchema, SECURE_AUTH_PACKAGE_VERSION, safeLogger } from "@tgoliveira/secure-auth"` |
 
-Exports include: `SecureAuthConfig`, `SecureAuthDb`, `SecureAuthServices` (types), `EmailProvider`, `authSchema`, `SECURE_AUTH_PACKAGE_VERSION`, `safeLogger`.
+Exports include: `SecureAuthConfig`, `SecureAuthDb`, `SecureAuthServices`,
+`PasskeyLoginAuthenticationExtensionsContext`, `PasskeyLoginAuthenticationExtensions` (types),
+`WebAuthnOriginAliasPolicy`, `EmailProvider`, `authSchema`, `SECURE_AUTH_PACKAGE_VERSION`,
+`safeLogger`.
+
+`SecureAuthConfig.webauthn.getLoginAuthenticationExtensions` is an optional server-only callback.
+After account and sign-in credentials are resolved, it receives `{ userId, credentialIds }` and
+may return bounded JSON-safe extension inputs. Secure-auth merges them only into
+`PublicKeyCredentialRequestOptions.extensions`; the callback cannot change authentication policy.
+
+`SecureAuthConfig.webauthn.originAliasPolicy` and the exported `WebAuthnOriginAliasPolicy` type
+control origin expansion. `"apex-www"` is the compatible default; `"none"` makes the primary and
+explicit extra origins exact and excludes implicit `app.baseUrl`, apex/www, and loopback aliases.
 
 ---
 
@@ -310,6 +322,7 @@ Passkey browser orchestration exports:
 
 - `registerAccountPasskey` and `AccountPasskeyRegistrationHooks`
 - `signInWithPasskey` and `PasskeyLoginHooks`
+- `PasskeyLoginIntegrationCompletion` and `PasskeyLoginIntegrationResult`
 - `enableAccountPasskeySignIn`
 
 `SecuritySettingsPage.allowPasskeySignInCapabilityPromotion` and
@@ -318,7 +331,9 @@ not expose the promotion action in package UI.
 
 Registration hooks run only after exact server/browser credential-id equality. Login's
 `onFullyAuthenticated` runs only after final account-session creation and never while TOTP is
-pending. See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
+pending. It may return a typed same-app `action_required` redirect; package UI surfaces callback
+failure instead of treating it as completed. See
+[passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
 ---
 

@@ -13,7 +13,13 @@ import {
 import { prepareAuthenticationOptions } from "../../modules/passkeys/lib/prepare-webauthn-options.js";
 import { releaseSensitiveClientExtensionResults } from "../../modules/passkeys/lib/webauthn-response-privacy.js";
 
-export type PasskeyLoginOutcome = "signed-in" | "requires-two-factor" | "cancelled" | "unsupported";
+export type PasskeyLoginOutcome =
+  | "signed-in"
+  | "signed-in-integration-action-required"
+  | "signed-in-integration-failed"
+  | "requires-two-factor"
+  | "cancelled"
+  | "unsupported";
 
 export type FullyAuthenticatedPasskeyContext = {
   /** Exact credential id returned by successful secure-auth server verification. */
@@ -21,6 +27,23 @@ export type FullyAuthenticatedPasskeyContext = {
   /** Browser-only. Never send this value to a server. */
   clientExtensionResults: AuthenticationResponseJSON["clientExtensionResults"];
 };
+
+export type PasskeyLoginIntegrationCompletion =
+  | { status: "completed" }
+  | {
+      status: "action_required";
+      /** Consumer-owned stable code, for example `local_capability_unavailable`. */
+      code: string;
+      /** Same-app absolute path used instead of the normal post-login destination. */
+      redirectTo: string;
+      /** Optional user-facing explanation for custom consumers. */
+      message?: string;
+    };
+
+export type PasskeyLoginIntegrationResult =
+  | { status: "not_configured" | "completed" }
+  | Extract<PasskeyLoginIntegrationCompletion, { status: "action_required" }>
+  | { status: "failed"; error: unknown };
 
 export type PasskeyLoginHooks = {
   /** Browser-option preparation before SimpleWebAuthn starts the ceremony; BufferSource is kept. */
@@ -31,7 +54,12 @@ export type PasskeyLoginHooks = {
    * Runs only after WebAuthn verification and final account-session creation. It is never called
    * while TOTP is pending.
    */
-  onFullyAuthenticated?: (context: FullyAuthenticatedPasskeyContext) => void | Promise<void>;
+  onFullyAuthenticated?: (
+    context: FullyAuthenticatedPasskeyContext
+  ) =>
+    | void
+    | PasskeyLoginIntegrationCompletion
+    | Promise<void | PasskeyLoginIntegrationCompletion>;
 };
 
 export type SignInWithPasskeyOptions = {
@@ -45,9 +73,7 @@ export type SignInWithPasskeyOptions = {
 export type SignInWithPasskeyResult = {
   outcome: PasskeyLoginOutcome;
   redirectTo: string;
-  integration?:
-    | { status: "not_configured" | "completed" }
-    | { status: "failed"; error: unknown };
+  integration?: PasskeyLoginIntegrationResult;
 };
 
 export function buildPasskeyLoginOutcomeKey(appSlug: string): string {
@@ -56,6 +82,26 @@ export function buildPasskeyLoginOutcomeKey(appSlug: string): string {
 
 export function getPasskeyLoginUnsupportedMessage(): string {
   return "This browser does not support passkey sign-in.";
+}
+
+function isSameAppAbsolutePath(value: string): boolean {
+  return value.startsWith("/") && !value.startsWith("//") && !value.includes("\\");
+}
+
+function resolveIntegrationCompletion(
+  result: void | PasskeyLoginIntegrationCompletion
+): PasskeyLoginIntegrationCompletion {
+  if (result === undefined || result.status === "completed") {
+    return { status: "completed" };
+  }
+  if (
+    result.status !== "action_required" ||
+    !result.code.trim() ||
+    !isSameAppAbsolutePath(result.redirectTo)
+  ) {
+    throw new TypeError("Invalid passkey login integration result.");
+  }
+  return result;
 }
 
 export function isPasskeyLoginSupported(): boolean {
@@ -156,18 +202,27 @@ export async function signInWithPasskey(
     }
 
     try {
-      await options.hooks.onFullyAuthenticated({
-        verifiedCredentialId: verifyResult.credentialId,
-        clientExtensionResults: assertion.clientExtensionResults,
-      });
+      const integration = resolveIntegrationCompletion(
+        await options.hooks.onFullyAuthenticated({
+          verifiedCredentialId: verifyResult.credentialId,
+          clientExtensionResults: assertion.clientExtensionResults,
+        })
+      );
+      if (integration.status === "action_required") {
+        return {
+          outcome: "signed-in-integration-action-required",
+          redirectTo: integration.redirectTo,
+          integration,
+        };
+      }
       return {
         outcome: "signed-in",
         redirectTo: afterLoginPath,
-        integration: { status: "completed" },
+        integration,
       };
     } catch (error) {
       return {
-        outcome: "signed-in",
+        outcome: "signed-in-integration-failed",
         redirectTo: afterLoginPath,
         integration: { status: "failed", error },
       };

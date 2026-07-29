@@ -1,4 +1,4 @@
-import type { SecureAuthConfig } from "@/core/types.js";
+import type { SecureAuthConfig, WebAuthnOriginAliasPolicy } from "@/core/types.js";
 
 function parseOrigin(value: string | undefined): URL | null {
   if (!value) return null;
@@ -41,17 +41,34 @@ function wwwAlias(origin: URL): URL | null {
   return alias;
 }
 
-function addOriginVariants(origin: URL, into: Set<string>) {
+function addOriginVariants(
+  origin: URL,
+  into: Set<string>,
+  aliasPolicy: WebAuthnOriginAliasPolicy
+) {
   into.add(origin.origin);
+  if (aliasPolicy === "none") return;
   const localhost = localhostAlias(origin);
   if (localhost) into.add(localhost.origin);
   const www = wwwAlias(origin);
   if (www) into.add(www.origin);
 }
 
-function addOriginString(value: string | undefined, into: Set<string>) {
+function addOriginString(
+  value: string | undefined,
+  into: Set<string>,
+  aliasPolicy: WebAuthnOriginAliasPolicy
+) {
   const parsed = parseOrigin(value);
-  if (parsed) addOriginVariants(parsed, into);
+  if (parsed) addOriginVariants(parsed, into, aliasPolicy);
+}
+
+function getOriginAliasPolicy(config: SecureAuthConfig): WebAuthnOriginAliasPolicy {
+  const policy = config.webauthn.originAliasPolicy ?? "apex-www";
+  if (policy !== "apex-www" && policy !== "none") {
+    throw new TypeError("Invalid WebAuthn origin alias policy.");
+  }
+  return policy;
 }
 
 export function getPrimaryWebAuthnOrigin(config: SecureAuthConfig): string {
@@ -66,13 +83,16 @@ export function getPrimaryWebAuthnOrigin(config: SecureAuthConfig): string {
 
 export function getWebAuthnOrigins(config: SecureAuthConfig): string[] {
   const origins = new Set<string>();
+  const aliasPolicy = getOriginAliasPolicy(config);
 
-  addOriginString(getPrimaryWebAuthnOrigin(config), origins);
-  addOriginString(config.webauthn.origin, origins);
-  addOriginString(config.app.baseUrl, origins);
+  addOriginString(getPrimaryWebAuthnOrigin(config), origins, aliasPolicy);
+  if (aliasPolicy === "apex-www") {
+    addOriginString(config.webauthn.origin, origins, aliasPolicy);
+    addOriginString(config.app.baseUrl, origins, aliasPolicy);
+  }
 
   for (const extra of config.webauthn.origins ?? []) {
-    addOriginString(extra, origins);
+    addOriginString(extra, origins, aliasPolicy);
   }
 
   return [...origins];

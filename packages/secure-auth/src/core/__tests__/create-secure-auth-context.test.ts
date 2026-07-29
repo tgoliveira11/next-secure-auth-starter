@@ -34,4 +34,23 @@ describe("createSecureAuthContext", () => {
     expect(ctx.passwordResetEmailContent("token").subject).toContain(config.app.name);
     expect(ctx.toPasskeyVerificationErrorMessage(new Error("origin mismatch"))).toContain("Passkey");
   });
+
+  it("wires strict WebAuthn origins into the verification context", () => {
+    const config = buildTestSecureAuthConfig({
+      app: { name: "Test App", slug: "test-app", baseUrl: "https://example.com" },
+      webauthn: {
+        rpId: "example.com",
+        rpName: "Test App",
+        origin: "https://www.example.com",
+        originAliasPolicy: "none",
+      },
+    });
+
+    const ctx = createSecureAuthContext({ config });
+
+    expect(ctx.getWebAuthnOrigins()).toEqual(["https://www.example.com"]);
+    expect(ctx.toPasskeyVerificationErrorMessage(new Error("origin mismatch"))).toContain(
+      "must use https://www.example.com"
+    );
+  });
 });

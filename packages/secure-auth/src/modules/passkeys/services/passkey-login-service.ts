@@ -15,6 +15,7 @@ import type { AuthLoginService } from "@/modules/auth/services/auth-login-servic
 import type { AuthService } from "@/modules/auth/services/auth-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
+import { resolveLoginAuthenticationExtensions } from "@/modules/passkeys/lib/login-authentication-extensions";
 
 type PasskeyLoginServiceDeps = {
   config: SecureAuthContext["config"];
@@ -138,11 +139,25 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
 
       const { userId, allowCredentials } = await resolveLoginContext(repos, input);
 
-      const options = await generateAuthenticationOptions({
+      const generatedOptions = await generateAuthenticationOptions({
         rpID,
         allowCredentials,
         userVerification: "required",
       });
+      const authenticationExtensions = await resolveLoginAuthenticationExtensions({
+        config,
+        userId,
+        allowCredentials,
+      });
+      const options = authenticationExtensions
+        ? {
+            ...generatedOptions,
+            extensions: {
+              ...authenticationExtensions,
+              ...generatedOptions.extensions,
+            } as typeof generatedOptions.extensions,
+          }
+        : generatedOptions;
 
       await repos.passkeyRepository.storeChallenge({
         userId,

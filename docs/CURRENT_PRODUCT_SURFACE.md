@@ -136,6 +136,8 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `auth.magicLink.enabled` | `false` | shipped |
 | `auth.securityNotifications.enabled` | `true` | shipped |
 | `passwordPolicy.checkBreachedPasswords` | `true` | shipped |
+| `webauthn.getLoginAuthenticationExtensions` | unset | opt-in — bounded server-only WebAuthn extension composition after account resolution |
+| `webauthn.originAliasPolicy` | `"apex-www"` | shipped — set `"none"` for exact canonical-origin verification |
 
 ## Client exports (`@tgoliveira/secure-auth/client`)
 
@@ -153,7 +155,8 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `mergeGuestPreferences`, `useMergeGuestPreferences` | shipped |
 | `usePreferencesEnabled` | shipped |
 | `registerAccountPasskey`, `AccountPasskeyRegistrationHooks` | shipped — optional browser composition |
-| `signInWithPasskey`, `PasskeyLoginHooks` | shipped — optional fully-authenticated browser callback |
+| `signInWithPasskey`, `PasskeyLoginHooks` | shipped — server-composed browser options plus typed fully-authenticated integration result |
+| `PasskeyLoginIntegrationCompletion`, `PasskeyLoginIntegrationResult` | shipped — generic completed/action-required/failed post-login contract |
 | `enableAccountPasskeySignIn` | shipped |
 | `PasskeySettings.allowSignInCapabilityPromotion` / `SecuritySettingsPage.allowPasskeySignInCapabilityPromotion` | shipped — explicit opt-in, default false |
 

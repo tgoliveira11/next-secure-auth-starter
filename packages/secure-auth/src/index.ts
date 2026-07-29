@@ -6,6 +6,10 @@ export type {
   EmailProvider,
   SecureAuthEmailContent,
   SecureAuthEmailTemplates,
+  SecureAuthJsonValue,
+  PasskeyLoginAuthenticationExtensions,
+  PasskeyLoginAuthenticationExtensionsContext,
+  WebAuthnOriginAliasPolicy,
 } from "./core/types.js";
 export { SECURE_AUTH_PACKAGE_VERSION } from "./core/package-version.js";
 export { safeLogger } from "./modules/security/logger/index.js";

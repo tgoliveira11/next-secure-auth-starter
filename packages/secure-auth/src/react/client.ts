@@ -12,6 +12,8 @@ export {
   buildPasskeyLoginOptionsPayload,
   type PasskeyLoginOutcome,
   type PasskeyLoginHooks,
+  type PasskeyLoginIntegrationCompletion,
+  type PasskeyLoginIntegrationResult,
   type FullyAuthenticatedPasskeyContext,
   type SignInWithPasskeyOptions,
   type SignInWithPasskeyResult,

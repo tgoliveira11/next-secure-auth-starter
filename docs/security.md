@@ -185,6 +185,13 @@ additional capability. Secure-auth recursively strips documented PRF-derived fie
 rejects documented PRF-derived fields anywhere in the bounded request graph. PRF output must never reach secure-auth,
 another server route, logs, analytics, storage, or URL state.
 
+`webauthn.getLoginAuthenticationExtensions` is a server-only composition point. It runs only for a
+resolved account with a non-empty sign-in allow-list and may add bounded JSON-safe extension input;
+it cannot replace the challenge, RP ID, required user verification, or allow-list. The callback's
+`userId` and `credentialIds` are never emitted as separate response metadata by secure-auth.
+Consumers must return the same public extension shape for equivalent sign-in accounts rather than
+turning this callback into an oracle for private feature enrollment.
+
 Signature counters and the monotonic `counter_revision` are updated through compare-and-set against
 the single authoritative credential row. Nonzero counters must strictly advance. Authenticators
 that report `0 -> 0` are supported because every accepted assertion still increments the revision.
@@ -195,7 +202,12 @@ as a vault enrollment or unlock challenge.
 
 See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
-Configure via `webauthn` in `createSecureAuth(config)`. The configured `webauthn.origin` must match how users reach the app; the package also accepts the paired **apex ↔ www** origin automatically (e.g. `https://example.com` and `https://www.example.com`). Use optional `webauthn.origins` for additional hostnames (e.g. subdomains).
+Configure via `webauthn` in `createSecureAuth(config)`. The configured `webauthn.origin` must match
+how users reach the app. `originAliasPolicy` defaults to `"apex-www"` for backward compatibility.
+Production apps that redirect all traffic to one canonical host should set
+`originAliasPolicy: "none"`; verification then accepts only the primary origin and exact
+`webauthn.origins` entries. A redirect is not a substitute for strict verification because an
+assertion may reach the verify route independently of page navigation.
 
 ---
 
