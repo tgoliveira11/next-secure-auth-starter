@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-07-29
+
 ### Fixed
 
 - **Accurate two-factor settings guidance** — The package-owned settings UI now states that enabled TOTP is required after password, passkey, and OAuth primary sign-in, while remaining separate from vault unlock.
