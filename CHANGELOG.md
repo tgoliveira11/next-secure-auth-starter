@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Local-first passkey presentation** — Login, exact-credential capability proofs, and portable vault grants now normalize stored WebAuthn transports with `internal` before `hybrid` and emit Level 3 `client-device`, `hybrid` hints when both are available. The selected credential, required user verification, RP/origin validation, and hybrid fallback are unchanged; browsers that ignore hints continue to use the standard allow-list.
+
 ## [0.10.1] - 2026-07-29
 
 ### Fixed

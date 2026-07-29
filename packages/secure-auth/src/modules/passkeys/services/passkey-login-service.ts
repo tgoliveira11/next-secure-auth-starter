@@ -1,7 +1,4 @@
-import {
-  generateAuthenticationOptions,
-  verifyAuthenticationResponse,
-} from "@simplewebauthn/server";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
 import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
@@ -16,6 +13,9 @@ import type { AuthService } from "@/modules/auth/services/auth-service";
 import type { TwoFactorService } from "@/modules/two-factor/services/two-factor-service";
 import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
 import { resolveLoginAuthenticationExtensions } from "@/modules/passkeys/lib/login-authentication-extensions";
+import {
+  buildPasskeyAuthenticationOptions,
+} from "@/modules/passkeys/lib/passkey-authentication-options";
 
 type PasskeyLoginServiceDeps = {
   config: SecureAuthContext["config"];
@@ -139,10 +139,9 @@ export function createPasskeyLoginService(deps: PasskeyLoginServiceDeps) {
 
       const { userId, allowCredentials } = await resolveLoginContext(repos, input);
 
-      const generatedOptions = await generateAuthenticationOptions({
+      const generatedOptions = await buildPasskeyAuthenticationOptions({
         rpID,
         allowCredentials,
-        userVerification: "required",
       });
       const authenticationExtensions = await resolveLoginAuthenticationExtensions({
         config,

@@ -183,6 +183,13 @@ Account passkey login is account authentication only:
 - WebAuthn challenges are single-use and consumed atomically.
 - Passkey sign-in is a strong primary factor but **does not bypass TOTP** when app-level 2FA is enabled. Users must complete the same TOTP step as credentials/OAuth logins.
 
+Generated authentication options prefer an available local authenticator without excluding a
+synced or cross-device passkey. Secure-auth normalizes duplicate stored transports, orders
+`internal` before `hybrid`, and emits advisory WebAuthn Level 3 `client-device`, `hybrid` hints only
+when both transports are advertised. Browsers may ignore hints; the exact allow-list, hybrid
+fallback, required user verification, credential verification, RP ID, and origin checks remain
+authoritative. No authenticator attachment is forced and no credential or database row is changed.
+
 Consumers may opt into sharing the same credential with an independent browser-only capability. The
 packages remain independent: secure-auth verifies account authentication; the consumer owns the
 additional capability. Secure-auth recursively strips documented PRF-derived fields in its client helpers and

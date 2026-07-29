@@ -32,6 +32,14 @@ flow reuses the credential but always runs a separate UV assertion after complet
 - Account authentication never returns a vault key. A local vault unlock never creates an account
   session.
 
+Authentication options for account login, exact-credential capability promotion, and portable
+vault grants use one package-owned policy. Stored transports are deduplicated and presented with
+`internal` before `hybrid`. When a credential advertises both, WebAuthn Level 3 hints prefer
+`client-device` while retaining `hybrid` as the next choice. Hints are advisory: Safari and other
+browsers that do not implement them ignore the field and continue from the unchanged credential
+allow-list. Secure-auth does not force `authenticatorAttachment`, remove hybrid fallback, rewrite
+the stored credential, or weaken required user verification.
+
 ## Public composition hooks
 
 The following exports are available from `@tgoliveira/secure-auth/react/client`:

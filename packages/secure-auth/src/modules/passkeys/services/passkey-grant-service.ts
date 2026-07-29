@@ -1,13 +1,13 @@
-import {
-  generateAuthenticationOptions,
-  verifyAuthenticationResponse,
-} from "@simplewebauthn/server";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import type { AuthenticationResponseJSON } from "@simplewebauthn/server";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit";
 import type { RunInTransaction } from "@/lib/db/transaction";
 import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
+import {
+  buildPasskeyAuthenticationOptions,
+} from "@/modules/passkeys/lib/passkey-authentication-options";
 import { ChallengeError, NotFoundError } from "./passkey-service";
 import {
   createPortableVaultGrantJti,
@@ -110,7 +110,7 @@ export function createPasskeyGrantService(deps: PasskeyGrantServiceDeps) {
         input.action === "unlock"
           ? normalizeAndThumbprintEphemeralPublicKey(input.ephemeralPublicKeyJwk).thumbprint
           : null;
-      const options = await generateAuthenticationOptions({
+      const options = await buildPasskeyAuthenticationOptions({
         rpID,
         allowCredentials: [
           {
@@ -118,7 +118,6 @@ export function createPasskeyGrantService(deps: PasskeyGrantServiceDeps) {
             transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
           },
         ],
-        userVerification: "required",
       });
       const operation = await repos.passkeyGrantRepository.createOperation({
         userId: session.userId,
