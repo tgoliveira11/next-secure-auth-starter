@@ -128,9 +128,9 @@ export function TwoFactorSettings({ appSlug }: TwoFactorSettingsProps) {
           <Badge variant={enabled ? "success" : "muted"}>{enabled ? "On" : "Off"}</Badge>
         </div>
         <CardDescription>
-          Two-factor authentication is required when signing in with email and password. Passkeys
-          use your device&apos;s built-in verification and do not require a separate one-time code.
-          TOTP protects account access only — it is separate from passkey sign-in.
+          When enabled, two-factor authentication requires a one-time code after signing in with
+          email and password, a passkey, or OAuth. It protects account access only and remains
+          separate from vault unlock.
         </CardDescription>
       </CardHeader>
 
@@ -201,7 +201,8 @@ export function TwoFactorSettings({ appSlug }: TwoFactorSettingsProps) {
       {setupOpen && (
         <div className="mt-6 space-y-4 border-t border-[var(--border)] pt-6">
           <Alert variant="info">
-            This protects sign-in only. It does not replace passkey sign-in.
+            Two-factor authentication protects account sign-in only and remains separate from vault
+            unlock.
           </Alert>
           <p className="text-sm text-[var(--muted)]">
             Scan this QR code with Google Authenticator, Microsoft Authenticator, 1Password, Authy, or
