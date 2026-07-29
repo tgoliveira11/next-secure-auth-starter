@@ -144,6 +144,10 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `webauthn.originAliasPolicy` | `"apex-www"` | shipped — set `"none"` for exact canonical-origin verification |
 | `webauthn.portableVaultGrants.enabled` | `false` | opt-in — independent portable vault broker authorization; see [portable-vault-grants.md](./portable-vault-grants.md) |
 
+Passkey login, exact-credential capability proofs, and portable grant assertions share a shipped
+local-first presentation policy: normalized `internal`/`hybrid` transports plus advisory WebAuthn
+Level 3 hints, with required UV and hybrid fallback preserved.
+
 ## Client exports (`@tgoliveira/secure-auth/client`)
 
 | Symbol | Status |

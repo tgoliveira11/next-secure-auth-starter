@@ -127,6 +127,26 @@ describe("passkey login getLoginOptions branches", () => {
     );
   });
 
+  it("prefers this device for login while preserving hybrid fallback", async () => {
+    mocks.findByCredentialId.mockResolvedValue({
+      userId: USER_ID,
+      credentialId: "cred-1",
+      signInEnabled: true,
+      transports: ["hybrid", "internal", "hybrid"],
+    });
+    const service = buildService();
+
+    const result = await service.getLoginOptions({ credentialId: "cred-1" });
+
+    expect(generateAuthenticationOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowCredentials: [{ id: "cred-1", transports: ["internal", "hybrid"] }],
+        userVerification: "required",
+      })
+    );
+    expect(result.options).toMatchObject({ hints: ["client-device", "hybrid"] });
+  });
+
   it("prefers matching credential when userId and credentialId are provided", async () => {
     mocks.findByCredentialId.mockResolvedValue(null);
     mocks.findById.mockResolvedValue({ id: USER_ID });

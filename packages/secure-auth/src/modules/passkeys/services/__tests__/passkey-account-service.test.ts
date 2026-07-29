@@ -400,6 +400,32 @@ describe("passkey account service sign-in capability upgrade", () => {
     expect(result.options.challenge).toBe("capability-challenge");
   });
 
+  it("prefers this device for exact-credential capability proof with hybrid fallback", async () => {
+    mocks.findByIdForUser.mockResolvedValue({
+      id: "pk-vault",
+      userId: "user-1",
+      credentialId: "vault-credential-id",
+      publicKey: Buffer.from("public-key").toString("base64url"),
+      counter: "0",
+      counterRevision: 7,
+      transports: ["hybrid", "internal"],
+      signInEnabled: false,
+      vaultUnlockEnabled: true,
+    });
+    const service = createService();
+
+    const result = await service.getSignInCapabilityOptions("user-1", "pk-vault");
+
+    expect(generateAuthenticationOptions).toHaveBeenCalledWith({
+      rpID: "localhost",
+      allowCredentials: [
+        { id: "vault-credential-id", transports: ["internal", "hybrid"] },
+      ],
+      userVerification: "required",
+    });
+    expect(result.options).toMatchObject({ hints: ["client-device", "hybrid"] });
+  });
+
   it("verifies proof, advances the shared counter, and enables sign-in atomically", async () => {
     const service = createService();
 

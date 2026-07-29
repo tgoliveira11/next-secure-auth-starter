@@ -1,5 +1,4 @@
 import {
-  generateAuthenticationOptions,
   generateRegistrationOptions,
   verifyAuthenticationResponse,
   verifyRegistrationResponse,
@@ -16,6 +15,9 @@ import {
   assertMayEnableAccountSignIn,
 } from "@/modules/passkeys/lib/passkey-capabilities";
 import { resolvePasskeyCounterAdvance } from "@/modules/passkeys/lib/passkey-counter";
+import {
+  buildPasskeyAuthenticationOptions,
+} from "@/modules/passkeys/lib/passkey-authentication-options";
 import type { SecureAuthContext } from "@/core/create-secure-auth-context";
 import type { SecureAuthRepositories } from "@/core/create-repositories";
 import type { RateLimitApi } from "@/modules/rate-limit/index";
@@ -167,7 +169,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
       }
       assertMayEnableAccountSignIn(credential);
 
-      const options = await generateAuthenticationOptions({
+      const options = await buildPasskeyAuthenticationOptions({
         rpID,
         allowCredentials: [
           {
@@ -175,7 +177,6 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
             transports: (credential.transports as AuthenticatorTransport[]) ?? undefined,
           },
         ],
-        userVerification: "required",
       });
 
       await repos.passkeyRepository.storeChallenge({

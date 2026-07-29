@@ -201,6 +201,28 @@ describe("passkey portable vault grant service", () => {
     );
   });
 
+  it("prefers this device for a portable grant while retaining hybrid fallback", async () => {
+    mocks.findByIdForUser.mockResolvedValue({
+      ...credential,
+      transports: ["hybrid", "internal", "hybrid"],
+    });
+    const service = createService();
+
+    const result = await service.getOptions(session, {
+      action: "enroll",
+      credentialDbId: credential.id,
+    });
+
+    expect(generateAuthenticationOptions).toHaveBeenCalledWith({
+      rpID: "example.com",
+      allowCredentials: [
+        { id: "credential-id", transports: ["internal", "hybrid"] },
+      ],
+      userVerification: "required",
+    });
+    expect(result.options).toMatchObject({ hints: ["client-device", "hybrid"] });
+  });
+
   it("rejects an ineligible credential before creating an operation", async () => {
     mocks.findByIdForUser.mockResolvedValue({
       ...credential,

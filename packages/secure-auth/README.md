@@ -136,6 +136,11 @@ export const secureAuth = createSecureAuth({
 localhost/127.0.0.1 pair. Set it to `"none"` when production redirects to one canonical host; only
 the primary origin and exact `webauthn.origins` entries are then accepted by assertion verification.
 
+For login and package-owned exact-credential assertions, secure-auth presents `internal` before
+`hybrid` and adds advisory WebAuthn Level 3 local-first hints when both transports are available.
+Hybrid remains an allowed fallback, user verification remains required, and browsers without hints
+support continue from the same credential allow-list. No authenticator attachment is forced.
+
 Consumers that compose an independent browser-only capability may set the server-only
 `webauthn.getLoginAuthenticationExtensions({ userId, credentialIds })` callback. It can add only
 bounded JSON-safe WebAuthn extension inputs after the account allow-list is resolved; it cannot
