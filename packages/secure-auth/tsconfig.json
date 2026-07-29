@@ -12,6 +12,7 @@
     "incremental": true,
     "tsBuildInfoFile": ".cache/tsconfig.tsbuildinfo",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "baseUrl": ".",

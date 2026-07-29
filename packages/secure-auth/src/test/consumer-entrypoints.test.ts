@@ -7,6 +7,9 @@ import { describe, it, expect } from "vitest";
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const pkgRequire = createRequire(path.join(packageRoot, "package.json"));
 const distRoot = path.join(packageRoot, "dist");
+const packageVersion = JSON.parse(
+  readFileSync(path.join(packageRoot, "package.json"), "utf8"),
+).version as string;
 const RELATIVE_DECLARATION_IMPORT =
   /(?:\bfrom\s+|\b(?:import|require)\s*(?:\(\s*)?)["'](\.{1,2}\/[^"']+)["']/g;
 
@@ -28,6 +31,14 @@ const PUBLIC_ENTRYPOINTS = [
 ] as const;
 
 describe("consumer entrypoint compatibility (built package exports)", () => {
+  it("exports the package manifest version from both module formats", async () => {
+    const esm = await import("@tgoliveira/secure-auth");
+    const cjs = pkgRequire("@tgoliveira/secure-auth");
+
+    expect(esm.SECURE_AUTH_PACKAGE_VERSION).toBe(packageVersion);
+    expect(cjs.SECURE_AUTH_PACKAGE_VERSION).toBe(packageVersion);
+  });
+
   it("recognizes re-exports, side-effect imports, dynamic imports, and require calls", () => {
     expect(
       getRelativeDeclarationImports(`

@@ -3,7 +3,7 @@
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
 **Package version:** see [`packages/secure-auth/package.json`](../packages/secure-auth/package.json)
-**Last reviewed:** 2026-07-28
+**Last reviewed:** 2026-07-29
 
 ## Status legend
 
@@ -17,7 +17,7 @@ Living inventory of what the package exposes today. Update this file when export
 
 | Export | Status | Purpose |
 | --- | --- | --- |
-| `@tgoliveira/secure-auth` | shipped | `createSecureAuth`, types, `safeLogger` |
+| `@tgoliveira/secure-auth` | shipped | `createSecureAuth`, types, `safeLogger`, manifest-derived `SECURE_AUTH_PACKAGE_VERSION` |
 | `@tgoliveira/secure-auth/next` | shipped | Next.js helpers, `createNextAuthRouteHandlers` |
 | `@tgoliveira/secure-auth/next/middleware` | shipped | `createSecureAuthMiddleware` (Edge-safe) |
 | `@tgoliveira/secure-auth/react` | shipped | UI pages, provider, admin pages |
@@ -49,7 +49,7 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 
 | Key | Methods | Status |
 | --- | --- | --- |
-| `health` | GET | shipped |
+| `health` | GET | shipped — reports the build-embedded package manifest version |
 | `loginStart` | POST | shipped |
 | `loginStartForm` | POST | shipped |
 | `loginComplete` | POST | shipped |
