@@ -40,6 +40,7 @@ Living inventory of what the package exposes today. Update this file when export
 | `0002_v0_3_admin_platform.sql` | shipped | Admin platform tables + user profile/role columns |
 | `0003_user_preferences.sql` | shipped | Per-user key-value preferences (`user_preferences`) — see [user-preferences.md](./user-preferences.md) |
 | `0004_outgoing_william_stryker.sql` | shipped | Monotonic passkey assertion CAS epoch (`passkey_credentials.counter_revision`) |
+| `0005_nasty_slipstream.sql` | opt-in | Session-bound, single-use portable vault grant and receipt operations (`webauthn_broker_operations`) |
 
 ## Route keys (`secureAuth.routes.*`)
 
@@ -82,6 +83,9 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 | `passkeyRegister` | POST | shipped |
 | `passkeyById` | DELETE | shipped |
 | `passkeyEnableSignIn` | POST | shipped — explicit vault-only credential promotion |
+| `passkeyPortableVaultGrantOptions` | POST | opt-in (`webauthn.portableVaultGrants.enabled`) — exact-credential UV ceremony |
+| `passkeyPortableVaultGrantVerify` | POST | opt-in — issue short-lived ES256 broker grant |
+| `passkeyPortableVaultGrantFinalize` | POST | opt-in — verify and single-use consume broker completion receipt |
 | `sessionsList` | GET | shipped |
 | `sessionById` | DELETE | shipped |
 | `sessionsPing` | POST | shipped |
@@ -138,6 +142,7 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `passwordPolicy.checkBreachedPasswords` | `true` | shipped |
 | `webauthn.getLoginAuthenticationExtensions` | unset | opt-in — bounded server-only WebAuthn extension composition after account resolution |
 | `webauthn.originAliasPolicy` | `"apex-www"` | shipped — set `"none"` for exact canonical-origin verification |
+| `webauthn.portableVaultGrants.enabled` | `false` | opt-in — independent portable vault broker authorization; see [portable-vault-grants.md](./portable-vault-grants.md) |
 
 ## Client exports (`@tgoliveira/secure-auth/client`)
 
@@ -146,6 +151,8 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `preferencesApi` | shipped (requires `preferences.enabled`) |
 | `sanitizeWebAuthnResponseForSecureAuthServer` | shipped — recursively removes documented browser-only PRF-derived results before serialization |
 | `passkeyAccountApi.enableSignInOptions` / `enableSignInVerify` | shipped |
+| `passkeyPortableVaultGrantApi` | opt-in — grant options/verify and broker receipt finalization |
+| `requestPortableVaultGrant` | opt-in — dedicated browser WebAuthn grant ceremony with sensitive-extension cleanup |
 
 ## Client exports (`@tgoliveira/secure-auth/react/client`)
 
@@ -158,6 +165,7 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `signInWithPasskey`, `PasskeyLoginHooks` | shipped — server-composed browser options plus typed fully-authenticated integration result |
 | `PasskeyLoginIntegrationCompletion`, `PasskeyLoginIntegrationResult` | shipped — generic completed/action-required/failed post-login contract |
 | `enableAccountPasskeySignIn` | shipped |
+| `requestPortableVaultGrant` | opt-in (`webauthn.portableVaultGrants.enabled`) |
 | `PasskeySettings.allowSignInCapabilityPromotion` / `SecuritySettingsPage.allowPasskeySignInCapabilityPromotion` | shipped — explicit opt-in, default false |
 
 ## Public UI config (`@tgoliveira/secure-auth/react`, `@tgoliveira/secure-auth/next`)

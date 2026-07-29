@@ -176,6 +176,18 @@ export function createRoutes(getServices: () => Promise<SecureAuthServices>) {
       () => import("./handlers/account/passkeys-enable-sign-in.js"),
       "POST"
     ),
+    passkeyPortableVaultGrantOptions: route(
+      () => import("./handlers/account/passkey-portable-vault-grant-options.js"),
+      "POST"
+    ),
+    passkeyPortableVaultGrantVerify: route(
+      () => import("./handlers/account/passkey-portable-vault-grant-verify.js"),
+      "POST"
+    ),
+    passkeyPortableVaultGrantFinalize: route(
+      () => import("./handlers/account/passkey-portable-vault-grant-finalize.js"),
+      "POST"
+    ),
 
     twoFactorStatus: route(() => import("./handlers/account/two-factor-status.js"), "GET"),
     twoFactorSetupStart: route(() => import("./handlers/account/two-factor-setup-start.js"), "POST"),

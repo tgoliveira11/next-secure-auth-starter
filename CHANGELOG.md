@@ -6,6 +6,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Opt-in portable vault broker grants** — `webauthn.portableVaultGrants` adds dedicated, fully-authenticated, UV-required WebAuthn proof routes for ES256 `enroll`, `unlock`, and `revoke` grants. Grants use app-scoped opaque UUID subjects, exact credential/action/request binding, short TTLs, and RFC 7638 ephemeral-key binding for unlock. New client exports run the ceremony and finalize broker completion receipts without introducing a dependency on vault-core. Account passkey list items now also expose their WebAuthn `credentialId` so a verified post-login credential can be correlated with the package database `id` without browser identity hints.
+- **Portable vault operation migration** — `0005_nasty_slipstream.sql` adds account-session-bound operation state with hashed challenges, envelope IDs, grant JTIs, and receipt JTIs. No PUK, PRF output, private ephemeral key, UVK, or broker payload is stored.
+
+### Security
+
+- **Receipt-gated capability state** — `vault_unlock_enabled` changes only after an exact ES256 broker receipt is verified and atomically consumed. Unlock receipts are also single-use. Account deletion now returns 409 while any active passkey still protects portable vault access.
+- **Deployment-safe JWK configuration** — Private grant and rotating broker public receipt JWKs are accepted as bounded, canonical base64url JSON configuration, validated as P-256 ES256 keys at startup. Production and Preview can use isolated environment values without raw-JSON truncation.
+
 ## [0.9.1] - 2026-07-29
 
 ### Fixed

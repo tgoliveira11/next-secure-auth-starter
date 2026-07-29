@@ -63,6 +63,11 @@ Reference: [consumer-quick-start.md](./consumer-quick-start.md) · [consumer-dem
 - [ ] Migration `0004_outgoing_william_stryker.sql` applied before deploying counter-revision code
 - [ ] Shared credential integrations use one authoritative counter and revision with compare-and-set
 - [ ] Consumer vault challenges use a feature-specific audience, never secure-auth `registration`
+- [ ] If portable vault grants are enabled, migration `0005_nasty_slipstream.sql` is applied first
+- [ ] Portable grant options/verify/finalize routes are wired under same-origin authenticated account APIs
+- [ ] Production and Preview use distinct base64url JWK config, broker state, issuer/audience, origins, and KEKs
+- [ ] Portable enroll/revoke capability state changes only after exact single-use receipt finalization
+- [ ] Portable unlock finalizes its receipt before installing the restored non-extractable UVK
 
 ---
 

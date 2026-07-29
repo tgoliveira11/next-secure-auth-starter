@@ -16,6 +16,8 @@ export const AUDIT_EVENT_TYPES = [
   "two_factor_login_required",
   "passkey_login_success",
   "passkey_login_failed",
+  "portable_vault_grant_issued",
+  "portable_vault_receipt_completed",
   "email_verification_requested",
   "email_verified",
   "email_verification_failed",
@@ -47,6 +49,8 @@ const ALLOWED_METADATA_KEYS = new Set([
   "authProvider",
   "reason",
   "sessionCountRevoked",
+  "action",
+  "requestId",
 ]);
 
 const SENSITIVE_METADATA_PATTERNS = [

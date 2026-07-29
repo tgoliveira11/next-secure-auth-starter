@@ -15,6 +15,7 @@ import type { createAccountSessionService } from "../modules/sessions/services/a
 import type { createTwoFactorService } from "../modules/two-factor/services/two-factor-service.js";
 import type { createPasskeyLoginService } from "../modules/passkeys/services/passkey-login-service.js";
 import type { createPasskeyAccountService } from "../modules/passkeys/services/passkey-account-service.js";
+import type { createPasskeyGrantService } from "../modules/passkeys/services/passkey-grant-service.js";
 import type { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
 import type { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 import type { createAdminService } from "../modules/admin/services/admin-service.js";
@@ -57,6 +58,51 @@ export type PasskeyLoginAuthenticationExtensionsContext = {
 export type PasskeyLoginAuthenticationExtensions = Record<string, SecureAuthJsonValue>;
 
 export type WebAuthnOriginAliasPolicy = "apex-www" | "none";
+
+export type PortableVaultGrantPrivateJwk = {
+  kty: "EC";
+  crv: "P-256";
+  x: string;
+  y: string;
+  d: string;
+  kid: string;
+  alg?: "ES256";
+  use?: "sig";
+};
+
+export type PortableVaultBrokerReceiptPublicJwk = {
+  kty: "EC";
+  crv: "P-256";
+  x: string;
+  y: string;
+  kid: string;
+  alg?: "ES256";
+  use?: "sig";
+};
+
+export type PortableVaultGrantsEnabledConfig = {
+  enabled: true;
+  /** Stable issuer identifier for this secure-auth deployment. */
+  issuer: string;
+  /** Stable app registration id understood by the broker. */
+  appId: string;
+  /** Exact URL audience configured by the portable vault broker. */
+  audience: string;
+  /** Grant lifetime in seconds. Defaults to 60; allowed range is 15-120. */
+  ttlSeconds?: number;
+  /** Base64url-encoded secret of at least 32 bytes for app-scoped opaque subjects. */
+  opaqueSubjectKey: string;
+  /** Base64url-encoded JSON ES256 private JWK. Keep this value server-only. */
+  grantPrivateJwkB64: string;
+  /** Exact broker issuer accepted for completion receipts. */
+  brokerReceiptIssuer: string;
+  /** Base64url-encoded JSON array of active ES256 broker receipt public JWKs. */
+  brokerReceiptPublicJwksB64: string;
+};
+
+export type PortableVaultGrantsConfig =
+  | { enabled?: false }
+  | PortableVaultGrantsEnabledConfig;
 
 export type SecureAuthEmailContent = {
   subject: string;
@@ -266,6 +312,12 @@ export type SecureAuthConfig = {
       | PasskeyLoginAuthenticationExtensions
       | undefined
       | Promise<PasskeyLoginAuthenticationExtensions | undefined>;
+    /**
+     * Optional, account-session-gated WebAuthn proof grants for an independent portable vault
+     * broker. Secure-auth verifies the passkey and signs a key-bound authorization grant; it never
+     * receives PRF output, a portable unlock key, or decrypted vault material.
+     */
+    portableVaultGrants?: PortableVaultGrantsConfig;
   };
   captcha?: {
     provider?: "turnstile";
@@ -327,6 +379,7 @@ export type SecureAuthServices = {
   readonly twoFactorService: ReturnType<typeof createTwoFactorService>;
   readonly passkeyLoginService: ReturnType<typeof createPasskeyLoginService>;
   readonly passkeyAccountService: ReturnType<typeof createPasskeyAccountService>;
+  readonly passkeyGrantService: ReturnType<typeof createPasskeyGrantService>;
   readonly magicLinkService: ReturnType<typeof createMagicLinkService>;
   readonly securityNotificationService: ReturnType<typeof createSecurityNotificationService>;
   readonly adminService: ReturnType<typeof createAdminService>;

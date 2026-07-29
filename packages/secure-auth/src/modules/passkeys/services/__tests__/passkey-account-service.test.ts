@@ -131,6 +131,7 @@ describe("passkey account service capability boundaries", () => {
     mocks.findByUserId.mockResolvedValue([
       {
         id: "pk-vault",
+        credentialId: "credential-vault",
         friendlyName: "Vault passkey",
         createdAt: new Date("2026-01-01T00:00:00.000Z"),
         lastUsedAt: null,

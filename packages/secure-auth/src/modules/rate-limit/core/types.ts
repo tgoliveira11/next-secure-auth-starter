@@ -8,6 +8,8 @@ export type RateLimitOperation =
   | "passkey.register"
   | "passkey.authenticate"
   | "passkey.login"
+  | "passkey.portable_vault_grant"
+  | "passkey.portable_vault_receipt"
   | "account.delete"
   | "auth.verify_email_resend"
   | "auth.verify_email_confirm"
@@ -57,6 +59,8 @@ export const RATE_LIMIT_POLICIES: Record<RateLimitOperation, RateLimitPolicy> = 
   "passkey.register": { maxAttempts: 10, windowMs: 60 * 60 * 1000 },
   "passkey.authenticate": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },
   "passkey.login": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },
+  "passkey.portable_vault_grant": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },
+  "passkey.portable_vault_receipt": { maxAttempts: 10, windowMs: 15 * 60 * 1000 },
   "account.delete": { maxAttempts: 3, windowMs: 60 * 60 * 1000 },
   "auth.verify_email_resend": { maxAttempts: 5, windowMs: 60 * 60 * 1000 },
   "auth.verify_email_confirm": { maxAttempts: 20, windowMs: 15 * 60 * 1000 },

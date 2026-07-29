@@ -10,7 +10,9 @@ import {
   uniqueIndex,
   varchar,
   primaryKey,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -117,6 +119,58 @@ export const webauthnChallenges = pgTable(
   (table) => [
     index("idx_webauthn_challenges_lookup").on(table.challenge, table.type, table.userId),
     index("idx_webauthn_challenges_expires_at").on(table.expiresAt),
+  ]
+);
+
+/**
+ * Short-lived, account-session-bound WebAuthn proof operations for signed broker grants.
+ * Vault keys, PRF output, public ephemeral keys, and broker payloads are never stored here.
+ */
+export const webauthnBrokerOperations = pgTable(
+  "webauthn_broker_operations",
+  {
+    requestId: uuid("request_id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accountSessionId: uuid("account_session_id")
+      .notNull()
+      .references(() => accountSessions.id, { onDelete: "cascade" }),
+    credentialDbId: uuid("credential_db_id")
+      .notNull()
+      .references(() => passkeyCredentials.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(),
+    action: text("action").notNull(),
+    challengeHash: text("challenge_hash").notNull().unique(),
+    ephemeralPublicKeyThumbprint: text("ephemeral_public_key_thumbprint"),
+    envelopeIdHash: text("envelope_id_hash"),
+    challengeExpiresAt: timestamp("challenge_expires_at", { withTimezone: true }).notNull(),
+    challengeConsumedAt: timestamp("challenge_consumed_at", { withTimezone: true }),
+    grantJtiHash: text("grant_jti_hash").unique(),
+    grantExpiresAt: timestamp("grant_expires_at", { withTimezone: true }),
+    receiptJtiHash: text("receipt_jti_hash").unique(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check(
+      "webauthn_broker_operations_purpose_check",
+      sql`${table.purpose} = 'portable_vault'`
+    ),
+    check(
+      "webauthn_broker_operations_action_scope_check",
+      sql`(
+        (${table.action} = 'enroll' AND ${table.envelopeIdHash} IS NULL AND ${table.ephemeralPublicKeyThumbprint} IS NULL)
+        OR (${table.action} = 'revoke' AND ${table.envelopeIdHash} IS NOT NULL AND ${table.ephemeralPublicKeyThumbprint} IS NULL)
+        OR (${table.action} = 'unlock' AND ${table.envelopeIdHash} IS NOT NULL AND ${table.ephemeralPublicKeyThumbprint} IS NOT NULL)
+      )`
+    ),
+    index("idx_webauthn_broker_operations_user_session").on(
+      table.userId,
+      table.accountSessionId
+    ),
+    index("idx_webauthn_broker_operations_expiry").on(table.challengeExpiresAt),
+    index("idx_webauthn_broker_operations_credential").on(table.credentialDbId),
   ]
 );
 
@@ -305,6 +359,7 @@ export const authSchema = {
   passkeyCredentials,
   auditEvents,
   webauthnChallenges,
+  webauthnBrokerOperations,
   rateLimitBuckets,
   userTwoFactorSettings,
   userTwoFactorBackupCodes,

@@ -8,6 +8,7 @@ import { ReauthenticationRequiredError, ValidationError } from "@/modules/accoun
 const mocks = vi.hoisted(() => ({
   findById: vi.fn(),
   findSession: vi.fn(),
+  findPasskeys: vi.fn(),
   deleteById: vi.fn(),
   verifyPassword: vi.fn(),
   enforceRateLimit: vi.fn(),
@@ -30,6 +31,9 @@ const accountService = createAccountService({
     accountSessionRepository: {
       findByIdForUser: mocks.findSession,
     },
+    passkeyRepository: {
+      findByUserId: mocks.findPasskeys,
+    },
     auditRepository: {
       record: mocks.recordAudit,
     },
@@ -46,6 +50,7 @@ describe("accountService.deleteAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.verifyPassword.mockResolvedValue(true);
+    mocks.findPasskeys.mockResolvedValue([]);
     mocks.findSession.mockResolvedValue({
       authMethod: "google",
       lastUsedAt: now,
@@ -139,5 +144,30 @@ describe("accountService.deleteAccount", () => {
         confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
       })
     ).rejects.toBeInstanceOf(ReauthenticationRequiredError);
+  });
+
+  it("blocks deletion until every portable-vault passkey is disabled", async () => {
+    mocks.findById.mockResolvedValue({
+      id: "user-1",
+      authProvider: "credentials",
+      passwordHash: "hash",
+    });
+    mocks.findPasskeys.mockResolvedValue([
+      { id: "passkey-1", vaultUnlockEnabled: true },
+    ]);
+
+    await expect(
+      accountService.deleteAccount(
+        "user-1",
+        {
+          confirmationPhrase: ACCOUNT_DELETION_CONFIRMATION_PHRASE,
+          password: "secret",
+        },
+        { accountSessionId: "sess-1" }
+      )
+    ).rejects.toMatchObject({ name: "ConflictError" });
+
+    expect(mocks.recordAudit).not.toHaveBeenCalled();
+    expect(mocks.deleteById).not.toHaveBeenCalled();
   });
 });

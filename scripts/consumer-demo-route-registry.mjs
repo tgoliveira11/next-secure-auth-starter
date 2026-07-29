@@ -43,6 +43,21 @@ export const ROUTE_REGISTRY = [
     path: "account/passkeys/[id]/enable-sign-in",
     methods: ["POST"],
   },
+  {
+    key: "passkeyPortableVaultGrantOptions",
+    path: "account/passkeys/portable-vault-grants/options",
+    methods: ["POST"],
+  },
+  {
+    key: "passkeyPortableVaultGrantVerify",
+    path: "account/passkeys/portable-vault-grants/verify",
+    methods: ["POST"],
+  },
+  {
+    key: "passkeyPortableVaultGrantFinalize",
+    path: "account/passkeys/portable-vault-grants/finalize",
+    methods: ["POST"],
+  },
   { key: "sessionsList", path: "account/sessions", methods: ["GET"] },
   { key: "sessionById", path: "account/sessions/[id]", methods: ["DELETE"] },
   { key: "sessionsPing", path: "account/sessions/ping", methods: ["POST"] },

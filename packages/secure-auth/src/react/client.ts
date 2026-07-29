@@ -25,6 +25,7 @@ export {
   type RegisterAccountPasskeyResult,
 } from "../lib/passkey/register-account-passkey.js";
 export { enableAccountPasskeySignIn } from "../lib/passkey/enable-account-passkey-sign-in.js";
+export { requestPortableVaultGrant } from "../lib/passkey/request-portable-vault-grant.js";
 export { TurnstileCaptcha, type TurnstileCaptchaProps } from "../modules/ui/features/auth/turnstile-captcha";
 export {
   mergeGuestPreferences,

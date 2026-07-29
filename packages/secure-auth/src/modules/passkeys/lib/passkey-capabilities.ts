@@ -11,6 +11,8 @@ export type PasskeyCredentialCapabilityFlags = {
 
 export type AccountPasskeyListItem = {
   id: string;
+  /** WebAuthn credential id used to correlate a completed login with this database row. */
+  credentialId: string;
   friendlyName: string;
   createdAt: string;
   lastUsedAt: string | null;
@@ -138,6 +140,7 @@ export function getPasskeyAccountLabel(
 export function toAccountPasskeyListItem(
   cred: {
     id: string;
+    credentialId: string;
     friendlyName: string | null;
     createdAt: Date;
     lastUsedAt: Date | null;
@@ -154,6 +157,7 @@ export function toAccountPasskeyListItem(
 
   return {
     id: cred.id,
+    credentialId: cred.credentialId,
     friendlyName: getPasskeyAccountLabel(flags, fallbackName),
     createdAt: cred.createdAt.toISOString(),
     lastUsedAt: cred.lastUsedAt?.toISOString() ?? null,

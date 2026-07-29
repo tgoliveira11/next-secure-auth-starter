@@ -96,6 +96,15 @@ export function createAccountService(deps: AccountServiceDeps) {
         endpoint: "/api/account",
       });
 
+      const activePasskeys = await repos.passkeyRepository.findByUserId(userId);
+      if (activePasskeys.some((credential) => credential.vaultUnlockEnabled)) {
+        const error = new Error(
+          "Disable portable vault access for every passkey before deleting this account"
+        );
+        error.name = "ConflictError";
+        throw error;
+      }
+
       await repos.auditRepository.record("account_deletion_requested", userId, {
         endpoint: "/api/account",
         authProvider: user.authProvider,

@@ -50,7 +50,9 @@ vault-only passkey instead of starting another registration.
 7. **Wire `passkeyEnableSignIn`** at `/api/account/passkeys/[id]/enable-sign-in` when users may reuse vault-only credentials for account sign-in.
 8. **Keep one counter authority** — every WebAuthn verifier must compare-and-set the counter on the same `passkey_credentials` row.
 
-The package does **not** own vault envelope tables. It fails closed: account delete will not revoke vault-only or dual-capability credentials.
+The package does **not** own vault envelope tables. Account deletion fails closed with HTTP 409
+while any active credential has `vaultUnlockEnabled`; complete the app's receipt-gated portable
+broker revoke flow first. See [portable-vault-grants.md](./portable-vault-grants.md).
 
 ## Validation checklist
 
@@ -65,6 +67,8 @@ The package does **not** own vault envelope tables. It fails closed: account del
 - [ ] User can add account sign-in passkey when only vault-only passkeys exist (on a different authenticator, or same device when platform allows)
 - [ ] Existing vault-only passkey can be promoted with one exact assertion and no re-registration
 - [ ] PRF output is absent from every account server request
+- [ ] Portable enroll/revoke toggles capability only after a matching single-use broker receipt
+- [ ] Portable unlock receipt is finalized before the app installs the non-extractable UVK
 
 ## Related docs
 

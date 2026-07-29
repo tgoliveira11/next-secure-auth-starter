@@ -24,6 +24,7 @@ const shared = {
     "postgres",
     "bcryptjs",
     "@simplewebauthn/server",
+    "jose",
     "server-only",
     "@tgoliveira/outpost",
   ],

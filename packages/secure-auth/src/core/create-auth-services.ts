@@ -11,6 +11,7 @@ import { createAccountSessionService } from "../modules/sessions/services/accoun
 import { createTwoFactorService } from "../modules/two-factor/services/two-factor-service.js";
 import { createPasskeyLoginService } from "../modules/passkeys/services/passkey-login-service.js";
 import { createPasskeyAccountService } from "../modules/passkeys/services/passkey-account-service.js";
+import { createPasskeyGrantService } from "../modules/passkeys/services/passkey-grant-service.js";
 import { createMagicLinkService } from "../modules/auth/services/magic-link-service.js";
 import { createSecurityNotificationService } from "../modules/security/notifications/security-notification-service.js";
 import { createAuthOptions } from "../modules/auth/lib/auth-options.js";
@@ -94,6 +95,12 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     rateLimit,
     runInTransaction,
   });
+  const passkeyGrantService = createPasskeyGrantService({
+    ctx,
+    repos,
+    rateLimit,
+    runInTransaction,
+  });
   const magicLinkService = createMagicLinkService({
     config,
     ctx,
@@ -137,6 +144,7 @@ export function createAuthServices(config: SecureAuthConfig): SecureAuthServices
     twoFactorService,
     passkeyLoginService,
     passkeyAccountService,
+    passkeyGrantService,
     magicLinkService,
     securityNotificationService,
     adminService,

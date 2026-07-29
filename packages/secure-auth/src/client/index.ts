@@ -11,8 +11,10 @@ export * from "../lib/api-client/client.js";
 export * from "../lib/api-client/parse-response.js";
 export * from "../lib/api-client/passkey-account.js";
 export * from "../lib/api-client/passkey-login.js";
+export * from "../lib/api-client/passkey-portable-vault-grants.js";
 export * from "../lib/api-client/two-factor.js";
 export * from "../lib/api-client/preferences.js";
+export { requestPortableVaultGrant } from "../lib/passkey/request-portable-vault-grant.js";
 
 export * from "../modules/account/lib/account-auth-messages.js";
 export * from "../modules/account/lib/account-deletion.js";
@@ -27,6 +29,17 @@ export {
   type SecureAuthServerWebAuthnResponse,
   type WebAuthnResponseWithClientExtensionResults,
 } from "../modules/passkeys/lib/webauthn-response-privacy.js";
+export type {
+  PortableVaultBrokerReceiptClaimsV1,
+  PortableVaultEphemeralPublicKeyJwk,
+  PortableVaultGrantAction,
+  PortableVaultGrantClaimsV1,
+  PortableVaultGrantFinalizeResponse,
+  PortableVaultGrantOptionsRequest,
+  PortableVaultGrantOptionsResponse,
+  PortableVaultGrantVerifyRequest,
+  PortableVaultGrantVerifyResponse,
+} from "../modules/passkeys/lib/portable-vault-grant-types.js";
 
 export * from "../lib/forms/read-named-form-field.js";
 
