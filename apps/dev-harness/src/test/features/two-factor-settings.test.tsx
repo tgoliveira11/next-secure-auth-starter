@@ -34,7 +34,13 @@ describe("two-factor settings UI", () => {
       expect(screen.getByText("Off")).toBeTruthy();
     });
     expect(screen.getByRole("button", { name: /set up two-factor authentication/i })).toBeTruthy();
-    expect(screen.getByText(/separate from passkey sign-in/i)).toBeTruthy();
+    expect(
+      screen.getByText(
+        /requires a one-time code after signing in with email and password, a passkey, or OAuth/i
+      )
+    ).toBeTruthy();
+    expect(screen.getByText(/separate from vault unlock/i)).toBeTruthy();
+    expect(screen.queryByText(/passkeys.*do not require a separate one-time code/i)).toBeNull();
   });
 
   it("renders setup QR and code input", async () => {
