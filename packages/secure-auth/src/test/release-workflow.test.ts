@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 // @ts-expect-error The release helper is an intentionally uncompiled Node.js module.
 import { bumpVersion, extractUnreleased, inferReleaseBump, prepareRelease, releaseChangelog, resolveReleaseVersion } from "../../../../scripts/prepare-release.mjs";
+// @ts-expect-error The release guard is an intentionally uncompiled Node.js module.
+import { verifyBuiltPackageVersion } from "../../../../scripts/verify-package-version.mjs";
 
 const changelog = `# Changelog
 
@@ -23,6 +25,26 @@ const changelog = `# Changelog
 `;
 
 describe("release preparation", () => {
+  function writeVersionFixture(root: string, manifestVersion: string, runtimeVersion: string) {
+    mkdirSync(path.join(root, "packages/secure-auth/dist"), { recursive: true });
+    writeFileSync(
+      path.join(root, "package.json"),
+      `${JSON.stringify({ version: manifestVersion }, null, 2)}\n`,
+    );
+    writeFileSync(
+      path.join(root, "packages/secure-auth/package.json"),
+      `${JSON.stringify({ version: manifestVersion }, null, 2)}\n`,
+    );
+    writeFileSync(
+      path.join(root, "packages/secure-auth/dist/index.js"),
+      `export const SECURE_AUTH_PACKAGE_VERSION = ${JSON.stringify(runtimeVersion)};\n`,
+    );
+    writeFileSync(
+      path.join(root, "packages/secure-auth/dist/index.cjs"),
+      `exports.SECURE_AUTH_PACKAGE_VERSION = ${JSON.stringify(runtimeVersion)};\n`,
+    );
+  }
+
   it("requires release metadata to reach protected main through a pull request", () => {
     const workflowPath = path.resolve(
       import.meta.dirname,
@@ -35,6 +57,25 @@ describe("release preparation", () => {
     expect(workflow).toContain("steps.release.outputs.changed == 'true'");
     expect(workflow).not.toContain("git push origin HEAD:main");
     expect(workflow).not.toContain("Commit and push release metadata");
+  });
+
+  it("rejects release artifacts whose runtime version differs from the manifest", async () => {
+    const validRoot = mkdtempSync(path.join(tmpdir(), "secure-auth-version-valid-"));
+    const staleRoot = mkdtempSync(path.join(tmpdir(), "secure-auth-version-stale-"));
+    try {
+      writeVersionFixture(validRoot, "0.9.1", "0.9.1");
+      writeVersionFixture(staleRoot, "0.9.1", "0.6.1");
+
+      await expect(verifyBuiltPackageVersion({ root: validRoot })).resolves.toEqual({
+        version: "0.9.1",
+      });
+      await expect(verifyBuiltPackageVersion({ root: staleRoot })).rejects.toThrow(
+        /runtime version disagrees/,
+      );
+    } finally {
+      rmSync(validRoot, { recursive: true, force: true });
+      rmSync(staleRoot, { recursive: true, force: true });
+    }
   });
 
   it("infers SemVer bumps and migrates legacy internal versions", () => {

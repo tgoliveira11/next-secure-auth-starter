@@ -482,10 +482,11 @@ See [consumer-quick-start.md](./consumer-quick-start.md) for complete examples.
 `secureAuth.routes.health.GET` returns:
 
 ```json
-{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "0.1.25" }
+{ "ok": true, "package": "@tgoliveira/secure-auth", "version": "<installed-version>" }
 ```
 
-Version comes from `SECURE_AUTH_PACKAGE_VERSION` — not a hardcoded route string.
+Version comes from `SECURE_AUTH_PACKAGE_VERSION`, which the build embeds directly from
+`packages/secure-auth/package.json`. Consumers must not hardcode or override this value.
 
 ---
 

@@ -1,2 +1,4 @@
-/** Published package version — keep in sync with packages/secure-auth/package.json. */
-export const SECURE_AUTH_PACKAGE_VERSION = "0.6.1" as const;
+import packageMetadata from "../../package.json";
+
+/** Published package version, embedded from the package manifest during the build. */
+export const SECURE_AUTH_PACKAGE_VERSION: string = packageMetadata.version;

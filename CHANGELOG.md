@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Accurate runtime package version** — `SECURE_AUTH_PACKAGE_VERSION` is now embedded from `packages/secure-auth/package.json` during the build instead of relying on a manually synchronized source literal. The package-health route therefore reports the installed release, and validation now fails when either the ESM or CJS runtime export differs from the release manifests.
+
 ## [0.9.0] - 2026-07-29
 
 ### Added

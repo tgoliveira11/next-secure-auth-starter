@@ -69,7 +69,8 @@ The workflow refuses a premature dispatch while release notes are still in `Unre
 [`.github/workflows/publish-secure-auth.yml`](../.github/workflows/publish-secure-auth.yml) (`workflow_dispatch` **only** — no push/tag/release triggers):
 
 1. Confirm the merged metadata puts the workflow in recovery/readiness mode (`prepare-release.mjs` reports `changed=false`, `recovery=true`).
-2. `npm run audit:security` + `npm run validate`.
+2. `npm run audit:security` + `npm run validate`. Validation builds the package and verifies
+   that the public ESM and CJS `SECURE_AUTH_PACKAGE_VERSION` exports match both release manifests.
 3. Build exact publication tarball (`npm pack`).
 4. Reject npm version collisions and inconsistent pre-existing tags.
 5. `npm publish` with provenance (OIDC / Trusted Publishing).
@@ -105,6 +106,11 @@ OIDC Trusted Publisher, environment `npmjs`, and protected-main settings are doc
 ```
 
 Required for npm provenance.
+
+`packages/secure-auth/package.json` is also the only source of truth for the public runtime
+version. Do not add a second version literal to source code. `npm run verify:package-version`
+must run after the package build and fails closed if the root manifest, package manifest, ESM
+bundle, or CJS bundle disagrees.
 
 ## What agents must not do
 
