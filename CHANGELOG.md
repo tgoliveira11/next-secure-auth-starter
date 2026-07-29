@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-29
+
 ### Added
 
 - **Opt-in portable vault broker grants** — `webauthn.portableVaultGrants` adds dedicated, fully-authenticated, UV-required WebAuthn proof routes for ES256 `enroll`, `unlock`, and `revoke` grants. Grants use app-scoped opaque UUID subjects, exact credential/action/request binding, short TTLs, and RFC 7638 ephemeral-key binding for unlock. New client exports run the ceremony and finalize broker completion receipts without introducing a dependency on vault-core. Account passkey list items now also expose their WebAuthn `credentialId` so a verified post-login credential can be correlated with the package database `id` without browser identity hints.
