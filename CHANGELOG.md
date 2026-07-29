@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-29
+
 ### Added
 
 - **Server-composed passkey login extensions** — Optional `webauthn.getLoginAuthenticationExtensions` runs after secure-auth resolves the account and sign-in credential allow-list, allowing consumers to add bounded JSON-safe WebAuthn extension inputs without relying on browser-local account hints or exposing `userId` as separate response metadata.
