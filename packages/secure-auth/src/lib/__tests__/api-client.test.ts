@@ -7,6 +7,7 @@ import { accountAuthApi } from "../api-client/account-auth";
 import { accountSessionsApi } from "../api-client/account-sessions";
 import { passkeyLoginApi } from "../api-client/passkey-login";
 import { passkeyAccountApi } from "../api-client/passkey-account";
+import { passkeyPortableVaultGrantApi } from "../api-client/passkey-portable-vault-grants";
 import { authLoginApi, twoFactorApi } from "../api-client/two-factor";
 
 function mockFetch(body: unknown, status = 200) {
@@ -176,6 +177,50 @@ describe("api client wrappers", () => {
     });
     mockFetch({ success: true });
     await expect(passkeyAccountApi.remove("cred-1")).resolves.toEqual({ success: true });
+  });
+
+  it("portable vault grant API sanitizes PRF material and covers each endpoint", async () => {
+    const fetchMock = vi.fn().mockImplementation(async () =>
+      new Response(JSON.stringify({ requestId: "request-1" }), { status: 200 })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const request = {
+      action: "unlock" as const,
+      credentialDbId: "de305d54-75b4-431b-adb2-eb6b9e546014",
+      envelopeId: "7dd12781-7a93-49bc-87fc-2fc076304ccc",
+      ephemeralPublicKeyJwk: {
+        kty: "EC" as const,
+        crv: "P-256" as const,
+        x: "A".repeat(43),
+        y: "B".repeat(43),
+      },
+    };
+
+    await passkeyPortableVaultGrantApi.options(request);
+    await passkeyPortableVaultGrantApi.verify({
+      requestId: "de305d54-75b4-431b-adb2-eb6b9e546014",
+      action: "unlock",
+      envelopeId: "7dd12781-7a93-49bc-87fc-2fc076304ccc",
+      response: {
+        id: "credential-1",
+        clientExtensionResults: {
+          credProps: { rk: true },
+          prf: { results: { first: "must-not-leave-browser" } },
+        },
+      },
+    });
+    await passkeyPortableVaultGrantApi.finalizeReceipt("signed-receipt");
+
+    const verifyBody = JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string) as {
+      response: { clientExtensionResults: Record<string, unknown> };
+    };
+    expect(verifyBody.response.clientExtensionResults).toEqual({ credProps: { rk: true } });
+    expect(JSON.stringify(verifyBody)).not.toContain("must-not-leave-browser");
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      "/api/account/passkeys/portable-vault-grants/options",
+      "/api/account/passkeys/portable-vault-grants/verify",
+      "/api/account/passkeys/portable-vault-grants/finalize",
+    ]);
   });
 
   it("twoFactorApi and authLoginApi call expected endpoints", async () => {

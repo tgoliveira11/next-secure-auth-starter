@@ -23,9 +23,13 @@ The system must protect:
 - rate-limit identifiers
 - user privacy
 
-Authentication is **account access only**. This package must not implement vault unlock, encrypted letter storage, or product-specific cryptography.
+Authentication is **account access only**. This package does not implement vault key derivation,
+vault unlock, encrypted product storage, broker PUK custody, or product-specific cryptography. Its
+optional portable-vault module is an authorization boundary only: it verifies a new WebAuthn proof,
+signs a scoped broker grant, and verifies the broker's completion receipt.
 
-Passkeys and TOTP are for **account authentication only** — not encryption key derivation or vault unlock.
+Passkeys and TOTP are never encryption-key derivation inputs. Account login and portable vault
+authorization remain separate ceremonies and security domains.
 
 ---
 
@@ -172,10 +176,10 @@ Passkey login follows the same policy: when TOTP 2FA is enabled, passkey verific
 
 ## Passkeys
 
-Passkeys are account authentication only:
+Account passkey login is account authentication only:
 
 - Secure-auth never uses WebAuthn signatures or PRF as encryption keys.
-- Do not introduce vault unlock or trusted-device vault behavior.
+- Secure-auth never receives PUK, PRF output, an ephemeral private key, UVK, or decrypted vault data.
 - WebAuthn challenges are single-use and consumed atomically.
 - Passkey sign-in is a strong primary factor but **does not bypass TOTP** when app-level 2FA is enabled. Users must complete the same TOTP step as credentials/OAuth logins.
 
@@ -199,6 +203,19 @@ that report `0 -> 0` are supported because every accepted assertion still increm
 Consumer-owned vault ceremonies must use a feature-specific, single-use challenge audience. The
 secure-auth `registration` audience remains reserved for account registration and must not be reused
 as a vault enrollment or unlock challenge.
+
+The opt-in `webauthn.portableVaultGrants` module provides that distinct ceremony without importing
+vault-core. It requires a same-origin, fully authenticated account session (TOTP complete), selects
+exactly one credential, requires UV, and compare-and-sets the authoritative counter/revision. Its
+ES256 grant binds `purpose`, `action`, opaque UUID subject, app, credential, UUID request/JTI, and
+short expiry; unlock also binds an envelope UUID and RFC 7638 ephemeral P-256 thumbprint. Login
+never emits this grant.
+
+Enrollment/revocation capability flags change only after an ES256 broker receipt matches the
+session-bound operation, app, subject, action, credential, request, grant JTI, and envelope and is
+atomically consumed. Unlock receipts are consumed as well before the app installs the restored UVK.
+Grant/receipt operation storage contains hashes and metadata only. See
+[portable-vault-grants.md](./portable-vault-grants.md).
 
 See [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
 
@@ -352,7 +369,7 @@ Branches   >= 90%
 
 Coverage thresholds must not be lowered without explicit architectural review.
 
-Security-sensitive flows that require tests: authentication (password, OAuth, passkey), token reuse/expiry, TOTP, passkey challenges, **passkey capability boundaries** (account list/delete vs vault-only credentials), session revocation, account deletion, logging redaction, and module boundary violations.
+Security-sensitive flows that require tests: authentication (password, OAuth, passkey), token reuse/expiry, TOTP, passkey challenges, portable vault grant/receipt replay and scope binding, **passkey capability boundaries** (account list/delete vs vault-only credentials), session revocation, account deletion, logging redaction, and module boundary violations.
 
 ### Passkey capability boundaries
 
@@ -364,6 +381,7 @@ Account authentication and other WebAuthn uses (for example vault unlock in down
 - Account **`POST /api/account/passkeys/register`** creates new credentials with `sign_in_enabled: true` and `vault_unlock_enabled: false` only — it does not upgrade vault-only rows.
 - Account **`POST /api/account/passkeys/:id/enable-sign-in`** explicitly upgrades a vault-only row only after a fully authenticated session, exact-credential UV-required assertion, separate challenge audience, and counter/revision compare-and-set. Package UI exposure is explicit opt-in and defaults off.
 - Dual-capability credentials (`sign_in_enabled` + `vault_unlock_enabled`) are not removable from account settings until the owning app disables vault unlock.
+- Account deletion is rejected while any active credential still has `vault_unlock_enabled`; complete receipt-gated broker revocation first.
 
 **Platform limitation:** Some authenticators do not allow a second passkey per RP on one device. Use
 the explicit capability-upgrade flow to reuse the existing vault-only credential; do not attempt a

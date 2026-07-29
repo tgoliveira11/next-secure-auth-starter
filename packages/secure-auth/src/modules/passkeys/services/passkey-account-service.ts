@@ -51,6 +51,7 @@ export function createPasskeyAccountService(deps: PasskeyAccountServiceDeps) {
         toAccountPasskeyListItem(
           {
             id: cred.id,
+            credentialId: cred.credentialId,
             friendlyName: cred.friendlyName,
             createdAt: cred.createdAt,
             lastUsedAt: cred.lastUsedAt,

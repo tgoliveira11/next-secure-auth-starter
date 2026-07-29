@@ -55,10 +55,18 @@ Keep app tables in a separate schema namespace or prefixed table names to avoid 
 | `0.5.x+` | Semver for API; major bump for breaking DB |
 | `0.6.x` | `user_preferences` table in `0003_user_preferences.sql` (opt-in via `preferences.enabled`) |
 | Next minor | `passkey_credentials.counter_revision` in `0004_outgoing_william_stryker.sql`; existing rows are safely backfilled to `0` before the new package is deployed |
+| Portable vault grants | `webauthn_broker_operations` in `0005_nasty_slipstream.sql`; additive and unused while the feature gate is disabled |
 
 Apply `0004` before deploying the package version that reads `counter_revision`. The additive,
 non-null column has a default of `0`; no credential is revoked and no existing counter is changed.
 After deployment, every successful assertion atomically increments the revision.
+
+Apply `0005_nasty_slipstream.sql` before setting
+`webauthn.portableVaultGrants.enabled: true`. It creates only short-lived authorization-operation
+state and foreign keys to existing users, account sessions, and passkey credentials. No existing
+credential is changed, and no PUK, PRF output, UVK, or broker envelope payload is migrated into
+secure-auth. Deploy the migration first, configure isolated broker/grant keys second, and enable the
+feature last. See [portable-vault-grants.md](./portable-vault-grants.md).
 
 ## Breaking DB changes
 

@@ -1,6 +1,7 @@
 import type { SecureAuthConfig } from "../core/types.js";
 import { resolvePasswordPolicyConfig } from "../core/config-accessors.js";
 import { validateCaptchaConfig } from "../modules/captcha/index.js";
+import { validatePortableVaultGrantsConfig } from "../modules/passkeys/lib/portable-vault-grant-crypto.js";
 import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
 import {
   buildMiddlewareConfig,
@@ -18,6 +19,7 @@ export type SecureAuth = ReturnType<typeof createSecureAuth>;
  */
 export function createSecureAuth(config: SecureAuthConfig) {
   validateCaptchaConfig(config);
+  validatePortableVaultGrantsConfig(config);
   const passwordPolicy: PasswordPolicyConfig = resolvePasswordPolicyConfig(config);
   const uiConfig = buildPublicUIConfig(config);
   const middlewareConfig: SecureAuthMiddlewareConfig = buildMiddlewareConfig(config, uiConfig);

@@ -50,6 +50,25 @@ describe("published SQL migrations", () => {
     expect(sql).toContain("DEFAULT 0 NOT NULL");
   });
 
+  it("0005 migration adds session-bound, replay-protected portable vault operations", () => {
+    const sql = readFileSync(
+      join(MIGRATIONS_DIR, "0005_nasty_slipstream.sql"),
+      "utf-8"
+    );
+
+    expect(sql).toContain('CREATE TABLE "webauthn_broker_operations"');
+    expect(sql).toContain('"account_session_id" uuid NOT NULL');
+    expect(sql).toContain('"challenge_hash" text NOT NULL');
+    expect(sql).toContain('"grant_jti_hash" text');
+    expect(sql).toContain('"receipt_jti_hash" text');
+    expect(sql).toContain('"envelope_id_hash" text');
+    expect(sql).toContain('CONSTRAINT "webauthn_broker_operations_purpose_check"');
+    expect(sql).toContain('CONSTRAINT "webauthn_broker_operations_action_scope_check"');
+    expect(sql).toContain("'portable_vault'");
+    expect(sql).not.toContain("puk");
+    expect(sql).not.toContain("private_key");
+  });
+
   it("has a snapshot for every journal entry", () => {
     const journal = JSON.parse(readFileSync(join(META_DIR, "_journal.json"), "utf-8")) as {
       entries: Array<{ idx: number }>;

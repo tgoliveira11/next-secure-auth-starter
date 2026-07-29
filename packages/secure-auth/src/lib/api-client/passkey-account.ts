@@ -12,6 +12,7 @@ export type AccountPasskeyCapabilities = {
 
 export type AccountPasskey = {
   id: string;
+  credentialId: string;
   friendlyName: string;
   createdAt: string;
   lastUsedAt: string | null;

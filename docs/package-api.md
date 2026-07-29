@@ -69,6 +69,9 @@ Wire each handler in your App Router under the consumer URL path shown below. Ca
 | `passkeyRegister` | POST | `/api/account/passkeys/register` | Yes |
 | `passkeyById` | DELETE | `/api/account/passkeys/[id]` | Yes |
 | `passkeyEnableSignIn` | POST | `/api/account/passkeys/[id]/enable-sign-in` | Yes |
+| `passkeyPortableVaultGrantOptions` | POST | `/api/account/passkeys/portable-vault-grants/options` | Yes (opt-in, full session) |
+| `passkeyPortableVaultGrantVerify` | POST | `/api/account/passkeys/portable-vault-grants/verify` | Yes (opt-in, full session) |
+| `passkeyPortableVaultGrantFinalize` | POST | `/api/account/passkeys/portable-vault-grants/finalize` | Yes (opt-in, full session) |
 | `twoFactorStatus` | GET | `/api/account/2fa/status` | Yes |
 | `twoFactorSetupStart` | POST | `/api/account/2fa/setup/start` | Yes |
 | `twoFactorSetupVerify` | POST | `/api/account/2fa/setup/verify` | Yes |
@@ -163,6 +166,11 @@ Exports include: `SecureAuthConfig`, `SecureAuthDb`, `SecureAuthServices`,
 `PasskeyLoginAuthenticationExtensionsContext`, `PasskeyLoginAuthenticationExtensions` (types),
 `WebAuthnOriginAliasPolicy`, `EmailProvider`, `authSchema`, `SECURE_AUTH_PACKAGE_VERSION`,
 `safeLogger`.
+
+Portable broker exports include configuration/JWK types, grant and receipt claim types, request and
+response unions, and the stable `PORTABLE_VAULT_GRANT_PURPOSE` /
+`PORTABLE_VAULT_GRANT_VERSION` constants. See
+[portable-vault-grants.md](./portable-vault-grants.md) for the exact protocol.
 
 `SecureAuthConfig.webauthn.getLoginAuthenticationExtensions` is an optional server-only callback.
 After account and sign-in credentials are resolved, it receives `{ userId, credentialIds }` and
@@ -502,6 +510,7 @@ See [Route map](#route-map) for handler keys and paths.
 {
   passkeys: Array<{
     id: string;
+    credentialId: string;
     friendlyName: string;
     signInEnabled: boolean;
     vaultUnlockEnabled: boolean;
@@ -534,6 +543,17 @@ the explicit capability upgrade for an existing vault-only credential instead of
 
 See [consumer-passkey-capability-boundaries.md](./consumer-passkey-capability-boundaries.md) and
 [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
+
+### Portable vault grants
+
+When `webauthn.portableVaultGrants.enabled` is `true`, the three portable-vault route keys issue and
+finalize session-bound ES256 broker authorization. Browser consumers use
+`requestPortableVaultGrant` and `passkeyPortableVaultGrantApi` from
+`@tgoliveira/secure-auth/client` (also re-exported where applicable from `react/client`). This is a
+dedicated WebAuthn assertion after complete account authentication; neither login nor registration
+silently emits a vault grant. Apply `0005_nasty_slipstream.sql` first. Full configuration,
+action-specific request types, broker claims, retry rules, and examples are in
+[portable-vault-grants.md](./portable-vault-grants.md).
 
 ---
 

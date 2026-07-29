@@ -51,6 +51,7 @@ describe("passkey capabilities", () => {
     const item = toAccountPasskeyListItem(
       {
         id: "pk-vault",
+        credentialId: "credential-vault",
         friendlyName: "Vault passkey",
         createdAt: new Date("2026-01-01T00:00:00.000Z"),
         lastUsedAt: null,
@@ -61,6 +62,7 @@ describe("passkey capabilities", () => {
     );
 
     expect(item.removableFromAccountSettings).toBe(false);
+    expect(item.credentialId).toBe("credential-vault");
     expect(item.capabilities).toEqual({ signIn: false, vaultUnlock: true });
     expect(item.label).toBe("Vault passkey");
     expect(item.description).not.toContain("Sign in without a password");

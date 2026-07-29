@@ -56,6 +56,7 @@ Required top-level fields when calling `createSecureAuth`:
 | `webauthn.origin` | `string` | WebAuthn origin (primary) |
 | `webauthn.origins` | `string[]` | optional | Additional explicitly allowed origins (e.g. subdomains) |
 | `webauthn.originAliasPolicy` | `"apex-www" \| "none"` | `"apex-www"` | Automatic origin aliases; use `"none"` for exact canonical-origin enforcement |
+| `webauthn.portableVaultGrants.enabled` | `boolean` | `false` | Dedicated ES256 broker-grant ceremony for portable vault actions |
 | `captcha.enabled` | `boolean` | `false` | Master switch for Turnstile CAPTCHA |
 | `captcha.provider` | `"turnstile"` | `turnstile` | CAPTCHA provider (Turnstile only in this release) |
 | `captcha.siteKey` | `string` | — | Turnstile site key (public; exposed via `uiConfig` when enabled) |
@@ -196,6 +197,28 @@ variable. `"apex-www"` preserves legacy apex/www and localhost/127.0.0.1 aliases
 only `webauthn.origin` (or `app.baseUrl` when the primary origin is invalid) plus each exact entry in
 `webauthn.origins`. Production apps with a canonical host should set `"none"` and redirect every
 other host before authentication.
+
+Portable vault broker grants are configured in TypeScript from app-owned environment values. The
+package never reads env directly:
+
+```typescript
+portableVaultGrants: {
+  enabled: true,
+  issuer: "https://www.example.com",
+  appId: "example",
+  audience: "https://vault-broker.example.com",
+  ttlSeconds: 60,
+  opaqueSubjectKey: process.env.PORTABLE_VAULT_SUBJECT_KEY!,
+  grantPrivateJwkB64: process.env.PORTABLE_VAULT_GRANT_PRIVATE_JWK_B64!,
+  brokerReceiptIssuer: "https://vault-broker.example.com",
+  brokerReceiptPublicJwksB64:
+    process.env.PORTABLE_VAULT_BROKER_RECEIPT_PUBLIC_JWKS_B64!,
+},
+```
+
+Both JWK values are base64url-encoded JSON (one private grant JWK and an array of public receipt
+JWKs). Production and Preview require distinct keys and broker state. See
+[portable-vault-grants.md](./portable-vault-grants.md).
 
 ### CAPTCHA (Cloudflare Turnstile)
 

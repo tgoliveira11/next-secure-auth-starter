@@ -4,6 +4,7 @@ import { createAccountTokenRepository } from "../modules/account/repositories/ac
 import { createAccountSessionRepository } from "../modules/sessions/repositories/account-session-repository.js";
 import { createTwoFactorRepository } from "../modules/two-factor/repositories/two-factor-repository.js";
 import { createPasskeyRepository } from "../modules/passkeys/repositories/passkey-repository.js";
+import { createPasskeyGrantRepository } from "../modules/passkeys/repositories/passkey-grant-repository.js";
 import { createAuditRepository } from "../modules/audit/repositories/audit-repository.js";
 import { createAdminUserRepository } from "../modules/admin/repositories/admin-user-repository.js";
 import { createLockoutRepository } from "../modules/admin/repositories/lockout-repository.js";
@@ -19,6 +20,7 @@ export function createRepositories({ db }: { db: SecureAuthDb }) {
     accountSessionRepository: createAccountSessionRepository(db),
     twoFactorRepository: createTwoFactorRepository(db),
     passkeyRepository: createPasskeyRepository(db),
+    passkeyGrantRepository: createPasskeyGrantRepository(db),
     auditRepository: createAuditRepository(db),
     adminUserRepository: createAdminUserRepository(db),
     lockoutRepository: createLockoutRepository(db),

@@ -159,6 +159,9 @@ npm run db:migrate
 For the shared-passkey contract, confirm `0004_outgoing_william_stryker.sql` has run before deploying
 the package. It safely initializes existing credentials with `counter_revision = 0`.
 
+Before enabling portable vault broker grants, also apply `0005_nasty_slipstream.sql`. The feature
+remains inert when `webauthn.portableVaultGrants` is absent or disabled.
+
 See [migrations.md](./migrations.md) for monorepo vs downstream details.
 
 ---
@@ -327,6 +330,13 @@ vault-only credentials are protected from deletion and can be explicitly enabled
 If an independent browser-only feature reuses the same credential, use the package preparation and
 verified callbacks and keep all PRF results out of server payloads. See
 [passkey-credential-interoperability.md](./passkey-credential-interoperability.md).
+
+For deterministic cross-device vault access, use the opt-in portable broker grant module instead of
+assuming WebAuthn PRF output syncs. Wire `passkeyPortableVaultGrantOptions`,
+`passkeyPortableVaultGrantVerify`, and `passkeyPortableVaultGrantFinalize`; then use
+`requestPortableVaultGrant` and `passkeyPortableVaultGrantApi` from the client entry. Configuration,
+receipt-gated enrollment/unlock/revoke, and recovery from interrupted operations are documented in
+[portable-vault-grants.md](./portable-vault-grants.md).
 
 For an isolated PWA or a new browser, do not depend on `localStorage` or a copied login hint to add
 extension input. Configure the optional server-only

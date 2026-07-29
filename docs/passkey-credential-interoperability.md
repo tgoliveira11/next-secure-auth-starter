@@ -7,6 +7,11 @@ additional capability remain separate security domains.
 This contract is opt-in. Standalone secure-auth consumers do not request PRF and behave exactly as
 before.
 
+This document's PRF hooks are a legacy/browser-local compatibility path. WebAuthn PRF output is not
+a portable cross-device key contract even when the credential itself syncs. For new deterministic
+cross-device vault unlock, use [portable-vault-grants.md](./portable-vault-grants.md). The portable
+flow reuses the credential but always runs a separate UV assertion after complete account login.
+
 ## Security invariants
 
 - Both ceremonies must use the same effective WebAuthn RP ID. Different registrable domains cannot
@@ -36,6 +41,7 @@ The following exports are available from `@tgoliveira/secure-auth/react/client`:
 - `signInWithPasskey`
 - `PasskeyLoginHooks`
 - `enableAccountPasskeySignIn`
+- `requestPortableVaultGrant`
 
 Ready-to-use pages accept the same hooks:
 
@@ -152,10 +158,15 @@ verification, so a future extension request cannot accidentally bypass the lifec
 
 ### Account sign-in to browser-only capability
 
-This direction stays consumer-owned. Resolve the account credential by its database id on the
+For a legacy PRF envelope, this direction stays consumer-owned. Resolve the account credential by its database id on the
 server, generate an exact feature-specific authentication challenge, apply the browser extension
 locally, verify the assertion once against the shared credential row, and compare-and-set the same
 counter. Persist the new envelope and `vault_unlock_enabled = true` atomically.
+
+For the portable broker architecture, do not build another verifier. Enable
+`webauthn.portableVaultGrants`, wire its three package routes, and use
+`requestPortableVaultGrant`. Secure-auth remains the single verifier/counter authority while
+vault-core and the broker retain their independent cryptographic and persistence boundaries.
 
 ## Login plus local unlock
 

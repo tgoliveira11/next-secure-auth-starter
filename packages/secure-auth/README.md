@@ -143,6 +143,12 @@ replace the challenge, RP ID, user-verification policy, or credentials. Pair it 
 `PasskeyLoginHooks.prepareOptions` and the typed `onFullyAuthenticated` result. See
 [passkey-credential-interoperability.md](../../docs/passkey-credential-interoperability.md).
 
+Deterministic cross-device vault unlock should use the separate, opt-in portable broker grant
+module. It runs a dedicated UV-required assertion after full account authentication, signs a
+short-lived ES256 grant, and verifies/consumes broker completion receipts without importing
+vault-core or receiving PUK/PRF/UVK material. See
+[portable-vault-grants.md](../../docs/portable-vault-grants.md).
+
 ## Route handlers
 
 Thin App Router wrappers in the consuming app:
@@ -213,6 +219,8 @@ before serialization and rejects them at every account verification route. See
 [consumer-passkey-capability-boundaries.md](../../docs/consumer-passkey-capability-boundaries.md),
 [passkey-registration-capability-boundary-audit.md](../../docs/passkey-registration-capability-boundary-audit.md),
 and [passkey-credential-interoperability.md](../../docs/passkey-credential-interoperability.md).
+Portable broker adoption and migration `0005_nasty_slipstream.sql` are documented in
+[portable-vault-grants.md](../../docs/portable-vault-grants.md).
 
 ## CAPTCHA (Cloudflare Turnstile)
 
