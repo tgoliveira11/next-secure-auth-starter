@@ -232,7 +232,7 @@ When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.
 | Export | Purpose |
 | --- | --- |
 | `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
-| `useSecureAuthUi()` | Read provider config in package pages or custom components |
+| `useSecureAuthUi()` | Read provider config in package pages or custom components. Also exported from `@tgoliveira/secure-auth/react/client` for plain client components that must not pull the page bundle |
 | `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position`, `auth.redirectAuthenticatedFromGuestPages`, and optional `oauthProviderIds` and `login.twoStep` |
 | `OAuthProviderId` | Public provider ID union: `google \| apple \| github \| azure-ad` |
 

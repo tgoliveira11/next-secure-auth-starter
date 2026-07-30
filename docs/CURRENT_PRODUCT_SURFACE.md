@@ -166,6 +166,7 @@ Level 3 hints, with required UV and hybrid fallback preserved.
 | `useUserPreferences`, `useUserPreference` | shipped (requires `preferences.enabled`) |
 | `mergeGuestPreferences`, `useMergeGuestPreferences` | shipped |
 | `usePreferencesEnabled` | shipped |
+| `useSecureAuthUi`, `resolveAuthPaths`, `DEFAULT_AUTH_PATHS` | shipped — re-exported from `/react` so client components can read UI config without the page bundle |
 | `registerAccountPasskey`, `AccountPasskeyRegistrationHooks` | shipped — optional browser composition |
 | `signInWithPasskey`, `PasskeyLoginHooks` | shipped — server-composed browser options plus typed fully-authenticated integration result |
 | `PasskeyLoginIntegrationCompletion`, `PasskeyLoginIntegrationResult` | shipped — generic completed/action-required/failed post-login contract |

@@ -107,6 +107,18 @@ describe("consumer entrypoint compatibility (built package exports)", () => {
     });
   }
 
+  it("lets plain client components read UI config without the page bundle", async () => {
+    const mod = await import("@tgoliveira/secure-auth/react/client");
+
+    expect(mod.useSecureAuthUi).toBeTypeOf("function");
+    expect(mod.resolveAuthPaths).toBeTypeOf("function");
+    expect(mod.DEFAULT_AUTH_PATHS.afterLogout).toBe("/");
+
+    // The point of the re-export: `/react` pulls next/link, `/react/client` must not.
+    const clientBundle = readFileSync(path.join(distRoot, "react/client.js"), "utf8");
+    expect(clientBundle).not.toContain("next/link");
+  });
+
   it("exports auth schema tables from drizzle/schema via require", () => {
     const mod = pkgRequire("@tgoliveira/secure-auth/drizzle/schema");
     expect(mod.users).toBeDefined();

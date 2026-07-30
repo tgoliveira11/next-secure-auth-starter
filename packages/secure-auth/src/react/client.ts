@@ -1,6 +1,18 @@
 "use client";
 
 export { ConfirmDialog } from "../modules/ui/primitives/confirm-dialog";
+/**
+ * Also exported from `@tgoliveira/secure-auth/react`. Re-exported here so a plain client
+ * component (a sign-out button, a settings panel) can read configured paths and policy
+ * without pulling in the page bundle and its `next/link` dependency.
+ */
+export { useSecureAuthUi } from "../modules/ui/secure-auth-ui-provider.js";
+export type { SecureAuthUIPublicConfig } from "../core/ui-config.js";
+export {
+  DEFAULT_AUTH_PATHS,
+  resolveAuthPaths,
+  type AuthPaths,
+} from "../modules/ui/pages/types.js";
 export { usePasswordManagerFormSubmit } from "../lib/forms/use-password-manager-form";
 export { defaultSignOutAccount } from "../lib/sign-out-account";
 export { signOutWithRedirect } from "../lib/sign-out-with-redirect";

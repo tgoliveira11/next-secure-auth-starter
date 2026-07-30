@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **UI config hook on the client entry** — `@tgoliveira/secure-auth/react/client` now re-exports `useSecureAuthUi`, `resolveAuthPaths`, `DEFAULT_AUTH_PATHS`, and the `SecureAuthUIPublicConfig` / `AuthPaths` types. Plain client components (sign-out buttons, settings panels) can read configured paths without importing the page bundle and its `next/link` dependency.
+
 ## [0.11.0] - 2026-07-30
 
 ### Added
