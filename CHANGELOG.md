@@ -6,6 +6,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-07-30
+
 ### Added
 
 - **Two-step login page** — `ui.login.twoStep` (or the `twoStep` prop on `LoginPage`) splits `/login` into an identify step (email, forgot password, magic link, OAuth) and an authenticate step (password, forgot password, captcha, passkey). The step change is client-side only: no request is made between steps, so the page cannot be used to enumerate accounts, and the submitted payload, routes, cookies, captcha, and two-factor flow are unchanged. A `<noscript>` fallback keeps the full credentials form usable without JavaScript. New overridable messages: `loginContinueLabel`, `loginChangeEmailLabel`, `loginPasswordStepDescription`, `forgotPasswordLinkLabel`.
