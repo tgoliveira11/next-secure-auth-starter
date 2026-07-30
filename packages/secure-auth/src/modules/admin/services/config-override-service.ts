@@ -10,6 +10,7 @@ const OVERRIDABLE_KEYS = new Set([
   "profile.enabled",
   "preferences.enabled",
   "apiKeys.enabled",
+  "ui.login.twoStep",
 ]);
 
 /** Keys that must not be weakened via the admin panel at runtime (env/deployment only). */

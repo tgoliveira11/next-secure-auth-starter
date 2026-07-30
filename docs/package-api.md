@@ -209,7 +209,7 @@ Server-safe primitives (Button, Card, Input, …) do not require `"use client"`.
 
 | Export | Route (defaults) | Notes |
 | --- | --- | --- |
-| `LoginPage` | `/login` | Email/password, passkey, OAuth; passkey + TOTP when 2FA enabled |
+| `LoginPage` | `/login` | Email/password, passkey, OAuth; passkey + TOTP when 2FA enabled. `twoStep` prop (or `ui.login.twoStep`) splits it into email-first / password-second |
 | `RegisterPage` | `/register` | Optional `passwordPolicy` prop |
 | `ForgotPasswordPage` | `/forgot-password` | |
 | `ResetPasswordPage` | `/reset-password` | Reads `?token=` |
@@ -233,7 +233,7 @@ When wrapped in `SecureAuthUIProvider`, pages inherit defaults from `secureAuth.
 | --- | --- |
 | `SecureAuthUIProvider` | Client context for page defaults from `secureAuth.uiConfig` |
 | `useSecureAuthUi()` | Read provider config in package pages or custom components |
-| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position`, `auth.redirectAuthenticatedFromGuestPages`, and optional `oauthProviderIds` |
+| `SecureAuthUIPublicConfig` | Type for serializable UI config (no secrets); includes `passwordStrength.position`, `auth.redirectAuthenticatedFromGuestPages`, and optional `oauthProviderIds` and `login.twoStep` |
 | `OAuthProviderId` | Public provider ID union: `google \| apple \| github \| azure-ad` |
 
 Guest-only pages redirect fully authenticated users to `uiConfig.auth.authenticatedRedirectPath` by default. Opt out globally via `auth.redirectAuthenticatedFromGuestPages: false` or per page with `redirectIfAuthenticated={false}`. See [consumer-authenticated-redirect-migration.md](./consumer-authenticated-redirect-migration.md).
@@ -472,6 +472,7 @@ Returns:
 | `uiConfig` | Serializable UI defaults for `SecureAuthUIProvider` |
 | `passwordPolicy` | Resolved effective password policy (same as `uiConfig.passwordPolicy`) |
 | `getPublicUIConfig()` | Same as `uiConfig` |
+| `getResolvedUIConfig()` | `Promise<SecureAuthUIPublicConfig>` — `uiConfig` with admin panel overrides applied (`ui.login.twoStep`, `passwordPolicy.minLength`, `preferences.enabled`). Reads the override store, so the calling layout becomes dynamic; falls back to `uiConfig` when the store is unavailable |
 | `getServices()` | Advanced; prefer `routes.*` |
 | `config` | Original `SecureAuthConfig` |
 

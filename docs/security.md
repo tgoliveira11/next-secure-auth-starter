@@ -118,6 +118,13 @@ Verification, reset, and login tokens must be:
 
 API responses must not leak whether an email address is registered (no account enumeration).
 
+The two-step login layout (`ui.login.twoStep`) is bound by the same rule: the transition from the
+email step to the password step happens entirely in the browser. No endpoint is called to check
+whether the account exists, whether it has a password, or which sign-in methods it has, so the
+layout adds no enumeration oracle. Any future "which methods does this account have?" lookup would
+be one, and must not be added to this flow. The entered email is kept in `sessionStorage` only, so a
+failed sign-in can return to the password step — it is never placed in the URL.
+
 Password reset tokens must not be validated via a separate oracle endpoint; consumers submit the token only when resetting the password.
 
 Magic-link emails link to a UI page (`/login/magic-link` by default) that POSTs the token to the API. The verify API does not accept GET requests with tokens in the query string.

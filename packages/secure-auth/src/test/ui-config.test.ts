@@ -94,6 +94,22 @@ describe("buildPublicUIConfig", () => {
     expect(JSON.stringify(ui)).not.toContain("secret-key");
   });
 
+  it("defaults afterLogout to the app home when the config omits it", () => {
+    const config = buildTestSecureAuthConfig();
+    delete (config.auth as { afterLogoutPath?: string }).afterLogoutPath;
+
+    expect(buildPublicUIConfig(config).paths.afterLogout).toBe("/");
+  });
+
+  it("defaults the login layout to a single step and honors ui.login.twoStep", () => {
+    expect(buildPublicUIConfig(buildTestSecureAuthConfig()).login).toEqual({ twoStep: false });
+
+    const twoStep = buildPublicUIConfig(
+      buildTestSecureAuthConfig({ ui: { login: { twoStep: true } } })
+    );
+    expect(twoStep.login).toEqual({ twoStep: true });
+  });
+
   it("maps custom afterLogoutPath from createSecureAuth auth config", () => {
     const ui = buildPublicUIConfig(
       buildTestSecureAuthConfig({

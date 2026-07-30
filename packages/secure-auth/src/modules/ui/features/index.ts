@@ -1,4 +1,6 @@
 export * from "./auth/credentials-login-form.js";
+export * from "./auth/login-form-fields.js";
+export * from "./auth/two-step-login-panel.js";
 export * from "./auth/credentials-two-factor-form.js";
 export * from "./auth/oauth-two-factor-form.js";
 export * from "./auth/oauth-sign-in-error.js";

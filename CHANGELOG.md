@@ -6,6 +6,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Two-step login page** — `ui.login.twoStep` (or the `twoStep` prop on `LoginPage`) splits `/login` into an identify step (email, forgot password, magic link, OAuth) and an authenticate step (password, forgot password, captcha, passkey). The step change is client-side only: no request is made between steps, so the page cannot be used to enumerate accounts, and the submitted payload, routes, cookies, captcha, and two-factor flow are unchanged. A `<noscript>` fallback keeps the full credentials form usable without JavaScript. New overridable messages: `loginContinueLabel`, `loginChangeEmailLabel`, `loginPasswordStepDescription`, `forgotPasswordLinkLabel`.
+- **Runtime UI config overrides** — `ui.login.twoStep` is admin-overridable, and the new `secureAuth.getResolvedUIConfig()` projects admin overrides (`ui.login.twoStep`, `passwordPolicy.minLength`, `preferences.enabled`) onto the serializable UI config. It falls back to the static config when the override store is unavailable.
+- **`LoginPasskeySection` composition props** — `showSocialSignIn` (default `true`, unchanged behavior) and `emailKnown` let the section be reused when OAuth is rendered elsewhere.
+
+### Changed
+
+- **Sign-out lands on the app home by default** — `auth.afterLogoutPath` is now optional and falls back to `/` instead of requiring every consumer to pass a value. Apps that want to land on `/login` must set it explicitly.
+- **`LoginPage` honors `forgotPasswordLinkLabel`** — the prop was previously accepted but not applied.
+
+### Fixed
+
+- **Partial path config no longer blanks defaults** — `resolveAuthPaths()` and `buildPublicUIConfig()` ignore `undefined` entries, so omitting a path in `ui.paths` keeps the package default instead of resolving to `undefined`.
+
 ## [0.10.2] - 2026-07-29
 
 ### Fixed

@@ -193,7 +193,8 @@ export const secureAuth = createSecureAuth({
   },
   auth: {
     afterLoginPath: "/dashboard",
-    afterLogoutPath: "/login",
+    // Defaults to "/" (app home) when omitted.
+    afterLogoutPath: "/",
     requireEmailVerificationBeforeSignIn: false,
     nextAuthSecret: process.env.NEXTAUTH_SECRET!,
     twoFactorEncryptionKey: process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY!,

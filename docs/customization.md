@@ -87,6 +87,38 @@ export default function Page() {
 }
 ```
 
+### Two-step login page
+
+Set `ui.login.twoStep: true` (or `AUTH_LOGIN_TWO_STEP=true` in your env mapper) to split `/login`
+into two steps:
+
+| Step | Shows |
+| --- | --- |
+| 1 — identify | Email field, **Continue**, forgot password, magic link (when enabled), OAuth providers |
+| 2 — authenticate | Email (read-only, with "Use a different email"), password, forgot password, captcha, submit, passkey |
+
+```typescript
+createSecureAuth({
+  ui: { login: { twoStep: true } },
+});
+```
+
+Per page:
+
+```tsx
+<LoginPage twoStep />
+```
+
+The step change is client-side only — the page never asks the server whether an email exists, so it
+cannot be used to enumerate accounts. The POST payload and every downstream route are unchanged, and
+a `<noscript>` fallback keeps the single-step credentials form usable without JavaScript.
+
+Copy is overridable through `ui.messages`: `loginContinueLabel`, `loginChangeEmailLabel`,
+`loginPasswordStepDescription`, `forgotPasswordLinkLabel`.
+
+The same key is admin-overridable at runtime. Feed the provider from
+`await secureAuth.getResolvedUIConfig()` to pick up admin panel changes.
+
 ### Authenticated-user redirects (guest-only pages)
 
 By default (`0.1.20+`), fully authenticated users are redirected away from `/login`, `/register`, and `/forgot-password` to `authenticatedRedirectPath` (resolved from `auth.authenticatedRedirectPath` → `auth.afterLoginPath` → `ui.paths.afterLogin` → `"/dashboard"`).

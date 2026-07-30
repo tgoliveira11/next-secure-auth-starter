@@ -14,6 +14,7 @@ import {
   useUiAppName,
   useUiAppSlug,
   useUiMessage,
+  useTwoStepLogin,
   useUiPaths,
   useUiPasswordPolicy,
 } from "../use-page-ui";
@@ -91,6 +92,30 @@ describe("use-page-ui hooks", () => {
       { wrapper: wrapper(uiConfig()) }
     );
     expect(provider.current).toBe("Provider login");
+  });
+
+  it("useTwoStepLogin prefers prop, then provider, then off by default", () => {
+    const { result: prop } = renderHook(() => useTwoStepLogin(false), {
+      wrapper: wrapper(uiConfig({ login: { twoStep: true } })),
+    });
+    expect(prop.current).toBe(false);
+
+    const { result: provider } = renderHook(() => useTwoStepLogin(), {
+      wrapper: wrapper(uiConfig({ login: { twoStep: true } })),
+    });
+    expect(provider.current).toBe(true);
+
+    const { result: fallback } = renderHook(() => useTwoStepLogin(), {
+      wrapper: wrapper(null),
+    });
+    expect(fallback.current).toBe(false);
+  });
+
+  it("useUiPaths keeps defaults when the provider omits a path", () => {
+    const { result } = renderHook(() => useUiPaths(), {
+      wrapper: wrapper(uiConfig({ paths: { ...DEFAULT_AUTH_PATHS, home: undefined as never } })),
+    });
+    expect(result.current.home).toBe("/");
   });
 
   it("useUiPaths merges provider paths with overrides", () => {

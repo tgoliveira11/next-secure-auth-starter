@@ -184,6 +184,52 @@ describe("@tgoliveira/secure-auth/react page exports", () => {
     expect(screen.getByRole("heading", { name: /explicit title/i })).toBeTruthy();
   });
 
+  it("LoginPage renders the two-step layout when the provider enables it", () => {
+    const uiConfig: SecureAuthUIPublicConfig = {
+      appSlug: "provider-app",
+      appName: "Provider App",
+      paths: DEFAULT_AUTH_PATHS,
+      messages: {},
+      passwordPolicy: {
+        enforcement: "warn",
+        minLength: 12,
+        requireUppercase: false,
+        requireLowercase: false,
+        requireNumber: false,
+        requireSymbol: false,
+        blockCommonPasswords: true,
+        minScore: 2,
+      },
+      passwordStrength: { position: "above" },
+      auth: DEFAULT_TEST_PUBLIC_AUTH,
+      sessionPolicy: {
+        singleActiveSession: false,
+        revocationPollIntervalSeconds: 0,
+      },
+      login: { twoStep: true },
+    };
+
+    const { unmount } = render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <LoginPage />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "Continue" })).toBeTruthy();
+    expect(document.getElementById("login-password-block")?.hasAttribute("hidden")).toBe(true);
+    unmount();
+
+    // An explicit prop still wins over the provider.
+    render(
+      <SecureAuthUIProvider config={uiConfig}>
+        <LoginPage twoStep={false} />
+      </SecureAuthUIProvider>
+    );
+
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
+    expect(screen.getByLabelText("Password")).toBeTruthy();
+  });
+
   it("RegisterPage renders password strength feedback above the field by default", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(

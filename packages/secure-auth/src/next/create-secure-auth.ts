@@ -2,7 +2,11 @@ import type { SecureAuthConfig } from "../core/types.js";
 import { resolvePasswordPolicyConfig } from "../core/config-accessors.js";
 import { validateCaptchaConfig } from "../modules/captcha/index.js";
 import { validatePortableVaultGrantsConfig } from "../modules/passkeys/lib/portable-vault-grant-crypto.js";
-import { buildPublicUIConfig, type SecureAuthUIPublicConfig } from "../core/ui-config.js";
+import {
+  applyUIConfigOverrides,
+  buildPublicUIConfig,
+  type SecureAuthUIPublicConfig,
+} from "../core/ui-config.js";
 import {
   buildMiddlewareConfig,
   type SecureAuthMiddlewareConfig,
@@ -45,6 +49,22 @@ export function createSecureAuth(config: SecureAuthConfig) {
     },
     getPublicUIConfig(): SecureAuthUIPublicConfig {
       return uiConfig;
+    },
+    /**
+     * UI config with admin panel overrides applied.
+     *
+     * Reads the config-override store (cached for `admin.configCacheTtlSeconds`), so the
+     * calling layout becomes dynamic. Falls back to the static config when the store is
+     * unavailable — an unreachable admin table must never break sign-in.
+     */
+    async getResolvedUIConfig(): Promise<SecureAuthUIPublicConfig> {
+      try {
+        const resolvedServices = await getServices();
+        const overrides = await resolvedServices.configOverrideService.getOverrides();
+        return applyUIConfigOverrides(uiConfig, overrides);
+      } catch {
+        return uiConfig;
+      }
     },
     get services() {
       throw new Error(
