@@ -1,6 +1,6 @@
 import type { PasswordPolicyConfig } from "../modules/security/password-policy/password-policy-core.js";
 import {
-  DEFAULT_AUTH_PATHS,
+  resolveAuthPaths,
   type AuthPaths,
 } from "../modules/ui/pages/types.js";
 import type { SecureAuthConfig } from "./types.js";
@@ -53,6 +53,10 @@ export type SecureAuthUIPublicConfig = {
   magicLink?: {
     enabled: boolean;
   };
+  /** Login page layout. `twoStep` asks for email first and reveals password/passkey after. */
+  login?: {
+    twoStep: boolean;
+  };
   preferences?: {
     enabled: boolean;
   };
@@ -98,6 +102,10 @@ const DEFAULT_UI_MESSAGES: Record<string, string> = {
   registerLinkLabel: "Create one",
   loginLinkLabel: "Sign in",
   returnHomeLabel: "Return home",
+  loginContinueLabel: "Continue",
+  loginChangeEmailLabel: "Use a different email",
+  loginPasswordStepDescription: "Enter your password to finish signing in.",
+  forgotPasswordLinkLabel: "Forgot password?",
 };
 
 function mapConfigPathsToAuthPaths(config: SecureAuthConfig): AuthPaths {
@@ -129,10 +137,7 @@ export type { PublicAuthRedirectConfig } from "./auth-redirect-config.js";
 
 /** Builds a JSON-serializable UI config for `SecureAuthUIProvider`. */
 export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPublicConfig {
-  const paths = {
-    ...DEFAULT_AUTH_PATHS,
-    ...mapConfigPathsToAuthPaths(config),
-  };
+  const paths = resolveAuthPaths(mapConfigPathsToAuthPaths(config));
 
   return {
     appSlug: config.app.slug,
@@ -157,6 +162,9 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
     magicLink: {
       enabled: config.auth.magicLink?.enabled === true,
     },
+    login: {
+      twoStep: config.ui?.login?.twoStep === true,
+    },
     preferences: {
       enabled: config.preferences?.enabled === true,
     },
@@ -165,3 +173,55 @@ export function buildPublicUIConfig(config: SecureAuthConfig): SecureAuthUIPubli
 }
 
 export type { OAuthProviderId } from "./oauth-provider-config.js";
+
+/**
+ * Admin-overridable keys that are visible to client pages.
+ *
+ * The rest of the overridable keys only affect server behavior, so they never need to be
+ * projected into the serializable UI config.
+ */
+export const UI_VISIBLE_OVERRIDE_KEYS = [
+  "ui.login.twoStep",
+  "passwordPolicy.minLength",
+  "preferences.enabled",
+] as const;
+
+function readBooleanOverride(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return undefined;
+}
+
+/**
+ * Projects admin config overrides onto an already-built UI config.
+ *
+ * Applied on top of the serializable config instead of re-running `buildPublicUIConfig` on a
+ * cloned `SecureAuthConfig`, so non-serializable fields (brand logo, db, email transport) are
+ * never cloned or inspected.
+ */
+export function applyUIConfigOverrides(
+  base: SecureAuthUIPublicConfig,
+  overrides: ReadonlyMap<string, unknown>
+): SecureAuthUIPublicConfig {
+  if (overrides.size === 0) return base;
+
+  let next = base;
+
+  const twoStep = readBooleanOverride(overrides.get("ui.login.twoStep"));
+  if (twoStep !== undefined) {
+    next = { ...next, login: { ...next.login, twoStep } };
+  }
+
+  const minLength = overrides.get("passwordPolicy.minLength");
+  if (typeof minLength === "number" && Number.isFinite(minLength)) {
+    next = { ...next, passwordPolicy: { ...next.passwordPolicy, minLength } };
+  }
+
+  const preferencesEnabled = readBooleanOverride(overrides.get("preferences.enabled"));
+  if (preferencesEnabled !== undefined) {
+    next = { ...next, preferences: { enabled: preferencesEnabled } };
+  }
+
+  return next;
+}

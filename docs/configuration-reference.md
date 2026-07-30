@@ -41,7 +41,7 @@ Required top-level fields when calling `createSecureAuth`:
 | `app.slug` | `string` | URL-safe identifier |
 | `app.baseUrl` | `string` | Public base URL |
 | `auth.afterLoginPath` | `string` | Redirect after successful login |
-| `auth.afterLogoutPath` | `string` | Redirect after logout |
+| `auth.afterLogoutPath` | `string` | Redirect after logout. Optional — defaults to `/` (app home) |
 | `auth.redirectAuthenticatedFromGuestPages` | `boolean` | `true` | Redirect signed-in users away from login/register/forgot-password |
 | `auth.authenticatedRedirectPath` | `string` | `auth.afterLoginPath` | Landing path for authenticated-user guest redirects |
 | `auth.requireEmailVerificationBeforeSignIn` | `boolean` | Block sign-in until email verified |
@@ -89,6 +89,7 @@ Optional nested config (defaults applied when omitted):
 | `ui.paths.*` | `string` | package defaults (apps override in code) |
 | `ui.messages.*` | `string` | apps override in code |
 | `ui.passwordStrength.position` | `"above"` \| `"below"` | `"above"` |
+| `ui.login.twoStep` | `boolean` | `false` | Two-step login page (email first, then password/passkey) |
 | `email.templates` | optional template fns | package defaults for all outbound account emails (verification, reset, magic link, security notifications) |
 
 ---
@@ -264,6 +265,7 @@ Other browsers/devices are revoked in the database on login. The starter and con
 | `AUTH_PASSWORD_MIN_SCORE` | number | `2` | 0–4 | `passwordPolicy.minScore` |
 | `AUTH_PASSWORD_HIBP_ENABLED` | boolean | `false` | | `passwordPolicy.checkBreachedPasswords` |
 | `AUTH_PASSWORD_STRENGTH_POSITION` | enum | `above` | `above`, `below` | `ui.passwordStrength.position` |
+| `AUTH_LOGIN_TWO_STEP` | boolean | `false` | | `ui.login.twoStep` |
 
 Legacy `PASSWORD_*` names are supported for policy fields (not strength position). `AUTH_PASSWORD_CHECK_BREACHED` is accepted as an alias for `AUTH_PASSWORD_HIBP_ENABLED`.
 
@@ -284,6 +286,22 @@ AUTH_PASSWORD_STRENGTH_POSITION=below
 ```
 
 Invalid position values fall back to `above`.
+
+### Two-step login page
+
+`AUTH_LOGIN_TWO_STEP=true` (or `ui: { login: { twoStep: true } }`) makes `LoginPage` ask for the
+email address first — alongside the forgot-password link, magic link, and OAuth providers — and only
+reveal the password field and passkey button after **Continue**. The forgot-password link stays
+available on both steps.
+
+The step transition happens entirely in the browser: no request is made between the two steps, so
+the page never reveals whether an account exists. The submitted payload, routes, cookies, captcha
+verification, and two-factor flow are identical to the single-step layout. Without JavaScript the
+page degrades to the full single-step credentials form.
+
+This key is also runtime-overridable from the admin panel (`ui.login.twoStep`). To pick up admin
+overrides, feed the provider from `await secureAuth.getResolvedUIConfig()` instead of
+`secureAuth.uiConfig` — that reads the override store, so the layout becomes dynamic.
 
 ### Product-specific passwords (vault, encryption, etc.)
 
@@ -390,7 +408,7 @@ createSecureAuth({
   app: { name: "My App", slug: "my-app", baseUrl: "https://example.com" },
   auth: {
     afterLoginPath: "/dashboard",
-    afterLogoutPath: "/login",
+    afterLogoutPath: "/",
     requireEmailVerificationBeforeSignIn: false,
     nextAuthSecret: "...",
     twoFactorEncryptionKey: "...",

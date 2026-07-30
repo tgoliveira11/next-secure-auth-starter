@@ -252,6 +252,9 @@ export function buildSecureAuthConfigFromEnv(
       passwordStrength: {
         position: passwordStrengthPosition,
       },
+      login: {
+        twoStep: readBooleanEnv(env, ["AUTH_LOGIN_TWO_STEP"], false),
+      },
     },
   };
 }

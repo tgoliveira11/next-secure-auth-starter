@@ -10,11 +10,15 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // `getResolvedUIConfig()` applies admin panel config overrides (e.g. `ui.login.twoStep`).
+  // Use `secureAuth.uiConfig` instead when the layout must stay static.
+  const uiConfig = await secureAuth.getResolvedUIConfig();
+
   return (
     <html lang="en">
       <body className="min-h-screen antialiased">
-        <Providers uiConfig={secureAuth.uiConfig}>{children}</Providers>
+        <Providers uiConfig={uiConfig}>{children}</Providers>
       </body>
     </html>
   );

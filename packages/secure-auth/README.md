@@ -113,7 +113,7 @@ export const secureAuth = createSecureAuth({
     afterLoginPath: "/dashboard",
     redirectAuthenticatedFromGuestPages: true,
     authenticatedRedirectPath: "/dashboard",
-    afterLogoutPath: "/login",
+    afterLogoutPath: "/",
     requireEmailVerificationBeforeSignIn: false,
     nextAuthSecret: process.env.NEXTAUTH_SECRET!,
     twoFactorEncryptionKey: process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY!,

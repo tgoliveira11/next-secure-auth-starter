@@ -54,8 +54,15 @@ export const DEFAULT_AUTH_PATHS: Required<AuthPaths> = {
   adminPanel: "/admin",
 };
 
+/** Drops `undefined` entries so callers never blank out a default by spreading a partial object. */
+function withoutUndefined(overrides: AuthPaths): AuthPaths {
+  return Object.fromEntries(
+    Object.entries(overrides).filter(([, value]) => value !== undefined)
+  ) as AuthPaths;
+}
+
 export function resolveAuthPaths(overrides?: AuthPaths): Required<AuthPaths> {
-  return { ...DEFAULT_AUTH_PATHS, ...overrides };
+  return { ...DEFAULT_AUTH_PATHS, ...(overrides ? withoutUndefined(overrides) : undefined) };
 }
 
 /** Shared customization props for ready-to-use pages. */
@@ -97,6 +104,13 @@ export type LoginPageProps = SecureAuthPageProps & {
   registerLinkLabel?: string;
   forgotPasswordLinkLabel?: string;
   submitLabel?: string;
+  /** Label for the step-one button in the two-step layout. */
+  continueLabel?: string;
+  /**
+   * Ask for the email first and reveal password/passkey on a second step.
+   * Overrides `SecureAuthUIProvider` config. Default: package config (`ui.login.twoStep`).
+   */
+  twoStep?: boolean;
   /** OAuth / passkey callback after successful sign-in. */
   afterLoginPath?: string;
   /** Optional browser-only composition hooks for passkey authentication. */

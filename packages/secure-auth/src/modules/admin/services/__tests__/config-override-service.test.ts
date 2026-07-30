@@ -34,4 +34,14 @@ describe("config override service", () => {
     await service.setOverride("profile.enabled", true, "admin-1");
     expect(configOverrideRepository.set).toHaveBeenCalledWith("profile.enabled", true, "admin-1");
   });
+
+  it("allows toggling the two-step login layout", async () => {
+    const service = createConfigOverrideService({
+      config: { admin: { configCacheTtlSeconds: 0 } } as never,
+      configOverrideRepository,
+    });
+
+    await service.setOverride("ui.login.twoStep", true, "admin-1");
+    expect(configOverrideRepository.set).toHaveBeenCalledWith("ui.login.twoStep", true, "admin-1");
+  });
 });

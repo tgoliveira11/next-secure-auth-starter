@@ -35,6 +35,13 @@ export function useUiPaths(overrides?: AuthPaths) {
   return resolveAuthPaths({ ...ui?.paths, ...overrides });
 }
 
+/** Resolves the two-step login layout: explicit prop → provider config → package default (`false`). */
+export function useTwoStepLogin(prop?: boolean): boolean {
+  const ui = useSecureAuthUi();
+  if (prop !== undefined) return prop;
+  return ui?.login?.twoStep === true;
+}
+
 export function useUiAppSlug(prop?: string): string {
   const ui = useSecureAuthUi();
   return prop ?? ui?.appSlug ?? "app";

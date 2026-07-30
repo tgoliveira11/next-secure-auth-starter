@@ -25,6 +25,10 @@ export type LoginPasskeySectionProps = {
   loginTwoFactorPath?: string;
   /** Optional browser-only composition hooks for passkey authentication. */
   hooks?: PasskeyLoginHooks;
+  /** Render the OAuth provider buttons below the passkey button. Default: true. */
+  showSocialSignIn?: boolean;
+  /** When true, the email is already captured, so the hint no longer asks for it. */
+  emailKnown?: boolean;
 };
 
 export type PasskeyLoginCapabilityStatus = "checking" | "supported" | "unsupported";
@@ -35,6 +39,8 @@ export function LoginPasskeySection({
   loginPath = "/login",
   loginTwoFactorPath = "/login/2fa?mode=credentials",
   hooks,
+  showSocialSignIn = true,
+  emailKnown = false,
 }: LoginPasskeySectionProps) {
   const router = useRouter();
   const [error, setError] = useState("");
@@ -128,14 +134,16 @@ export function LoginPasskeySection({
       </Button>
       {passkeyCapability === "supported" && (
         <p className="text-sm text-[var(--muted)]">
-          Enter your email above, then sign in with the passkey registered to that account.
+          {emailKnown
+            ? "Sign in with the passkey registered to that account."
+            : "Enter your email above, then sign in with the passkey registered to that account."}
         </p>
       )}
       {passkeyCapability === "unsupported" && (
         <p className="text-sm text-[var(--muted)]">{PASSKEY_LOGIN_UNSUPPORTED_MESSAGE}</p>
       )}
 
-      <SocialSignIn afterLoginPath={afterLoginPath} />
+      {showSocialSignIn && <SocialSignIn afterLoginPath={afterLoginPath} />}
     </>
   );
 }

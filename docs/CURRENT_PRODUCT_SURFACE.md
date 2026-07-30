@@ -117,7 +117,7 @@ Consumers wire thin App Router handlers. Canonical consumer-demo mapping: `scrip
 
 | Page | Status |
 | --- | --- |
-| Login, Register, Forgot/Reset password | shipped |
+| Login, Register, Forgot/Reset password | shipped — Login supports single-step and two-step (`ui.login.twoStep`) layouts |
 | Check email, Verify email | shipped |
 | Login 2FA, Login complete | shipped |
 | Account / Security / Sessions settings | shipped |
@@ -138,6 +138,7 @@ Locks, Waitlist, API Keys, and Config expose explicit pending, ready, ready-empt
 | `preferences.enabled` | `false` | shipped — [guide](./user-preferences.md) |
 | `accountLockout.enabled` | `false` | shipped |
 | `auth.magicLink.enabled` | `false` | shipped |
+| `ui.login.twoStep` | `false` | shipped — email-first login page; also admin-overridable |
 | `auth.securityNotifications.enabled` | `true` | shipped |
 | `passwordPolicy.checkBreachedPasswords` | `true` | shipped |
 | `webauthn.getLoginAuthenticationExtensions` | unset | opt-in — bounded server-only WebAuthn extension composition after account resolution |
@@ -177,6 +178,8 @@ Level 3 hints, with required UV and hybrid fallback preserved.
 | Symbol / field | Status |
 | --- | --- |
 | `SecureAuthUIPublicConfig.oauthProviderIds` | shipped — optional provider-ID-only list; current `createSecureAuth` always populates it |
+| `SecureAuthUIPublicConfig.login.twoStep` | shipped — optional; drives the email-first login layout |
+| `createSecureAuth().getResolvedUIConfig()` | shipped — async UI config with admin overrides applied |
 | `OAuthProviderId` | shipped — `google \| apple \| github \| azure-ad` |
 
 ## Planned client exports

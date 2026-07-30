@@ -23,12 +23,15 @@ export const viewport: Viewport = {
 
 export const dynamic = "force-dynamic";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // `getResolvedUIConfig()` applies admin panel config overrides (e.g. `ui.login.twoStep`).
+  const uiConfig = await secureAuth.getResolvedUIConfig();
+
   return (
     <html lang="en">
       <body className="relative min-h-screen antialiased">
         <SkipLink />
-        <Providers uiConfig={secureAuth.uiConfig}>{children}</Providers>
+        <Providers uiConfig={uiConfig}>{children}</Providers>
       </body>
     </html>
   );

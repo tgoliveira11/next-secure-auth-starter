@@ -149,7 +149,8 @@ export type SecureAuthConfig = {
   };
   auth: {
     afterLoginPath: string;
-    afterLogoutPath: string;
+    /** Post sign-out redirect. Default: `/` (the app home, not the login page). */
+    afterLogoutPath?: string;
     requireEmailVerificationBeforeSignIn: boolean;
     nextAuthSecret: string;
     twoFactorEncryptionKey: string;
@@ -360,6 +361,14 @@ export type SecureAuthConfig = {
     cssVariables?: Record<string, string>;
     passwordStrength?: {
       position?: "above" | "below";
+    };
+    login?: {
+      /**
+       * When true, the login page asks for the email address first (with magic link and
+       * OAuth options), and only reveals password and passkey sign-in on a second step.
+       * Default: false (email, password, passkey and OAuth on a single step).
+       */
+      twoStep?: boolean;
     };
   };
 };
