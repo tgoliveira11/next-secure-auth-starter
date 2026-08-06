@@ -618,7 +618,7 @@ Recommended `next.config.ts`:
 ```typescript
 const nextConfig = {
   transpilePackages: ["next-auth"],
-  serverExternalPackages: ["postgres", "bcryptjs", "@simplewebauthn/server"],
+  serverExternalPackages: ["postgres", "bcryptjs", "@node-rs/argon2", "@simplewebauthn/server"],
 };
 export default nextConfig;
 ```

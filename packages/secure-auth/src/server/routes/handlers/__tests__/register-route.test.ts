@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
   hashPassword: vi.fn(
-    async () => "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"
+    async () => "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA==$ZGlnZXN0"
   ),
 }));
 
@@ -54,7 +54,7 @@ describe("register API route", () => {
     services = await buildServices();
   });
 
-  it("creates a new user with a bcrypt password hash", async () => {
+  it("creates a new user with an Argon2id password hash", async () => {
     mocks.findByEmail.mockResolvedValue(null);
     mocks.create.mockResolvedValue({ id: "user-1", email: "new@example.com", status: "active" });
     const res = await POST(
@@ -76,7 +76,7 @@ describe("register API route", () => {
     expect(mocks.create).toHaveBeenCalledWith({
       email: "new@example.com",
       authProvider: "credentials",
-      passwordHash: "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
+      passwordHash: "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA==$ZGlnZXN0",
       status: "active",
     });
   });

@@ -6,6 +6,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-08-06
+
+### Changed
+
+- **Argon2id password storage with zero-action legacy migration** — registration, reset, and password-change writes now use Argon2id v19 with OWASP parameters (`m=19456`, `t=2`, `p=1`, 32-byte output). Existing bcrypt users remain compatible and transparently migrate after a successful password login through a compare-and-set update that preserves `password_updated_at`; no schema migration or user action is required.
+- **Versioned backup-code HMACs** — newly generated TOTP backup codes use HMAC-SHA-256 keyed by the two-factor encryption key, while existing SHA-256/pepper digests remain consumable for compatibility.
+
+### Security
+
+- **Atomic backup-code consumption** — backup codes are now accepted only when a single conditional database update marks an unused current or legacy digest as consumed, preventing concurrent double use.
+- **Repository supply-chain baseline** — npm and GitHub Actions Dependabot updates, JavaScript/TypeScript CodeQL analysis, least-privilege workflow permissions, disabled checkout credential persistence, and immutable SHA pins for every third-party Action are now enforced by tests.
+- **Consistent TOTP policy helper** — the legacy policy helper no longer claims or permits a passkey bypass; enabled TOTP is required after password, passkey, and OAuth primary authentication.
+
 ## [0.12.0] - 2026-07-30
 
 ### Added

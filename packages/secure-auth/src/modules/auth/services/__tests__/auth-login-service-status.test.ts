@@ -5,6 +5,8 @@ import { createAuthLoginService } from "@/modules/auth/services/auth-login-servi
 import { buildTestSecureAuthConfig } from "@/test/helpers/create-test-secure-auth";
 
 vi.mock("@/modules/security/policies/password-hashing", () => ({
+  hashPassword: vi.fn(),
+  passwordHashNeedsRehash: vi.fn().mockReturnValue(false),
   verifyPassword: vi.fn().mockResolvedValue(true),
 }));
 

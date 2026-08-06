@@ -51,7 +51,17 @@ Never store or log these values in plaintext:
 
 ## Passwords
 
-Passwords must be hashed with a strong password hashing function (bcrypt with appropriate cost parameters).
+New and changed passwords are hashed with Argon2id v19 using explicit OWASP parameters:
+19,456 KiB memory, 2 iterations, parallelism 1, and a 32-byte output. The native
+`@node-rs/argon2` implementation runs only on the server.
+
+Hashes written by releases before 0.13.0 remain valid. A successful password login verifies the
+legacy bcrypt digest and transparently replaces only its hash representation through a
+compare-and-set update. This preserves `password_updated_at`, does not require user action, and
+prevents a concurrent password change from authorizing a stale password. There is deliberately no
+bulk database conversion: plaintext is required to compute Argon2id, so accounts migrate safely on
+their next successful password login. New registration, password reset, and password change writes
+use Argon2id immediately.
 
 Password strength is assessed via configurable policy (`passwordPolicy` in `createSecureAuth(config)`).
 
@@ -62,6 +72,14 @@ PASSWORD_POLICY_ENFORCEMENT=off | warn | enforce
 ```
 
 Default recommendation: `warn`.
+
+### TOTP backup codes
+
+New backup-code digests use a versioned HMAC-SHA-256 keyed by `auth.twoFactorEncryptionKey`.
+Existing SHA-256/pepper digests remain readable during migration. Verification checks both forms
+inside one conditional `UPDATE ... WHERE used_at IS NULL`, so concurrent requests cannot consume
+the same backup code twice. Successful legacy codes are consumed in place; newly generated or
+regenerated codes use HMAC.
 
 ### Compromised password detection
 

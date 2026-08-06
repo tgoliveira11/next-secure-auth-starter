@@ -71,6 +71,12 @@ npm install @tgoliveira/secure-auth@latest \
 
 See [publishing-npm-automation.md](../../docs/publishing-npm-automation.md) for automated npm releases and [consumer-quick-start.md](../../docs/consumer-quick-start.md) for install.
 
+The package writes new password digests with server-only Argon2id. Keep
+`@node-rs/argon2` in the consuming app's Next.js `serverExternalPackages` alongside `postgres`,
+`bcryptjs`, and `@simplewebauthn/server`; the full snippet is in the consumer quick start.
+Existing bcrypt accounts need no migration script or user action: a successful password login
+replaces the legacy digest atomically while preserving the password-change timestamp.
+
 ---
 
 ## Supported public entry points

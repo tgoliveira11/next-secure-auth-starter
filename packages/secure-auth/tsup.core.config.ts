@@ -23,6 +23,7 @@ const shared = {
     "react-dom",
     "postgres",
     "bcryptjs",
+    "@node-rs/argon2",
     "@simplewebauthn/server",
     "jose",
     "server-only",

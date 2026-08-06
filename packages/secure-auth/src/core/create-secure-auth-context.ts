@@ -46,7 +46,10 @@ import {
   decryptTwoFactorSecret,
   encryptTwoFactorSecret,
 } from "../modules/two-factor/policies/two-factor-secret-crypto.js";
-import { hashBackupCode } from "../modules/two-factor/policies/backup-code.js";
+import {
+  getBackupCodeHashCandidates,
+  hashBackupCode,
+} from "../modules/two-factor/policies/backup-code.js";
 
 export type SecureAuthContext = {
   readonly config: SecureAuthConfig;
@@ -99,6 +102,7 @@ export type SecureAuthContext = {
     payload: Parameters<typeof decryptTwoFactorSecret>[1]
   ) => ReturnType<typeof decryptTwoFactorSecret>;
   hashBackupCode: (code: string) => string;
+  getBackupCodeHashCandidates: (code: string) => string[];
 };
 
 export function createSecureAuthContext({ config }: { config: SecureAuthConfig }): SecureAuthContext {
@@ -146,5 +150,6 @@ export function createSecureAuthContext({ config }: { config: SecureAuthConfig }
     encryptTwoFactorSecret: (plaintext) => encryptTwoFactorSecret(config, plaintext),
     decryptTwoFactorSecret: (payload) => decryptTwoFactorSecret(config, payload),
     hashBackupCode: (code) => hashBackupCode(config, code),
+    getBackupCodeHashCandidates: (code) => getBackupCodeHashCandidates(config, code),
   };
 }

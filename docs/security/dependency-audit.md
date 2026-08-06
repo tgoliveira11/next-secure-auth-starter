@@ -1,7 +1,7 @@
 # Dependency security audit
 
-**Last updated:** 2026-07-27
-**Package:** `@tgoliveira/secure-auth@0.7.0`
+**Last updated:** 2026-08-06
+**Package:** `@tgoliveira/secure-auth@0.13.0`
 
 This document records npm advisory findings, remediation actions, and residual risk for the monorepo. It complements [../security.md](../security.md).
 
@@ -41,7 +41,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 
 ---
 
-## Remediation summary (0.7.0)
+## Remediation summary (current)
 
 | Package | Severity | Class | Path | Fix | Fixed version | Affects consumers? |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -49,8 +49,8 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 | `next-auth` | critical | A | apps + package peer/dev | Direct upgrade; peer minimum raised | `4.24.15` | Yes — fixes malformed bearer, email normalization, and provider-bound OAuth state findings |
 | `postcss` | high | A/C | `next` bundled + build tooling | Root resolution | `8.5.23` | Indirect — Next still declares `8.4.31` |
 | `sharp` | high | A/C | `next` optional dependency | Root resolution | `0.35.0` | Indirect — Next still declares `^0.34.5` |
-| `brace-expansion` | high | B/C | ESLint, glob, coverage tooling | Root resolution + guarded minimatch 3 compatibility patch | `5.0.8` | No — monorepo tooling only |
-| `js-yaml` | high | B | ESLint tooling | Lockfile refresh after direct tooling upgrade | `4.3.0` | No |
+| `brace-expansion` | high | B/C | ESLint, glob, coverage tooling | Root resolution + guarded minimatch 3 compatibility patch | `5.0.9` | No — monorepo tooling only |
+| `js-yaml` | high | B | ESLint tooling | Direct root resolution and lockfile refresh | `4.3.1` | No |
 | `esbuild` | low | B | drizzle-kit, tsup, vite, vitest | Root resolution | `0.28.1` | No |
 | `uuid` | moderate | A | `next-auth` nested + package direct | NextAuth upgrade + root resolution | `11.1.1` | Indirect — NextAuth 4.24.15 now declares `^11.1.1` |
 | `nodemailer` | high | B | dev-harness + `next-auth` optional peer | Direct upgrade + root resolution | `9.0.3` | No (app-only; not in published package) |
@@ -137,7 +137,7 @@ Published tarball (`npm pack`) ships **runtime** `dependencies` only — not dev
 - **Type:** transitive dev
 - **Production:** no
 - **Dependency path:** ESLint/minimatch and Vitest coverage/glob tooling
-- **Strategy:** Resolve brace-expansion to `5.0.8` and js-yaml to `4.3.0`. `scripts/apply-security-compat-patches.mjs` updates minimatch 3's CommonJS import and minimatch 9's CommonJS/ESM imports to accept brace-expansion 5's named export; it verifies the exact minimatch versions and source shapes before writing, then fails closed if upstream changes. Validate lint and coverage after the cross-major resolution.
+- **Strategy:** Resolve brace-expansion to `5.0.9` and js-yaml to `4.3.1`. `scripts/apply-security-compat-patches.mjs` updates minimatch 3's CommonJS import and minimatch 9's CommonJS/ESM imports to accept brace-expansion 5's named export; it verifies the exact minimatch versions and source shapes before writing, then fails closed if upstream changes. Validate lint and coverage after the cross-major resolution.
 - **Consumer impact:** none; these packages are not in the published tarball.
 - **Residual risk:** none at audit time.
 
@@ -182,7 +182,7 @@ The root `postinstall` script applies only the minimatch 3/9 compatibility impor
 - `dist/`, `migrations/`, `LICENSE`, `README.md`, `package.json`, `styles.css`
 - **No** test sources, app code, `.env`, or devDependencies
 
-Runtime dependencies in the published package: `@simplewebauthn/*`, `bcryptjs`, `otplib`, `qrcode`, `server-only`, `uuid`, `zod` — all at patched versions where applicable.
+Runtime dependencies in the published package: `@node-rs/argon2`, `@simplewebauthn/*`, `bcryptjs` (legacy password verification and API keys), `otplib`, `qrcode`, `server-only`, `uuid`, `zod` — all at patched versions where applicable.
 
 ---
 

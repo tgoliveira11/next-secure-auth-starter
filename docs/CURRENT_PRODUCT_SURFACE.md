@@ -3,7 +3,7 @@
 Living inventory of what the package exposes today. Update this file when exports, routes, migrations, or shipped/planned status changes.
 
 **Package version:** see [`packages/secure-auth/package.json`](../packages/secure-auth/package.json)
-**Last reviewed:** 2026-07-29
+**Last reviewed:** 2026-08-06
 
 ## Status legend
 
