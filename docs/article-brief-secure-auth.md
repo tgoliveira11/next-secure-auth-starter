@@ -327,7 +327,7 @@ docs/                     ← architecture, security, consumer guides
 
 | Control | Implementation notes |
 | --- | --- |
-| **Password hashing** | bcrypt |
+| **Password hashing** | Argon2id v19 for new writes; transparent legacy bcrypt verification and rehash |
 | **Password policy** | Configurable; default `minLength: 12`, `enforcement: "warn"` |
 | **2FA** | TOTP + backup codes; secrets encrypted with `auth.twoFactorEncryptionKey` |
 | **Passkeys** | WebAuthn challenges; origin/RP ID from config |

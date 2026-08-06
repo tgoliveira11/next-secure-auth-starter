@@ -238,10 +238,9 @@ export function createTwoFactorService(deps: TwoFactorServiceDeps) {
       }
 
       if (input.backupCode) {
-        const codeHash = ctx.hashBackupCode(input.backupCode);
-        const row = await repos.twoFactorRepository.findUnusedBackupCodeByHash(userId, codeHash);
+        const codeHashes = ctx.getBackupCodeHashCandidates(input.backupCode);
+        const row = await repos.twoFactorRepository.consumeBackupCodeByHashes(userId, codeHashes);
         if (!row) return null;
-        await repos.twoFactorRepository.markBackupCodeUsed(row.id, userId);
         await repos.auditRepository.record("two_factor_backup_code_used", userId, {
           endpoint: "/api/auth/login/verify-2fa",
           method: "backup_code",

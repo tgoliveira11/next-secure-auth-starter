@@ -41,6 +41,7 @@ const nextConfig: NextConfig = {
     "nodemailer",
     "postgres",
     "bcryptjs",
+    "@node-rs/argon2",
     "@simplewebauthn/server",
   ],
   headers: async () => [

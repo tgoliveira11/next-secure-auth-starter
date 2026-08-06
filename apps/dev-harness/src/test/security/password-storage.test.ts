@@ -5,9 +5,10 @@ import { join } from "node:path";
 const PACKAGE_SRC = join(process.cwd(), "../../packages/secure-auth/src");
 const SAMPLE_BCRYPT_HASH =
   "$2b$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+const SAMPLE_ARGON2ID_HASH = "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA==$ZGlnZXN0";
 
 describe("password storage security", () => {
-  it("stores credentials passwords as password_hash bcrypt digests, not plaintext columns", () => {
+  it("stores credentials passwords as password_hash digests, not plaintext columns", () => {
     const schema = readFileSync(join(PACKAGE_SRC, "drizzle/schema.ts"), "utf8");
     const usersSection = schema.slice(schema.indexOf("export const users"));
 
@@ -16,7 +17,7 @@ describe("password storage security", () => {
     expect(usersSection).not.toContain("plaintextPassword");
   });
 
-  it("user repository validates bcrypt digest format", () => {
+  it("user repository validates current and legacy digest formats", () => {
     const repoSource = readFileSync(
       join(PACKAGE_SRC, "modules/account/repositories/user-repository.ts"),
       "utf8"
@@ -40,7 +41,7 @@ describe("password storage security", () => {
     expect(registerWrapper).toContain("secureAuth.routes.register.POST");
   });
 
-  it("login and account deletion verify against bcrypt digests only", () => {
+  it("login and account deletion use the strict server-side verifier", () => {
     const authLoginService = readFileSync(
       join(PACKAGE_SRC, "modules/auth/services/auth-login-service.ts"),
       "utf8"
@@ -56,7 +57,8 @@ describe("password storage security", () => {
     expect(accountService).not.toContain("bcrypt.compare");
   });
 
-  it("accepts bcrypt digest format", () => {
+  it("recognizes the current Argon2id and legacy bcrypt formats", () => {
+    expect(SAMPLE_ARGON2ID_HASH).toMatch(/^\$argon2id\$v=19\$m=19456,t=2,p=1\$/);
     expect(SAMPLE_BCRYPT_HASH).toMatch(/^\$2[aby]\$\d{2}\$/);
   });
 });

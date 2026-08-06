@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { DbClient } from "@/lib/db/types";
 import { users } from "@/lib/db/schema";
 import { assertPasswordHashFormat } from "@/modules/security/policies/password-hashing";
@@ -51,6 +51,26 @@ export function createUserRepository(db: DbClient) {
         .where(eq(users.id, id))
         .returning();
       return user;
+    },
+
+    /**
+     * Upgrades only the stored hash representation. This deliberately preserves
+     * passwordUpdatedAt because the user's password did not change.
+     */
+    async upgradePasswordHashIfCurrent(
+      id: string,
+      expectedPasswordHash: string,
+      passwordHash: string,
+      client: DbClient = db
+    ) {
+      validateStoredPasswordHash(expectedPasswordHash);
+      validateStoredPasswordHash(passwordHash);
+      const [user] = await client
+        .update(users)
+        .set({ passwordHash, updatedAt: new Date() })
+        .where(and(eq(users.id, id), eq(users.passwordHash, expectedPasswordHash)))
+        .returning();
+      return user ?? null;
     },
 
     async markEmailVerified(id: string, client: DbClient = db) {

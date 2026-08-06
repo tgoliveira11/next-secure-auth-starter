@@ -1,7 +1,8 @@
 /**
  * Credentials passwords may appear transiently in HTTPS POST/DELETE JSON bodies only.
  * They must never be stored, logged, echoed in responses, or sent in URLs/query strings.
- * Verification uses bcrypt on the server against `users.password_hash` — not client-side checks.
+ * Verification uses the strict Argon2id/legacy-bcrypt policy on the server against
+ * `users.password_hash` — not client-side checks.
  */
 
 const PASSWORD_QUERY_KEY = /password/i;

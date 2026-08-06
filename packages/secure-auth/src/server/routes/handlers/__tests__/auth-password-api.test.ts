@@ -113,7 +113,7 @@ describe("auth password API boundaries", () => {
     expect(body).not.toHaveProperty("passwordHash");
   });
 
-  it("verifies credentials only on the server with bcrypt helpers", () => {
+  it("verifies credentials only with the strict server-side hashing policy", () => {
     const authLoginService = readModuleSource("modules/auth/services/auth-login-service.ts");
     expect(authLoginService).toContain("verifyPassword");
     expect(authLoginService).not.toMatch(/passwordHash\s*===/);

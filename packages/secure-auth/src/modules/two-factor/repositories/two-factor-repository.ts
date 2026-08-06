@@ -1,4 +1,4 @@
-import { and, eq, isNull, gt } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull } from "drizzle-orm";
 import type { DbClient } from "@/lib/db/types";
 import {
   userTwoFactorBackupCodes,
@@ -71,29 +71,19 @@ export function createTwoFactorRepository(db: DbClient) {
         .returning();
     },
 
-    async findUnusedBackupCodeByHash(userId: string, codeHash: string) {
-      const [row] = await db
-        .select()
-        .from(userTwoFactorBackupCodes)
-        .where(
-          and(
-            eq(userTwoFactorBackupCodes.userId, userId),
-            eq(userTwoFactorBackupCodes.codeHash, codeHash),
-            isNull(userTwoFactorBackupCodes.usedAt)
-          )
-        )
-        .limit(1);
-      return row ?? null;
-    },
-
-    async markBackupCodeUsed(id: string, userId: string, client: DbClient = db) {
+    async consumeBackupCodeByHashes(
+      userId: string,
+      codeHashes: string[],
+      client: DbClient = db
+    ) {
+      if (codeHashes.length === 0) return null;
       const [row] = await client
         .update(userTwoFactorBackupCodes)
         .set({ usedAt: new Date() })
         .where(
           and(
-            eq(userTwoFactorBackupCodes.id, id),
             eq(userTwoFactorBackupCodes.userId, userId),
+            inArray(userTwoFactorBackupCodes.codeHash, codeHashes),
             isNull(userTwoFactorBackupCodes.usedAt)
           )
         )

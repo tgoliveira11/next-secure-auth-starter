@@ -29,6 +29,7 @@ describe("createSecureAuthContext", () => {
     const encrypted = ctx.encryptTwoFactorSecret("secret");
     expect(ctx.decryptTwoFactorSecret(encrypted)).toBe("secret");
     expect(ctx.hashBackupCode("12345678")).not.toBe("12345678");
+    expect(ctx.getBackupCodeHashCandidates("12345678")).toHaveLength(2);
     expect(ctx.validatePasswordForSubmission("ValidPassword123!")).toMatchObject({ valid: true });
     expect(ctx.verificationEmailContent("token").subject).toContain(config.app.name);
     expect(ctx.passwordResetEmailContent("token").subject).toContain(config.app.name);

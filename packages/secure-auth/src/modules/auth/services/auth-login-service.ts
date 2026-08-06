@@ -2,7 +2,12 @@ import {
   TWO_FACTOR_LOGIN_CHALLENGE_TTL_MS,
   TWO_FACTOR_LOGIN_TOKEN_TTL_MS,
 } from "@/modules/two-factor/lib/constants";
-import { verifyPassword } from "@/modules/security/policies/password-hashing";
+import {
+  hashPassword,
+  passwordHashNeedsRehash,
+  verifyPassword,
+} from "@/modules/security/policies/password-hashing";
+import { safeLogger } from "@/modules/security/logger/index";
 import { RateLimitError } from "@/modules/rate-limit/index";
 import { assertCredentialsEmailVerifiedForSignIn } from "@/modules/account/lib/account-policy-config";
 import { assertUserMayAuthenticate } from "@/modules/auth/lib/user-auth-eligibility";
@@ -31,6 +36,44 @@ type AuthLoginServiceDeps = {
 export function createAuthLoginService(deps: AuthLoginServiceDeps) {
   const { config, ctx, repos, rateLimit, authService, twoFactorService, lockoutService } = deps;
 
+  async function upgradeLegacyPasswordHash(
+    plaintext: string,
+    user: NonNullable<Awaited<ReturnType<typeof repos.userRepository.findByEmail>>>
+  ) {
+    if (!user.passwordHash || !passwordHashNeedsRehash(user.passwordHash)) return user;
+
+    let replacementHash: string;
+    try {
+      replacementHash = await hashPassword(plaintext);
+    } catch (error) {
+      safeLogger.warn("Password hash upgrade deferred", {
+        reason: error instanceof Error ? error.name : "unknown_error",
+      });
+      return user;
+    }
+
+    try {
+      const upgraded = await repos.userRepository.upgradePasswordHashIfCurrent(
+        user.id,
+        user.passwordHash,
+        replacementHash
+      );
+      if (upgraded) return upgraded;
+    } catch (error) {
+      safeLogger.warn("Password hash upgrade deferred after write failure", {
+        reason: error instanceof Error ? error.name : "unknown_error",
+      });
+      return user;
+    }
+
+    // A concurrent password change must not allow the stale credential to log in.
+    const current = await repos.userRepository.findById(user.id);
+    if (!current?.passwordHash || !(await verifyPassword(plaintext, current.passwordHash))) {
+      throw new InvalidCredentialsError();
+    }
+    return current;
+  }
+
   const service = {
     async startCredentialsLogin(email: string, password: string, ip?: string) {
       const normalizedEmail = email.trim().toLowerCase();
@@ -44,7 +87,7 @@ export function createAuthLoginService(deps: AuthLoginServiceDeps) {
 
       await authService.assertLoginAllowed(normalizedEmail, ip);
 
-      const user = await repos.userRepository.findByEmail(normalizedEmail);
+      let user = await repos.userRepository.findByEmail(normalizedEmail);
       if (!user?.passwordHash) {
         await authService.recordLoginFailure(normalizedEmail);
         if (lockoutService) await lockoutService.recordFailure(normalizedEmail);
@@ -61,6 +104,8 @@ export function createAuthLoginService(deps: AuthLoginServiceDeps) {
         }
         throw new InvalidCredentialsError();
       }
+
+      user = await upgradeLegacyPasswordHash(password, user);
 
       // Successful auth — reset lockout counter
       if (lockoutService) await lockoutService.recordSuccess(normalizedEmail, user.id);

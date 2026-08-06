@@ -6,6 +6,9 @@ on:
       - "packages/secure-auth/src/server/routes/create-routes.ts"
       - "scripts/consumer-demo-route-registry.mjs"
 
+permissions:
+  contents: read
+
 jobs:
   sync:
     name: Generate missing consumer-demo route files
@@ -14,12 +17,12 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 20
           cache: npm
@@ -38,7 +41,10 @@ jobs:
 
       - name: Commit generated routes
         if: steps.diff.outputs.changed != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          gh auth setup-git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add apps/consumer-demo/src/app/api/
