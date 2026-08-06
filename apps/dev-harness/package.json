@@ -57,7 +57,7 @@
     "@vitest/coverage-v8": "^3.2.6",
     "axe-core": "^4.12.1",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9.28.0",
+    "eslint": "^10.8.0",
     "eslint-config-next": "^16.2.12",
     "happy-dom": "^20.10.3",
     "jest-axe": "^10.0.0",
