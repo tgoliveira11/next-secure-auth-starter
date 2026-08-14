@@ -43,7 +43,7 @@
     "js-yaml": "4.3.1",
     "next": "^16.2.12",
     "postcss": "8.5.23",
-    "sharp": "0.35.0"
+    "sharp": "^0.35.3"
   },
   "overrides": {
     "brace-expansion": "$brace-expansion",

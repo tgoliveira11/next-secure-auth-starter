@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 const minimatchPackageUrl = new URL("../node_modules/minimatch/package.json", import.meta.url);
@@ -43,13 +43,6 @@ if (source.includes(compatibleImport)) {
   process.stdout.write("Applied brace-expansion 5 compatibility patch to minimatch 3.1.5.\n");
 }
 
-const globMinimatchPackage = JSON.parse(await readFile(globMinimatchPackageUrl, "utf8"));
-if (globMinimatchPackage.version !== "9.0.9") {
-  throw new Error(
-    `Refusing to patch unexpected glob minimatch ${globMinimatchPackage.version}; review the security compatibility patch.`
-  );
-}
-
 async function applyExactReplacements(sourceUrl, replacements, label) {
   let nextSource = await readFile(sourceUrl, "utf8");
   let changed = false;
@@ -76,23 +69,44 @@ async function applyExactReplacements(sourceUrl, replacements, label) {
   }
 }
 
-await applyExactReplacements(
-  globMinimatchCommonJsUrl,
-  [
-    [
-      'const brace_expansion_1 = __importDefault(require("brace-expansion"));',
-      'const brace_expansion_1 = require("brace-expansion");',
-    ],
-    [
-      "return (0, brace_expansion_1.default)(pattern);",
-      "return (0, brace_expansion_1.expand)(pattern);",
-    ],
-  ],
-  "minimatch 9.0.9 CommonJS"
-);
+async function exists(url) {
+  try {
+    await access(url);
+    return true;
+  } catch (error) {
+    if (error?.code === "ENOENT") return false;
+    throw error;
+  }
+}
 
-await applyExactReplacements(
-  globMinimatchEsmUrl,
-  [["import expand from 'brace-expansion';", "import { expand } from 'brace-expansion';"]],
-  "minimatch 9.0.9 ESM"
-);
+if (await exists(globMinimatchPackageUrl)) {
+  const globMinimatchPackage = JSON.parse(await readFile(globMinimatchPackageUrl, "utf8"));
+  if (globMinimatchPackage.version !== "9.0.9") {
+    throw new Error(
+      `Refusing to patch unexpected glob minimatch ${globMinimatchPackage.version}; review the security compatibility patch.`
+    );
+  }
+
+  await applyExactReplacements(
+    globMinimatchCommonJsUrl,
+    [
+      [
+        'const brace_expansion_1 = __importDefault(require("brace-expansion"));',
+        'const brace_expansion_1 = require("brace-expansion");',
+      ],
+      [
+        "return (0, brace_expansion_1.default)(pattern);",
+        "return (0, brace_expansion_1.expand)(pattern);",
+      ],
+    ],
+    "minimatch 9.0.9 CommonJS"
+  );
+
+  await applyExactReplacements(
+    globMinimatchEsmUrl,
+    [["import expand from 'brace-expansion';", "import { expand } from 'brace-expansion';"]],
+    "minimatch 9.0.9 ESM"
+  );
+} else {
+  process.stdout.write("Glob's nested minimatch is not installed; no compatibility patch needed.\n");
+}

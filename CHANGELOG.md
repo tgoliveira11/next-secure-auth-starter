@@ -6,6 +6,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependency toolchain refreshed as one validated graph** — Zod 4, jose 6.2.8, Playwright 1.62.1, jest-axe 11, Testing Library jest-dom 7, happy-dom 20.11.1, Sharp 0.35.3, Next ESLint config 16.3, and the current checkout/setup-node/cache Actions replace overlapping Dependabot branches. ESLint remains on the supported 9.x line until the React lint plugin declares ESLint 10 compatibility; Vitest remains on 3.x until the package's 90% coverage contract is restored under Vitest 4's stricter V8 remapping.
+
+### Security
+
+- **Patched transitive Nano ID** — the lockfile now resolves Nano ID 3.3.18, removing the zero-size custom-generator denial-of-service advisory inherited through PostCSS.
+
 ## [0.13.0] - 2026-08-06
 
 ### Changed
